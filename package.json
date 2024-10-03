@@ -1,0 +1,16 @@
+{
+  "name": "cpu-simulator",
+  "version": "0.0.1",
+  "description": "A simple, graphical CPU simulator for teaching students the concepts and internal process of modern CPUs and virtualization.",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Erik Burmester",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.1.2",
+    "typescript": "^5.6.2"
+  }
+}
