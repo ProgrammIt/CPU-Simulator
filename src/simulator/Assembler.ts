@@ -5,8 +5,8 @@ class Assembler {
     private static _instance: Assembler | null | undefined = null;
 
     private constructor() {};
-    private split(): string {};
-    private parse(): Bit[][] {};
+    private split(data: string): string[] {};
+    private parse(elements: string[]): DoubleWord[] {};
 
     /**
      * This method returns the single instance of the Assembler class.
@@ -31,5 +31,16 @@ class Assembler {
         return;
     }
 
-    public compile(f: File): void {}
+    /**
+     * This method compiles a given computer program written in assembly language into its binary representation.
+     * The instructions will be encoded using the opcodes defined in the language definition.
+     * The order in which the instructions appear in the input program is preserved during the compilation process.
+     * @param f An .asm file containing a computer program written in assembly language.
+     * @returns A list of the binary encoded instructions of the given computer program.
+     */
+    public compile(f: File): DoubleWord[] {
+        const data: string = readFileSync(f.path).toString();
+        const elements : string[] = this.split(data);
+        return this.parse(elements);
+    }
 }
