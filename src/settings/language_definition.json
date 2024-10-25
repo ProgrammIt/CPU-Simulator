@@ -1,243 +1,321 @@
-{
-    "ADD" : {
-        "opcode" : "0000000",
+[
+    {
+        "mnemonic" : "ADD",
+        "opcode" : [0, 0, 0, 0, 0, 0, 0],
+        "type" : "R",
         "regexes" : [
             "(ADD)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "ADC" : {
-        "opcode" : "0000001",
-        "regexes" : [
-            "(ADC)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
-        ]
+    {
+        "mnemonic": "ADC",
+        "opcode": [0, 0, 0, 0, 0, 0, 1],
+        "type": "R",
+        "regexes": ["(ADC)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"]
     },
-    "SUB" : {
-        "opcode": "0000010",
+    {
+        "mnemonic" : "SUB",
+        "opcode": [0, 0, 0, 0, 0, 1, 0],
+        "type" : "R",
         "regexes": [
             "(SUB)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "SBB" : {
-        "opcode" : "0000011",
+    {
+        "mnemonic" : "SBB",
+        "opcode" : [0, 0, 0, 0, 0, 1, 1],
+        "type" : "R",
         "regexes" : [
             "(SBB)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "MUL" : {
-        "opcode" : "0000100",
+    {
+        "mnemonic" : "MUL",
+        "opcode" : [0, 0, 0, 0, 1, 0, 0],
+        "type" : "R",
         "regexes" : [
             "(MUL)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "DIV" : {
-        "opcode" : "0000101",
+    {
+        "mnemonic" : "DIV",
+        "opcode" : [0, 0, 0, 0, 1, 0, 1],
+        "type" : "R",
         "regexes" : [
             "(DIV)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "NEG" : {
-        "opcode": "0000110",
-        "regexes": [
+    {
+        "mnemonic" : "NEG",
+        "opcode" : [0, 0, 0 ,0 , 1, 1, 0],
+        "type" : "R",
+        "regexes" : [
             "(NEG)[\\s]+((?:%|@)[\\S]*)"
         ]
     },
-    "CMP" : {
-        "opcode": "0000111",
-        "regexes": [
+    {
+        "mnemonic" : "CMP",
+        "opcode" : [0, 0, 0, 0, 1, 1, 1],
+        "type" : "R",
+        "regexes" : [
             "(CMP)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|\\$|@)[\\S]*)"
         ]
     },
-    "TEST" : {
-        "opcode": "0001000",
-        "regexes": [
+    {
+        "mnemonic" : "TEST",
+        "opcode" : [0, 0, 0, 1, 0, 0, 0],
+        "type" : "R",
+        "regexes" : [
             "(TEST)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|\\$|@)[\\S]*)"
         ]
     },
-    "JMP" : {
-        "opcode": "0001001",
-        "regexes": [
+    {
+        "mnemonic" : "JMP",
+        "opcode" : [0, 0, 0, 1, 0, 0, 1],
+        "type" : "J",
+        "regexes" : [
             "(JMP)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JZ" : {
-        "opcode": "0001010",
-        "regexes": [
+    {
+        "mnemonic" : "JZ",
+        "opcode" : [0, 0, 0, 1, 0, 1, 0],
+        "type" : "J",
+        "regexes" : [
             "(JZ)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JE" : {
-        "opcode": "0001011",
-        "regexes": [
+    {
+        "mnemonic" : "JE",
+        "opcode" : [0, 0, 0, 1, 0, 1, 1],
+        "type" : "J",
+        "regexes" : [
             "(JE)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JNZ" : {
-        "opcode": "0001100",
-        "regexes": [
+    {
+        "mnemonic" : "JNZ",
+        "opcode" : [0, 0, 0, 1, 1, 0, 0],
+        "type" : "J",
+        "regexes" : [
             "(JNZ)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JNE" : {
-        "opcode": "0001101",
-        "regexes": [
+    {
+        "mnemonic" : "JNE",
+        "opcode" : [0, 0, 0, 1, 1, 0, 1],
+        "type" : "J",
+        "regexes" : [
             "(JNE)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JG" : {
-        "opcode": "0001110",
-        "regexes": [
+    {
+        "mnemonic" : "JG",
+        "opcode" : [0, 0, 0, 1, 1, 1, 0],
+        "type" : "J",
+        "regexes" : [
             "(JG)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JGE" : {
-        "opcode": "0001111",
-        "regexes": [
+    {
+        "mnemonic" : "JGE",
+        "opcode" : [0, 0, 0, 1, 1, 1, 1],
+        "type" : "J",
+        "regexes" : [
             "(JGE)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JL" : {
-        "opcode": "0010000",
-        "regexes": [
+    {
+        "mnemonic" : "JL",
+        "opcode" : [0 ,0 ,1, 0, 0, 0, 0],
+        "type" : "J",
+        "regexes" : [
             "(JL)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "JLE" : {
-        "opcode": "0010001",
-        "regexes": [
+    {
+        "mnemonic" : "JLE",
+        "opcode" : [0, 0, 1, 0, 0, 0, 1],
+        "type" : "J",
+        "regexes" : [
             "(JLE)[\\s]+((?:%|@)?[\\S]*)"
         ]
     },
-    "MOV" : {
-        "opcode": "0010010",
-        "regexes": [
+    {
+        "mnemonic" : "MOV",
+        "opcode" : [0, 0, 1, 0, 0, 1, 0],
+        "type" : "I",
+        "regexes" : [
             "(MOV)[\\s]+((?:\\$|@|%)[\\S]*)[\\s]*,[\\s]*((?:\\$|%)[\\S]*)",
             "(MOV)[\\s]+((?:\\$|%)[\\S]*)[\\s]*,[\\s]*((?:\\$|@|%)[\\S]*)"
         ]
     },
-    "LEA" : {
-        "opcode" : "0010011",
+    {
+        "mnemonic" : "LEA",
+        "opcode" : [0, 0, 1, 0, 0, 1, 1],
+        "type" : "I",
         "regexes" : [
             "(LEA)[s]+((?:$|@|%)[S]*)[s]*,[s]*((?:$|@|%)[S]*)"
         ]
     },
-    "POPF" : {
-        "opcode" : "0010100",
+    {
+        "mnemonic" : "POPF",
+        "opcode" : [0, 0, 1, 0, 1, 0, 0],
+        "type" : "I",
         "regexes" : [
             "(POPF)"
         ]
     },
-    "PUSHF" : {
-        "opcode" : "0010101",
+    {
+        "mnemonic" : "PUSHF",
+        "opcode" : [0, 0, 1, 0, 1, 0, 1],
+        "type" : "I",
         "regexes" : [
             "(PUSHF)"
         ]
     },
-    "CLC" : {
-        "opcode" : "0010110",
+    {
+        "mnemonic" : "CLC",
+        "opcode" : [0, 0, 1, 0, 1, 1, 0],
+        "type" : "R",
         "regexes" : [
             "(CLC)"
         ]
     },
-    "CMC" : {
-        "opcode" : "0010111",
+    {
+        "mnemonic" : "CMC",
+        "opcode" : [0, 0, 1, 0, 1, 1, 1],
+        "type" : "R",
         "regexes" : [
             "(CMC)"
         ]
     },
-    "STC" : {
-        "opcode": "0011000",
-        "regexes": [
+    {
+        "mnemonic" : "STC",
+        "opcode" : [0, 0, 1, 1, 0, 0, 0],
+        "type" : "R",
+        "regexes" : [
             "(STC)"
         ]
     },
-    "CLI" : {
-        "opcode" : "0011001",
+    {
+        "mnemonic" : "CLI",
+        "opcode" : [0, 0, 1, 1, 0, 0, 1],
+        "type" : "R",
         "regexes" : [
             "(CLI)"
         ]
     },
-    "STI" : {
-        "opcode" : "0011010",
+    {
+        "mnemonic" : "STI",
+        "opcode" : [0, 0, 1, 1, 0, 1, 0],
+        "type" : "R",
         "regexes" : [
             "(STI)"
         ]
     },
-    "INT" : {
-        "opcode" : "0011011",
+    {
+        "mnemonic" : "INT",
+        "opcode" : [0, 0, 1, 1, 0, 1, 1],
+        "type" : "J",
         "regexes" : [
             "(INT)[\\s]+((?:%|@|\\$)[\\S]*)"
         ]
     },
-    "IRET" : {
-        "opcode" : "0011100",
+    {
+        "mnemonic" : "IRET",
+        "opcode" : [0, 0, 1, 1, 1, 0, 0],
+        "type" : "J",
         "regexes" : [
             "(IRET)"
         ]
     },
-    "AND" : {
-        "opcode" : "0011101",
+    {
+        "mnemonic" : "AND",
+        "opcode" : [0, 0, 1, 1, 1, 0, 1],
+        "type" : "R",
         "regexes" : [
             "(AND)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "OR" : {
-        "opcode" : "0011110",
+    {
+        "mnemonic" : "OR",
+        "opcode" : [0, 0, 1, 1, 1, 1, 0],
+        "type" : "R",
         "regexes" : [
             "(OR)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "XOR" : {
-        "opcode" : "0011111",
+    {
+        "mnemonic" : "XOR",
+        "opcode" : [0, 0, 1, 1, 1, 1, 1],
+        "type" : "R",
         "regexes" : [
             "(XOR)[\\s]+((?:%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:%|@)[\\S]*)"
         ]
     },
-    "NOT" : {
-        "opcode": "0100000",
-        "regexes": [
+    {
+        "mnemonic" : "NOT",
+        "opcode" : [0, 1, 0, 0, 0, 0,0],
+        "type" : "R",
+        "regexes" : [
             "(NOT)[\\s]+((?:%|@)[\\S]*)"
         ]
     },
-    "CALL" : {
-        "opcode" : "0100001",
+    {
+        "mnemonic" : "CALL",
+        "opcode" : [0, 1, 0, 0, 0, 0, 1],
+        "type" : "J",
         "regexes" : [
             "(CALL)[\\s]+((?:%|@)[\\S]*)"
         ]
     },
-    "RET" : {
-        "opcode" : "0100010",
+    {
+        "mnemonic" : "RET",
+        "opcode" : [0, 1, 0, 0, 0, 1, 0],
+        "type" : "J",
         "regexes" : [
             "(RET)"
         ]
     },
-    "POP" : {
-        "opcode" : "0100011",
+    {
+        "mnemonic" : "POP",
+        "opcode" : [0, 1, 0, 0, 0, 1, 1],
+        "type" : "I",
         "regexes" : [
             "(POP)"
         ]
     },
-    "PUSH" : {
-        "opcode" : "0100100",
+    {
+        "mnemonic" : "PUSH",
+        "opcode" : [0, 1, 0, 0, 1, 0, 0],
+        "type" : "I",
         "regexes" : [
             "(PUSH)[\\s]+((?:%|\\$|@)[\\S]*)"
         ]
     },
-    "SYSENTER" : {
-        "opcode" : "0100101",
+    {
+        "mnemonic" : "SYSENTER",
+        "opcode" : [0, 1, 0, 0, 1, 0, 1],
+        "type" : "J",
         "regexes" : [
             "(SYSENTER)[\\s]+((?:%|@)[\\S]*)"
         ]
     },
-    "SYSEXIT" : {
-        "opcode" : "0100110",
+    {
+        "mnemonic" : "SYSEXIT",
+        "opcode" : [0, 1, 0, 0, 1, 1, 0],
+        "type" : "J",
         "regexes" : [
             "(SYSEXIT)"
         ]
     },
-    "NOP" : {
-        "opcode" : "1111111",
+    {
+        "mnemonic" : "NOP",
+        "opcode" : [1, 1, 1, 1, 1, 1, 1],
+        "type" : "R",
         "regexes" : [
             "(NOP)"
         ]
     }
-}
+]
