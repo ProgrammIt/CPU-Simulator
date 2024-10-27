@@ -100,7 +100,7 @@ class Assembler {
 
     for (let instruction of Assembler._langDefinition!.instructions) {
       
-      if (instructionMnemonic === instruction.mnemonic) {
+      if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
         instructionType = this.encodeInstructionType(instruction.type, line);
         opcode = instruction.opcode;
       }
