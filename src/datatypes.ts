@@ -1,57 +1,17 @@
-type Bit = 0|1;
+interface LanguageDefinition {
+  instructions: Instruction[];
+  addressable_registers: Register[];
+}
 
-type Byte = [Bit, Bit, Bit, Bit, Bit, Bit, Bit, Bit];
+interface Instruction {
+  mnemonic: string;
+  opcode: string;
+  type: string;
+  regexes: string[];
+}
 
-type Word = [
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit
-];
-
-type DoubleWord = [
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit,
-  Bit
-];
+interface Register {
+  name: string;
+  aliases: string[];
+  code: string;
+}
