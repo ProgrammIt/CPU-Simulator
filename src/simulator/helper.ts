@@ -5,7 +5,7 @@
  * @param targetSystem A decimal value representing the base of the destination system.
  * @returns A character string containing the value transferred to the target system.
 */
-function convertNumeralSystem(
+export function convertNumeralSystem(
   s: string,
   sourceSystem: number,
   targetSystem: number
