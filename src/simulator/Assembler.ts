@@ -73,7 +73,7 @@ export class Assembler {
 				// Some instructions come in variants. Test all of them on a single line.
 				for (let instructionRegex of instruction.regexes) {
 					// Test whether the line of code matches the regex of an instruction.
-					let result: RegExpExecArray | null = RegExp(instructionRegex).exec(line);
+					let result: RegExpExecArray | null = RegExp(instructionRegex, "i").exec(line);
 					
 					if (result != null) {
 						// Line of code did match the regex of an instruction. The regex returns an array containing matches and groups.
