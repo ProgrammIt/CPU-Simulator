@@ -361,7 +361,7 @@ export class Assembler {
    * @param s The file contents of a .json file containing the assembly language definition.
    * @returns
    */
-  public async loadLanguageDefinition(s: string): Promise<void> {
+  public loadLanguageDefinition(s: string): void {
 	Assembler._langDefinition = JSON.parse(s);
 	return;
   }
