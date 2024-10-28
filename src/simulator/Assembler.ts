@@ -1,7 +1,7 @@
 import { convertNumeralSystem } from "./helper";
 
 export class Assembler {
-  private static WORD_WIDTH = 32;
+  private static WORD_WIDTH: number = 32;
   private static _regexComment: RegExp = /[\s]*;.*/gim;
   private static _regexNewLine: RegExp = /\r?\n|\r/gim;
   private static _regexLabel: RegExp = /[a-zA-Z][a-zA-Z\-_0-9]/gim;
