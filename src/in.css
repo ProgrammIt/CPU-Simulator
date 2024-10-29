@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: "BDO Grotesk";
+        src: url("./../assets/fonts/BDOGrotesk-VF.woff2") format("woff2");
+    }
+}
+
+body {
+    font-family: "BDO Grotesk", Arial, Helvetica, sans-serif;
+}
