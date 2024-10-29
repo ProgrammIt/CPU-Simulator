@@ -9,21 +9,22 @@
   },
   "jest": {
     "roots": [
-        "<rootDir>/src"
+      "<rootDir>/src"
     ],
     "testMatch": [
-        "**/?(*.)+(spec|test).+(ts|tsx|js)"
+      "**/?(*.)+(spec|test).+(ts|tsx|js)"
     ],
     "transform": {
-        "^.+\\.(ts|tsx)$": "ts-jest"
+      "^.+\\.(ts|tsx)$": "ts-jest"
     }
- },
+  },
   "author": "Erik Burmester",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "electron": "^32.1.2",
     "jest": "^29.7.0",
+    "tailwindcss": "^3.4.14",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2"
   }
