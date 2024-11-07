@@ -2,7 +2,7 @@
   "name": "cpu-simulator",
   "version": "0.0.1",
   "description": "A simple, graphical CPU simulator for teaching students the concepts and internal process of modern CPUs and virtualization.",
-  "main": "./dist/main.js",
+  "main": "./out/main.js",
   "scripts": {
     "test": "jest",
     "start": "electron-forge start",
