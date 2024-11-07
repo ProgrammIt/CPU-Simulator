@@ -22,15 +22,15 @@ export class Assembler {
 	
 	// Split file contents into lines of code, remove comments and mark empty lines for deletion
  var linesMarkedForDeletion: number[] = [];
-	fileContents.split(Assembler._regexNewLine).forEach((line, lineno) => {
+	fileContents.split(Assembler._regexNewLine).forEach((line, lineNo) => {
     var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
 		  if (lineWithoutComment.length === 0) {
-			     linesMarkedForDeletion.push(lineNo);
+			    linesMarkedForDeletion.push(lineNo);
 		  }
-	  	lines.set(lineno, lineWithoutComment);
+	  	lines.set(lineNo, lineWithoutComment);
 	});
 
-	for (let lineNo of lineNumbersMarkedForDeletion) {
+	for (let lineNo of linesMarkedForDeletion) {
 		lines.delete(lineNo);
 	}
 
