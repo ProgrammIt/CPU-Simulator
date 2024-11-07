@@ -4,8 +4,83 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CPU-Simulator</title>
+        <link rel="stylesheet" href="dark.css">
+        <script src="./../dist/render.js"></script>
     </head>
     <body>
-        <h1>CPU-Simulator</h1>
+        <main>
+            <!-- Registers -->
+            <section id="registers" class="registers">
+                <h2>Registers</h2>
+                <div class="widget-grid">
+                    <!-- EAX register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="eax-label">EAX</label>
+                        <div class="register" id="eax">0x64</div>
+                    </div>
+
+                    <!-- EBX register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="ebx-label">EBX</label>
+                        <div class="register" id="ebx">0xFFF1</div>
+                    </div>
+
+                    <!-- EIP register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="eip-label">EIP</label>
+                        <div class="register" id="eip">0x0</div>
+                    </div>
+
+                    <!-- EIR register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="eir-label">EIR</label>
+                        <div class="register" id="eir"> </div>
+                    </div>
+
+                    <!-- ESP register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="esp-label">ESP</label>
+                        <div class="register" id="esp"> </div>
+                    </div>
+
+                    <!-- ITP register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="itp-label">ITP</label>
+                        <div class="register" id="itp">0xFFFFFF7E</div>
+                    </div>
+
+                    <!-- NPTP register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="nptp-label">NPTP</label>
+                        <div class="register" id="nptp">0xFFFAFF2E</div>
+                    </div>
+
+                    <!-- VMPTR register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="vmptr-label">VMPTR</label>
+                        <div class="register" id="vmptr">0xFFFE6FAE</div>
+                    </div>
+
+                    <!-- PTP register -->
+                    <div class="register-widget">
+                        <label class="register-label" id="ptp-label">PTP</label>
+                        <div class="register" id="ptp">0xFFEF12A5</div>
+                    </div>
+
+                    <!-- EFLAGS register -->
+                    <div class="register-widget">
+                        <label class="register-label" for="eflags" id="eflags-label">EFLAGS</label>
+                        <div class="register" id="eflags">0xFFEF12A5</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RAM -->
+            <section class="ram">
+                <h2>RAM</h2>
+                <div id="ram-cells" class="fixed-col-2-grid">
+                </div>
+            </section>
+        </main>
     </body>
 </html>
