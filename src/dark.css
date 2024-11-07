@@ -1,0 +1,92 @@
+@layer base {
+    @font-face {
+        font-family: "BDO Grotesk";
+        src: url("./../assets/fonts/BDOGrotesk-VF.woff2") format("woff2");
+    }
+}
+
+body {
+    font-family: "BDO Grotesk", Arial, Helvetica, sans-serif;
+    background-color: #1e293b;
+    color: white;
+    margin: 0rem;
+    padding: 0rem;
+}
+
+main {
+    padding: 0rem 1rem;
+    display: flex;
+    flex-direction: row;
+}
+
+@media (max-width: 800px) {
+    main {
+        padding: 0rem 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.registers {
+    min-width: 50%;
+}
+
+.widget-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, 160px);
+}
+
+.register-widget {
+    margin: 0rem;
+    padding: 1rem;
+    background-color: #111827;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.register {
+    margin-top: 1rem;
+    font-family: monospace, sans-serif;
+}
+
+.ram-cell {
+    margin: 0rem;
+    padding: 1rem;
+    background-color: #111827;
+    border-radius: 10px;
+    text-align: left;
+    font-family: monospace;
+}
+
+.ram-cell-label {
+    margin: 0rem;
+    padding: 1rem;
+    text-align: left;
+}
+
+.ram {
+    min-width: 50%;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.ram > h2 {
+    position: sticky;
+    margin: 0rem;
+    padding: 1rem 0rem;
+    top: 0;
+    background-color: #1e293b;
+}
+
+.ram-spacer {
+    margin: 0rem;
+    padding: 1rem;
+}
+
+.fixed-col-2-grid {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 3fr;
+    place-items: stretch;
+}

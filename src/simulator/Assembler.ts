@@ -277,23 +277,21 @@ export class Assembler {
 	 * @returns The binary encoded operands type.
 	 */
 	private encodeOperandType(operand: string, line: number): string {
+		var encodedType: string = "";
+		
 		if (operand === null || operand === undefined || operand.length === 0) {
-			return "0000000";
+			encodedType = "0000000";
+		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
+			encodedType = "1100000";
+		} else if (operand.startsWith("$")) {
+			encodedType = "1010000";
+		} else if (operand.startsWith("@") || operand.match(Assembler._regexLabel)) {
+			encodedType = "1110000";
+		} else {
+			throw Error(`In line ${line}: Unrecognized type of operand.`);
 		}
 
-		if (operand.startsWith("*%") || operand.startsWith("%")) {
-			return "1100000";
-		}
-
-		if (operand.startsWith("$")) {
-			return "1010000";
-		}
-
-		if (operand.startsWith("@") || operand.match(Assembler._regexLabel)) {
-			return "1110000";
-		}
-
-		throw Error(`In line ${line}: Unrecognized type of operand.`);
+		return encodedType;
 	}
 
 	/**
