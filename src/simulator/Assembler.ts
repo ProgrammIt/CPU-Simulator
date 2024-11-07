@@ -20,21 +20,15 @@ export class Assembler {
   private preprocess(fileContents: string): Map<number, string> {
 	var lines: Map<number, string> = new Map();
 	
-	// Split file contents into lines of code.
+	// Split file contents into lines of code, remove comments and mark empty lines for deletion
+ var linesMarkedForDeletion: number[] = [];
 	fileContents.split(Assembler._regexNewLine).forEach((line, lineno) => {
-	  	lines.set(lineno, line);
+    var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
+		  if (lineWithoutComment.length === 0) {
+			     linesMarkedForDeletion.push(lineNo);
+		  }
+	  	lines.set(lineno, lineWithoutComment);
 	});
-
-	// Remove comments, leading and trailing whitespace from individual lines of code.
-	var lineNumbersMarkedForDeletion: number[] = [];
-
-	for (let [lineNo, line] of lines.entries()) {	
-		var lineWithoutComment: string = line.trim().replace(Assembler._regexComment, "");
-		if (lineWithoutComment.length === 0) {
-			lineNumbersMarkedForDeletion.push(lineNo);
-		}			
-		lines.set(lineNo, lineWithoutComment);
-	}
 
 	for (let lineNo of lineNumbersMarkedForDeletion) {
 		lines.delete(lineNo);
