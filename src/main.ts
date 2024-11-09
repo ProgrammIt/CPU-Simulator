@@ -1,12 +1,9 @@
-import { app, BrowserWindow, ipcMain } from "electron/main";
-import { MainMemory } from "./simulator/MainMemory";
+import { app, BrowserWindow, ipcMain } from "electron";
+import { MainMemory } from "./simulator/functional_units/MainMemory";
 import path from 'path';
 import { Assembler } from "./simulator/Assembler";
 import { readFileSync } from "fs";
-
-export const WORD_WIDTH: number = 32;
-export const BINARY_DATA_REGEX: RegExp = /^(?:0b)?[01]*$/gmi;
-export const HEX_DATA_REGEX: RegExp = /^0x[1-9ABCDEF][0-9ABCDEF]*$/gmi;
+import { QUADWORD_WIDTH } from "./constants";
 
 const createWindow = () => {
   	const win = new BrowserWindow({
@@ -21,7 +18,7 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-	const mainMemory = MainMemory.instance(Math.pow(2, WORD_WIDTH));
+	const mainMemory = MainMemory.instance(Math.pow(2, QUADWORD_WIDTH));
 	const assembler = Assembler.instance;
 	assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
 	const assemblyProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
