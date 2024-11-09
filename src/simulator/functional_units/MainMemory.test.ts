@@ -3,7 +3,7 @@ import {MainMemory} from './MainMemory';
 import { DOUBLEWORD } from '../../constants';
 
 describe("Read and write from or to main memory", () => {
-    var mainMemory: MainMemory = MainMemory.instance(Math.pow(2, DOUBLEWORD));
+    var mainMemory: MainMemory = MainMemory.instance;
     
     test("Write byte to main memory", () => {
         var physicalAddress: string = parseInt("0x0", 16).toString(2);
@@ -24,9 +24,9 @@ describe("Read and write from or to main memory", () => {
 
     test("Write doubleword to main memory", () => {
         var physicalAddress: string = parseInt("0x0", 16).toString(2);
-        mainMemory.writeQuadwordTo(physicalAddress, "11011001001011101010000101100000");
+        mainMemory.writeDoublewordTo(physicalAddress, "11011001001011101010000101100000");
         physicalAddress = parseInt("0x1000000", 16).toString(2);
-        mainMemory.writeQuadwordTo(physicalAddress, "11011001001011101010000101100000");
+        mainMemory.writeDoublewordTo(physicalAddress, "11011001001011101010000101100000");
         expect(mainMemory.cells).toEqual(new Map<string, string>([
             ["0", "11011001"],
             ["1", "00101110"],
@@ -43,7 +43,7 @@ describe("Read and write from or to main memory", () => {
     test("Write doubleword to high memory address, expecting an Error", () => {
         var physicalAddress: string = parseInt("0xFFFFFFFE", 16).toString(2);
         const attemptToWrite = () => {
-            mainMemory.writeQuadwordTo(physicalAddress, "11011001001011101010000101100000");
+            mainMemory.writeDoublewordTo(physicalAddress, "11011001001011101010000101100000");
         }      
         expect(attemptToWrite).toThrow(Error);
     });
@@ -62,19 +62,19 @@ describe("Read and write from or to main memory", () => {
 
     test("Read doubleword from memory address", () => {
         var physicalAddress: string = parseInt("0x0", 16).toString(2);
-        var result: string = mainMemory.readQuadwordFrom(physicalAddress);
+        var result: string = mainMemory.readDoublewordFrom(physicalAddress);
         expect(result).toBe("11011001001011101010000101100000");
     });
 
     test("Read doubleword from a previously unused memory address", () => {
         var physicalAddress: string = parseInt("0xFFFF", 16).toString(2);
-        let result: string = mainMemory.readQuadwordFrom(physicalAddress);
+        let result: string = mainMemory.readDoublewordFrom(physicalAddress);
         expect(result).toBe("00000000000000000000000000000000");
     });
 
     test("Read doubleword from partially unused memory address", () => {
         var physicalAddress: string = parseInt("0x3", 16).toString(2);
-        let result: string = mainMemory.readQuadwordFrom(physicalAddress);
+        let result: string = mainMemory.readDoublewordFrom(physicalAddress);
         expect(result).toBe("01100000000000000000000000000000");
     });
 });
