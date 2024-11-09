@@ -22,7 +22,7 @@ app.whenReady().then(() => {
 	const mainMemory = MainMemory.instance(Math.pow(2, WORD_WIDTH));
 	const assembler = Assembler.instance;
 	assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
-	const assemblyProgram: string = readFileSync("./src/assets/loop.asm", "utf8");
+	const assemblyProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
 	const compiledProgram: string[] = assembler.compile(assemblyProgram);
 	const startAddressProgrammDec: number = 0;
 	var currentAddressDec: number = startAddressProgrammDec;
