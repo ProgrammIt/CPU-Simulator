@@ -1,5 +1,4 @@
 import { LanguageDefinition } from "../datatypes";
-import { convertNumeralSystem } from "./helper";
 
 export class Assembler {
   private static WORD_WIDTH: number = 32;
@@ -232,18 +231,18 @@ export class Assembler {
 			binaryValue = operand.replace("$0b", "");
 		} else if (operand.startsWith("$0x")) {
 			// Hex immediate
-			binaryValue = convertNumeralSystem(operand.replace("$", ""), 16, 2);
+			binaryValue = parseInt(operand.replace("$", ""), 16).toString(2);
 		} else if (operand.startsWith("$")) {
-			binaryValue = convertNumeralSystem(operand.replace("$", ""), 10, 2);
+			binaryValue = parseInt(operand.replace("$", ""), 10).toString(2);
 		} else if (operand.startsWith("@0b")) {
 			// Binary memory address
 			binaryValue = operand.replace("@0b", "");
 		} else if (operand.startsWith("@0x")) {
 			// Hex memory address
-			binaryValue = convertNumeralSystem(operand.replace("@", ""), 16, 2);
+			binaryValue = parseInt(operand.replace("@", ""), 16).toString(2);
 		} else if (operand.startsWith("@")) {
 			// Decimal memory address
-			binaryValue = convertNumeralSystem(operand.replace("@", ""), 10, 2);
+			binaryValue = parseInt(operand.replace("@", ""), 10).toString(2);
 		} else if (operand.startsWith("*%")) {
 			// Register used with indirect addressing mode
 			binaryValue = this.encodeRegister(operand.replace("*%", ""), line);
