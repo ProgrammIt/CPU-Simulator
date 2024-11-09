@@ -1,3 +1,4 @@
+export const BYTE: number = 8;
 export const WORD: number = 16;
 export const DOUBLEWORD: number = 32;
 export const QUADWORD: number = 64;
