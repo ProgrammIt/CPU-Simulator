@@ -1,5 +1,6 @@
 window.onload = async () => {
     const ramCells: Map<string,string> = await window.mainMemory.cells();
+    console.log(ramCells);
     renderRAMCells(ramCells);
 }
 
@@ -20,7 +21,7 @@ function renderRAMCells(ram: Map<string,string>) {
         for (let [key, value] of Array.from(ram).reverse()) {
             const labelRamCellHTMLElement: HTMLElement = document.createElement("label");
             const divRamCellHTMLElement: HTMLElement = document.createElement("div");
-            const diffCurrentAndLatestAddressDec = parseInt(lastHexAddress, 16) - parseInt(key, 16);
+            const diffCurrentAndLatestAddressDec = parseInt(lastHexAddress, 16) - parseInt(key, 2);
 
             if (lastHexAddress.length !== 0 && diffCurrentAndLatestAddressDec > 1) {
                 // Adding placeholders in the view as an indicator for empty and thus skipped memory cells
@@ -36,17 +37,17 @@ function renderRAMCells(ram: Map<string,string>) {
                 ramCellsHTMLElement.appendChild(divSpacerHTMLElement);
             }
             
-            labelRamCellHTMLElement.innerHTML = key;
-            labelRamCellHTMLElement.setAttribute("for", `ram-cell-${key}`);
+            labelRamCellHTMLElement.innerHTML = `0x${parseInt(key, 2).toString(16)}`;
+            labelRamCellHTMLElement.setAttribute("for", `ram-cell-0x${parseInt(key, 2).toString(16)}`);
             labelRamCellHTMLElement.setAttribute("class", "ram-cell-label");
                 
             divRamCellHTMLElement.innerHTML = value;
-            divRamCellHTMLElement.setAttribute("id", `ram-cell-${key}`);
+            divRamCellHTMLElement.setAttribute("id", `ram-cell-0x${parseInt(key, 2).toString(16)}`);
             divRamCellHTMLElement.setAttribute("class", "ram-cell");
             
             ramCellsHTMLElement.appendChild(labelRamCellHTMLElement);
             ramCellsHTMLElement.appendChild(divRamCellHTMLElement);
-            lastHexAddress = key;
+            lastHexAddress = `0x${parseInt(key, 2).toString(16)}`;
         }
     }
 }
