@@ -1,3 +1,4 @@
+import { LanguageDefinition } from "../datatypes";
 import { convertNumeralSystem } from "./helper";
 
 export class Assembler {
