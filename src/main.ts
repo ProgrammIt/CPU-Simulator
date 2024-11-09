@@ -3,7 +3,7 @@ import { MainMemory } from "./simulator/functional_units/MainMemory";
 import path from 'path';
 import { Assembler } from "./simulator/Assembler";
 import { readFileSync } from "fs";
-import { DOUBLEWORD } from "./constants";
+import { MemoryManagementUnit } from "./simulator/execution_units/MemoryManagementUnit";
 
 const createWindow = () => {
   	const win = new BrowserWindow({
@@ -18,7 +18,8 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-	const mainMemory = MainMemory.instance(Math.pow(2, DOUBLEWORD));
+	const mainMemory = MainMemory.instance;
+	const mmu = MemoryManagementUnit.instance;
 	const assembler = Assembler.instance;
 	assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
 	const assemblyProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
@@ -26,12 +27,12 @@ app.whenReady().then(() => {
 	const startAddressProgrammDec: number = 0;
 	var currentAddressDec: number = startAddressProgrammDec;
 	for (const doubleword of compiledProgram) {
-		mainMemory.writeQuadwordTo((currentAddressDec).toString(2), doubleword);
+		mmu.writeDoublewordTo((currentAddressDec).toString(2), doubleword);
 		currentAddressDec += 4;
 	}
 	var physicalAddress: string = "";
     physicalAddress = parseInt("0x1000000", 16).toString(2);
-    mainMemory.writeQuadwordTo(physicalAddress, "11011001001011101010000101100000");
+    mmu.writeDoublewordTo(physicalAddress, "11011001001011101010000101100000");
 	
 	createWindow();
 
