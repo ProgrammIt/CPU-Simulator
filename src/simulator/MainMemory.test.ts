@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import {MainMemory} from './MainMemory';
+import {MainMemory} from './functional_units/MainMemory';
 
 describe("Read and write from or to main memory", () => {
     const WORD_WIDTH: number = 32;
