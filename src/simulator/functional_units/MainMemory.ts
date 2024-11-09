@@ -1,3 +1,4 @@
+import { DOUBLEWORD } from "../../constants";
 import { convertToBinaryValue } from "../../helper";
 
 export class MainMemory {
@@ -28,12 +29,11 @@ export class MainMemory {
      * MainMemory class. If the instance was initialized beforehand,
      * this instance will be returned. Otherwise a single new instance 
      * will be created.
-     * @param capacity A power of two numerical value.
      * @returns The single instance of the MainMemory class.
      */
-    public static instance(capacity: number): MainMemory {
+    public static get instance(): MainMemory {
         if (MainMemory._instance === null || MainMemory._instance === undefined) {
-            MainMemory._instance = new MainMemory(capacity);
+            MainMemory._instance = new MainMemory(Math.pow(2, DOUBLEWORD));
         }
         return MainMemory._instance;
     }
@@ -65,9 +65,9 @@ export class MainMemory {
     /**
      * This methods writes a doubleword (32-bit- or 4-byte-) value to memory to the specified memory address.
      * @param physicalAddress A physical memory address to write the doubleword-sized data to.
-     * @param doubleword Quadword-sized data to write.
+     * @param doubleword Doubleword-sized data to write.
      */
-    public writeQuadwordTo(physicalAddress: string, doubleword: string) {
+    public writeDoublewordTo(physicalAddress: string, doubleword: string) {
         physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress, 2);
@@ -82,9 +82,9 @@ export class MainMemory {
     /**
      * This method reads doubleword sized data from the main memory starting at the specified physical memory address.
      * @param physicalAddress A binary physical memory address to read the doubleword-sized data from.
-     * @returns Quadword-sized binary data.
+     * @returns Doubleword-sized binary data.
      */
-    public readQuadwordFrom(physicalAddress: string): string {
+    public readDoublewordFrom(physicalAddress: string): string {
         physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress, 2);
