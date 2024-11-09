@@ -1,4 +1,4 @@
-import { convertToBinaryAddress } from "../../helper";
+import { convertToBinaryValue } from "../../helper";
 
 export class MainMemory {
     private _cells: Map<string, string>;
@@ -63,29 +63,29 @@ export class MainMemory {
     }
 
     /**
-     * This methods writes a quadword (32-bit- or 4-byte-) value to memory to the specified memory address.
-     * @param physicalAddress A physical memory address to write the quadword-sized data to.
-     * @param quadword Quadword-sized data to write.
+     * This methods writes a doubleword (32-bit- or 4-byte-) value to memory to the specified memory address.
+     * @param physicalAddress A physical memory address to write the doubleword-sized data to.
+     * @param doubleword Quadword-sized data to write.
      */
-    public writeQuadwordTo(physicalAddress: string, quadword: string) {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+    public writeQuadwordTo(physicalAddress: string, doubleword: string) {
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress, 2);
         var currentAddressDec: number = startAddressDec;
-        this.writeByteTo(currentAddressDec.toString(2), quadword.slice(0, 8));
-        this.writeByteTo((++currentAddressDec).toString(2), quadword.slice(8, 16));
-        this.writeByteTo((++currentAddressDec).toString(2), quadword.slice(16, 24));
-        this.writeByteTo((++currentAddressDec).toString(2), quadword.slice(24));
+        this.writeByteTo(currentAddressDec.toString(2), doubleword.slice(0, 8));
+        this.writeByteTo((++currentAddressDec).toString(2), doubleword.slice(8, 16));
+        this.writeByteTo((++currentAddressDec).toString(2), doubleword.slice(16, 24));
+        this.writeByteTo((++currentAddressDec).toString(2), doubleword.slice(24));
         return;
     }
 
     /**
-     * This method reads quadword sized data from the main memory starting at the specified physical memory address.
-     * @param physicalAddress A binary physical memory address to read the quadword-sized data from.
+     * This method reads doubleword sized data from the main memory starting at the specified physical memory address.
+     * @param physicalAddress A binary physical memory address to read the doubleword-sized data from.
      * @returns Quadword-sized binary data.
      */
     public readQuadwordFrom(physicalAddress: string): string {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress, 2);
         var currentAddressDec: number = startAddressDec;
@@ -104,7 +104,7 @@ export class MainMemory {
      * @param data Byte-sized data to write to the specified pyhsical memory address.
      */
     public writeByteTo(physicalAddress: string, data: string) {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         if (data.length === 0) {
             throw Error("Nothing to write to main memory.");
@@ -127,7 +127,7 @@ export class MainMemory {
      * @returns The byte-sized data found at the specified address.
      */
     public readByteFrom(physicalAddress: string): string {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         var result = this._cells.has(physicalAddress) ? this._cells.get(physicalAddress)! : "0".padStart(MainMemory.CELL_CAPACITY, "0");
         return result;
@@ -140,7 +140,7 @@ export class MainMemory {
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
      */
     public clearByte(physicalAddress: string) {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         this._cells.delete(physicalAddress);
         ++this._freeMemory;
@@ -154,7 +154,7 @@ export class MainMemory {
      * @param physicalAddress A physical memory address.
      */
     public setByte(physicalAddress: string) {
-        physicalAddress = convertToBinaryAddress(physicalAddress);
+        physicalAddress = convertToBinaryValue(physicalAddress);
         this.validatePhysicalAddress(physicalAddress);
         this._cells.set(physicalAddress, "1".padStart(MainMemory.CELL_CAPACITY, "1"));
         --this._freeMemory;
