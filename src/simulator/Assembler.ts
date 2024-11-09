@@ -21,7 +21,7 @@ export class Assembler {
 	var lines: Map<number, string> = new Map();
 	
 	// Split file contents into lines of code, remove comments and mark empty lines for deletion
- var linesMarkedForDeletion: number[] = [];
+ 	var linesMarkedForDeletion: number[] = [];
 	fileContents.split(Assembler._regexNewLine).forEach((line, lineNo) => {
     var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
 		  if (lineWithoutComment.length === 0) {
