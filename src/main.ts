@@ -2,9 +2,11 @@ import { app, BrowserWindow, ipcMain } from "electron/main";
 import { MainMemory } from "./simulator/MainMemory";
 import path from 'path';
 import { Assembler } from "./simulator/Assembler";
-import { readFileSync } from "original-fs";
+import { readFileSync } from "fs";
 
-const WORD_WIDTH = 32;
+export const WORD_WIDTH: number = 32;
+export const BINARY_DATA_REGEX: RegExp = /^(?:0b)?[01]*$/gmi;
+export const HEX_DATA_REGEX: RegExp = /^0x[1-9ABCDEF][0-9ABCDEF]*$/gmi;
 
 const createWindow = () => {
   	const win = new BrowserWindow({
