@@ -1,5 +1,3 @@
-import { convertNumeralSystem } from "./helper";
-
 export class MainMemory {
     private _cells: Map<string, string>;
     private _capacity: number;
@@ -109,10 +107,8 @@ export class MainMemory {
         if (data.length > 8) {
             throw Error("Data attempted to write exeeds write limit of one byte.")
         }
-        // Convert binary address to hex representation
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress, 2).toString(16).toUpperCase()}`;
         // Write byte to memory.
-        this._cells.set(physicalAddressHex, data);
+        this._cells.set(physicalAddress, data);
         --this._freeMemory;
         ++this._usedMemory;
         return;
@@ -127,9 +123,7 @@ export class MainMemory {
      */
     public readByteFrom(physicalAddress: string): string {
         this.validatePhysicalAddress(physicalAddress);
-        // Convert binary address to hex representation
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress, 2).toString(16).toUpperCase()}`;
-        var result = this._cells.has(physicalAddressHex) ? this._cells.get(physicalAddressHex)! : "0".padStart(MainMemory.CELL_CAPACITY, "0");
+        var result = this._cells.has(physicalAddress) ? this._cells.get(physicalAddress)! : "0".padStart(MainMemory.CELL_CAPACITY, "0");
         return result;
     }
 
@@ -141,9 +135,7 @@ export class MainMemory {
      */
     public clearByte(physicalAddress: string) {
         this.validatePhysicalAddress(physicalAddress);
-        // Convert binary address to hex representation
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress, 2).toString(16).toUpperCase()}`;
-        this._cells.delete(physicalAddressHex);
+        this._cells.delete(physicalAddress);
         ++this._freeMemory;
         --this._usedMemory;
         return;
@@ -156,9 +148,7 @@ export class MainMemory {
      */
     public setByte(physicalAddress: string) {
         this.validatePhysicalAddress(physicalAddress);
-        // Convert binary address to hex representation
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress, 2).toString(16).toUpperCase()}`;
-        this._cells.set(physicalAddressHex, "1".padStart(MainMemory.CELL_CAPACITY, "1"));
+        this._cells.set(physicalAddress, "1".padStart(MainMemory.CELL_CAPACITY, "1"));
         --this._freeMemory;
         ++this._usedMemory;
         return;
