@@ -1,5 +1,5 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
-contextBridge.exposeInMainWorld('versions', {
-  
+contextBridge.exposeInMainWorld("mainMemory", {
+    cells: () => ipcRenderer.invoke("retrieveMainMemoryCells"),
 });
