@@ -1,6 +1,6 @@
 import {describe, expect, test} from '@jest/globals';
-import {Assembler} from './Assembler';
 import { readFileSync } from 'fs';
+import { Assembler } from '../simulator/Assembler';
 
 describe('Encode instructions', () => {
     var assembler = Assembler.instance;
