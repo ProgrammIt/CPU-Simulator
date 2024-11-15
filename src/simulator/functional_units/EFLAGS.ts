@@ -1,0 +1,230 @@
+import { Bit, Byte } from "../../types";
+import { ByteRegister } from "./Register";
+
+export class EFLAGS extends ByteRegister {
+    // Positions of the flag bits in the status register from MSB (starting at index 0) to LSB.
+    private static POS_CPL_MSB_BIT: number = 0;
+    private static POS_CPL_LSB_BIT: number = 1;
+    private static POS_INTERRUPT_BIT: number = 2;
+    private static POS_OVERFLOW_BIT: number = 3;
+    private static POS_SIGNED_BIT: number = 4;
+    private static POS_ZERO_BIT: number = 5;
+    private static POS_CARRY_BIT: number = 6;
+    private static POS_PARITY_BIT: number = 7;   
+
+    public constructor() {
+        super("EFLAGS");
+        this.content.value = new Array<Bit>(
+            new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0)
+        );
+    }
+
+    /**
+     * This method sets or clears the flag bit at the specified index.
+     * Clearing means setting the bit to a binary 0. Setting means setting the bit to a binary 1.
+     * @param index The position of the flag bit in the register from MSB (index 0) to LSB.
+     * @param bit The binary value to set the flag bit to.
+     * @returns 
+     */
+    private setBitTo(index: number, bit: Bit) {
+        // Create a deep copy of readonly array.
+        const tmp: Array<Bit> = new Array<Bit>(...this.content.value);
+        // Modify deep copy.
+        tmp[index] = bit;
+        // Set content of register.
+        this.content.value = tmp;
+        return;
+    }
+
+    /**
+     * This method sets the parity flag bit to a binary 1.
+     * @returns 
+     */
+    public setParity() {
+       this.setBitTo(EFLAGS.POS_PARITY_BIT, new Bit(1));
+       return;
+    }
+
+    /**
+     * This method clears the parity flag bit to a binary 0.
+     * @returns 
+     */
+    public clearParity() {
+        this.setBitTo(EFLAGS.POS_PARITY_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the carry flag bit to a binary 1.
+     * @returns 
+     */
+    public setCarry() {
+        this.setBitTo(EFLAGS.POS_CARRY_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the carry flag bit to a binary 0.
+     * @returns 
+     */
+    public clearCarry() {
+        this.setBitTo(EFLAGS.POS_CARRY_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the zero flag bit to a binary 1.
+     * @returns 
+     */
+    public setZero() {
+        this.setBitTo(EFLAGS.POS_ZERO_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the zero flag bit to a binary 0.
+     * @returns 
+     */
+    public clearZero() {
+        this.setBitTo(EFLAGS.POS_ZERO_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the signed flag bit to a binary 1.
+     * @returns 
+     */
+    public setSigned() {
+        this.setBitTo(EFLAGS.POS_SIGNED_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the signed flag bit to a binary 0.
+     * @returns 
+     */
+    public clearSigned() {
+        this.setBitTo(EFLAGS.POS_SIGNED_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the overflow flag bit to a binary 1.
+     * @returns 
+     */
+    public setOverflow() {
+        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the overflow flag bit to a binary 0.
+     * @returns 
+     */
+    public clearOverflow() {
+        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the interrupt flag bit to a binary 1.
+     * @returns 
+     */
+    public setInterrupt() {
+        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the interrupt flag bit to a binary 0.
+     * @returns 
+     */
+    public clearInterrupt() {
+        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method sets the CPL flag bits to a binary 3.
+     * @returns 
+     */
+    public enterUserMode() {
+        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, new Bit(1));
+        return;
+    }
+
+    /**
+     * This method clears the CPL flag bits to a binary 0.
+     * @returns 
+     */
+    public enterKernelMode() {
+        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, new Bit(0));
+        return;
+    }
+
+    /**
+     * This method reads the current status of the parity flag bit.
+     */
+    public get parity(): Bit {
+        return this.content.value.at(EFLAGS.POS_PARITY_BIT)!;
+    }
+
+    /**
+     * This method reads the current status of the carry flag bit.
+     */
+    public get carry(): Bit {
+        return this.content.value.at(EFLAGS.POS_CARRY_BIT)!;
+    }
+
+    /**
+     * This method reads the current status of the zero flag bit.
+     */
+    public get zero(): Bit {
+        return this.content.value.at(EFLAGS.POS_ZERO_BIT)!;
+    }
+
+    /**
+     * This method reads the current status of the signed flag bit.
+     */
+    public get signed(): Bit {
+        return this.content.value.at(EFLAGS.POS_SIGNED_BIT)!;
+    }
+
+    /**
+     * This method reads the current status of the overflow flag bit.
+     */
+    public get overflow(): Bit {
+        return this.content.value.at(EFLAGS.POS_OVERFLOW_BIT)!;
+    }
+
+    /**
+     * This method reads the current status of the interrupt flag bit.
+     */
+    public get interrupt(): Bit {
+        return this.content.value.at(EFLAGS.POS_INTERRUPT_BIT)!;
+    }
+
+    /**
+     * This method checks whether the CPU is currently in user mode.
+     * @returns True if the CPU is currently in user mode, otherwise false.
+     */
+    public isInUserMode(): boolean {
+        return (
+            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)!.equal(new Bit(1)) && 
+            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)!.equal(new Bit(1))
+        );
+    }
+
+    /**
+     * This method checks whether the CPU is currently in kernel mode.
+     * @returns True if the CPU is currently in kernel mode, otherwise false.
+     */
+    public isInKernelMode(): boolean {
+        return (
+            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)!.equal(new Bit(0)) && 
+            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)!.equal(new Bit(0))
+        );
+    }
+}
