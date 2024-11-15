@@ -1,9 +1,8 @@
 import {describe, expect, test} from '@jest/globals';
-import {MainMemory} from './MainMemory';
-import { DOUBLEWORD } from '../../constants';
+import { RAM } from '../simulator/functional_units/RAM';
 
 describe("Read and write from or to main memory", () => {
-    var mainMemory: MainMemory = MainMemory.instance;
+    var mainMemory: RAM = RAM.instance;
     
     test("Write byte to main memory", () => {
         var physicalAddress: string = parseInt("0x0", 16).toString(2);
