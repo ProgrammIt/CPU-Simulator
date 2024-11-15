@@ -1,11 +1,32 @@
-import { MainMemory } from "../functional_units/MainMemory";
+import { Byte, Doubleword, PhysicalAddress, VirtualAddress } from "../../types";
+import { RAM } from "../functional_units/RAM";
 
 export class MemoryManagementUnit {
-    private _tlb: Map<string, string>;
+    private _tlb: Map<VirtualAddress, PhysicalAddress>; // TODO: limit size of tlb to 64
+    private _memoryVirtualizationEnabled: boolean;
+    private _mainMemory: RAM;
     private static _instance: MemoryManagementUnit | null = null;
 
-    private constructor() {
-        this._tlb = new Map<string, string>();
+    private constructor(mainMemory: RAM) {
+        this._tlb = new Map<VirtualAddress, PhysicalAddress>();
+        this._memoryVirtualizationEnabled = false;
+        this._mainMemory = mainMemory;
+    }
+
+    /**
+     * This method enables memory virtualization.
+     */
+    // TODO: When memory virtualization is implemented, make public.
+    private enableMemoryVirtualization() {
+        this._memoryVirtualizationEnabled = true;
+    }
+
+    /**
+     * This method disables memory virtualization.
+     */
+    // TODO: When memory virtualization is implemented, make public.
+    private disableMemoryVirtualization() {
+        this._memoryVirtualizationEnabled = false;
     }
 
     /**
@@ -13,9 +34,9 @@ export class MemoryManagementUnit {
      * If there is no such instance, one and one is created. Otherwise, the exisiting one is returned.
      * @returns An instance of the MemoryManagementUnit class.
      */
-    public static get instance(): MemoryManagementUnit {
+    public static instance(mainMemory: RAM): MemoryManagementUnit {
         if (MemoryManagementUnit._instance === null) {
-            MemoryManagementUnit._instance = new MemoryManagementUnit();
+            MemoryManagementUnit._instance = new MemoryManagementUnit(mainMemory);
         }
         return MemoryManagementUnit._instance;
     }
@@ -25,9 +46,9 @@ export class MemoryManagementUnit {
      * @param physicalAddress A binary virtual memory address to write the doubleword-sized data to.
      * @param doubleword Doubleword-sized data to write.
      */
-    public writeDoublewordTo(virtualAddress: string, doubleword: string) {
-        const physicalAddress: string = this.translate(virtualAddress);
-        MainMemory.instance.writeDoublewordTo(physicalAddress, doubleword);
+    public writeDoublewordTo(virtualAddress: VirtualAddress, doubleword: Doubleword) {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress);
+        this._mainMemory.writeDoublewordTo(physicalAddress, doubleword);
         return;
     }
 
@@ -36,9 +57,9 @@ export class MemoryManagementUnit {
      * @param virtualAddress A binary virtual memory address to read the doubleword-sized data from.
      * @returns Doubleword-sized binary data.
      */
-    public readDoublewordFrom(virtualAddress: string): string {
-        const physicalAddress: string = this.translate(virtualAddress);
-        return MainMemory.instance.readDoublewordFrom(physicalAddress);
+    public readDoublewordFrom(virtualAddress: VirtualAddress): Doubleword {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress);
+        return this._mainMemory.readDoublewordFrom(physicalAddress);
     }
 
     /**
@@ -47,9 +68,9 @@ export class MemoryManagementUnit {
      * @param virtualAddress A binary value representing a virtual memory address to write the data to.
      * @param data Byte-sized data to write to the specified pyhsical memory address.
      */
-    public writeByteTo(virtualAddress: string, data: string) {
-        const physicalAddress: string = this.translate(virtualAddress);
-        MainMemory.instance.writeByteTo(physicalAddress, data);
+    public writeByteTo(virtualAddress: VirtualAddress, data: Byte) {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress);
+        this._mainMemory.writeByteTo(physicalAddress, data);
         return;
     }
 
@@ -60,9 +81,9 @@ export class MemoryManagementUnit {
      * @param virtualAddress A binary value representing a virtual memory address to write the data to.
      * @returns The byte-sized data found at the specified address.
      */
-    public readByteFrom(virtualAddress: string): string {
-        const physicalAddress: string = this.translate(virtualAddress);
-        return MainMemory.instance.readByteFrom(physicalAddress);
+    public readByteFrom(virtualAddress: VirtualAddress): Byte {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress);
+        return this._mainMemory.readByteFrom(physicalAddress);
     }
 
     /**
@@ -70,7 +91,7 @@ export class MemoryManagementUnit {
      * or NPT.
      * @param virtualAddress A binary value representing a virtual memory address.
      */
-    private translate(virtualAddress: string): string {
+    private translate(virtualAddress: VirtualAddress): PhysicalAddress {
         // TODO: Because the simulator currently does not support memory virtualization, the virtual memory address is treated as a physical memory address.
         return virtualAddress;
     }
