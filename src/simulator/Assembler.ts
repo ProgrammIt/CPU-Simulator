@@ -1,4 +1,4 @@
-import { LanguageDefinition } from "../datatypes";
+import { Bit, DataSize, Doubleword, LanguageDefinition } from "../types";
 
 export class Assembler {
   private static WORD_WIDTH: number = 32;
@@ -40,10 +40,10 @@ export class Assembler {
 	/**
 	 * This method encodes the reduced assembly program to its binary equivalent.
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
-	 * @returns An array of strings representing the encoded instructions and their operands of the assembly program.
+	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
-  	private encode(lines: Map<number, string>): string[] {
-	  	var encodedInstructions: string[] = [];
+  	private encode(lines: Map<number, string>): Doubleword[] {
+	  	var encodedInstructions: Doubleword[] = [];
 	  	var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);
 
 		// Remove jump labels as they will not be encoded.
@@ -81,10 +81,10 @@ export class Assembler {
 						 */
 						
 						// Pass the resulting array to the instruction encoding.
-						let encodedResults: string[] = this.encodeInstruction(result, lineNo, jumpLabels);
-						let encodedInstruction: string = encodedResults[0];
-						let encodedOperand1: string = encodedResults[1];
-						let encodedOperand2: string = encodedResults[2];
+						let encodedResults: Doubleword[] = this.encodeInstruction(result, lineNo, jumpLabels);
+						let encodedInstruction: Doubleword = encodedResults[0];
+						let encodedOperand1: Doubleword = encodedResults[1];
+						let encodedOperand2: Doubleword = encodedResults[2];
 						encodedInstructions.push(encodedInstruction, encodedOperand1, encodedOperand2);
 
 						// If one variant did match, do not test the others too.
@@ -131,54 +131,60 @@ export class Assembler {
    * @param line The original computer programs line of code which is currently encoded.
    * @returns A string containing the binary equivalent of the given instruction.
    */
-	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): string[] {
-		var encodedInstruction: string = "";
-		var addressingModeOperand1: string = "";
-		var typeOperand1: string = "";
-		var addressingModeOperand2: string = "";
-		var typeOperand2: string = "";
-		var encodedOperandValue1: string = "";
-		var encodedOperandValue2: string = "";
-		var instructionType: string = "";
-		var opcode: string = "";
+	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): Doubleword[] {
+		var encodedInstruction: Doubleword = new Doubleword();
+		var addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
+		var typeOperand1: Array<Bit> = new Array<Bit>(7);
+		var addressingModeOperand2: Array<Bit> = new Array<Bit>(2);
+		var typeOperand2: Array<Bit> = new Array<Bit>(7);
+		var encodedOperandValue1: Doubleword = new Doubleword();
+		var encodedOperandValue2: Doubleword = new Doubleword();
+		var instructionType: Array<Bit> = new Array<Bit>(3);
+		var opcode: Array<Bit> = new Array<Bit>(7);
 		var instructionMnemonic: string = regexMatchArrayInstruction[1];
-		const delimeter: string = "11";
+		const delimeter: Array<Bit> = new Array<Bit>(2).fill(new Bit(1));
 
 		for (let instruction of Assembler._langDefinition!.instructions) {
-		
-		if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
-			instructionType = this.encodeInstructionType(instruction.type, line);
-			opcode = instruction.opcode;
-		}
+			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
+				instructionType = this.encodeInstructionType(instruction.type, line);
+				instruction.opcode.split("").forEach((bit, index) => {
+					opcode[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+				});
+				break;
+			}
 		}
 		
 		// Check for second operand
 		if (regexMatchArrayInstruction.length > 3) {
-		// A second operand given
-		addressingModeOperand2 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[3], line);
-		typeOperand2 = this.encodeOperandType(regexMatchArrayInstruction[3], line);
-		encodedOperandValue2 = this.encodeOperandValue(regexMatchArrayInstruction[3], line, jumpLabels);
+			// A second operand given
+			addressingModeOperand2 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[3], line);
+			typeOperand2 = this.encodeOperandType(regexMatchArrayInstruction[3], line);
+			encodedOperandValue2 = this.encodeOperandValue(regexMatchArrayInstruction[3], line, jumpLabels);
 		} else {
-		// No second operand given
-		addressingModeOperand2 = this.encodeOperandAddressingMode("", line);
-		typeOperand2 = this.encodeOperandType("", line);
-		encodedOperandValue2 = this.encodeOperandValue("", line, jumpLabels);
+			// No second operand given
+			addressingModeOperand2 = this.encodeOperandAddressingMode("", line);
+			typeOperand2 = this.encodeOperandType("", line);
+			encodedOperandValue2 = this.encodeOperandValue("", line, jumpLabels);
 		}
 
 		// Check for first operand
 		if (regexMatchArrayInstruction.length > 2) {
-		// A single operand given
-		addressingModeOperand1 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[2], line);
-		typeOperand1 = this.encodeOperandType(regexMatchArrayInstruction[2], line);
-		encodedOperandValue1 = this.encodeOperandValue(regexMatchArrayInstruction[2], line, jumpLabels);
+			// A single operand given
+			addressingModeOperand1 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[2], line);
+			typeOperand1 = this.encodeOperandType(regexMatchArrayInstruction[2], line);
+			encodedOperandValue1 = this.encodeOperandValue(regexMatchArrayInstruction[2], line, jumpLabels);
 		} else {
-		// No operand given
-		addressingModeOperand1 = this.encodeOperandAddressingMode("", line);
-		typeOperand1 = this.encodeOperandType("", line);
-		encodedOperandValue1 = this.encodeOperandValue("", line, jumpLabels);
+			// No operand given
+			addressingModeOperand1 = this.encodeOperandAddressingMode("", line);
+			typeOperand1 = this.encodeOperandType("", line);
+			encodedOperandValue1 = this.encodeOperandValue("", line, jumpLabels);
 		}
 
-		encodedInstruction += instructionType + delimeter + opcode + delimeter + addressingModeOperand1 + typeOperand1 + addressingModeOperand2 + typeOperand2;
+		encodedInstruction.value.concat(
+			instructionType, delimeter, opcode, delimeter, 
+			addressingModeOperand1, typeOperand1, 
+			addressingModeOperand2, typeOperand2
+		);
 		
 		return [encodedInstruction, encodedOperandValue1, encodedOperandValue2];
 	}
@@ -189,22 +195,18 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns The binary encoded addressing mode.
 	 */
-	private encodeOperandAddressingMode(operand: string, line: number): string {
-		if (operand === undefined || operand === null) {
-		return "10";
-		}
-		
+	private encodeOperandAddressingMode(operand: string, line: number): Array<Bit> {		
 		if (operand.startsWith("*%")) {
-		return "11";
+			return new Array<Bit>(2).fill(new Bit(1));
 		}
 
 		if (operand.startsWith("*@") || operand.startsWith("*$")) {
-		throw new Error(
-			`In line ${line}: Indirect addressing mode is only supported for usage with registers.`
-		);
+			throw new Error(
+				`In line ${line}: Indirect addressing mode is only supported for usage with registers.`
+			);
 		}
 
-		return "10";
+		return new Array<Bit>(new Bit(1), new Bit(0));
 	}
 
 	/**
@@ -217,55 +219,62 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns The binary encoded operand
 	 */
-	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): string {
-		var operand32BitEncoded: string = "";
-		var binaryValue: string = "";
+	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): Doubleword {
+		var operand32BitEncoded: Doubleword = new Doubleword();
+		var binaryValueString: string = "";
 
-		if (operand === null || operand === undefined || operand.length === 0) {
-			binaryValue = "0";
+		if (operand.length === 0) {
+			binaryValueString = "0";
 		} else if (jumpLabels.has(operand)) {
 			// Check if operand is jump label
-			binaryValue = jumpLabels.get(operand)!;
+			binaryValueString = jumpLabels.get(operand)!;
 		} else if (operand.startsWith("$0b")) {
 			// Binary immediate
-			binaryValue = operand.replace("$0b", "");
+			binaryValueString = operand.replace("$0b", "");
 		} else if (operand.startsWith("$0x")) {
 			// Hex immediate
-			binaryValue = parseInt(operand.replace("$", ""), 16).toString(2);
+			binaryValueString = parseInt(operand.replace("$", ""), 16).toString(2);
 		} else if (operand.startsWith("$")) {
-			binaryValue = parseInt(operand.replace("$", ""), 10).toString(2);
+			binaryValueString = parseInt(operand.replace("$", ""), 10).toString(2);
 		} else if (operand.startsWith("@0b")) {
 			// Binary memory address
-			binaryValue = operand.replace("@0b", "");
+			binaryValueString = operand.replace("@0b", "");
 		} else if (operand.startsWith("@0x")) {
 			// Hex memory address
-			binaryValue = parseInt(operand.replace("@", ""), 16).toString(2);
+			binaryValueString = parseInt(operand.replace("@", ""), 16).toString(2);
 		} else if (operand.startsWith("@")) {
 			// Decimal memory address
-			binaryValue = parseInt(operand.replace("@", ""), 10).toString(2);
+			binaryValueString = parseInt(operand.replace("@", ""), 10).toString(2);
 		} else if (operand.startsWith("*%")) {
 			// Register used with indirect addressing mode
-			binaryValue = this.encodeRegister(operand.replace("*%", ""), line);
+			binaryValueString = this.encodeRegister(operand.replace("*%", ""), line);
 		} else if (operand.startsWith("%")) {
 			// Register used with direct addressing mode
-			binaryValue = this.encodeRegister(operand.replace("%", ""), line);
+			binaryValueString = this.encodeRegister(operand.replace("%", ""), line);
 		} else {
 			throw Error(`In line ${line}: Unrecognized operand type and value.`);
 		}
 
-		if (binaryValue.length > Assembler.WORD_WIDTH) {
+		if (binaryValueString.length > Assembler.WORD_WIDTH) {
 			/**
 			 * Overflow handling: discard surplus bits
 			 * Example:
 			 *   1111 10010010 00101011 10111010 01011011 (36 bit) -> 10010010 00101011 10111010 01011011 (32 bit)
 			 */
-			operand32BitEncoded = binaryValue.slice(binaryValue.length - 32);
-		} else if (binaryValue.length < Assembler.WORD_WIDTH) {
-			// Pad binary value to fit WORD_WIDTH
-			operand32BitEncoded = binaryValue.padStart(Assembler.WORD_WIDTH, "0");
+			binaryValueString = binaryValueString.slice(binaryValueString.length - 32);
 		} else {
-			operand32BitEncoded = binaryValue;
+			// Pad binary value to fit WORD_WIDTH
+			binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
 		}
+
+		binaryValueString.split("").forEach((bit, index) => {
+			// Create deepcopy of current value, because value is readonly.
+			const tmp: Array<Bit> = operand32BitEncoded.value.slice();
+			// Manipulate copy.
+			tmp[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+			// Set copy as new value.
+			operand32BitEncoded.value = tmp;
+		});
 
 		return operand32BitEncoded;
  	}
@@ -276,17 +285,17 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns The binary encoded operands type.
 	 */
-	private encodeOperandType(operand: string, line: number): string {
-		var encodedType: string = "";
+	private encodeOperandType(operand: string, line: number): Array<Bit> {
+		var encodedType: Array<Bit> = new Array<Bit>(7);
 		
 		if (operand === null || operand === undefined || operand.length === 0) {
-			encodedType = "0000000";
+			encodedType = new Array<Bit>(7).fill(new Bit(0));
 		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
-			encodedType = "1100000";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
 		} else if (operand.startsWith("$")) {
-			encodedType = "1010000";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(0), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
 		} else if (operand.startsWith("@") || operand.match(Assembler._regexLabel)) {
-			encodedType = "1110000";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
 		} else {
 			throw Error(`In line ${line}: Unrecognized type of operand.`);
 		}
@@ -317,17 +326,17 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns A string of zeros and ones representing the instructions type.
 	 */
-	private encodeInstructionType(type: string, line: number): string {
-		var encodedType: string = "";
+	private encodeInstructionType(type: string, line: number): Array<Bit> {
+		var encodedType: Array<Bit> = new Array<Bit>(3).fill(new Bit(0));
 		switch (type.toUpperCase()) {
 		case "R":
-			encodedType = "100";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(0), new Bit(0));
 			break;
 		case "I":
-			encodedType = "110";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(0));
 			break;
 		case "J":
-			encodedType = "111";
+			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(1));
 			break;
 		default:
 			throw Error(`In line ${line}: Unrecognized instruction type.`);
@@ -365,7 +374,7 @@ export class Assembler {
    * @param s File contents of an .asm file containing a computer program written in assembly language.
    * @returns An array of strings representing the binary encoded instructions of the given computer program.
    */
-  public compile(s: string): string[] {
+  public compile(s: string): Doubleword[] {
 	const lines: Map<number, string> = this.preprocess(s);
 	return this.encode(lines);
   }
