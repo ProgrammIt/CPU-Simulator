@@ -73,8 +73,21 @@ export class Bit {
 	 */
 	public static WIDTH: number = DataSize.BYTE;
 
+	/**
+	 * Instantiates a new object with the given binary value.
+	 * @param b A binary value of 0 or 1.
+	 * @constructor
+	 */
 	public constructor(b: 0|1) {
 		this.value = b;
+	}
+
+	/**
+	 * Converts the binary value into a string representation.
+	 * @returns 
+	 */
+	public toString(): string {
+		return this.value.toString();
 	}
 
 	/**
@@ -99,6 +112,10 @@ export class Byte {
 	 */
 	public static WIDTH: number = DataSize.BYTE;
 
+	/**
+	 * Instantiates a new object.
+	 * @constructor
+	 */
 	public constructor() {
 		this._value = new Array<Bit>(Byte.WIDTH).fill(new Bit(0));
 	}
@@ -108,9 +125,10 @@ export class Byte {
 	}
 
 	public set value(newValue: Array<Bit>) {
-		if (newValue.length > DataSize.BYTE) {
+		if (newValue.length > Byte.WIDTH) {
 			throw new Error(`The given value consists out of more than ${Byte.WIDTH} bits.`);
 		}
+		this._value = new Array<Bit>();
 		this._value = newValue;
 	}
 
@@ -123,6 +141,46 @@ export class Byte {
 	public equal(byte: Byte): boolean {
 		return byte._value.toString() === this._value.toString();
 	}
+
+	/**
+	 * Converts the binary value into a string representation.
+	 * @returns 
+	 */
+	public toString(): string {
+		return this._value.join("");
+	}
+
+	/**
+	 * This method creates an instance from the given number.
+	 * Throws an error, if the given number is not an integer
+	 * or can not be expressed with 32 bits.
+	 * @param integer The number to initialize the new instances value with.
+	 * @returns A new instance class.
+	 * @override
+	 */
+	public static fromInteger(integer: number): Byte {
+		const byte = new Byte();
+
+		if (!Number.isInteger(integer)) {
+			throw Error("Given number is not an integer.");
+		}
+
+		var binaryNumber: string = integer.toString(2);
+
+		if (binaryNumber.length > Byte.WIDTH) {
+			throw new Error(`The given number cannot be expressed with ${Byte.WIDTH} bits.`);
+		}
+
+		if (binaryNumber.length < Byte.WIDTH) {
+			binaryNumber = binaryNumber.padStart(Byte.WIDTH, "0");
+		}
+
+		binaryNumber.split("").forEach((bit, index) => {
+			byte._value[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+		});
+
+		return byte;
+	}
 }
 
 export class Word {
@@ -134,8 +192,12 @@ export class Word {
 	/**
 	 * The number of a bits the value consists of.
 	 */
-	public static WIDTH: number;
+	public static WIDTH: number = DataSize.WORD;
 
+	/**
+	 * Instantiates a new object.
+	 * @constructor
+	 */
 	public constructor() {
 		this._value = new Array<Bit>(Word.WIDTH).fill(new Bit(0));
 	}
@@ -160,6 +222,46 @@ export class Word {
 	public equal(word: Word): boolean {
 		return word._value.toString() === this._value.toString();
 	}
+
+	/**
+	 * Converts the binary value into a string representation.
+	 * @returns 
+	 */
+	public toString(): string {
+		return this._value.join("");
+	}
+
+	/**
+	 * This method creates an instance from the given number.
+	 * Throws an error, if the given number is not an integer
+	 * or can not be expressed with 32 bits.
+	 * @param integer The number to initialize the new instances value with.
+	 * @returns A new instance class.
+	 * @override
+	 */
+	public static fromInteger(integer: number): Word {
+		const word = new Word();
+
+		if (!Number.isInteger(integer)) {
+			throw Error("Given number is not an integer.");
+		}
+
+		var binaryNumber: string = integer.toString(2);
+
+		if (binaryNumber.length > Word.WIDTH) {
+			throw new Error(`The given number cannot be expressed with ${Word.WIDTH} bits.`);
+		}
+
+		if (binaryNumber.length < Word.WIDTH) {
+			binaryNumber = binaryNumber.padStart(Word.WIDTH, "0");
+		}
+
+		binaryNumber.split("").forEach((bit, index) => {
+			word._value[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+		});
+
+		return word;
+	}
 }
 
 export class Doubleword {
@@ -173,6 +275,10 @@ export class Doubleword {
 	 */
 	public static WIDTH: number = DataSize.DOUBLEWORD;
 
+	/**
+	 * Instantiates a new object.
+	 * @constructor
+	 */
 	public constructor() {
 		this._value = new Array<Bit>(Doubleword.WIDTH).fill(new Bit(0));		
 	}
@@ -197,6 +303,45 @@ export class Doubleword {
 	public equal(doubleword: Doubleword): boolean {
 		return doubleword._value.toString() === this._value.toString();
 	}
+
+	/**
+	 * Converts the binary value into a string representation.
+	 * @returns 
+	 */
+	public toString(): string {
+		return this._value.join("");
+	}
+
+	/**
+	 * This method creates an instance from the given number.
+	 * Throws an error, if the given number is not an integer
+	 * or can not be expressed with 32 bits.
+	 * @param integer The number to initialize the new instances value with.
+	 * @returns A new instance.
+	 */
+	public static fromInteger(integer: number): Doubleword {
+		const doubleword = new Doubleword();
+
+		if (!Number.isInteger(integer)) {
+			throw Error("Given number is not an integer.");
+		}
+
+		var binaryNumber: string = integer.toString(2);
+
+		if (binaryNumber.length > Doubleword.WIDTH) {
+			throw new Error(`The given number cannot be expressed with ${Doubleword.WIDTH} bits.`);
+		}
+
+		if (binaryNumber.length < Doubleword.WIDTH) {
+			binaryNumber = binaryNumber.padStart(Doubleword.WIDTH, "0");
+		}
+
+		binaryNumber.split("").forEach((bit, index) => {
+			doubleword._value[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+		});
+
+		return doubleword;
+	}
 }
 
 /**
@@ -219,23 +364,27 @@ export class Address extends Doubleword {
 	 * @returns A new instance class.
 	 */
 	public static fromInteger(integer: number): Address {
-		const doubleword = new Address();
+		const address = new Address();
 
 		if (!Number.isInteger(integer)) {
 			throw Error("Given number is not an integer.");
 		}
 
-		const binaryNumber: string = integer.toString(2);
+		var binaryNumber: string = integer.toString(2);
 
-		if (binaryNumber.length > DataSize.DOUBLEWORD) {
+		if (binaryNumber.length > Address.WIDTH) {
 			throw new Error(`The given number cannot be expressed with ${Address.WIDTH} bits.`);
 		}
 
+		if (binaryNumber.length < Address.WIDTH) {
+			binaryNumber = binaryNumber.padStart(Address.WIDTH, "0");
+		}
+
 		binaryNumber.split("").forEach((bit, index) => {
-			doubleword._value[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+			address._value[index] = (bit === "0") ? new Bit(0) : new Bit(1);
 		});
 
-		return doubleword;
+		return address;
 	}
 
 	/**
