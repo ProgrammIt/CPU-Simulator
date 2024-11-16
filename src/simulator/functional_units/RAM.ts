@@ -69,17 +69,38 @@ export class RAM {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
         const firstByte: Byte = new Byte();
+        // Bit 0 - 7
         firstByte.value = doubleword.value.slice(0, 8);
         const secondByte: Byte = new Byte();
-        secondByte.value = doubleword.value.slice(8, 17);
+        // Bit 8 - 15
+        secondByte.value = doubleword.value.slice(8, 16);
         const thirdByte: Byte = new Byte();
-        thirdByte.value = doubleword.value.slice(17, 25);
+        // Bit 16 - 24
+        thirdByte.value = doubleword.value.slice(16, 24);
         const fourthByte: Byte = new Byte();
-        fourthByte.value = doubleword.value.slice(25);
+        // Bit 24 - 32
+        fourthByte.value = doubleword.value.slice(24);
         this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
         this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 1), secondByte);
         this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 2), thirdByte);
         this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 3), fourthByte);
+        return;
+    }
+
+    /**
+     * This method writes a specified byte of data to the specified address in
+     * in the main memory. Throws an error, if the data exeeds a byte.
+     * @param physicalAddress A binary value representing a physical memory address to write the data to.
+     * @param data Byte-sized data to write to the specified pyhsical memory address.
+     */
+    public writeByteTo(physicalAddress: PhysicalAddress, data: Byte) {
+        this.validatePhysicalAddress(physicalAddress);
+        const physicalAddressHex: string = 
+            `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
+        // Write byte to memory.
+        this._cells.set(physicalAddressHex, data);
+        --this._freeMemory;
+        ++this._usedMemory;
         return;
     }
 
@@ -103,22 +124,6 @@ export class RAM {
     }
 
     /**
-     * This method writes a specified byte of data to the specified address in
-     * in the main memory. Throws an error, if the data exeeds a byte.
-     * @param physicalAddress A binary value representing a physical memory address to write the data to.
-     * @param data Byte-sized data to write to the specified pyhsical memory address.
-     */
-    public writeByteTo(physicalAddress: PhysicalAddress, data: Byte) {
-        this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = parseInt(physicalAddress.value.join(""), 2).toString(16);
-        // Write byte to memory.
-        this._cells.set(physicalAddressHex, data);
-        --this._freeMemory;
-        ++this._usedMemory;
-        return;
-    }
-
-    /**
      * This method tries to read a byte from the specified memory address.
      * Returns a binary zero for address not conatined in the
      * map in order to simulate a full size memory.
@@ -127,12 +132,12 @@ export class RAM {
      */
     public readByteFrom(physicalAddress: PhysicalAddress): Byte {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = parseInt(physicalAddress.value.join(""), 2).toString(16);
+        const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         var result: Byte = new Byte();
         if (this._cells.has(physicalAddressHex)) {
             result = this._cells.get(physicalAddressHex)!;
         } else {
-            result.value = new Array<Bit>(8).fill(new Bit(1));
+            result.value = new Array<Bit>(8).fill(new Bit(0));
         }
         return result;
     }
@@ -145,7 +150,7 @@ export class RAM {
      */
     public clearByte(physicalAddress: PhysicalAddress) {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = parseInt(physicalAddress.value.join(""), 2).toString(16);
+        const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         this._cells.delete(physicalAddressHex);
         ++this._freeMemory;
         --this._usedMemory;
@@ -159,7 +164,8 @@ export class RAM {
      */
     public setByte(physicalAddress: PhysicalAddress) {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = parseInt(physicalAddress.value.join(""), 2).toString(16);
+        const physicalAddressHex: string = 
+            `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         const byte = new Byte();
         byte.value = new Array<Bit>(8).fill(new Bit(1));
         this._cells.set(physicalAddressHex, byte);
