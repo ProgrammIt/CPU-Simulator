@@ -4,7 +4,7 @@ import path from 'path';
 import { Assembler } from "./simulator/Assembler";
 import { readFileSync } from "fs";
 import { MemoryManagementUnit } from "./simulator/execution_units/MemoryManagementUnit";
-import { Doubleword, PhysicalAddress, VirtualAddress } from "./types";
+import { Doubleword, VirtualAddress } from "./types";
 
 const createWindow = () => {
   	const win = new BrowserWindow({
