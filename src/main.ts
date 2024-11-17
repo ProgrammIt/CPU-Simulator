@@ -46,15 +46,9 @@ app.whenReady().then(() => {
 
 	ipcMain.handle("retrieveMainMemoryCells", async () => {
 		var tmp: Map<string, string> = new Map<string, string>();
-		// mainMemory.cells.forEach((value, key) => {
-		// 	console.log(`${key}:${value}`);
-		// });
 		mainMemory.cells.forEach((byte, address) => {
 			tmp.set(address, byte.toString());
 		});
-		// for (const [key, value] of tmp.entries()) {
-		// 	console.log(`${key}:${value}`);
-		// }
 		return tmp;
 	});
 });
