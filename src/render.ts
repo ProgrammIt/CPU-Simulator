@@ -1,14 +1,9 @@
 window.onload = async () => {
-    const ramCells: Map<string,string> = await window.mainMemory.cells();
-    console.log(ramCells);
+    const ramCells: Map<string, string> = await window.mainMemory.cells();
     renderRAMCells(ramCells);
 }
 
-function renderRAMCells(ram: Map<string,string>) {
-    if (ram === undefined || ram === null) {
-        throw Error("RAM object is null");
-    }
-
+function renderRAMCells(ram: Map<string, string>) {
     if (ram.size === 0) {
         throw Error("RAM object has no memory cells.")
     }
@@ -18,10 +13,14 @@ function renderRAMCells(ram: Map<string,string>) {
 
     if (ramCellsHTMLElement !== null) {
 
-        for (let [key, value] of Array.from(ram).reverse()) {
+        // for (const [key, value] of Array.from(ram).reverse()) {
+		//     console.log(`${key}:${value}`);
+	    // }
+
+        for (const [key, value] of Array.from(ram).reverse()) {
             const labelRamCellHTMLElement: HTMLElement = document.createElement("label");
             const divRamCellHTMLElement: HTMLElement = document.createElement("div");
-            const diffCurrentAndLatestAddressDec = parseInt(lastHexAddress, 16) - parseInt(key, 2);
+            const diffCurrentAndLatestAddressDec = parseInt(lastHexAddress, 16) - parseInt(key, 16);
 
             if (lastHexAddress.length !== 0 && diffCurrentAndLatestAddressDec > 1) {
                 // Adding placeholders in the view as an indicator for empty and thus skipped memory cells
@@ -37,17 +36,17 @@ function renderRAMCells(ram: Map<string,string>) {
                 ramCellsHTMLElement.appendChild(divSpacerHTMLElement);
             }
             
-            labelRamCellHTMLElement.innerHTML = `0x${parseInt(key, 2).toString(16)}`;
-            labelRamCellHTMLElement.setAttribute("for", `ram-cell-0x${parseInt(key, 2).toString(16)}`);
+            labelRamCellHTMLElement.innerHTML = key;
+            labelRamCellHTMLElement.setAttribute("for", `ram-cell-${key}`);
             labelRamCellHTMLElement.setAttribute("class", "ram-cell-label");
                 
             divRamCellHTMLElement.innerHTML = value;
-            divRamCellHTMLElement.setAttribute("id", `ram-cell-0x${parseInt(key, 2).toString(16)}`);
+            divRamCellHTMLElement.setAttribute("id", `ram-cell-${key}`);
             divRamCellHTMLElement.setAttribute("class", "ram-cell");
             
             ramCellsHTMLElement.appendChild(labelRamCellHTMLElement);
             ramCellsHTMLElement.appendChild(divRamCellHTMLElement);
-            lastHexAddress = `0x${parseInt(key, 2).toString(16)}`;
+            lastHexAddress = `${key}`;
         }
     }
 }

@@ -1,7 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-export const mainMemory = {
-  cells: () => ipcRenderer.invoke("retrieveMainMemoryCells"),
-};
+declare global {
+	interface Window {
+    mainMemory: any
+  }
+}
 
-contextBridge.exposeInMainWorld("mainMemory", mainMemory);
+contextBridge.exposeInMainWorld("mainMemory", {
+  cells: () => ipcRenderer.invoke("retrieveMainMemoryCells"),
+});

@@ -4,7 +4,7 @@ import path from 'path';
 import { Assembler } from "./simulator/Assembler";
 import { readFileSync } from "fs";
 import { MemoryManagementUnit } from "./simulator/execution_units/MemoryManagementUnit";
-import { Bit, Byte, Doubleword, PhysicalAddress, VirtualAddress } from "./types";
+import { Doubleword, PhysicalAddress, VirtualAddress } from "./types";
 
 const createWindow = () => {
   	const win = new BrowserWindow({
@@ -25,6 +25,7 @@ app.whenReady().then(() => {
 	assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
 	const assemblyProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
 	const compiledProgram: Doubleword[] = assembler.compile(assemblyProgram);
+	
 	const startAddressProgrammDec: number = 0;
 	var currentAddressDec: number = startAddressProgrammDec;
 	for (const doubleword of compiledProgram) {
@@ -44,6 +45,16 @@ app.whenReady().then(() => {
   	});
 
 	ipcMain.handle("retrieveMainMemoryCells", async () => {
-		return mainMemory.cells;
+		var tmp: Map<string, string> = new Map<string, string>();
+		// mainMemory.cells.forEach((value, key) => {
+		// 	console.log(`${key}:${value}`);
+		// });
+		mainMemory.cells.forEach((byte, address) => {
+			tmp.set(address, byte.toString());
+		});
+		// for (const [key, value] of tmp.entries()) {
+		// 	console.log(`${key}:${value}`);
+		// }
+		return tmp;
 	});
 });

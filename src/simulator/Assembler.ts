@@ -23,10 +23,10 @@ export class Assembler {
 	// Split file contents into lines of code, remove comments and mark empty lines for deletion
  	var linesMarkedForDeletion: number[] = [];
 	fileContents.split(Assembler._regexNewLine).forEach((line, lineNo) => {
-    var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
-		  if (lineWithoutComment.length === 0) {
-			    linesMarkedForDeletion.push(lineNo);
-		  }
+    	var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
+		if (lineWithoutComment.length === 0) {
+			linesMarkedForDeletion.push(lineNo);
+		}
 	  	lines.set(lineNo, lineWithoutComment);
 	});
 
@@ -44,7 +44,7 @@ export class Assembler {
 	 */
   	private encode(lines: Map<number, string>): Doubleword[] {
 	  	var encodedInstructions: Doubleword[] = [];
-	  	var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);
+	  	var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
 
 		// Remove jump labels as they will not be encoded.
 		var lineNumbersMarkedForDeletion: number[] = [];
@@ -81,7 +81,7 @@ export class Assembler {
 						 */
 						
 						// Pass the resulting array to the instruction encoding.
-						let encodedResults: Doubleword[] = this.encodeInstruction(result, lineNo, jumpLabels);
+						let encodedResults: Doubleword[] = this.encodeInstruction(result, lineNo, jumpLabels);					
 						let encodedInstruction: Doubleword = encodedResults[0];
 						let encodedOperand1: Doubleword = encodedResults[1];
 						let encodedOperand2: Doubleword = encodedResults[2];
@@ -117,7 +117,10 @@ export class Assembler {
 				const memoryCellsPerInstruction: number = 4;
 				let virtualAddressOfInstructionFollowingLabel: number = (instructionCounter * memoryCellsPerInstruction) + 1;
 				let jumpLabel = line.replace(/\.|:/gim, "");
-				jumpLabels.set(jumpLabel, (virtualAddressOfInstructionFollowingLabel).toString(2).padStart(Assembler.WORD_WIDTH, "0"));
+				jumpLabels.set(
+					jumpLabel, 
+					(virtualAddressOfInstructionFollowingLabel).toString(2).padStart(Assembler.WORD_WIDTH, "0")
+				);
 			}
 			++instructionCounter;
 		}
@@ -142,7 +145,7 @@ export class Assembler {
 		var instructionType: Array<Bit> = new Array<Bit>(3);
 		var opcode: Array<Bit> = new Array<Bit>(7);
 		var instructionMnemonic: string = regexMatchArrayInstruction[1];
-		const delimeter: Array<Bit> = new Array<Bit>(2).fill(new Bit(1));
+		const delimeter: Array<Bit> = new Array<Bit>(new Bit(1), new Bit(1));
 
 		for (let instruction of Assembler._langDefinition!.instructions) {
 			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
@@ -180,11 +183,11 @@ export class Assembler {
 			encodedOperandValue1 = this.encodeOperandValue("", line, jumpLabels);
 		}
 
-		encodedInstruction.value.concat(
-			instructionType, delimeter, opcode, delimeter, 
-			addressingModeOperand1, typeOperand1, 
-			addressingModeOperand2, typeOperand2
-		);
+		encodedInstruction.value = [
+			...instructionType, ... delimeter, ... opcode, ... delimeter, 
+			... addressingModeOperand1, ... typeOperand1, 
+			... addressingModeOperand2, ... typeOperand2
+		];
 		
 		return [encodedInstruction, encodedOperandValue1, encodedOperandValue2];
 	}
@@ -262,10 +265,10 @@ export class Assembler {
 			 *   1111 10010010 00101011 10111010 01011011 (36 bit) -> 10010010 00101011 10111010 01011011 (32 bit)
 			 */
 			binaryValueString = binaryValueString.slice(binaryValueString.length - 32);
-		} else {
-			// Pad binary value to fit WORD_WIDTH
-			binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
 		}
+		
+		// Pad binary value to fit WORD_WIDTH
+		binaryValueString = binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
 
 		binaryValueString.split("").forEach((bit, index) => {
 			// Create deepcopy of current value, because value is readonly.
@@ -314,7 +317,7 @@ export class Assembler {
 		register = register.replace("%", "").toLowerCase();
 		for (const reg of Assembler._langDefinition!.addressable_registers) {
 			if (register === reg.name.toLowerCase()) {
-				return reg.code.padStart(Assembler.WORD_WIDTH, "0");
+				return reg.code.padStart(DataSize.DOUBLEWORD, "0");
 			}
 		}
 		throw Error(`In line ${line}: Unrecognized register.`);
