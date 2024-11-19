@@ -5,9 +5,8 @@ export class MemoryManagementUnit {
     private _tlb: Map<VirtualAddress, PhysicalAddress>; // TODO: limit size of tlb to 64
     private _memoryVirtualizationEnabled: boolean;
     private _mainMemory: RAM;
-    private static _instance: MemoryManagementUnit | null = null;
 
-    private constructor(mainMemory: RAM) {
+    public constructor(mainMemory: RAM) {
         this._tlb = new Map<VirtualAddress, PhysicalAddress>();
         this._memoryVirtualizationEnabled = false;
         this._mainMemory = mainMemory;
@@ -27,18 +26,6 @@ export class MemoryManagementUnit {
     // TODO: When memory virtualization is implemented, make public.
     private disableMemoryVirtualization() {
         this._memoryVirtualizationEnabled = false;
-    }
-
-    /**
-     * This method returns the single instance of the MemoryManagementUnit class.
-     * If there is no such instance, one and one is created. Otherwise, the exisiting one is returned.
-     * @returns An instance of the MemoryManagementUnit class.
-     */
-    public static instance(mainMemory: RAM): MemoryManagementUnit {
-        if (MemoryManagementUnit._instance === null) {
-            MemoryManagementUnit._instance = new MemoryManagementUnit(mainMemory);
-        }
-        return MemoryManagementUnit._instance;
     }
 
     /**
