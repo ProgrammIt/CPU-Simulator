@@ -437,3 +437,76 @@ export class PhysicalAddress extends Address {
 		super();
 	}
 }
+
+/**
+ * An enum representing the available and binary encoded registers.
+ */
+export const enum Registers {
+	EAX = "00000000000000000000000000000000",
+	EBX = "00000000000000000000000000000001",
+	EIP = "00000000000000000000000000000010",
+	EIR = "00000000000000000000000000000011",
+	NPTP = "00000000000000000000000000000100",
+	VMPTR = "00000000000000000000000000000101",
+	ESP = "00000000000000000000000000000110",
+	ITP = "00000000000000000000000000000111",
+	GPTP = "00000000000000000000000000001000"
+}
+
+/**
+ * An enum representing the available and binary encoded operands addressing modes.
+ */
+export const enum AddressingModes {
+	DIRECT = "10",
+	INDIRECT = "11"
+}
+
+/**
+ * An enum representing the available and binary encoded operands types.
+ */
+export const enum OperandTypes {
+	NO = "0000000",
+	CONSTANT = "1010000",
+	REGISTER = "1100000",
+	MEMORY_ADDRESS = "1110000"
+}
+
+/**
+ * A class representing a decoded (non-binary) operand of an instruction.
+ */
+export class InstructionOperand {
+	/**
+	 * The operands addressing mode. Can be either direct or indirect. Indirect mode is only valid for registers.
+	 * @readonly
+	 */
+	public readonly addressingMode: AddressingModes;
+
+	/**
+	 * The operands type. Can be either a constant/immediate, a memory address or a register.
+	 * @readonly
+	 */
+	public readonly type: OperandTypes;
+
+	/**
+	 * The operands value in decimal, hexadecimal and binary representation.
+	 * @readonly
+	 */
+	public readonly value: {
+		binary: string,
+		hex: string,
+		dec: number
+	};
+
+	/**
+	 * Creates a new instance from the given arguments.
+	 * @param addressingMode The operands addressing mode.
+	 * @param type The operands type.
+	 * @param value The operands value in decimal, hexadecimal and binary representation.
+	 * @constructor
+	 */
+    public constructor(addressingMode: AddressingModes, type: OperandTypes, value: {binary: string, hex: string, dec: number}) {
+        this.addressingMode = addressingMode;
+        this.type = type;
+        this.value = value;
+    }
+}
