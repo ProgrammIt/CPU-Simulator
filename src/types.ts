@@ -454,7 +454,7 @@ export const enum Registers {
 }
 
 /**
- * An enum representing the available and binary encoded operands addressing modes.
+ * An enum representing the available and binary encoded addressing modes of operands.
  */
 export const enum AddressingModes {
 	DIRECT = "10",
@@ -462,13 +462,22 @@ export const enum AddressingModes {
 }
 
 /**
- * An enum representing the available and binary encoded operands types.
+ * An enum representing the available and binary encoded operand types.
  */
 export const enum OperandTypes {
 	NO = "0000000",
 	CONSTANT = "1010000",
 	REGISTER = "1100000",
 	MEMORY_ADDRESS = "1110000"
+}
+
+/**
+ * An enum representing the available and binary encoded instruction types.
+ */
+export const enum InstructionTypes {
+	R = "100",
+	I = "110",
+	J = "111"
 }
 
 /**
