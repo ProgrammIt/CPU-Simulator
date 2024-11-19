@@ -11,6 +11,7 @@ body {
     color: white;
     margin: 0rem;
     padding: 0rem;
+    width: 100vw;
 }
 
 main {
@@ -21,8 +22,6 @@ main {
 
 @media (max-width: 800px) {
     main {
-        padding: 0rem 1rem;
-        display: flex;
         flex-direction: column;
     }
 }
