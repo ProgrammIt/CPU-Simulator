@@ -1,4 +1,5 @@
-import { Byte, Doubleword } from "../../types";
+import { Byte } from "../../types/Byte";
+import { Doubleword } from "../../types/Doubleword";
 
 export class Register {
     /**
