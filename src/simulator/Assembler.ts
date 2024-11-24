@@ -1,4 +1,6 @@
-import { Bit, DataSize, Doubleword, LanguageDefinition } from "../types";
+import { DataSize, LanguageDefinition } from "../types";
+import { Bit } from "../types/Bit";
+import { Doubleword } from "../types/Doubleword";
 
 export class Assembler {
   private static WORD_WIDTH: number = 32;
@@ -145,13 +147,13 @@ export class Assembler {
 		var instructionType: Array<Bit> = new Array<Bit>(3);
 		var opcode: Array<Bit> = new Array<Bit>(7);
 		var instructionMnemonic: string = regexMatchArrayInstruction[1];
-		const delimeter: Array<Bit> = new Array<Bit>(new Bit(1), new Bit(1));
+		const delimeter: Array<Bit> = new Array<Bit>(1, 1);
 
 		for (let instruction of Assembler._langDefinition!.instructions) {
 			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
 				instructionType = this.encodeInstructionType(instruction.type, line);
 				instruction.opcode.split("").forEach((bit, index) => {
-					opcode[index] = (bit === "0") ? new Bit(0) : new Bit(1);
+					opcode[index] = (bit === "0") ? 0 : 1;
 				});
 				break;
 			}
@@ -200,7 +202,7 @@ export class Assembler {
 	 */
 	private encodeOperandAddressingMode(operand: string, line: number): Array<Bit> {		
 		if (operand.startsWith("*%")) {
-			return new Array<Bit>(2).fill(new Bit(1));
+			return new Array<Bit>(2).fill(1);
 		}
 
 		if (operand.startsWith("*@") || operand.startsWith("*$")) {
@@ -209,7 +211,7 @@ export class Assembler {
 			);
 		}
 
-		return new Array<Bit>(new Bit(1), new Bit(0));
+		return new Array<Bit>(1, 0);
 	}
 
 	/**
@@ -271,12 +273,7 @@ export class Assembler {
 		binaryValueString = binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
 
 		binaryValueString.split("").forEach((bit, index) => {
-			// Create deepcopy of current value, because value is readonly.
-			const tmp: Array<Bit> = operand32BitEncoded.value.slice();
-			// Manipulate copy.
-			tmp[index] = (bit === "0") ? new Bit(0) : new Bit(1);
-			// Set copy as new value.
-			operand32BitEncoded.value = tmp;
+			operand32BitEncoded.value[index] = (bit === "0") ? 0 : 1;
 		});
 
 		return operand32BitEncoded;
@@ -292,13 +289,13 @@ export class Assembler {
 		var encodedType: Array<Bit> = new Array<Bit>(7);
 		
 		if (operand === null || operand === undefined || operand.length === 0) {
-			encodedType = new Array<Bit>(7).fill(new Bit(0));
+			encodedType = new Array<Bit>(7).fill(0);
 		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
-			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
+			encodedType = new Array<Bit>(1, 1, 0, 0, 0, 0, 0);
 		} else if (operand.startsWith("$")) {
-			encodedType = new Array<Bit>(new Bit(1), new Bit(0), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
+			encodedType = new Array<Bit>(1, 0, 1, 0, 0, 0, 0);
 		} else if (operand.startsWith("@") || operand.match(Assembler._regexLabel)) {
-			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0));
+			encodedType = new Array<Bit>(1, 1, 1, 0, 0, 0, 0);
 		} else {
 			throw Error(`In line ${line}: Unrecognized type of operand.`);
 		}
@@ -330,16 +327,16 @@ export class Assembler {
 	 * @returns A string of zeros and ones representing the instructions type.
 	 */
 	private encodeInstructionType(type: string, line: number): Array<Bit> {
-		var encodedType: Array<Bit> = new Array<Bit>(3).fill(new Bit(0));
+		var encodedType: Array<Bit> = new Array<Bit>(3).fill(0);
 		switch (type.toUpperCase()) {
 		case "R":
-			encodedType = new Array<Bit>(new Bit(1), new Bit(0), new Bit(0));
+			encodedType = new Array<Bit>(1, 0, 0);
 			break;
 		case "I":
-			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(0));
+			encodedType = new Array<Bit>(1, 1, 0);
 			break;
 		case "J":
-			encodedType = new Array<Bit>(new Bit(1), new Bit(1), new Bit(1));
+			encodedType = new Array<Bit>(1, 1, 1);
 			break;
 		default:
 			throw Error(`In line ${line}: Unrecognized instruction type.`);
