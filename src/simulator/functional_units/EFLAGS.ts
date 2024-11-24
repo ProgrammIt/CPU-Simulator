@@ -1,4 +1,4 @@
-import { Bit, Byte } from "../../types";
+import { Bit } from "../../types/Bit";
 import { ByteRegister } from "./Register";
 
 export class EFLAGS extends ByteRegister {
@@ -10,12 +10,12 @@ export class EFLAGS extends ByteRegister {
     private static POS_SIGNED_BIT: number = 4;
     private static POS_ZERO_BIT: number = 5;
     private static POS_CARRY_BIT: number = 6;
-    private static POS_PARITY_BIT: number = 7;   
+    private static POS_PARITY_BIT: number = 7;
 
     public constructor() {
         super("EFLAGS");
         this.content.value = new Array<Bit>(
-            new Bit(1), new Bit(1), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0), new Bit(0)
+            1, 1, 0, 0, 0, 0, 0, 0
         );
     }
 
@@ -41,7 +41,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setParity() {
-       this.setBitTo(EFLAGS.POS_PARITY_BIT, new Bit(1));
+       this.setBitTo(EFLAGS.POS_PARITY_BIT, 1);
        return;
     }
 
@@ -50,7 +50,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearParity() {
-        this.setBitTo(EFLAGS.POS_PARITY_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_PARITY_BIT, 0);
         return;
     }
 
@@ -59,7 +59,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setCarry() {
-        this.setBitTo(EFLAGS.POS_CARRY_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_CARRY_BIT, 1);
         return;
     }
 
@@ -68,7 +68,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearCarry() {
-        this.setBitTo(EFLAGS.POS_CARRY_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_CARRY_BIT, 0);
         return;
     }
 
@@ -77,7 +77,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setZero() {
-        this.setBitTo(EFLAGS.POS_ZERO_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_ZERO_BIT, 1);
         return;
     }
 
@@ -86,7 +86,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearZero() {
-        this.setBitTo(EFLAGS.POS_ZERO_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_ZERO_BIT, 0);
         return;
     }
 
@@ -95,7 +95,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setSigned() {
-        this.setBitTo(EFLAGS.POS_SIGNED_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_SIGNED_BIT, 1);
         return;
     }
 
@@ -104,7 +104,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearSigned() {
-        this.setBitTo(EFLAGS.POS_SIGNED_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_SIGNED_BIT, 0);
         return;
     }
 
@@ -113,7 +113,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setOverflow() {
-        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, 1);
         return;
     }
 
@@ -122,7 +122,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearOverflow() {
-        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_OVERFLOW_BIT, 0);
         return;
     }
 
@@ -131,7 +131,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public setInterrupt() {
-        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, 1);
         return;
     }
 
@@ -140,7 +140,7 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public clearInterrupt() {
-        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_INTERRUPT_BIT, 0);
         return;
     }
 
@@ -149,8 +149,8 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public enterUserMode() {
-        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, new Bit(1));
-        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, new Bit(1));
+        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, 1);
+        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, 1);
         return;
     }
 
@@ -159,8 +159,8 @@ export class EFLAGS extends ByteRegister {
      * @returns 
      */
     public enterKernelMode() {
-        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, new Bit(0));
-        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, new Bit(0));
+        this.setBitTo(EFLAGS.POS_CPL_LSB_BIT, 0);
+        this.setBitTo(EFLAGS.POS_CPL_MSB_BIT, 0);
         return;
     }
 
@@ -212,8 +212,8 @@ export class EFLAGS extends ByteRegister {
      */
     public isInUserMode(): boolean {
         return (
-            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)!.equal(new Bit(1)) && 
-            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)!.equal(new Bit(1))
+            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 1 && 
+            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 1
         );
     }
 
@@ -223,8 +223,8 @@ export class EFLAGS extends ByteRegister {
      */
     public isInKernelMode(): boolean {
         return (
-            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)!.equal(new Bit(0)) && 
-            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)!.equal(new Bit(0))
+            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 0 && 
+            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 0
         );
     }
 }
