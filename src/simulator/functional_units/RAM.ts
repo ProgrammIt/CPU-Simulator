@@ -1,4 +1,8 @@
-import { Bit, Byte, DataSize, Doubleword, PhysicalAddress } from "../../types";
+import { DataSize } from "../../types";
+import { Bit } from "../../types/Bit";
+import { Byte } from "../../types/Byte";
+import { Doubleword } from "../../types/Doubleword";
+import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
     private _cells: Map<string, Byte>;
@@ -137,7 +141,7 @@ export class RAM {
         if (this._cells.has(physicalAddressHex)) {
             result = this._cells.get(physicalAddressHex)!;
         } else {
-            result.value = new Array<Bit>(8).fill(new Bit(0));
+            result.value = new Array<Bit>(8).fill(0);
         }
         return result;
     }
@@ -167,7 +171,7 @@ export class RAM {
         const physicalAddressHex: string = 
             `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         const byte = new Byte();
-        byte.value = new Array<Bit>(8).fill(new Bit(1));
+        byte.value = new Array<Bit>(8).fill(1);
         this._cells.set(physicalAddressHex, byte);
         --this._freeMemory;
         ++this._usedMemory;
