@@ -1,4 +1,7 @@
-import { Byte, Doubleword, PhysicalAddress, VirtualAddress } from "../../types";
+import { Byte } from "../../types/Byte";
+import { Doubleword } from "../../types/Doubleword";
+import { PhysicalAddress } from "../../types/PhysicalAddress";
+import { VirtualAddress } from "../../types/VirtualAddress";
 import { RAM } from "../functional_units/RAM";
 
 export class MemoryManagementUnit {
