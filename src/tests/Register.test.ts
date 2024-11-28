@@ -1,8 +1,8 @@
-import { DoublewordRegister } from "../simulator/functional_units/Register";
+import { GeneralPurposeRegister } from "../simulator/functional_units/GeneralPurposeRegister";
 import { Bit } from "../types/Bit";
 
 describe("Read and write from or to main memory", () => {
-    const eax: DoublewordRegister = new DoublewordRegister("EAX");
+    const eax: GeneralPurposeRegister = new GeneralPurposeRegister("EAX");
     test("Write doubleword to register", () => {        
         eax.content.value = new Array<Bit>(32).fill(1);  
         expect(eax.content.value.join("")).toBe("11111111111111111111111111111111");
