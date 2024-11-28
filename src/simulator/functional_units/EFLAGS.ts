@@ -1,7 +1,12 @@
 import { Bit } from "../../types/Bit";
-import { ByteRegister } from "./Register";
+import { Byte } from "../../types/Byte";
+import { Register } from "./Register";
 
-export class EFLAGS extends ByteRegister {
+/**
+ * This class represents the status register of a CPU core.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+export class EFLAGS extends Register<Byte> {
     // Positions of the flag bits in the status register from MSB (starting at index 0) to LSB.
     private static POS_CPL_MSB_BIT: number = 0;
     private static POS_CPL_LSB_BIT: number = 1;
@@ -13,10 +18,7 @@ export class EFLAGS extends ByteRegister {
     private static POS_PARITY_BIT: number = 7;
 
     public constructor() {
-        super("EFLAGS");
-        this.content.value = new Array<Bit>(
-            1, 1, 0, 0, 0, 0, 0, 0
-        );
+        super("EFLAGS", new Byte([1, 1, 0, 0, 0, 0, 0, 0]));
     }
 
     /**
@@ -188,7 +190,7 @@ export class EFLAGS extends ByteRegister {
     /**
      * This method reads the current status of the signed flag bit.
      */
-    public get signed(): Bit {
+    public get sign(): Bit {
         return this.content.value.at(EFLAGS.POS_SIGNED_BIT)!;
     }
 
