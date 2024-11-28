@@ -9,13 +9,25 @@ export class Address extends Doubleword {
 	/**
 	 * Constructs a new instance.
 	 */
-	public constructor() {
-		super(false);
+	public constructor(
+		value: Array<Bit> = new Array<Bit>(
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		)
+	) {
+		super(value);
 	}
 
 	/**
-	 * Sets the address value to the given one.
-	 * @param value The new value for the address.
+	 * Accessor for setting the binary value.
+	 * @param newValue The new value.
+	 * @override
 	 */
 	public set value(newValue: Array<Bit>) {
 		if (newValue.length != DataSize.DOUBLEWORD) {
@@ -25,7 +37,8 @@ export class Address extends Doubleword {
 	}
 
 	/**
-	 * Getter for the address value.
+	 * Accessor for reading the binary value.
+	 * @override
 	 */
 	public get value(): Array<Bit> {
 		return this._value;

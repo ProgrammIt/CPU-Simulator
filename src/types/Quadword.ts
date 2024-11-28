@@ -1,30 +1,18 @@
 import { DataSize } from "../types";
+import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 
-export class Quadword {
+export class Quadword extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSize.QUADWORD - 1) - 1;
 	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSize.QUADWORD - 1);
 	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSize.QUADWORD);
 
 	/**
-	 * The binary data this object holds.
-	 */
-	protected _value: Array<Bit>;
-
-	/**
-	 * Indicates, whether this binary value should be treated as a signed value.
-	 * If this gets set to true, the MSB should be treated as sign bit.
-	 * This reduces the range of displayable values.
-	 */
-	public signed: boolean;
-
-	/**
 	 * Instantiates a new object.
-	 * @param signed [signed=true] Indicates whether this binary value should be treated as a signed value.
 	 * @constructor
 	 */
-	public constructor(signed: boolean = true) {
-		this._value = new Array<Bit>(
+	public constructor(
+		value: Array<Bit> = new Array<Bit>(
 			0, 0, 0, 0,
 			0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -41,14 +29,24 @@ export class Quadword {
 			0, 0, 0, 0,
 			0, 0, 0, 0,
 			0, 0, 0, 0
-		);
-		this.signed = signed;
+		)	
+	) {
+		super(value);
 	}
 
+	/**
+	 * Accessor for reading the binary value.
+	 * @override
+	 */
 	public get value(): Array<Bit> {
 		return this._value;
 	}
 
+	/**
+	 * Accessor for setting the binary value.
+	 * @param newValue The new value.
+	 * @override
+	 */
 	public set value(newValue: Array<Bit>) {
 		if (newValue.length != DataSize.QUADWORD) {
 			throw new Error(`A new value must have exactly ${DataSize.QUADWORD} bits.`);
@@ -82,41 +80,21 @@ export class Quadword {
 	 * Depending on the second parameter, the range of allowed values is slightly different. This method throws an error, if
 	 * the value to be converted is too large or too small.
 	 * @param integer The number to initialize the new instances value with.
-	 * @param signed [signed=true] Indicates, whether this binary value should be treated as a signed value.
 	 * @returns A new instance.
 	 */
-	public static fromInteger(integer: number, signed: boolean = true): Quadword {
+	public static fromInteger(integer: number): Quadword {
 		if (!Number.isInteger(integer)) {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (signed && (integer < Quadword.MAX_NEGATIVE_NUMBER_SIGNED || integer > Quadword.MAX_POSITIVE_NUMBER_SIGNED)) {
+		if (integer < Quadword.MAX_NEGATIVE_NUMBER_SIGNED || integer > Quadword.MAX_POSITIVE_NUMBER_SIGNED) {
 			throw new Error(`The given number cannot be expressed using ${DataSize.QUADWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
-		if (!signed && integer < 0) {
-			/**
-			 * A user can enter a negative number and still specify that this value should be treated as an unsigned binary value after conversion.
-			 * This is fine, but the sign must be removed.
-			 */
-			integer *= -1;
-		}
-
-		if (!signed && integer > Quadword.MAX_NUMBER_UNSIGNED) {
-			throw new Error(`The given number cannot be expressed with ${DataSize.QUADWORD - 1} bits.`);
-		}
-
-		var quadword: Quadword;
-		var binaryNumber: string;
+		var quadword: Quadword = new Quadword();
 		
-		if (signed && integer < 0) {
-			quadword = new Quadword();
-			// A bit shift converts the given number to a signed 32-bit value.
-			binaryNumber = (integer >>> 0).toString(2).padStart(DataSize.QUADWORD, "1");
-		} else {
-			quadword = (signed) ? new Quadword() : new Quadword(false);
-			binaryNumber = integer.toString(2).padStart(DataSize.QUADWORD, "0");
-		}
+		// A bit shift converts the given number to a signed 32-bit value, so we need to extend the result to 64 bit.
+		var binaryNumber = (integer < 0) ? (integer >>> 0).toString(2).padStart(DataSize.QUADWORD, "1") : integer.toString(2).padStart(DataSize.QUADWORD, "0");
 
 		binaryNumber.split("").forEach((bit, index) => {
 			quadword._value[index] = (bit === "0") ? 0 : 1;
