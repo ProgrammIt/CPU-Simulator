@@ -1,7 +1,10 @@
+import { DivisionByZeroError } from "../../error_types";
 import { DataSize } from "../../types";
+import { BinaryValue } from "../../types/BinaryValue";
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { Doubleword } from "../../types/Doubleword";
+import { Quadword } from "../../types/Quadword";
 import { Word } from "../../types/Word";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
@@ -11,13 +14,9 @@ import { EFLAGS } from "../functional_units/EFLAGS";
 export class ArithmeticLogicUnit {
     /**
      * A refference to the CPU cores EFLAGS register, this ALU is associated with.
+     * @readonly
      */
-    private _eflags: EFLAGS;
-    
-    /**
-     * The last operations result.
-     */
-    public _result: Doubleword;
+    private readonly _eflags: EFLAGS;
 
     /**
      * Constructs a new instance from the given arguments.
@@ -26,54 +25,58 @@ export class ArithmeticLogicUnit {
      */
     public constructor(eflags: EFLAGS) {
         this._eflags = eflags;
-        this._result = new Doubleword();
     }
 
     /**
-     * A getter for retrieving the result of the last operation.
-     * @returns The last operations result. 
-     */
-    public get result() {
-        return this._result;
-    }
-
-    /**
-     * This method checks whether the last operation resulted in a binary zero
-     * and sets the zero flag accordingly.
+     * This method checks whether the given binary value is a binary zero
+     * and sets or clears the **zero** flag accordingly.
+     * @param operand A binary value.
      * @returns
      */
-    private checkForZero() {
-        if (this._result.value.every(bit => (bit === 0))) {
+    private checkForZero(operand: Doubleword) {
+        if (operand.value.every(bit => (bit === 0))) {
             this._eflags.setZero();
+        } else {
+            this._eflags.clearZero();
         }
+        return;
     }
 
     /**
-     * This method checks whether the last operation resulted in a binary zero
-     * and sets the zero flag accordingly.
+     * This method checks whether the given binary value has an even number of set bits
+     * in the least significant byte and sets or clears the **parity** flag accordingly.
+     * @param operand A binary value.
      * @returns
      */
-    private checkForParity() {
+    private checkForParity(operand: Doubleword) {
         var noSetBits: number = 0;
-        this._result.value.slice(-DataSize.DOUBLEWORD).forEach(bit => {
+        operand.value.slice(-DataSize.BYTE).forEach(bit => {
             if (bit === 1) {
                 ++noSetBits
             }
         });
         if (noSetBits % 2 === 0) {
             this._eflags.setParity();
+        } else {
+            this._eflags.clearParity();
         }
+        return;
     }
 
     /**
-     * This method checks whether the last operation resulted in a negative
-     * value.
+     * This method checks whether the given binary value is negative and
+     * sets or clears the **sign** flag accordingly. The given value is 
+     * treated as a negative value if the MSB is set to 1.
+     * @param operand A binary value. 
      * @returns
      */
-    private checkForSigned() {
-        if (this._result.value[0] === 1) {
+    private checkForSigned(operand: Doubleword) {
+        if (operand.value[0] === 1) {
             this._eflags.setSigned();
+        } else {
+            this._eflags.clearSigned();
         }
+        return;
     }
 
     /**
@@ -84,231 +87,164 @@ export class ArithmeticLogicUnit {
     private checkForOverflow(carry: Array<Bit>) {
         if (carry[carry.length - 1] !== carry[carry.length - 2]) {
             this._eflags.setOverflow();
+        } else {
+            this._eflags.clearOverflow();
         }
+        return;
     }
 
     /**
-     * This method checks whether the last operation resulted in a negative value.
-     * A negative value is present if the MSB is set to 1.
+     * This method checks whether to set or clear the **carry** flag after an operation.
      * @param carry The carry bits to check.
      */
-    private checkNegativeValue(carry: Array<Bit>) {
+    private checkCarry(carry: Array<Bit>) {
         if (carry[carry.length - 1] === 1) {
             this._eflags.setCarry();
+        } else {
+            this._eflags.clearCarry();
         }
     }
 
     /**
-     * This method performs the logical NOT operation on a single bit. The given value will be inverted:
-     * 1 becomes 0 and vice versa.
-     * @param operand The bit to invert.
-     * @returns The inverted bit.
+     * This method performs the logical NOT operation bit-wise on a doubleword sized binary value.
+     * All its bits will be inverted: 1 becomes 0 and vice versa.The result corresponds 
+     * to the one's complement of the given binary value.
+     * 
+     * All flags remain unchanged.
+     * @param operand The doubleword sized binary value to invert.
+     * @returns The inverted binary value.
      */
-    public not(operand: Bit): Bit {
-        return (operand === 1) ? 0 : 1;
+    public not(operand: Doubleword): Doubleword {
+        const result: Doubleword = new Doubleword(operand.value.slice());
+        operand.value.forEach((bit, index) => {
+            result.value[index] = (bit === 1) ? 0 : 1;
+        });
+        return result;
     }
 
     /**
-     * This method performs the logical AND operation on two given bits, according to the following table:
+     * This method performs an bit-wise, logical AND operation on two given binary values, 
+     * according to the following table.
+     * 
      * | Bit x | Bit y | Result |
      * |-------|-------|--------|
      * | 0     | 0     | 0      |
      * | 1     | 0     | 0      |
      * | 0     | 1     | 0      |
      * | 1     | 1     | 1      |
-     * @param firstOperand The first bit.
-     * @param secondOperand The second bit.
-     * @returns The result of the logical AND operation.
+     * 
+     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**, 
+     * **sign** and **parity** flags are *set* or *cleared* according to the operations result.
+     * @param firstOperand The first doubleword.
+     * @param secondOperand The second doubleword.
+     * @returns The resulting binary value.
      */
-    public and(firstOperand: Bit, secondOperand: Bit): Bit {
-        return (firstOperand === 1 && secondOperand === 1) ? 1 : 0;
+    public and(firstOperand: Doubleword, secondOperand: Doubleword): Doubleword {
+        const result: Doubleword = new Doubleword();
+        this._eflags.clearCarry();
+        this._eflags.clearOverflow();
+        firstOperand.value.forEach((bitFirstOperand, index) => {
+            const bitSecondOperand: Bit = secondOperand.value[index];
+            result.value[index] = (bitFirstOperand === 1 && bitSecondOperand === 1) ? 1 : 0;
+        });
+        this.checkForZero(result);
+        this.checkForParity(result);
+        this.checkForSigned(result);
+        return result;
     }
 
     /**
-     * This method performs the logical NAND operation on two given bits, according to the following table:
-     * | Bit x | Bit y | Result |
-     * |-------|-------|--------|
-     * | 0     | 0     | 1      |
-     * | 1     | 0     | 1      |
-     * | 0     | 1     | 1      |
-     * | 1     | 1     | 0      |
-     * @param firstOperand The first bit.
-     * @param secondOperand The second bit.
-     * @returns The result of the logical NAND operation.
-     */
-    public nand(firstOperand: Bit, secondOperand: Bit): Bit {
-        return (firstOperand === 1 && secondOperand === 1) ? 0 : 1;
-    }
-
-    /**
-     * This method performs the logical OR operation on two given bits, according to the following table:
+     * This method performs an bit-wise, logical OR operation on two given binary values, 
+     * according to the following table.
+     * 
      * | Bit x | Bit y | Result |
      * |-------|-------|--------|
      * | 0     | 0     | 0      |
      * | 1     | 0     | 1      |
      * | 0     | 1     | 1      |
      * | 1     | 1     | 1      |
-     * @param firstOperand The first bit.
-     * @param secondOperand The second bit.
-     * @returns The result of the logical OR operation.
+     * 
+     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**, 
+     * **sign** and **parity** flags are *set* or *cleared* according to the operations result.
+     * @param firstOperand The first word.
+     * @param secondOperand The second word.
+     * @returns The resulting binary value.
      */
-    public or(firstOperand: Bit, secondOperand: Bit): Bit {
-        return (firstOperand === 0 && secondOperand === 0) ? 0 : 1;
+    public or(firstOperand: Doubleword, secondOperand: Doubleword): Doubleword {
+        const result: Doubleword = new Doubleword();
+        this._eflags.clearCarry();
+        this._eflags.clearOverflow();
+        firstOperand.value.forEach((bitFirstOperand, index) => {
+            const bitSecondOperand: Bit = secondOperand.value[index];
+            result.value[index] = (bitFirstOperand === 0 && bitSecondOperand === 0) ? 0 : 1;
+        });
+        this.checkForZero(result);
+        this.checkForParity(result);
+        this.checkForSigned(result);
+        return result;
     }
 
     /**
-     * This method performs the logical XOR operation on two given bits, according to the following table:
+     * This method performs an bit-wise, logical XOR operation on two given binary values, 
+     * according to the following table.
+     * 
      * | Bit x | Bit y | Result |
      * |-------|-------|--------|
      * | 0     | 0     | 0      |
      * | 1     | 0     | 1      |
      * | 0     | 1     | 1      |
      * | 1     | 1     | 0      |
-     * @param firstOperand The first bit.
-     * @param secondOperand The second bit.
-     * @returns The result of the logical XOR operation.
-     */
-    public xor(firstOperand: Bit, secondOperand: Bit): Bit {
-        return (
-            (firstOperand === 1 && secondOperand === 0) || (firstOperand === 0 && secondOperand === 1)
-        ) ? 1 : 0;
-    }
-
-    /**
-     * This method performs the logical NOT operation bit-wise on a doubleword.
-     * The result corresponds to the one's complement of the given binary value.
-     * All flags remain unchanged.
-     * @param operand The doubleword to invert.
-     */
-    public notDoubleword(operand: Doubleword) {
-        this._result = new Doubleword();
-        operand.value.forEach((bit, index) => {
-            this._result.value[index] = this.not(bit);
-        });
-    }
-
-    /**
-     * This method performs the logical AND operation bit-wise on two given doubleword.
-     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**, **sign** and **parity** flags
-     * are *set* according to the operations result.
+     * 
+     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**,
+     * **sign** and **parity** flags are *set* or *cleared* according to the operations result.
      * @param firstOperand The first doubleword.
      * @param secondOperand The second doubleword.
+     * @returns The resulting binary value.
      */
-    public andDoubleword(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
+    public xor(firstOperand: Doubleword, secondOperand: Doubleword) {
+        const result: Doubleword = new Doubleword();
         this._eflags.clearCarry();
         this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        firstOperand.value.forEach((bit, index) => {
-            this._result.value[index] = this.and(bit, secondOperand.value[index]);
+        firstOperand.value.forEach((bitFirstOperand, index) => {
+            const bitSecondOperand: Bit = secondOperand.value[index];
+            result.value[index] = (
+                (bitFirstOperand === 1 && bitSecondOperand === 0) || 
+                (bitFirstOperand === 0 && bitSecondOperand === 1)
+            ) ? 1 : 0;
         });
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
-    }
-
-    /**
-     * This method performs the logical NAND operation bit-wise on two given doubleword.
-     * @param firstOperand The first doubleword.
-     * @param secondOperand The second doubleword.
-     */
-    public nandDoubleword(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearCarry();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        firstOperand.value.forEach((bit, index) => {
-            this._result.value[index] = this.nand(bit, secondOperand.value[index]);
-        });
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
-    }
-
-    /**
-     * This method performs the logical OR operation bit-wise on two given doubleword.
-     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**, **sign** and **parity** flags
-     * are *set* according to the operations result. 
-     * @param firstOperand The first word.
-     * @param secondOperand The second word.
-     */
-    public orDoubleword(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearCarry();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        firstOperand.value.forEach((bit, index) => {
-            this._result.value[index] = this.or(bit, secondOperand.value[index]);
-        });
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
-    }
-
-    /**
-     * This method performs the logical XOR operation bit-wise on two given doubleword.
-     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**, **sign** and **parity** flags
-     * are *set* according to the operations result. 
-     * @param firstOperand The first doubleword.
-     * @param secondOperand The second doubleword.
-     */
-    public xorDoubleword(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearCarry();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        firstOperand.value.forEach((bit, index) => {
-            this._result.value[index] = this.xor(bit, secondOperand.value[index]);
-        });
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+        this.checkForZero(result);
+        this.checkForParity(result);
+        this.checkForSigned(result);
+        return result;
     }
 
     /**
      * This method computes the two's complement of the given binary value.
-     * Affects the **overflow**, **carry**, **sign**, **zero** and **parity** flags.
+     * 
+     * Both the **carry** and the **overflow** flag are *cleared*, while the **zero**,
+     * **sign** and **parity** flags are *set* or *cleared* according to the operations result.
      * @param operand The operand.
+     * @returns The two's complement.
      */
-    public neg(operand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearCarry();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        this.notDoubleword(operand);
-        this.add(this._result, Doubleword.fromInteger(1));
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+    public neg(operand: Doubleword): Doubleword {
+        operand = this.not(operand);
+        return this.add(operand, Doubleword.fromInteger(1));
     }
 
     /**
      * This method adds two given binary numbers without taking the carry into account.
+     * 
      * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand.
-     * @param secondOperand The second operand.
+     * @param firstSummand The first operand/summand.
+     * @param secondSummand The second operand/summand.
+     * @returns The sum of both operands/summands.
      */
-    public add(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearCarry();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
+    public add(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
+        const result: Doubleword = new Doubleword();
         var carry: Array<Bit> = [0];
         for (let index = DataSize.DOUBLEWORD - 1; index >= 0; --index) {
-            const bitFirstOperand: Bit = firstOperand.value[index];
-            const bitSecondOperand: Bit = secondOperand.value[index];
+            const bitFirstOperand: Bit = firstSummand.value[index];
+            const bitSecondOperand: Bit = secondSummand.value[index];
             const carryBit: Bit = carry[carry.length - 1];
             if (
                 (bitFirstOperand === 1 && bitSecondOperand === 1) || 
@@ -319,32 +255,37 @@ export class ArithmeticLogicUnit {
             } else {
                 carry.push(0);
             }
-            const partialResult: Bit = this.xor(bitFirstOperand, bitSecondOperand);
-            this._result.value[index] = this.xor(partialResult, carryBit);
+            const partialResult: Bit = (
+                (bitFirstOperand === 1 && bitSecondOperand === 0) || 
+                (bitFirstOperand === 0 && bitSecondOperand === 1)
+            ) ? 1 : 0;
+            result.value[index] = (
+                (partialResult === 1 && carryBit === 0) || 
+                (partialResult === 0 && carryBit === 1)
+            ) ? 1 : 0;
         }
         this.checkForOverflow(carry);
-        this.checkNegativeValue(carry);
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+        this.checkCarry(carry);
+        this.checkForZero(result);
+        this.checkForParity(result);
+        this.checkForSigned(result);
+        return result;
     }
 
     /**
      * This method adds two given binary numbers while taking the carry into account.
+     * 
      * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand.
-     * @param secondOperand The second operand.
+     * @param firstSummand The first operand/summand.
+     * @param secondSummand The second operand/summand.
+     * @returns The sum of both operands/summands.
      */
-    public adc(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
+    public adc(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
+        const result: Doubleword = new Doubleword();
         var carry: Array<Bit> = (this._eflags.carry === 1) ? [1] : [0];
         for (let index = DataSize.DOUBLEWORD - 1; index >= 0; --index) {
-            const bitFirstOperand: Bit = firstOperand.value[index];
-            const bitSecondOperand: Bit = secondOperand.value[index];
+            const bitFirstOperand: Bit = firstSummand.value[index];
+            const bitSecondOperand: Bit = secondSummand.value[index];
             const carryBit: Bit = carry[carry.length - 1];
             if (
                 (bitFirstOperand === 1 && bitSecondOperand === 1) || 
@@ -355,160 +296,235 @@ export class ArithmeticLogicUnit {
             } else {
                 carry.push(0);
             }
-            const partialResult: Bit = this.xor(bitFirstOperand, bitSecondOperand);
-            this._result.value[index] = this.xor(partialResult, carryBit);
+            const partialResult: Bit = (
+                (bitFirstOperand === 1 && bitSecondOperand === 0) || 
+                (bitFirstOperand === 0 && bitSecondOperand === 1)
+            ) ? 1 : 0;
+            result.value[index] = (
+                (partialResult === 1 && carryBit === 0) || 
+                (partialResult === 0 && carryBit === 1)
+            ) ? 1 : 0;
         }
         this.checkForOverflow(carry);
-        this.checkNegativeValue(carry);
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+        this.checkCarry(carry);
+        this.checkForZero(result);
+        this.checkForParity(result);
+        this.checkForSigned(result);
+        return result;
     }
 
     /**
      * This method subtracts two given binary numbers without taking the carry into account.
+     * 
      * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand.
-     * @param secondOperand The second operand.
+     * @param minuend The binary value to subtract from.
+     * @param subtrahend The binary value to subtract.
+     * @returns The difference of the first operand (minuend) and the second operand (subtrahend).
      */
-    public sub(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        if (secondOperand.value[0] === 1) {
+    public sub(minuend: Doubleword, subtrahend: Doubleword): Doubleword {
+        if (subtrahend.value[0] === 1) {
             /**
              * - -(x) <=> + (x)
              */
-            this.sub(secondOperand, Doubleword.fromInteger(1));
-            this.notDoubleword(this._result);
-            secondOperand = this._result;
+            subtrahend = this.sub(subtrahend, Doubleword.fromInteger(1));
+            subtrahend = this.not(subtrahend);
         } else {
             /**
              * + -(x) <=> - (x)
              */
-            this.neg(secondOperand);
-            secondOperand = this._result;
+            subtrahend = this.neg(subtrahend);
         }
-        this.add(firstOperand, secondOperand);
+        return this.add(minuend, subtrahend);
     }
 
     /**
      * This method subtracts two given binary numbers without taking the carry into account.
+     * 
      * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand.
-     * @param secondOperand The second operand.
+     * @param minuend The binary value to subtract from.
+     * @param subtrahend The binary value to subtract.
+     * @returns The difference of the first operand (minuend) and the second operand (subtrahend).
      */
-    public sbb(firstOperand: Doubleword, secondOperand: Doubleword) {
-        this._result = new Doubleword();
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        if (secondOperand.value[0] === 1) {
-            this.sub(secondOperand, Doubleword.fromInteger(1));
-            this.notDoubleword(this._result);
-            secondOperand = this._result;
+    public sbb(minuend: Doubleword, subtrahend: Doubleword): Doubleword {
+        var carryFlag: Bit = this._eflags.carry;
+        if (subtrahend.value[0] === 1) {
+            /**
+             * - -(x) <=> + (x)
+             */
+            subtrahend = this.sub(subtrahend, Doubleword.fromInteger(1));
+            this._eflags.clearCarry();
+            subtrahend = this.not(subtrahend);
         } else {
-            this.neg(secondOperand);
-            secondOperand = this._result;
+            /**
+             * + -(x) <=> - (x)
+             */
+            subtrahend = this.neg(subtrahend);
         }
-        this.adc(firstOperand, secondOperand);
+        if (carryFlag === 1) {
+            this._eflags.setCarry();
+        }
+        return this.adc(minuend, subtrahend);
     }
 
     /**
-     * This method multiplies both the given binary, doubleword sized values.
-     * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand, which gets multiplied by the second operand.
-     * @param secondOperand The second operand, which determines, how often the first operand gets added to itself.
+     * This method sign extends a given binary value to the specified length.
+     * @param operand A binary value to sign extend.
+     * @param maxLength The lenght to sign extend the operand to.
      */
-    public mul(firstOperand: Doubleword, secondOperand: Doubleword) {
-        // TODO: Realize multiplication through several additions.
-        this._result = new Doubleword;
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        var firstOperandDec: number = 0;
-        var secondOperandDec: number = 0;
-        if (firstOperand.value[0] === 1) {
-            this.sub(firstOperand, Doubleword.fromInteger(1));
-            this._eflags.clearOverflow();
-            this._eflags.clearZero();
-            this._eflags.clearParity();
-            this._eflags.clearSigned();
-            this.notDoubleword(this._result);
-            firstOperandDec = parseInt(this._result.toString(), 2) * (-1);
-        } else {
-            firstOperandDec = parseInt(firstOperand.toString(), 2);
+    public signExtend<T extends BinaryValue>(operand: T, maxLength: number) {
+        if (!Number.isInteger(maxLength)) {
+			throw new Error("Given number is not an integer.");
+		}
+        if (maxLength <= operand.value.length) {
+            return;
         }
-
-        if (secondOperand.value[0] === 1) {
-            this.sub(secondOperand, Doubleword.fromInteger(1));
-            this._eflags.clearOverflow();
-            this._eflags.clearZero();
-            this._eflags.clearParity();
-            this._eflags.clearSigned();
-            this.notDoubleword(this._result);
-            secondOperandDec = parseInt(this._result.toString(), 2) * (-1);
-        } else {
-            secondOperandDec = parseInt(secondOperand.toString(), 2);
+        const isNegative: boolean = operand.value[0] === 1;
+        for (let i = 0; i < maxLength - operand.value.length; ++i) {
+            operand.value.unshift((isNegative) ? 1 : 0);
         }
+        return;
+    }
 
-        this._result = Doubleword.fromInteger(firstOperandDec * secondOperandDec);
-        /**
-         * Checks for an overflow or carry currently can not be performed, as the multiplication is not realized through multiple additions.
-         */
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+    /**
+     * This method performs an arithmetic shift on the given binary value one bit to the right.
+     * @param operand The operand to perform a right shift on.
+     * @returns The bit right shifted.
+     */
+    public rightShift<T extends BinaryValue>(operand: T): Bit {
+        const copy: Quadword = new Quadword(operand.value.slice());
+        for (let index = 0; index < copy.value.length - 1; ++index) {
+            const bitToShift: Bit = copy.value[index];
+            if (index === 0) {
+                operand.value[index] = bitToShift;
+            }
+            operand.value[index + 1] = bitToShift;
+        }
+        return copy.value[copy.value.length - 1];
+    }
+
+    /**
+     * This method performs an arithmetic shift on the given binary value one bit to the left.
+     * @param operand The operand to perform a right shift on.
+     * @returns The bit left shifted.
+     */
+    public leftShift<T extends BinaryValue>(operand: T): Bit {
+        const copy: Array<Bit> = operand.value.slice();
+        for (let index = copy.length - 1; index > 0; --index) {
+            const bitToShift: Bit = copy[index];
+            if (index === 0) {
+                operand.value[index] = 0;
+            }
+            operand.value[index - 1] = bitToShift;
+        }
+        return copy[0];
+    }
+
+    /**
+     * This method multiplies both the given binary, doubleword sized values using Booths mulitplication algorithm, 
+     * according to <https://medium.com/@jetnipit54/booth-algorithm-e6b8a6c5b8d>.
+     * 
+     * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
+     * @param multiplier The operand, which determines, how often the first operand gets multiplied.
+     * @param multiplicand The operand, which gets multiplied by the multiplicand.
+     * @returns The resulting product.
+     */
+    public mul(multiplier: Doubleword, multiplicand: Doubleword): Doubleword {
+        var a: Doubleword = new Doubleword();
+        var q_1: Bit = 0;
+        var q: Doubleword = new Doubleword(multiplicand.value.slice());
+        var cnt: number = a.value.length;
+        var m: Doubleword = new Doubleword(multiplier.value.slice());
+        var tmp: BinaryValue = new BinaryValue(new Array<Bit>((a.value.length * 2) + 1).fill(0));
+        while (cnt >= 0) {
+            if (q.value[q.value.length - 1] === 1 && q_1 === 0) {
+                a = this.sub(a, m);
+            } else if (q.value[q.value.length - 1] === 0 && q_1 === 1) {
+                a = this.add(a, m);
+            }
+            tmp.value = a.value.slice().concat(q.value.slice()).concat(q_1);
+            this.rightShift<BinaryValue>(tmp);
+            a.value = tmp.value.slice(0, DataSize.DOUBLEWORD);
+            q.value = tmp.value.slice(DataSize.DOUBLEWORD, 64);
+            q_1 = tmp.value[tmp.value.length - 1];
+            --cnt;
+        }
+        return new Doubleword(tmp.value.slice(-DataSize.DOUBLEWORD));
     }
 
     /**
      * This method divides both the given binary, doubleword sized values.
+     * 
      * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
-     * @param firstOperand The first operand, which gets multiplied by the second operand.
-     * @param secondOperand The second operand, which determines, how often the first operand gets added to itself.
+     * @param dividend The first operand, which divides the dividend.
+     * @param divisor The second operand, which gets divided by the divisor.
+     * @returns The resulting quotient.
      */
-    public div(firstOperand: Doubleword, secondOperand: Doubleword) {
-        // TODO: Realize multiplication through several subtractions.
-        this._result = new Doubleword;
-        this._eflags.clearOverflow();
-        this._eflags.clearZero();
-        this._eflags.clearParity();
-        this._eflags.clearSigned();
-        var firstOperandDec: number = 0;
-        var secondOperandDec: number = 0;
-        if (firstOperand.value[0] === 1) {
-            this.sub(firstOperand, Doubleword.fromInteger(1));
-            this._eflags.clearOverflow();
-            this._eflags.clearZero();
-            this._eflags.clearParity();
-            this._eflags.clearSigned();
-            this.notDoubleword(this._result);
-            firstOperandDec = parseInt(this._result.toString(), 2) * (-1);
-        } else {
-            firstOperandDec = parseInt(firstOperand.toString(), 2);
+    public div(dividend: Doubleword, divisor: Doubleword): Doubleword {
+        var quotient: Doubleword = new Doubleword();
+        var flipQuotientSign: boolean = false;
+        this.checkForZero(divisor);
+        if (this._eflags.zero === 1) {
+            throw new DivisionByZeroError("Dividing by zero is not permittet.");
         }
+        if (dividend.value[0] === 1 && divisor.value[0] === 1) {
+            dividend = this.sub(dividend, Doubleword.fromInteger(1));
+            dividend = this.not(dividend);
+            divisor = this.sub(divisor, Doubleword.fromInteger(1));
+            divisor = this.not(divisor);
+        }
+        if (divisor.value[0] === 1) {
+            // Calc the absolute value of the negative divisor first.
+            divisor = this.sub(divisor, Doubleword.fromInteger(1));
+            divisor = this.not(divisor);
+            flipQuotientSign = true;
+        }
+        if (dividend.value[0] === 1) {
+            // Calc the absolute value of the negative divisor first.
+            dividend = this.sub(dividend, Doubleword.fromInteger(1));
+            dividend = this.not(dividend);
+            flipQuotientSign = true;
+        }
+        this.cmp(dividend, divisor);
+        // 00000000000000000000000010000000
+        // 00000000000000000000000100000000
+        while (this._eflags.sign === this._eflags.overflow) {
+            dividend = this.sub(dividend, divisor);
+            quotient = this.add(quotient, Doubleword.fromInteger(1));
+            this.cmp(dividend, divisor);
+        }
+        if (flipQuotientSign) {
+            quotient = this.neg(quotient);
+        }
+        return quotient;
+    }
 
-        if (secondOperand.value[0] === 1) {
-            this.sub(secondOperand, Doubleword.fromInteger(1));
-            this._eflags.clearOverflow();
-            this._eflags.clearZero();
-            this._eflags.clearParity();
-            this._eflags.clearSigned();
-            this.notDoubleword(this._result);
-            secondOperandDec = parseInt(this._result.toString(), 2) * (-1);
-        } else {
-            secondOperandDec = parseInt(secondOperand.toString(), 2);
-        }
-        this._result = Doubleword.fromInteger(Math.trunc(firstOperandDec / secondOperandDec));
-        /**
-         * Checks for an overflow or carry currently can not be performed, as the multiplication is not realized through multiple subtractions.
-         */
-        this.checkForZero();
-        this.checkForParity();
-        this.checkForSigned();
+    /**
+     * This method compares both given binary values, by performing a subtraction.
+     * 
+     * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
+     * 
+     * In contrast to SUB, this operation does not effect the second operands value.
+     * @param firstOperand 
+     * @param secondOperand 
+     */
+    public cmp(firstOperand: Doubleword, secondOperand: Doubleword) {
+        // Create a copy of the second operand.
+        var copy: Doubleword = new Doubleword(secondOperand.value.slice());
+        this.sub(firstOperand, copy);
+    }
+
+    /**
+     * This method compares both given binary values, by performing a logical AND operation.
+     * 
+     * Affects the **sign**, **zero**, **carry**, **overflow** and **parity** bit according to the result.
+     * 
+     * In contrast to AND, this operation does not effect the second operands value.
+     * @param firstOperand 
+     * @param secondOperand 
+     */
+    public test(firstOperand: Doubleword, secondOperand: Doubleword) {
+        // Create a copy of the second operand.
+        var copy: Doubleword = new Doubleword(secondOperand.value.slice());
+        this.and(firstOperand, copy);
     }
 }
