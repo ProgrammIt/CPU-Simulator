@@ -1,7 +1,7 @@
-import { DataSize } from "../../types";
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { Doubleword } from "../../types/Doubleword";
+import { Instruction } from "../../types/Instruction";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
@@ -9,8 +9,8 @@ export class RAM {
     private _capacity: number;
     private _freeMemory: number;
     private _usedMemory: number;    // Counter for written memory cells. Only the memory cells that have been actively written to by a process will increase the count.
-    private highAddressDec: number;
-    private lowAddressDec: number;
+    private _highAddressDec: number;
+    private _lowAddressDec: number;
     private static _instance: RAM;
 
     /**
@@ -21,8 +21,8 @@ export class RAM {
         this._cells = new Map<string, Byte>();
         this._capacity = capacity;
         this._freeMemory = capacity;
-        this.highAddressDec = capacity;
-        this.lowAddressDec = 0;
+        this._highAddressDec = capacity;
+        this._lowAddressDec = 0;
         this._usedMemory = 0;
     }
 
@@ -33,9 +33,9 @@ export class RAM {
      * will be created.
      * @returns The single instance of the RAM class.
      */
-    public static get instance(): RAM {
+    public static getInstance(capacity: number): RAM {
         if (RAM._instance === null || RAM._instance === undefined) {
-            RAM._instance = new RAM(Math.pow(2, DataSize.DOUBLEWORD));
+            RAM._instance = new RAM(capacity);
         }
         return RAM._instance;
     }
@@ -69,7 +69,7 @@ export class RAM {
      * @param physicalAddress A physical memory address to write the doubleword-sized data to.
      * @param doubleword Doubleword-sized data to write.
      */
-    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword) {
+    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword|Instruction) {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
         const firstByte: Byte = new Byte();
@@ -184,8 +184,8 @@ export class RAM {
      */
     private validatePhysicalAddress(physicalAddress: PhysicalAddress) {
         var physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
-        if (physicalAddressDec > this.highAddressDec || physicalAddressDec < this.lowAddressDec) {
-            throw Error(`Memory address out of range [${this.lowAddressDec.toString(2)}, ${this.highAddressDec.toString(2)}].`)
+        if (physicalAddressDec > this._highAddressDec || physicalAddressDec < this._lowAddressDec) {
+            throw Error(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
         }
         return;
     }
