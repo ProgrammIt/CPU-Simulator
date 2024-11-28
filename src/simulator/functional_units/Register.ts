@@ -1,7 +1,13 @@
-import { Byte } from "../../types/Byte";
-import { Doubleword } from "../../types/Doubleword";
+/**
+ * This class represents a generic register.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+export class Register<T> {
+    /**
+     * The registers content.
+     */
+    public content: T;
 
-export class Register {
     /**
      * The name of the register.
      * @readonly
@@ -11,40 +17,10 @@ export class Register {
     /**
      * This method constructs an instance of the Register class.
      * @param name The name of the register.
+     * @param content The initial content of the register.
      */
-    public constructor(name: string) {
+    public constructor(name: string, content: T) {
         this.name = name.toUpperCase();
-    }
-}
-
-export class ByteRegister extends Register {
-    /**
-     * The registers content.
-     */
-    public content: Byte;
-
-    /**
-     * This method constructs an instance.
-     * @param name The name of the register.
-     */
-    public constructor(name: string) {
-        super(name.toUpperCase());
-        this.content = new Byte();
-    }
-}
-
-export class DoublewordRegister extends Register {
-    /**
-     * The registers content.
-     */
-    public content: Doubleword;
-
-    /**
-     * This method constructs an instance.
-     * @param name The name of the register.
-     */
-    public constructor(name: string) {
-        super(name.toUpperCase());
-        this.content = new Doubleword();
+        this.content = content;
     }
 }
