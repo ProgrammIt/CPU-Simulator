@@ -38,9 +38,7 @@ export class Byte extends BinaryValue {
         if (newValue.length > DataSize.BYTE) {
 			throw new Error(`The given value consists out of more than ${DataSize.BYTE} bits.`);
 		}
-
-		this._value = new Array<Bit>();
-		this._value = newValue;
+		this._value = newValue.slice();
 	}
 
 	/**

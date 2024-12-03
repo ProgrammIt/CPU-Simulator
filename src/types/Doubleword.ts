@@ -43,7 +43,7 @@ export class Doubleword extends BinaryValue {
 		if (newValue.length != DataSize.DOUBLEWORD) {
 			throw new Error(`A new value must have exactly ${DataSize.DOUBLEWORD} bits: ${newValue.length} given.`);
 		}
-		this._value = newValue;
+		this._value = newValue.slice();
 	}
 
 	/**

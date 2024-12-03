@@ -31,9 +31,9 @@ export class Address extends Doubleword {
 	 */
 	public set value(newValue: Array<Bit>) {
 		if (newValue.length != DataSize.DOUBLEWORD) {
-			throw new Error(`A new value must have exactly ${this._value} bits.`);
+			throw new Error(`A new value must have exactly ${this._value.length} bits.`);
 		}
-		this._value = newValue;
+		this._value = newValue.slice();
 	}
 
 	/**

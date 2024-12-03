@@ -51,7 +51,7 @@ export class Quadword extends BinaryValue {
 		if (newValue.length != DataSize.QUADWORD) {
 			throw new Error(`A new value must have exactly ${DataSize.QUADWORD} bits.`);
 		}
-		this._value = newValue;
+		this._value = newValue.slice();
 	}
 
 	/**
