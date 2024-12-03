@@ -242,6 +242,7 @@ export class ArithmeticLogicUnit {
     public add(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
         const result: Doubleword = new Doubleword();
         var carry: Array<Bit> = [0];
+
         for (let index = DataSize.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
             const bitSecondOperand: Bit = secondSummand.value[index];
@@ -485,8 +486,6 @@ export class ArithmeticLogicUnit {
             flipQuotientSign = true;
         }
         this.cmp(dividend, divisor);
-        // 00000000000000000000000010000000
-        // 00000000000000000000000100000000
         while (this._eflags.sign === this._eflags.overflow) {
             dividend = this.sub(dividend, divisor);
             quotient = this.add(quotient, Doubleword.fromInteger(1));
@@ -508,9 +507,8 @@ export class ArithmeticLogicUnit {
      * @param secondOperand 
      */
     public cmp(firstOperand: Doubleword, secondOperand: Doubleword) {
-        // Create a copy of the second operand.
-        var copy: Doubleword = new Doubleword(secondOperand.value.slice());
-        this.sub(firstOperand, copy);
+        this.sub(firstOperand, secondOperand);
+        return;
     }
 
     /**
