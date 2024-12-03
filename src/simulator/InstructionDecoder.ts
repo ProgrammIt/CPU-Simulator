@@ -15,8 +15,8 @@ export class InstructionDecoder {
     public static decodeOperandType(encodedOperandType: Array<Bit>): OperandTypes {
         var decodedOperandType: OperandTypes;
         switch (encodedOperandType.join("")) {
-            case OperandTypes.CONSTANT:
-                decodedOperandType = OperandTypes.CONSTANT;
+            case OperandTypes.IMMEDIATE:
+                decodedOperandType = OperandTypes.IMMEDIATE;
                 break;
             case OperandTypes.MEMORY_ADDRESS:
                 decodedOperandType = OperandTypes.MEMORY_ADDRESS;
@@ -46,7 +46,8 @@ export class InstructionDecoder {
                 decodedAddressingMode = AddressingModes.DIRECT;
                 break;
             case AddressingModes.INDIRECT:
-                decodedAddressingMode = AddressingModes.INDIRECT;        
+                decodedAddressingMode = AddressingModes.INDIRECT;
+                break;       
             default:
                 throw Error("Unrecognized addressing mode.");
                 break;
