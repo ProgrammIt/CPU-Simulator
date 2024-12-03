@@ -1,6 +1,3 @@
-import { Doubleword } from "./types/Doubleword";
-import { VirtualAddress } from "./types/VirtualAddress";
-
 export interface LanguageDefinition {
 	instructions: Instruction[];
 	addressable_registers: Register[];
@@ -33,13 +30,27 @@ export enum DataSize {
 }
 
 /**
- * An enum representing the available and binary encoded registers.
+ * An enum representing the accessable and binary encoded registers.
  */
-export const enum Registers {
+export const enum AccessableRegisters {
 	EAX = "00000000000000000000000000000000",
 	EBX = "00000000000000000000000000000001",
 	EIP = "00000000000000000000000000000010",
 	EIR = "00000000000000000000000000000011",
+	NPTP = "00000000000000000000000000000100",
+	VMPTR = "00000000000000000000000000000101",
+	ESP = "00000000000000000000000000000110",
+	ITP = "00000000000000000000000000000111",
+	GPTP = "00000000000000000000000000001000"
+}
+
+/**
+ * An enum representing the writable and binary encoded registers.
+ */
+export const enum WritableRegisters {
+	EAX = "00000000000000000000000000000000",
+	EBX = "00000000000000000000000000000001",
+	EIP = "00000000000000000000000000000010",
 	NPTP = "00000000000000000000000000000100",
 	VMPTR = "00000000000000000000000000000101",
 	ESP = "00000000000000000000000000000110",
@@ -60,7 +71,7 @@ export const enum AddressingModes {
  */
 export const enum OperandTypes {
 	NO = "0000000",
-	CONSTANT = "1010000",
+	IMMEDIATE = "1010000",
 	REGISTER = "1100000",
 	MEMORY_ADDRESS = "1110000"
 }
@@ -118,79 +129,4 @@ export const enum Operations {
 	SYSENTER = "0100101",
 	SYSEXIT = "0100110",
 	NOP = "1111111"
-}
-
-/**
- * This class represents a decoded (non-binary) instruction, ready for execution.
- */
-export class DecodedInstruction {
-	/**
-	 * The instructions type.
-	 */
-	public type: InstructionTypes;
-	
-	/**
-	 * The instructions operation.
-	 */
-	public operation: Operations;
-
-	/**
-	 * A list of the operations operands or undefined, if no operand is present.
-	 */
-	public operands: [InstructionOperand, InstructionOperand | undefined] | undefined;
-
-	/**
-	 * The operations target. Or in other words: where to put the result.
-	 * This member holds either a register, an virtual memory address or a undefined value, if there
-	 * is no target defined.
-	 */
-	public target: Registers | VirtualAddress | undefined;
-
-	/**
-	 * Constructs a new instance from the given arguments.
-	 * @param type The instructions type.
-	 * @param operation The instructions operation.
-	 */
-    public constructor(type: InstructionTypes, operation: Operations) {
-        this.type = type;
-        this.operation = operation;
-        this.operands = undefined;
-        this.target = undefined;
-    }
-}
-
-/**
- * A class representing a decoded (non-binary) operand of an instruction.
- */
-export class InstructionOperand {
-	/**
-	 * The operands addressing mode. Can be either direct or indirect. Indirect mode is only valid for registers.
-	 * @readonly
-	 */
-	public readonly addressingMode: AddressingModes;
-
-	/**
-	 * The operands type. Can be either a constant/immediate, a memory address or a register.
-	 * @readonly
-	 */
-	public readonly type: OperandTypes;
-
-	/**
-	 * The operands value in decimal, hexadecimal and binary representation.
-	 * @readonly
-	 */
-	public readonly value: Doubleword;
-
-	/**
-	 * Creates a new instance from the given arguments.
-	 * @param addressingMode The operands addressing mode.
-	 * @param type The operands type.
-	 * @param value The operands value in binary representation.
-	 * @constructor
-	 */
-    public constructor(addressingMode: AddressingModes, type: OperandTypes, value: Doubleword) {
-        this.addressingMode = addressingMode;
-        this.type = type;
-        this.value = value;
-    }
 }
