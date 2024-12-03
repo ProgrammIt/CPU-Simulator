@@ -1,10 +1,6 @@
 import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
 import { EFLAGS } from "../simulator/functional_units/EFLAGS";
-import { DataSize } from "../types";
-import { BinaryValue } from "../types/BinaryValue";
-import { Bit } from "../types/Bit";
 import { Doubleword } from "../types/Doubleword";
-import { Quadword } from "../types/Quadword";
 
 describe("Test ALU", () => {
     const flags: EFLAGS = new EFLAGS();

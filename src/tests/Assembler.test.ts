@@ -25,7 +25,7 @@ describe('Encode instructions', () => {
         var assembler = Assembler.instance;
         assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
         
-        var loopTestProgram: string = "MOV $0x64, %eax      ; Kopiere den Wert 100 in das Register eax.\n\n.loop: \n\tSUB $1, %eax     ; Subtrahiere den Wert 1 vom Wert im Register eax.\n\tCMP $0, %eax     ; Vergleiche den Inhalt von Register eax mit der 0.\n\tJG loop         ; Springe zum Schleifenanfang, wenn der Wert im Register ax noch größer als 0 ist.\n\n; Ende des Programms. Das Ergebnis steht in Register eax.";
+        var loopTestProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
         var expectedOutputLoopProgram: string[] = [
             "11011001001011101010000101100000",
             "00000000000000000000000001100100",
@@ -40,7 +40,7 @@ describe('Encode instructions', () => {
             "00000000000000000000000000000000",
 
             "11111000111011101110000100000000",
-            "00000000000000000000000000000101",
+            "00000000000000000000000000001100",
             "00000000000000000000000000000000"
         ];
 
