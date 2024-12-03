@@ -1,3 +1,4 @@
+import { DataSize } from "../../types";
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { Register } from "./Register";
@@ -22,6 +23,27 @@ export class EFLAGS extends Register<Byte> {
     }
 
     /**
+     * Accessor for retrieving a copy of the current registers content.
+     * @override
+     * @returns A copy of the current registers content.
+     */
+    public get content(): Byte {
+        return new Byte(this._content.value);
+    }
+
+    /**
+     * Accessor for setting the current registers content to a new value.
+     * @override
+     * @param newValue The new value.
+     */
+    public set content(newValue: Byte) {
+        if (newValue.value.length !== DataSize.BYTE) {
+			throw new Error(`A new value must have exactly ${DataSize.BYTE} bits: ${newValue.value.length} given.`);
+		}
+        this._content = new Byte(newValue.value);
+    }
+
+    /**
      * This method sets or clears the flag bit at the specified index.
      * Clearing means setting the bit to a binary 0. Setting means setting the bit to a binary 1.
      * @param index The position of the flag bit in the register from MSB (index 0) to LSB.
@@ -34,7 +56,7 @@ export class EFLAGS extends Register<Byte> {
         // Modify deep copy.
         tmp[index] = bit;
         // Set content of register.
-        this.content.value = tmp;
+        this._content.value = tmp;
         return;
     }
 
@@ -170,42 +192,42 @@ export class EFLAGS extends Register<Byte> {
      * This method reads the current status of the parity flag bit.
      */
     public get parity(): Bit {
-        return this.content.value.at(EFLAGS.POS_PARITY_BIT)!;
+        return this._content.value.at(EFLAGS.POS_PARITY_BIT)!;
     }
 
     /**
      * This method reads the current status of the carry flag bit.
      */
     public get carry(): Bit {
-        return this.content.value.at(EFLAGS.POS_CARRY_BIT)!;
+        return this._content.value.at(EFLAGS.POS_CARRY_BIT)!;
     }
 
     /**
      * This method reads the current status of the zero flag bit.
      */
     public get zero(): Bit {
-        return this.content.value.at(EFLAGS.POS_ZERO_BIT)!;
+        return this._content.value.at(EFLAGS.POS_ZERO_BIT)!;
     }
 
     /**
      * This method reads the current status of the signed flag bit.
      */
     public get sign(): Bit {
-        return this.content.value.at(EFLAGS.POS_SIGNED_BIT)!;
+        return this._content.value.at(EFLAGS.POS_SIGNED_BIT)!;
     }
 
     /**
      * This method reads the current status of the overflow flag bit.
      */
     public get overflow(): Bit {
-        return this.content.value.at(EFLAGS.POS_OVERFLOW_BIT)!;
+        return this._content.value.at(EFLAGS.POS_OVERFLOW_BIT)!;
     }
 
     /**
      * This method reads the current status of the interrupt flag bit.
      */
     public get interrupt(): Bit {
-        return this.content.value.at(EFLAGS.POS_INTERRUPT_BIT)!;
+        return this._content.value.at(EFLAGS.POS_INTERRUPT_BIT)!;
     }
 
     /**
@@ -214,8 +236,8 @@ export class EFLAGS extends Register<Byte> {
      */
     public isInUserMode(): boolean {
         return (
-            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 1 && 
-            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 1
+            this._content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 1 && 
+            this._content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 1
         );
     }
 
@@ -225,8 +247,8 @@ export class EFLAGS extends Register<Byte> {
      */
     public isInKernelMode(): boolean {
         return (
-            this.content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 0 && 
-            this.content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 0
+            this._content.value.at(EFLAGS.POS_CPL_MSB_BIT)! === 0 && 
+            this._content.value.at(EFLAGS.POS_CPL_LSB_BIT)! === 0
         );
     }
 }
