@@ -8,6 +8,14 @@
         <script src="./../out/render.js"></script>
     </head>
     <body>
+        <header>
+            <!-- Controls for the simulator -->
+            <div class="controls">
+                <button onclick="cycle()" class="next-btn">
+                    <img class="control-icon" src="./assets/img/next_dark.svg" alt="Button for triggering the next instruction cycle">
+                </button>
+            </div>
+        </header>
         <main>
             <!-- Registers -->
             <section id="registers" class="registers">
@@ -16,19 +24,19 @@
                     <!-- EAX register -->
                     <div class="register-widget">
                         <label class="register-label" id="eax-label">EAX</label>
-                        <div class="register" id="eax">0x64</div>
+                        <div class="register" id="eax"> </div>
                     </div>
 
                     <!-- EBX register -->
                     <div class="register-widget">
                         <label class="register-label" id="ebx-label">EBX</label>
-                        <div class="register" id="ebx">0xFFF1</div>
+                        <div class="register" id="ebx"> </div>
                     </div>
 
                     <!-- EIP register -->
                     <div class="register-widget">
                         <label class="register-label" id="eip-label">EIP</label>
-                        <div class="register" id="eip">0x0</div>
+                        <div class="register" id="eip"> </div>
                     </div>
 
                     <!-- EIR register -->
@@ -46,31 +54,31 @@
                     <!-- ITP register -->
                     <div class="register-widget">
                         <label class="register-label" id="itp-label">ITP</label>
-                        <div class="register" id="itp">0xFFFFFF7E</div>
+                        <div class="register" id="itp"> </div>
                     </div>
 
                     <!-- NPTP register -->
                     <div class="register-widget">
                         <label class="register-label" id="nptp-label">NPTP</label>
-                        <div class="register" id="nptp">0xFFFAFF2E</div>
+                        <div class="register" id="nptp"> </div>
                     </div>
 
                     <!-- VMPTR register -->
                     <div class="register-widget">
                         <label class="register-label" id="vmptr-label">VMPTR</label>
-                        <div class="register" id="vmptr">0xFFFE6FAE</div>
+                        <div class="register" id="vmptr"> </div>
                     </div>
 
                     <!-- PTP register -->
                     <div class="register-widget">
                         <label class="register-label" id="ptp-label">PTP</label>
-                        <div class="register" id="ptp">0xFFEF12A5</div>
+                        <div class="register" id="ptp"> </div>
                     </div>
 
                     <!-- EFLAGS register -->
                     <div class="register-widget">
                         <label class="register-label" for="eflags" id="eflags-label">EFLAGS</label>
-                        <div class="register" id="eflags">0xFFEF12A5</div>
+                        <div class="register" id="eflags"> </div>
                     </div>
                 </div>
             </section>
