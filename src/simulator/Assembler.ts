@@ -116,8 +116,7 @@ export class Assembler {
 
 		for (let [lineNo, line] of lines.entries()) {
 			if (line.match(/.[\S]*:/gim)) {
-				const memoryCellsPerInstruction: number = 4;
-				let virtualAddressOfInstructionFollowingLabel: number = (instructionCounter * memoryCellsPerInstruction) + 1;
+				let virtualAddressOfInstructionFollowingLabel: number = (instructionCounter * 12);
 				let jumpLabel = line.replace(/\.|:/gim, "");
 				jumpLabels.set(
 					jumpLabel, 
@@ -271,6 +270,7 @@ export class Assembler {
 		
 		// Pad binary value to fit WORD_WIDTH
 		binaryValueString = binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
+		
 
 		binaryValueString.split("").forEach((bit, index) => {
 			operand32BitEncoded.value[index] = (bit === "0") ? 0 : 1;
