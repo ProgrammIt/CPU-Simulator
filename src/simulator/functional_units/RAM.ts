@@ -69,7 +69,7 @@ export class RAM {
      * @param physicalAddress A physical memory address to write the doubleword-sized data to.
      * @param doubleword Doubleword-sized data to write.
      */
-    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword|Instruction) {
+    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword) {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
         const firstByte: Byte = new Byte();
