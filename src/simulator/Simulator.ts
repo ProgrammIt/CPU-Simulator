@@ -3,7 +3,6 @@ import { Assembler } from "./Assembler";
 import { CPUCore } from "./execution_units/CPUCore";
 import { RAM } from "./functional_units/RAM";
 import { Doubleword } from "../types/Doubleword";
-import { Instruction } from "../types/Instruction";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
@@ -50,11 +49,10 @@ export class Simulator {
 
     /**
      * This method triggers execution of the next instruction of a loaded programm.
+     * @returns True, if the cycle was performed normally and false, if the cycle could not be performed because the programm has ended.
      */
-    public cycle() {
-        this.cpuCore.fetch();
-        this.cpuCore.decode();
-        this.cpuCore.execute();
+    public cycle(): boolean {
+        return this.cpuCore.cycle();
     }
 
     /**
@@ -63,7 +61,7 @@ export class Simulator {
      */
     public loadProgramm(fileContents: string) {
         this._assembler.loadLanguageDefinition(readFileSync(this._pathToLanguageConfig, "utf-8"));
-        const compiledProgram: Array<Doubleword|Instruction> = this._assembler.compile(fileContents);
+        const compiledProgram: Array<Doubleword> = this._assembler.compile(fileContents);
         this.cpuCore.loadProgramm(compiledProgram);
         this._programmLoaded = true;
     }
