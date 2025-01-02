@@ -1,43 +1,45 @@
 {
+    "comment_format" : "[ ]*;.*",
+    "label_formats" : {
+        "declaration" : "\\.[a-zA-Z][a-zA-Z\\-_0-9]*\\:",
+        "usage" : "[a-zA-Z][a-zA-Z\\-_0-9]*"
+    },
+    "number_formats" : {
+        "decimal" : "-?[ ]*(?:0(?![0-9]+)|[1-9][0-9]*)",
+        "hexadecimal" : "-?[ ]*0x(?:(0(?![0-9A-Fa-f]+))|([1-9A-Fa-f][0-9A-Fa-f]*))",
+        "binary" : "-?[ ]*0b[01]+"
+    },
     "addressable_registers" : [
         {
             "name" : "EAX",
-            "aliases" : null,
             "code" : "0000"
         },
         {
             "name" : "EBX",
-            "aliases" : null,
             "code" : "0001"
         },
         {
             "name" : "EIP",
-            "aliases" : null,
             "code" : "0010"
         },
         {
             "name" : "EIR",
-            "aliases" : null,
             "conde" : "0011"
         },
         {
             "name" : "NPTP",
-            "aliases" : null,
             "code" : "0100"
         },
         {
             "name" : "VMPTR",
-            "aliases" : null,
             "code" : "0101"
         },
         {
             "name" : "ESP",
-            "aliases" : null,
             "code" : "0110"
         },
         {
             "name" : "ITP",
-            "aliases" : null,
             "code" : "0111"
         },
         {
@@ -48,327 +50,944 @@
             "code" :  "1000"
         }
     ],
+    "operand_types" : [
+        {
+            "name" : "LABEL",
+            "code" : "1110000",
+            "regex" : "[a-zA-Z][a-zA-Z\\-_0-9]*"
+        },
+        {
+            "name" : "REGISTER_DIRECT",
+            "code" : "1100000",
+            "regex" : "%[a-zA-Z]{3,}"
+        },
+        {
+            "name" : "REGISTER_INDIRECT",
+            "code" : "1100000",
+            "regex" : "\\*%[a-zA-Z]{3,}"
+        },
+        {
+            "name" : "IMMEDIATE_DECIMAL",
+            "code" : "1010000",
+            "regex" : "\\$-?(?:0(?![0-9]+)|[1-9][0-9]*)"
+        },
+        {
+            "name" : "IMMEDIATE_HEXADECIMAL",
+            "code" : "1010000",
+            "regex" : "\\$-?0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
+        },
+        {
+            "name" : "IMMEDIATE_BINARY",
+            "code" : "1010000",
+            "regex" : "\\$0b[01]+"
+        },
+        {
+            "name" : "MEMORY_ADDRESS_HEXADECIMAL",
+            "code" : "1110000",
+            "regex" : "@0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
+        },
+        {
+            "name" : "MEMORY_ADDRESS_DECIMAL",
+            "code" : "1110000",
+            "regex" : "@(?:0(?![0-9]+)|[1-9][0-9]*)"
+        },
+        {
+            "name" : "MEMORY_ADDRESS_BINARY",
+            "code" : "1110000",
+            "regex" : "@0b[01]+"
+        }
+    ],
+    "addressing_modes" : [
+        {
+            "name" : "DIRECT",
+            "code" : "10"
+        },
+        {
+            "name" : "INDIRECT",
+            "code" : "11"
+        }
+    ],
+    "instruction_types" : [
+        {
+            "name" : "R",
+            "code" : "100"
+        },
+        {
+            "name" : "I",
+            "code" : "101"
+        },
+        {
+            "name" : "J",
+            "code" : "111"
+        }
+    ],
     "instructions" : [
         {
             "mnemonic" : "ADD",
             "opcode" : "0000000",
             "type" : "R",
-            "regexes" : [
-                "(ADD)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(ADD)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_INDIRECT",
+                        "REGISTER_DIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic": "ADC",
             "opcode": "0000001",
             "type" : "R",
-            "regexes": [
-                "(ADC)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(ADC)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_INDIRECT",
+                        "REGISTER_DIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "SUB",
             "opcode": "0000010",
             "type" : "R",
-            "regexes": [
-                "(SUB)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(SUB)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "SBB",
             "opcode" : "0000011",
             "type" : "R",
-            "regexes" : [
-                "(SBB)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(SBB)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "MUL",
             "opcode" : "0000100",
             "type" : "R",
-            "regexes" : [
-                "(MUL)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(MUL)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "DIV",
             "opcode" : "0000101",
             "type" : "R",
-            "regexes" : [
-                "(DIV)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex": "(DIV)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "NEG",
             "opcode" : "0000110",
             "type" : "R",
-            "regexes" : [
-                "(NEG)[\\s]+((?:\\*?%|@)[\\S]*)"
+            "regex" : "(NEG)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "CMP",
             "opcode" : "0000111",
             "type" : "R",
-            "regexes" : [
-                "(CMP)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|\\$|@)[\\S]*)"
+            "regex" : "(CMP)[ ]+(__TARGET__)[ ]*,[ ]*(__SOURCE__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "TEST",
             "opcode" : "0001000",
             "type" : "R",
-            "regexes" : [
-                "(TEST)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|\\$|@)[\\S]*)"
+            "regex" : "(TEST)[ ]+(__TARGET__)[ ]*,[ ]*(__SOURCE__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JMP",
             "opcode" : "0001001",
             "type" : "J",
-            "regexes" : [
-                "(JMP)[\\s]+((?:\\*?%|@])?[\\S]*)"
+            "regex" : "(JMP)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JZ",
             "opcode" : "0001010",
             "type" : "J",
-            "regexes" : [
-                "(JZ)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JZ)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JE",
             "opcode" : "0001011",
             "type" : "J",
-            "regexes" : [
-                "(JE)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JE)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JNZ",
             "opcode" : "0001100",
             "type" : "J",
-            "regexes" : [
-                "(JNZ)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JNZ)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JNE",
             "opcode" : "0001101",
             "type" : "J",
-            "regexes" : [
-                "(JNE)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JNE)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JG",
             "opcode" : "0001110",
             "type" : "J",
-            "regexes" : [
-                "(JG)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JG)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JGE",
             "opcode" : "0001111",
             "type" : "J",
-            "regexes" : [
-                "(JGE)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JGE)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JL",
             "opcode" : "0010000",
             "type" : "J",
-            "regexes" : [
-                "(JL)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JL)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "JLE",
             "opcode" : "0010001",
             "type" : "J",
-            "regexes" : [
-                "(JLE)[\\s]+((?:\\*?%|@)?[\\S]*)"
+            "regex" : "(JLE)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "MOV",
             "opcode" : "0010010",
             "type" : "I",
-            "regexes" : [
-                "(MOV)[\\s]+((?:\\$|@|\\*?%)[\\S]*)[\\s]*,[\\s]*((?:\\$|\\*?%)[\\S]*)",
-                "(MOV)[\\s]+((?:\\$|\\*?%)[\\S]*)[\\s]*,[\\s]*((?:\\$|@|\\*?%)[\\S]*)"
+            "regex" : "(MOV)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
+            ],
+            "illegal_combinations_of_operand_types" : [
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                }
             ]
         },
         {
             "mnemonic" : "LEA",
             "opcode" : "0010011",
             "type" : "I",
-            "regexes" : [
-                "(LEA)[s]+((?:$|@|\\*?%)[S]*)[s]*,[s]*((?:$|@|\\*?%)[S]*)"
+            "regex" : "(LEA)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
+            ],
+            "illegal_combinations_of_operand_types" : [
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_DECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_HEXADECIMAL",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_DECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_HEXADECIMAL"
+                },
+                {
+                    "__SOURCE__" : "MEMORY_ADDRESS_BINARY",
+                    "__TARGET__" : "MEMORY_ADDRESS_BINARY"
+                }
             ]
         },
         {
             "mnemonic" : "POPF",
             "opcode" : "0010100",
             "type" : "I",
-            "regexes" : [
-                "(POPF)"
-            ]
+            "regex" : "(POPF)"
         },
         {
             "mnemonic" : "PUSHF",
             "opcode" : "0010101",
             "type" : "I",
-            "regexes" : [
-                "(PUSHF)"
-            ]
+            "regex" : "(PUSHF)"
         },
         {
             "mnemonic" : "CLC",
             "opcode" : "0010110",
             "type" : "R",
-            "regexes" : [
-                "(CLC)"
-            ]
+            "regex" : "(CLC)"
         },
         {
             "mnemonic" : "CMC",
             "opcode" : "0010111",
             "type" : "R",
-            "regexes" : [
-                "(CMC)"
-            ]
+            "regex" : "(CMC)"
         },
         {
             "mnemonic" : "STC",
             "opcode" : "0011000",
             "type" : "R",
-            "regexes" : [
-                "(STC)"
-            ]
+            "regex" : "(STC)"
         },
         {
             "mnemonic" : "CLI",
             "opcode" : "0011001",
             "type" : "R",
-            "regexes" : [
-                "(CLI)"
-            ]
+            "regex" : "(CLI)"
         },
         {
             "mnemonic" : "STI",
             "opcode" : "0011010",
             "type" : "R",
-            "regexes" : [
-                "(STI)"
-            ]
+            "regex" : "(STI)"
         },
         {
             "mnemonic" : "INT",
             "opcode" : "0011011",
             "type" : "J",
-            "regexes" : [
-                "(INT)[\\s]+((?:\\*?%|@|\\$)[\\S]*)"
+            "regex" : "(INT)[ ]+(__INDEX__)",
+            "operands" : [
+                {
+                    "name" : "__INDEX__",
+                    "allowed_types" : [
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "IRET",
             "opcode" : "0011100",
             "type" : "J",
-            "regexes" : [
-                "(IRET)"
-            ]
+            "regex" : "(IRET)"
         },
         {
             "mnemonic" : "AND",
             "opcode" : "0011101",
             "type" : "R",
-            "regexes" : [
-                "(AND)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex" : "(AND)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "OR",
             "opcode" : "0011110",
             "type" : "R",
-            "regexes" : [
-                "(OR)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex" : "(OR)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "XOR",
             "opcode" : "0011111",
             "type" : "R",
-            "regexes" : [
-                "(XOR)[\\s]+((?:\\*?%|\\$|@)[\\S]*)[\\s]*,[\\s]*((?:\\*?%|@)[\\S]*)"
+            "regex" : "(XOR)[ ]+(__SOURCE__)[ ]*,[ ]*(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__SOURCE__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "NOT",
             "opcode" : "0100000",
             "type" : "R",
-            "regexes" : [
-                "(NOT)[\\s]+((?:\\*?%|@)[\\S]*)"
+            "regex" : "(NOT)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "CALL",
             "opcode" : "0100001",
             "type" : "J",
-            "regexes" : [
-                "(CALL)[\\s]+((?:\\*?%|@)[\\S]*)"
+            "regex" : "(CALL)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "RET",
             "opcode" : "0100010",
             "type" : "J",
-            "regexes" : [
-                "(RET)"
-            ]
+            "regex" : "(RET)"
         },
         {
             "mnemonic" : "POP",
             "opcode" : "0100011",
             "type" : "I",
-            "regexes" : [
-                "(POP)"
-            ]
+            "regex" : "(POP)"
         },
         {
             "mnemonic" : "PUSH",
             "opcode" : "0100100",
             "type" : "I",
-            "regexes" : [
-                "(PUSH)[\\s]+((?:\\*?%|\\$|@)[\\S]*)"
+            "regex" : "(PUSH)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "SYSENTER",
             "opcode" : "0100101",
             "type" : "J",
-            "regexes" : [
-                "(SYSENTER)[\\s]+((?:\\*?%|@)[\\S]*)"
+            "regex" : "(SYSENTER)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
             ]
         },
         {
             "mnemonic" : "SYSEXIT",
             "opcode" : "0100110",
             "type" : "J",
-            "regexes" : [
-                "(SYSEXIT)"
-            ]
+            "regex" : "(SYSEXIT)"
         },
         {
             "mnemonic" : "NOP",
             "opcode" : "1111111",
             "type" : "R",
-            "regexes" : [
-                "(NOP)"
-            ]
+            "regex" : "(NOP)"
         }
     ]
 }
