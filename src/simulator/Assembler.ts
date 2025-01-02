@@ -1,103 +1,194 @@
-import { DataSize, LanguageDefinition } from "../types";
+import { readFileSync } from "node:fs";
+import { UnrecognizedInstructionError } from "../error_types";
 import { Bit } from "../types/Bit";
+import { AssemblyLanguageDefinition } from "../types/compiler/AssemblyLanguageDefinition";
+import { DataSizes } from "../types/DataSizes";
 import { Doubleword } from "../types/Doubleword";
+import { VirtualAddress } from "../types/VirtualAddress";
+import { off } from "node:process";
+import { twosComplementToDecimal } from "../helper";
+import { EncodedOperandTypes, OperandTypes } from "../types";
 
 export class Assembler {
-  private static WORD_WIDTH: number = 32;
-  private static _regexComment: RegExp = /[\s]*;.*/gim;
-  private static _regexNewLine: RegExp = /\r?\n|\r/gim;
-  private static _regexLabel: RegExp = /[a-zA-Z][a-zA-Z\-_0-9]/gim;
-  private static _instance: Assembler | null | undefined = null;
-  private static _langDefinition: LanguageDefinition | null | undefined;
+  	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
+  	public readonly languageDefinition: AssemblyLanguageDefinition;
+	public readonly translations: Map<string, Doubleword[]>;
+	public readonly processingWidth: DataSizes;
 
-  private constructor() {}
+	/**
+	 * Constructs a new assembler object with the given processing width.
+	 * @param processingWidth The processing width of the computer system the assembler is used for.
+	 * @param pathToLanguageDefinition The path to the language definition file of the assembly language used by this assembler.
+	 */
+  	public constructor(processingWidth: DataSizes, pathToLanguageDefinition: string = "./assets/settings/language_definition.json") {
+		this.processingWidth = processingWidth;
+		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
+		this.translations = new Map<string, Doubleword[]>();
+  	}
 
-  /**
-   * This method preprocesses the file contents of a computer program written in assembly language.
-   * It removes all comments, leading and trailing whitespace and splits the file contents into seperate lines of code.
-   * The line order is preserved.
-   * @param fileContents A string containing the contents of a computer program written in assembly language.
-   * @returns A map, which maps line numbers to strings representing the original programs lines of code.
-   */
-  private preprocess(fileContents: string): Map<number, string> {
-	var lines: Map<number, string> = new Map();
-	
-	// Split file contents into lines of code, remove comments and mark empty lines for deletion
- 	var linesMarkedForDeletion: number[] = [];
-	fileContents.split(Assembler._regexNewLine).forEach((line, lineNo) => {
-    	var lineWithoutComment: string = line.replace(Assembler._regexComment, "").trim();
-		if (lineWithoutComment.length === 0) {
-			linesMarkedForDeletion.push(lineNo);
+	/**
+	 * This method preprocesses the file contents of a computer program written in assembly language.
+	 * It removes all comments, leading and trailing whitespace and splits the file contents into seperate lines of code.
+	 * The line order is preserved.
+	 * @param fileContents A string containing the contents of a computer program written in assembly language.
+	 * @returns A map, which maps line numbers to strings representing the original programs lines of code.
+	 */
+	private preprocess(fileContents: string): Map<number, string> {
+		var lines: Map<number, string> = new Map();
+		// Split file contents into lines of code, remove comments and mark empty lines for deletion
+		var linesMarkedForDeletion: number[] = [];
+		const commentRegex = new RegExp(this.languageDefinition.comment_format, "gim");
+		fileContents.split(Assembler.NEW_LINE_REGEX).forEach((line, lineNo) => {
+			var lineWithoutComment: string = line.trim().replace(commentRegex, "");
+			if (lineWithoutComment.length === 0) {
+				linesMarkedForDeletion.push(lineNo);
+			}
+			// Store line of code in map regardless whether its an empty line or not.
+			lines.set(lineNo, lineWithoutComment);
+		});
+		// Delete empty lines.
+		for (let lineNo of linesMarkedForDeletion) {
+			lines.delete(lineNo);
 		}
-	  	lines.set(lineNo, lineWithoutComment);
-	});
-
-	for (let lineNo of linesMarkedForDeletion) {
-		lines.delete(lineNo);
+		return lines;
 	}
 
-	return lines;
-  }
+	/**
+	 * This method locates and removes the jump labels from the assembly code.
+	 * @param lines The lines of code to search for jump labels.
+	 * @returns The lines of code without jump labels.
+	 */
+	private removeJumpLabels(lines: Map<number, string>): Map<number, string> {
+		// Locate jump labels and put them into the list of lines to delete.
+		var lineNumbersMarkedForDeletion: number[] = [];
+		for (let [lineNo, line] of lines.entries()) {	
+			if (line.match(this.languageDefinition.label_formats.declaration)) {
+				lineNumbersMarkedForDeletion.push(lineNo);
+			}
+		}
+		// Remove jump labels from the list of lines.
+		for (let lineNo of lineNumbersMarkedForDeletion) {
+			lines.delete(lineNo);
+		}
+		return lines;
+	}
 
 	/**
 	 * This method encodes the reduced assembly program to its binary equivalent.
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
-  	private encode(lines: Map<number, string>): Doubleword[] {
-	  	var encodedInstructions: Doubleword[] = [];
-	  	var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
+	private encode(lines: Map<number, string>): Doubleword[] {
+		var lineEncoded: boolean = false;
+		var encodedInstructions: Doubleword[] = [];
+		var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
 
 		// Remove jump labels as they will not be encoded.
-		var lineNumbersMarkedForDeletion: number[] = [];
-
-		for (let [lineNo, line] of lines.entries()) {	
-			if (line.match(/.[\S]*:/gim)) {
-				lineNumbersMarkedForDeletion.push(lineNo);
-			}
-		}
-
-		for (let lineNo of lineNumbersMarkedForDeletion) {
-			lines.delete(lineNo);
-		}
-	
-		for (let [lineNo, line] of lines.entries()) {		
+		lines = this.removeJumpLabels(lines);
+		
+		// Iterate lines of code.
+		for (let [lineNo, line] of lines.entries()) {
+			
+			lineEncoded = false;
 			
 			// For every line of code, search for a contained instruction.
-			for (let instruction of Assembler._langDefinition!.instructions) {
+			for (let instruction of this.languageDefinition.instructions) {
+				const illegalCombosOfOperandTypes: {__SOURCE__: string, __TARGET__: string}[] | undefined 
+					= instruction.illegal_combinations_of_operand_types;
 				
-				// Some instructions come in variants. Test all of them on a single line.
-				for (let instructionRegex of instruction.regexes) {
-					// Test whether the line of code matches the regex of an instruction.
-					let result: RegExpExecArray | null = RegExp(instructionRegex, "i").exec(line);
-					
-					if (result != null) {
-						// Line of code did match the regex of an instruction. The regex returns an array containing matches and groups.
-
-						/**
-						 * Each of these arrays contains the following items in the specified order. Optional items are marked with `[]`.
-						 * 1. Instruction as is: mnemonic [and operands]
-						 * 2. Mnemonic
-						 * [3. First operand]
-						 * [4. Second operand]
-						 */
-						
-						// Pass the resulting array to the instruction encoding.
-						let encodedResults: Doubleword[] = this.encodeInstruction(result, lineNo, jumpLabels);					
-						let encodedInstruction: Doubleword = encodedResults[0];
-						let encodedOperand1: Doubleword = encodedResults[1];
-						let encodedOperand2: Doubleword = encodedResults[2];
-						encodedInstructions.push(encodedInstruction, encodedOperand1, encodedOperand2);
-
-						// If one variant did match, do not test the others too.
-						break;
+				if (instruction.operands !== undefined && instruction.operands.length === 2) {
+					const operand1: {name: string, allowed_types: string[]} = instruction.operands[0];
+					const operand2: {name: string, allowed_types: string[]} = instruction.operands[1];
+					/*
+					 * The instruction expects two operands. Iterate over all possible combinations of operand types
+					 * and check if the resulting regex matches the current line of code.
+					 */
+					for (let operand1TypeString of operand1.allowed_types) {
+						for (let operand2TypeString of operand2.allowed_types) {
+							const regexInstructionString: string = instruction.regex;
+							// Create a combination of operand types.
+							const typeCombination: { __SOURCE__: string, __TARGET__: string } 
+									= { __SOURCE__ : operand1TypeString, __TARGET__ : operand2TypeString };
+							// Check if the combination of operand types is forbidden for this instruction.
+							if (illegalCombosOfOperandTypes !== undefined && illegalCombosOfOperandTypes.includes(typeCombination)) {
+								continue;
+							}
+							// Locate the operand type of the first operand in the language definition.
+							const operand1TypeDefinition: {name: string; code: string; regex: string;}
+								= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
+							// Locate the operand type of the second operand in the language definition.
+							const operand2TypeDefinition: {name: string; code: string; regex: string;}
+								= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
+							// Create a regex for the current combination of operand types.
+							const regexInstruction: RegExp = new RegExp(
+								regexInstructionString
+									.replace(operand1.name, operand1TypeDefinition.regex)
+									.replace(operand2.name, operand2TypeDefinition.regex), 
+								"gim"
+							);
+							// Check if the current line of code matches the created regex.
+							const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
+							if (regexMatchArrayInstruction !== null) {
+								// Instruction found. Encode it.							
+								const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+								// Store the instruction along its encoded representation in the translations map.
+								this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
+								encodedInstructions.push(...encodedInstruction);
+								lineEncoded = true;
+								break;
+							}
+						}
+						if (lineEncoded) {
+							break;
+						}
+					}
+				} else if (instruction.operands !== undefined && instruction.operands.length === 1) {
+					const operand: {name: string, allowed_types: string[]} = instruction.operands[0];
+					/**
+					 * This instruction expects only one operand. Iterate over all possible types of the operand.
+					 */
+					for (let operandTypeString of operand.allowed_types) {
+						const regexInstructionString: string = instruction.regex;
+						// Locate the operand type of the first operand in the language definition.
+						const operandTypeDefinition: {name: string; code: string; regex: string;}
+							= this.languageDefinition.operand_types.find((current) => current.name === operandTypeString)!;
+						// Create a regex for the current operand type.
+						const regexInstruction: RegExp = new RegExp(
+							regexInstructionString.replace(operand.name, operandTypeDefinition.regex), 
+							"gim"
+						);
+						// Check if the current line of code matches the created regex.
+						const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
+						if (regexMatchArrayInstruction !== null) {
+							// Instruction found. Encode it.
+							const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+							// Store the instruction along its encoded representation in the translations map.
+							this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
+							encodedInstructions.push(...encodedInstruction);
+							lineEncoded = true;
+							break;
+						}
+					}
+				} else {
+					// Instruction has no operands.
+					const regexInstruction: RegExp = new RegExp(instruction.regex, "gim");
+					const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
+					if (regexMatchArrayInstruction !== null) {
+						// Instruction found. Encode it.
+						const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+						// Store the instruction along its encoded representation in the translations map.
+						this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
+						encodedInstructions.push(...encodedInstruction);
+						lineEncoded = true;
 					}
 				}
 			}
+			if (!lineEncoded) {
+				throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${line}`);
+			}
 		}
-
-	  	return encodedInstructions;
-  	}
+		return encodedInstructions;
+	}
 
 	/**
 	 * This methods locates jump labels in the assembly code and creates a map between a jump label and a (virtual) memory address.
@@ -112,29 +203,29 @@ export class Assembler {
 		 * later, because the keys in the map do not have to be consecutive, as blank lines 
 		 * have been removed from the original source text.
 		 */
-		var instructionCounter: number = 0;
-
+		var virtualAddressOfInstructionFollowingLabel: number = 0;
 		for (let [lineNo, line] of lines.entries()) {
-			if (line.match(/.[\S]*:/gim)) {
-				let virtualAddressOfInstructionFollowingLabel: number = (instructionCounter * 12);
+			if (line.match(/\.[\S]+:/gim)) {
 				let jumpLabel = line.replace(/\.|:/gim, "");
 				jumpLabels.set(
 					jumpLabel, 
-					(virtualAddressOfInstructionFollowingLabel).toString(2).padStart(Assembler.WORD_WIDTH, "0")
+					VirtualAddress.fromInteger(virtualAddressOfInstructionFollowingLabel).toString()
 				);
+			} else {
+				virtualAddressOfInstructionFollowingLabel += 12;
 			}
-			++instructionCounter;
 		}
-		
 		return jumpLabels;
 	}
 
-  /**
-   * This method binary encodes a given instruction.
-   * @param regexMatchArrayInstruction An array containing the results of a match of a regular expression on an instruction.
-   * @param line The original computer programs line of code which is currently encoded.
-   * @returns A string containing the binary equivalent of the given instruction.
-   */
+	/**
+	 * This method binary encodes a given instruction and its operands values.
+	 * It is used for insructions that contain no indirect access to a register with an offset.
+	 * @param regexMatchArrayInstruction An array containing the results of a match of a regular expression on an instruction.
+	 * @param line The original computer programs line of code which is currently encoded.
+	 * @param jumpLabels The jump labels found in the assembly code.
+	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
+	 */
 	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): Doubleword[] {
 		var encodedInstruction: Doubleword = new Doubleword();
 		var addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
@@ -148,7 +239,7 @@ export class Assembler {
 		var instructionMnemonic: string = regexMatchArrayInstruction[1];
 		const delimeter: Array<Bit> = new Array<Bit>(1, 1);
 
-		for (let instruction of Assembler._langDefinition!.instructions) {
+		for (let instruction of this.languageDefinition.instructions) {
 			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
 				instructionType = this.encodeInstructionType(instruction.type, line);
 				instruction.opcode.split("").forEach((bit, index) => {
@@ -157,7 +248,7 @@ export class Assembler {
 				break;
 			}
 		}
-		
+			
 		// Check for second operand
 		if (regexMatchArrayInstruction.length > 3) {
 			// A second operand given
@@ -224,60 +315,146 @@ export class Assembler {
 	 * @returns The binary encoded operand
 	 */
 	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): Doubleword {
-		var operand32BitEncoded: Doubleword = new Doubleword();
-		var binaryValueString: string = "";
-
+		var operand32BitEncoded: Doubleword;
 		if (operand.length === 0) {
-			binaryValueString = "0";
+			operand32BitEncoded = new Doubleword();
 		} else if (jumpLabels.has(operand)) {
-			// Check if operand is jump label
-			binaryValueString = jumpLabels.get(operand)!;
+			// Operand is jump label.
+			operand32BitEncoded = VirtualAddress.fromInteger(parseInt(jumpLabels.get(operand)!, 2));
 		} else if (operand.startsWith("$0b")) {
-			// Binary immediate
-			binaryValueString = operand.replace("$0b", "");
-		} else if (operand.startsWith("$0x")) {
-			// Hex immediate
-			binaryValueString = parseInt(operand.replace("$", ""), 16).toString(2);
-		} else if (operand.startsWith("$")) {
-			binaryValueString = parseInt(operand.replace("$", ""), 10).toString(2);
+			// Binary immediate found.
+			operand32BitEncoded = this.encodeBinaryValue(operand.replace("$0b", ""), line);
+		} else if (operand.startsWith("$-0x") || operand.startsWith("$0x")) {
+			// Hexadecimal immediate found.
+			operand32BitEncoded = this.encodeHexadecimalValue(operand.replace("$", ""), line);
+		} else if (operand.startsWith("$-") || operand.startsWith("$")) {
+			// Decimal immediate found.
+			operand32BitEncoded = this.encodeDecimalValue(operand.replace("$", ""), line);
 		} else if (operand.startsWith("@0b")) {
-			// Binary memory address
-			binaryValueString = operand.replace("@0b", "");
+			// Binary virtual memory address found.
+			operand32BitEncoded = this.encodeBinaryAddress(operand.replace("@0b", ""), line);
 		} else if (operand.startsWith("@0x")) {
-			// Hex memory address
-			binaryValueString = parseInt(operand.replace("@", ""), 16).toString(2);
+			// Hex virtual memory address found.
+			operand32BitEncoded = this.encodeHexadecimalAddress(operand.replace("@", ""), line);
 		} else if (operand.startsWith("@")) {
-			// Decimal memory address
-			binaryValueString = parseInt(operand.replace("@", ""), 10).toString(2);
+			// Decimal virtual memory address found.
+			operand32BitEncoded = this.encodeDecimalAddress(operand.replace("@", ""), line);
 		} else if (operand.startsWith("*%")) {
 			// Register used with indirect addressing mode
-			binaryValueString = this.encodeRegister(operand.replace("*%", ""), line);
+			operand32BitEncoded = this.encodeRegister(operand.replace("*%", ""), line);
 		} else if (operand.startsWith("%")) {
 			// Register used with direct addressing mode
-			binaryValueString = this.encodeRegister(operand.replace("%", ""), line);
+			operand32BitEncoded = this.encodeRegister(operand.replace("%", ""), line);
 		} else {
 			throw Error(`In line ${line}: Unrecognized operand type and value.`);
 		}
-
-		if (binaryValueString.length > Assembler.WORD_WIDTH) {
-			/**
-			 * Overflow handling: discard surplus bits
-			 * Example:
-			 *   1111 10010010 00101011 10111010 01011011 (36 bit) -> 10010010 00101011 10111010 01011011 (32 bit)
-			 */
-			binaryValueString = binaryValueString.slice(binaryValueString.length - 32);
-		}
-		
-		// Pad binary value to fit WORD_WIDTH
-		binaryValueString = binaryValueString.padStart(DataSize.DOUBLEWORD, "0");
-		
-
-		binaryValueString.split("").forEach((bit, index) => {
-			operand32BitEncoded.value[index] = (bit === "0") ? 0 : 1;
-		});
-
 		return operand32BitEncoded;
- 	}
+	}
+
+	/**
+	 * This method encodes an operands binary value into its 32-bit representation.
+	 * @param operand The binary value to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given immediate operand.
+	 */
+	private encodeBinaryValue(operand: string, line: number): Doubleword {
+		if (operand.length > this.processingWidth) {
+			throw Error(`In line ${line}: Binary immediate consists of more than ${this.processingWidth} bits.`);
+		}
+		// Sign extend binary value.
+		operand = operand.padStart(this.processingWidth, operand.charAt(0));
+		const binaryValue: Doubleword = new Doubleword();
+		operand.split("").map((bit, index) => {
+			binaryValue.value[index] = (bit === "0") ? 0 : 1;
+		})
+		return binaryValue;
+	}
+
+	/**
+	 * This method encodes an operands hexadecimal value into its 32-bit binary representation.
+	 * @param operand The hexadecimal value to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given immediate operand.
+	 */
+	private encodeHexadecimalValue(operand: string, line: number): Doubleword {
+		let operandDec: number = 0;
+		if (operand.startsWith("-")) {
+			// Negative hex value.
+			operandDec = (parseInt(operand.replace("-", ""), 16) * -1);
+		} else {
+			// Positive hex value.
+			operandDec = parseInt(operand, 16);
+		}
+		return Doubleword.fromInteger(operandDec);
+	}
+
+	/**
+	 * This method encodes an operands decimal value into its 32-bit binary representation.
+	 * @param operand The decimal value to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given immediate operand.
+	 */
+	private encodeDecimalValue(operand: string, line: number): Doubleword {
+		let operandDec: number = 0;
+		if (operand.startsWith("-")) {
+			// Negative dec value.
+			operandDec = (parseInt(operand.replace("-", ""), 10) * -1);
+		} else {
+			// Positive dec value.
+			operandDec = parseInt(operand, 10);
+		}
+		return Doubleword.fromInteger(operandDec);
+	}
+
+	/**
+	 * This method encodes an operands virtual, binary memory address into its 32-bit binary representation.
+	 * @param operand The virtual memory address to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given virtual memory address.
+	 * @throws An error if the given operands binary memory address is invalid.
+	 */
+	private encodeBinaryAddress(operand: string, line: number): VirtualAddress {
+		if (operand.length > this.processingWidth) {
+			throw Error(`In line ${line}: Binary memory address consists of more than ${this.processingWidth} bits.`);
+		}
+		// Extend binary address with zeros if necessary.
+		operand = operand.padStart(this.processingWidth, "0");
+		return VirtualAddress.fromInteger(parseInt(operand, 2));
+	}
+
+	/**
+	 * This method encodes an operands virtual, hexadecimal memory address into its 32-bit binary representation.
+	 * @param operand The virtual memory address to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given virtual memory address.
+	 * @throws An error if the given operands hexadecimal memory address is invalid.
+	 */
+	private encodeHexadecimalAddress(operand: string, line: number): VirtualAddress {
+		var virtualAddress: VirtualAddress;
+		try {
+			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 16));
+		} catch (error) {
+			throw Error(`In line ${line}: Invalid hexadecimal memory address.`);
+		}
+		return virtualAddress;
+	}
+
+	/**
+	 * This method encodes an operands virtual, decimal memory address into its 32-bit binary representation.
+	 * @param operand The virtual memory address to encode.
+	 * @param line The line of code which this operand originates from.
+	 * @returns The 32-bit binary representation of the given virtual memory address.
+	 * @throws An error if the given operands decimal memory address is invalid.
+	 */
+	private encodeDecimalAddress(operand: string, line: number): VirtualAddress {
+		var virtualAddress: VirtualAddress;
+		try {
+			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 10));
+		} catch (error) {
+			throw Error(`In line ${line}: Invalid hexadecimal memory address.`);
+		}
+		return virtualAddress;
+	}
 
 	/**
 	 * This method encodes the given operands type.
@@ -287,19 +464,17 @@ export class Assembler {
 	 */
 	private encodeOperandType(operand: string, line: number): Array<Bit> {
 		var encodedType: Array<Bit> = new Array<Bit>(7);
-		
-		if (operand === null || operand === undefined || operand.length === 0) {
+		if (operand.length === 0) {
 			encodedType = new Array<Bit>(7).fill(0);
 		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
 			encodedType = new Array<Bit>(1, 1, 0, 0, 0, 0, 0);
 		} else if (operand.startsWith("$")) {
 			encodedType = new Array<Bit>(1, 0, 1, 0, 0, 0, 0);
-		} else if (operand.startsWith("@") || operand.match(Assembler._regexLabel)) {
+		} else if (operand.startsWith("@") || operand.match(this.languageDefinition.label_formats.usage)) {
 			encodedType = new Array<Bit>(1, 1, 1, 0, 0, 0, 0);
 		} else {
 			throw Error(`In line ${line}: Unrecognized type of operand.`);
 		}
-
 		return encodedType;
 	}
 
@@ -308,13 +483,19 @@ export class Assembler {
 	 * An error is thrown if the register could not be found in the language definition.
 	 * @param register A string containing the register to encode.
 	 * @param line The original computer programs line of code which is currently encoded.
-	 * @returns An array of bits representing the register.
+	 * @returns The 32-bit encoded register.
+	 * @throws An error if the given register is not recognized.
 	 */
-	private encodeRegister(register: string, line: number): string {
-		register = register.replace("%", "").toLowerCase();
-		for (const reg of Assembler._langDefinition!.addressable_registers) {
+	private encodeRegister(register: string, line: number): Doubleword {
+		register = register.replace("%", "").toLowerCase().trim();
+		for (const reg of this.languageDefinition.addressable_registers) {
 			if (register === reg.name.toLowerCase()) {
-				return reg.code.padStart(DataSize.DOUBLEWORD, "0");
+				const tmp: string = reg.code.padStart(this.processingWidth, "0");
+				const encodedRegister: Doubleword = new Doubleword();
+				tmp.split("").forEach((bit, index) => {
+					encodedRegister.value[index] = (bit === "0") ? 0 : 1;
+				});
+				return encodedRegister;
 			}
 		}
 		throw Error(`In line ${line}: Unrecognized register.`);
@@ -344,38 +525,15 @@ export class Assembler {
 		return encodedType;
 	}
 
-  /**
-   * This method returns the single instance of the Assembler class.
-   * If there is no such instance, one and one is created. Otherwise, the exisiting one is returned.
-   * @returns An instance of the Assembler class.
-   */
-  public static get instance(): Assembler {
-	if (Assembler._instance == null || Assembler._instance == undefined) {
-	  Assembler._instance = new Assembler();
+	/**
+	 * This method compiles a given computer program written in assembly language into its binary representation.
+	 * The instructions will be encoded using the opcodes defined in the language definition.
+	 * The order in which the instructions appear in the input program is preserved during the compilation process.
+	 * @param s File contents of an .asm file containing a computer program written in assembly language.
+	 * @returns An array of strings representing the binary encoded instructions of the given computer program.
+	 */
+	public compile(s: string): Doubleword[] {
+		const lines: Map<number, string> = this.preprocess(s);
+		return this.encode(lines);
 	}
-	return Assembler._instance;
-  }
-
-  /**
-   * This method loads the assmebly language definition from the specified .json file.
-   * It must (!) be called before a computer program written in assembly can be compiled.
-   * @param s The file contents of a .json file containing the assembly language definition.
-   * @returns
-   */
-  public loadLanguageDefinition(s: string): void {
-	Assembler._langDefinition = JSON.parse(s);
-	return;
-  }
-
-  /**
-   * This method compiles a given computer program written in assembly language into its binary representation.
-   * The instructions will be encoded using the opcodes defined in the language definition.
-   * The order in which the instructions appear in the input program is preserved during the compilation process.
-   * @param s File contents of an .asm file containing a computer program written in assembly language.
-   * @returns An array of strings representing the binary encoded instructions of the given computer program.
-   */
-  public compile(s: string): Doubleword[] {
-	const lines: Map<number, string> = this.preprocess(s);
-	return this.encode(lines);
-  }
 }
