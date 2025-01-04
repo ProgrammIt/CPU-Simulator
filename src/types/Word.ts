@@ -1,5 +1,5 @@
-import { DataSize } from "../types";
 import { Bit } from "./Bit";
+import { DataSizes } from "./DataSizes";
 
 export class Word {
 	/**
@@ -7,9 +7,9 @@ export class Word {
 	 */
 	protected _value: Array<Bit>;
 
-	protected static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSize.WORD - 1) - 1;
-	protected static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSize.WORD - 1);
-	protected static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSize.WORD);
+	protected static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.WORD - 1) - 1;
+	protected static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.WORD - 1);
+	protected static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.WORD);
 
 	public signed: boolean;
 
@@ -33,8 +33,8 @@ export class Word {
 	}
 
 	public set value(newValue: Array<Bit>) {
-		if (newValue.length != DataSize.WORD) {
-			throw new Error(`A new value must have exactly ${DataSize.WORD} bits.`);
+		if (newValue.length != DataSizes.WORD) {
+			throw new Error(`A new value must have exactly ${DataSizes.WORD} bits.`);
 		}
 		this._value = newValue;
 	}
@@ -74,7 +74,7 @@ export class Word {
 		}
 
 		if (signed && (integer < Word.MAX_NEGATIVE_NUMBER_SIGNED || integer > Word.MAX_POSITIVE_NUMBER_SIGNED)) {
-			throw new Error(`The given number cannot be expressed using ${DataSize.WORD} bits, if the most significant bit should be treated as the sign bit.`);
+			throw new Error(`The given number cannot be expressed using ${DataSizes.WORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
 		if (!signed && integer < 0) {
@@ -86,7 +86,7 @@ export class Word {
 		}
 
 		if (!signed && integer > Word.MAX_NUMBER_UNSIGNED) {
-			throw new Error(`The given number cannot be expressed with ${DataSize.WORD - 1} bits.`);
+			throw new Error(`The given number cannot be expressed with ${DataSizes.WORD - 1} bits.`);
 		}
 
 		var word: Word;
@@ -98,7 +98,7 @@ export class Word {
 			binaryNumber = (integer >>> 0).toString(2);
 		} else {
 			word = (signed) ? new Word(true) : new Word(false);
-			binaryNumber = integer.toString(2).padStart(DataSize.WORD, "0");
+			binaryNumber = integer.toString(2).padStart(DataSizes.WORD, "0");
 		}
 
 		binaryNumber.split("").forEach((bit, index) => {
