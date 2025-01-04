@@ -1,5 +1,6 @@
-import { DataSize } from "../types";
+import { twosComplementToDecimal } from "../helper";
 import { Bit } from "./Bit";
+import { DataSizes } from "./DataSizes";
 import { Doubleword } from "./Doubleword";
 
 /**
@@ -30,7 +31,7 @@ export class Address extends Doubleword {
 	 * @override
 	 */
 	public set value(newValue: Array<Bit>) {
-		if (newValue.length != DataSize.DOUBLEWORD) {
+		if (newValue.length != DataSizes.DOUBLEWORD) {
 			throw new Error(`A new value must have exactly ${this._value.length} bits.`);
 		}
 		this._value = newValue.slice();
@@ -61,6 +62,7 @@ export class Address extends Doubleword {
 	 * the value to be converted is too large or too small.
 	 * @param integer The number to initialize the new instances value with.
 	 * @returns A new instance.
+	 * @override
 	 */
 	public static fromInteger(integer: number): Address {
 		if (!Number.isInteger(integer)) {
@@ -72,11 +74,11 @@ export class Address extends Doubleword {
 		}
 
 		if (integer > Doubleword.MAX_NUMBER_UNSIGNED) {
-			throw new Error(`The given number cannot be expressed with ${DataSize.DOUBLEWORD - 1} bits.`);
+			throw new Error(`The given number cannot be expressed with ${DataSizes.DOUBLEWORD - 1} bits.`);
 		}
 
 		const address: Address = new Address();
-		const binaryNumber = integer.toString(2).padStart(DataSize.DOUBLEWORD, "0");
+		const binaryNumber = integer.toString(2).padStart(DataSizes.DOUBLEWORD, "0");
 
 		binaryNumber.split("").forEach((bit, index) => {
 			address._value[index] = (bit === "0") ? 0 : 1;
