@@ -1,11 +1,15 @@
-import { DataSize } from "../types";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
+import { DataSizes } from "./DataSizes";
 
+/**
+ * This class represents a byte sized binary value.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
 export class Byte extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSize.BYTE - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSize.BYTE - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSize.BYTE);
+	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.BYTE - 1) - 1;
+	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.BYTE - 1);
+	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.BYTE);
 
 	/**
 	 * Instantiates a new object.
@@ -35,8 +39,8 @@ export class Byte extends BinaryValue {
 	 * @override
 	 */
 	public set value(newValue: Array<Bit>) {        
-        if (newValue.length > DataSize.BYTE) {
-			throw new Error(`The given value consists out of more than ${DataSize.BYTE} bits.`);
+        if (newValue.length > DataSizes.BYTE) {
+			throw new Error(`The given value consists out of more than ${DataSizes.BYTE} bits.`);
 		}
 		this._value = newValue.slice();
 	}
@@ -75,12 +79,14 @@ export class Byte extends BinaryValue {
 		}
 
 		if (integer < Byte.MAX_NEGATIVE_NUMBER_SIGNED || integer > Byte.MAX_POSITIVE_NUMBER_SIGNED) {
-			throw new Error(`The given number cannot be expressed using ${DataSize.BYTE} bits, if the most significant bit should be treated as the sign bit.`);
+			throw new Error(`The given number cannot be expressed using ${DataSizes.BYTE} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
 		var byte: Byte = new Byte();
 		// A bit shift converts the given number to a signed 32-bit value, therefore, we need to crop the result to 8 bit.
-		var binaryNumber: string = (integer < 0) ? (integer >>> 0).toString(2).slice(-DataSize.BYTE) : integer.toString(2).padStart(DataSize.BYTE, "0");
+		var binaryNumber: string = (integer < 0) ? 
+			(integer >>> 0).toString(2).slice(-DataSizes.BYTE) : 
+			integer.toString(2).padStart(DataSizes.BYTE, "0");
 
 		binaryNumber.split("").forEach((bit, index) => {
 			byte._value[index] = (bit === "0") ? 0 : 1;
