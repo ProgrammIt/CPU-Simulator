@@ -1,6 +1,6 @@
-import { DataSize } from "../../types";
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
+import { DataSizes } from "../../types/DataSizes";
 import { Register } from "./Register";
 
 /**
@@ -37,8 +37,8 @@ export class EFLAGS extends Register<Byte> {
      * @param newValue The new value.
      */
     public set content(newValue: Byte) {
-        if (newValue.value.length !== DataSize.BYTE) {
-			throw new Error(`A new value must have exactly ${DataSize.BYTE} bits: ${newValue.value.length} given.`);
+        if (newValue.value.length !== DataSizes.BYTE) {
+			throw new Error(`A new value must have exactly ${DataSizes.BYTE} bits: ${newValue.value.length} given.`);
 		}
         this._content = new Byte(newValue.value);
     }
