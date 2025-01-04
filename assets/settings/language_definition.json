@@ -19,35 +19,39 @@
             "code" : "0001"
         },
         {
-            "name" : "EIP",
+            "name" : "EDX",
             "code" : "0010"
         },
         {
+            "name" : "EIP",
+            "code" : "0011"
+        },
+        {
             "name" : "EIR",
-            "conde" : "0011"
+            "conde" : "0100"
         },
         {
             "name" : "NPTP",
-            "code" : "0100"
-        },
-        {
-            "name" : "VMPTR",
             "code" : "0101"
         },
         {
-            "name" : "ESP",
+            "name" : "VMPTR",
             "code" : "0110"
         },
         {
-            "name" : "ITP",
+            "name" : "ESP",
             "code" : "0111"
+        },
+        {
+            "name" : "ITP",
+            "code" : "1000"
         },
         {
             "name" : "GPTP",
             "aliases" : [
                 "PTP"
             ],
-            "code" :  "1000"
+            "code" :  "1001"
         }
     ],
     "operand_types" : [
@@ -408,9 +412,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -430,9 +431,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -452,9 +450,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -474,9 +469,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -496,9 +488,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -518,9 +507,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -540,9 +526,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -562,9 +545,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -584,9 +564,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -915,9 +892,6 @@
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
                         "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY",
                         "LABEL"
                     ]
                 }
@@ -969,10 +943,7 @@
                         "REGISTER_INDIRECT",
                         "MEMORY_ADDRESS_DECIMAL",
                         "MEMORY_ADDRESS_HEXADECIMAL",
-                        "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY"
+                        "MEMORY_ADDRESS_BINARY"
                     ]
                 }
             ]
