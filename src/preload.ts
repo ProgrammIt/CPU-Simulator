@@ -17,7 +17,7 @@ contextBridge.exposeInMainWorld("simulator", {
 	readEAX: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEAX", basis),
 	readEBX: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEBX", basis),
 	readEIP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEIP", basis),
-	eflags: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEFLAGS", basis),
+	readEFLAGS: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEFLAGS", basis),
 	readEIR: () => ipcRenderer.invoke("readEIR"),
 	readNPTP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readNPTP", basis),
 	readVMPTR: (basis: NumberSystem = 16) => ipcRenderer.invoke("readVMPTR", basis),
