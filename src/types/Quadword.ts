@@ -1,11 +1,11 @@
-import { DataSize } from "../types";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
+import { DataSizes } from "./DataSizes";
 
 export class Quadword extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSize.QUADWORD - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSize.QUADWORD - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSize.QUADWORD);
+	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.QUADWORD - 1) - 1;
+	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.QUADWORD - 1);
+	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.QUADWORD);
 
 	/**
 	 * Instantiates a new object.
@@ -48,8 +48,8 @@ export class Quadword extends BinaryValue {
 	 * @override
 	 */
 	public set value(newValue: Array<Bit>) {
-		if (newValue.length != DataSize.QUADWORD) {
-			throw new Error(`A new value must have exactly ${DataSize.QUADWORD} bits.`);
+		if (newValue.length != DataSizes.QUADWORD) {
+			throw new Error(`A new value must have exactly ${DataSizes.QUADWORD} bits.`);
 		}
 		this._value = newValue.slice();
 	}
@@ -88,13 +88,13 @@ export class Quadword extends BinaryValue {
 		}
 
 		if (integer < Quadword.MAX_NEGATIVE_NUMBER_SIGNED || integer > Quadword.MAX_POSITIVE_NUMBER_SIGNED) {
-			throw new Error(`The given number cannot be expressed using ${DataSize.QUADWORD} bits, if the most significant bit should be treated as the sign bit.`);
+			throw new Error(`The given number cannot be expressed using ${DataSizes.QUADWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
 		var quadword: Quadword = new Quadword();
 		
 		// A bit shift converts the given number to a signed 32-bit value, so we need to extend the result to 64 bit.
-		var binaryNumber = (integer < 0) ? (integer >>> 0).toString(2).padStart(DataSize.QUADWORD, "1") : integer.toString(2).padStart(DataSize.QUADWORD, "0");
+		var binaryNumber = (integer < 0) ? (integer >>> 0).toString(2).padStart(DataSizes.QUADWORD, "1") : integer.toString(2).padStart(DataSizes.QUADWORD, "0");
 
 		binaryNumber.split("").forEach((bit, index) => {
 			quadword._value[index] = (bit === "0") ? 0 : 1;
