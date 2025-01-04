@@ -1,4 +1,4 @@
-import { AddressingModes, InstructionTypes, OperandTypes, Operations } from "../types";
+import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations } from "../types";
 import { Bit } from "../types/Bit";
 
 /**
@@ -12,20 +12,20 @@ export class InstructionDecoder {
      * @param encodedOperandType 
      * @returns 
      */
-    public static decodeOperandType(encodedOperandType: Array<Bit>): OperandTypes {
-        var decodedOperandType: OperandTypes;
+    public static decodeOperandType(encodedOperandType: Array<Bit>): EncodedOperandTypes {
+        var decodedOperandType: EncodedOperandTypes;
         switch (encodedOperandType.join("")) {
-            case OperandTypes.IMMEDIATE:
-                decodedOperandType = OperandTypes.IMMEDIATE;
+            case EncodedOperandTypes.IMMEDIATE:
+                decodedOperandType = EncodedOperandTypes.IMMEDIATE;
                 break;
-            case OperandTypes.MEMORY_ADDRESS:
-                decodedOperandType = OperandTypes.MEMORY_ADDRESS;
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                decodedOperandType = EncodedOperandTypes.MEMORY_ADDRESS;
                 break;
-            case OperandTypes.REGISTER:
-                decodedOperandType = OperandTypes.REGISTER;
+            case EncodedOperandTypes.REGISTER:
+                decodedOperandType = EncodedOperandTypes.REGISTER;
                 break;
-            case OperandTypes.NO:
-                decodedOperandType = OperandTypes.NO;
+            case EncodedOperandTypes.NO:
+                decodedOperandType = EncodedOperandTypes.NO;
                 break;
             default:
                 throw Error("Unrecognized operand type.");
@@ -39,14 +39,14 @@ export class InstructionDecoder {
      * @param encodedAddressingMode 
      * @returns 
      */
-    public static decodeAddressingMode(encodedAddressingMode: Array<Bit>): AddressingModes {
-        var decodedAddressingMode: AddressingModes;
+    public static decodeAddressingMode(encodedAddressingMode: Array<Bit>): EncodedAddressingModes {
+        var decodedAddressingMode: EncodedAddressingModes;
         switch (encodedAddressingMode.join("")) {
-            case AddressingModes.DIRECT:
-                decodedAddressingMode = AddressingModes.DIRECT;
+            case EncodedAddressingModes.DIRECT:
+                decodedAddressingMode = EncodedAddressingModes.DIRECT;
                 break;
-            case AddressingModes.INDIRECT:
-                decodedAddressingMode = AddressingModes.INDIRECT;
+            case EncodedAddressingModes.INDIRECT:
+                decodedAddressingMode = EncodedAddressingModes.INDIRECT;
                 break;       
             default:
                 throw Error("Unrecognized addressing mode.");
@@ -60,14 +60,14 @@ export class InstructionDecoder {
      * @param encodedInstructionType The binary encoded instructions type.
      * @returns A decoded representation of the type.
      */
-    public static decodeInstructionType(encodedInstructionType: Array<Bit>): InstructionTypes {
-        var decodedInstructionType: InstructionTypes;
-        if (encodedInstructionType.join("") === InstructionTypes.I) {
-            decodedInstructionType = InstructionTypes.I;
-        } else if (encodedInstructionType.join("") === InstructionTypes.J) {
-            decodedInstructionType = InstructionTypes.J;
+    public static decodeInstructionType(encodedInstructionType: Array<Bit>): EncodedInstructionTypes {
+        var decodedInstructionType: EncodedInstructionTypes;
+        if (encodedInstructionType.join("") === EncodedInstructionTypes.I) {
+            decodedInstructionType = EncodedInstructionTypes.I;
+        } else if (encodedInstructionType.join("") === EncodedInstructionTypes.J) {
+            decodedInstructionType = EncodedInstructionTypes.J;
         } else {
-            decodedInstructionType = InstructionTypes.R;
+            decodedInstructionType = EncodedInstructionTypes.R;
         }
         return decodedInstructionType;
     }
@@ -77,26 +77,26 @@ export class InstructionDecoder {
      * @param encodedOperation The binary encoded I-type operation.
      * @returns A decoded representation of the operation.
      */
-    public static decodeIOperation(encodedOperation: Array<Bit>): Operations {
-        var decodedITypeOperation: Operations;
+    public static decodeIOperation(encodedOperation: Array<Bit>): EncodedOperations {
+        var decodedITypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
-            case Operations.MOV:
-                decodedITypeOperation = Operations.MOV;
+            case EncodedOperations.MOV:
+                decodedITypeOperation = EncodedOperations.MOV;
                 break;
-            case Operations.LEA:
-                decodedITypeOperation = Operations.LEA;
+            case EncodedOperations.LEA:
+                decodedITypeOperation = EncodedOperations.LEA;
                 break;
-            case Operations.POPF:
-                decodedITypeOperation = Operations.POPF;
+            case EncodedOperations.POPF:
+                decodedITypeOperation = EncodedOperations.POPF;
                 break;
-            case Operations.PUSHF:
-                decodedITypeOperation = Operations.PUSHF;
+            case EncodedOperations.PUSHF:
+                decodedITypeOperation = EncodedOperations.PUSHF;
                 break;
-            case Operations.POP:
-                decodedITypeOperation = Operations.POP;
+            case EncodedOperations.POP:
+                decodedITypeOperation = EncodedOperations.POP;
                 break;
-            case Operations.PUSH:
-                decodedITypeOperation = Operations.PUSH;
+            case EncodedOperations.PUSH:
+                decodedITypeOperation = EncodedOperations.PUSH;
                 break;
             default:
                 throw Error("Unrecognized I-type instruction.");
@@ -110,56 +110,56 @@ export class InstructionDecoder {
      * @param encodedOperation The binary encoded J-type operation.
      * @returns A decoded representation of the operation.
      */
-    public static decodeJOperation(encodedOperation: Array<Bit>): Operations {
-        var decodedJTypeOperation: Operations;
+    public static decodeJOperation(encodedOperation: Array<Bit>): EncodedOperations {
+        var decodedJTypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
-            case Operations.JMP:
-                decodedJTypeOperation = Operations.JMP;
+            case EncodedOperations.JMP:
+                decodedJTypeOperation = EncodedOperations.JMP;
                 break;
-            case Operations.JZ:
-                decodedJTypeOperation = Operations.JZ;
+            case EncodedOperations.JZ:
+                decodedJTypeOperation = EncodedOperations.JZ;
                 break;
-            case Operations.JE:
-                decodedJTypeOperation = Operations.JE;
+            case EncodedOperations.JE:
+                decodedJTypeOperation = EncodedOperations.JE;
                 break;
-            case Operations.JNZ:
-                decodedJTypeOperation = Operations.JNZ;
+            case EncodedOperations.JNZ:
+                decodedJTypeOperation = EncodedOperations.JNZ;
                 break;
-            case Operations.JNE:
-                decodedJTypeOperation = Operations.JNE;
+            case EncodedOperations.JNE:
+                decodedJTypeOperation = EncodedOperations.JNE;
                 break;
-            case Operations.JG:
-                decodedJTypeOperation = Operations.JG;
+            case EncodedOperations.JG:
+                decodedJTypeOperation = EncodedOperations.JG;
                 break;
-            case Operations.JGE:
-                decodedJTypeOperation = Operations.JGE;
+            case EncodedOperations.JGE:
+                decodedJTypeOperation = EncodedOperations.JGE;
                 break;
-            case Operations.JL:
-                decodedJTypeOperation = Operations.JL;
+            case EncodedOperations.JL:
+                decodedJTypeOperation = EncodedOperations.JL;
                 break;
-            case Operations.JLE:
-                decodedJTypeOperation = Operations.JLE;
+            case EncodedOperations.JLE:
+                decodedJTypeOperation = EncodedOperations.JLE;
                 break;
-            case Operations.JZ:
-                decodedJTypeOperation = Operations.JZ;
+            case EncodedOperations.JZ:
+                decodedJTypeOperation = EncodedOperations.JZ;
                 break;
-            case Operations.INT:
-                decodedJTypeOperation = Operations.INT;
+            case EncodedOperations.INT:
+                decodedJTypeOperation = EncodedOperations.INT;
                 break;
-            case Operations.IRET:
-                decodedJTypeOperation = Operations.IRET;
+            case EncodedOperations.IRET:
+                decodedJTypeOperation = EncodedOperations.IRET;
                 break;
-            case Operations.CALL:
-                decodedJTypeOperation = Operations.CALL;
+            case EncodedOperations.CALL:
+                decodedJTypeOperation = EncodedOperations.CALL;
                 break;
-            case Operations.RET:
-                decodedJTypeOperation = Operations.RET;
+            case EncodedOperations.RET:
+                decodedJTypeOperation = EncodedOperations.RET;
                 break;
-            case Operations.SYSENTER:
-                decodedJTypeOperation = Operations.SYSENTER;
+            case EncodedOperations.SYSENTER:
+                decodedJTypeOperation = EncodedOperations.SYSENTER;
                 break;
-            case Operations.SYSEXIT:
-                decodedJTypeOperation = Operations.SYSEXIT;
+            case EncodedOperations.SYSEXIT:
+                decodedJTypeOperation = EncodedOperations.SYSEXIT;
                 break;
             default:
                 throw Error("Unrecognized J-type instruction.");
@@ -173,65 +173,65 @@ export class InstructionDecoder {
      * @param encodedOperation The binary encoded R-type operation.
      * @returns A decoded representation of the operation.
      */
-    public static decodeROperation(encodedOperation: Array<Bit>): Operations {
-        var decodedRTypeOperation: Operations;
+    public static decodeROperation(encodedOperation: Array<Bit>): EncodedOperations {
+        var decodedRTypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
-            case Operations.ADD:
-                decodedRTypeOperation = Operations.ADD;
+            case EncodedOperations.ADD:
+                decodedRTypeOperation = EncodedOperations.ADD;
                 break;
-            case Operations.ADC:
-                decodedRTypeOperation = Operations.ADC;
+            case EncodedOperations.ADC:
+                decodedRTypeOperation = EncodedOperations.ADC;
                 break;
-            case Operations.SUB:
-                decodedRTypeOperation = Operations.SUB;
+            case EncodedOperations.SUB:
+                decodedRTypeOperation = EncodedOperations.SUB;
                 break;
-            case Operations.SBB:
-                decodedRTypeOperation = Operations.SBB;
+            case EncodedOperations.SBB:
+                decodedRTypeOperation = EncodedOperations.SBB;
                 break;
-            case Operations.MUL:
-                decodedRTypeOperation = Operations.MUL;
+            case EncodedOperations.MUL:
+                decodedRTypeOperation = EncodedOperations.MUL;
                 break;
-            case Operations.DIV:
-                decodedRTypeOperation = Operations.DIV;
+            case EncodedOperations.DIV:
+                decodedRTypeOperation = EncodedOperations.DIV;
                 break;
-            case Operations.NEG:
-                decodedRTypeOperation = Operations.NEG;
+            case EncodedOperations.NEG:
+                decodedRTypeOperation = EncodedOperations.NEG;
                 break;
-            case Operations.CMP:
-                decodedRTypeOperation = Operations.CMP;
+            case EncodedOperations.CMP:
+                decodedRTypeOperation = EncodedOperations.CMP;
                 break;
-            case Operations.TEST:
-                decodedRTypeOperation = Operations.TEST;
+            case EncodedOperations.TEST:
+                decodedRTypeOperation = EncodedOperations.TEST;
                 break;
-            case Operations.CLC:
-                decodedRTypeOperation = Operations.CLC;
+            case EncodedOperations.CLC:
+                decodedRTypeOperation = EncodedOperations.CLC;
                 break;
-            case Operations.CMC:
-                decodedRTypeOperation = Operations.CMC;
+            case EncodedOperations.CMC:
+                decodedRTypeOperation = EncodedOperations.CMC;
                 break;
-            case Operations.STC:
-                decodedRTypeOperation = Operations.STC;
+            case EncodedOperations.STC:
+                decodedRTypeOperation = EncodedOperations.STC;
                 break;
-            case Operations.CLI:
-                decodedRTypeOperation = Operations.CLI;
+            case EncodedOperations.CLI:
+                decodedRTypeOperation = EncodedOperations.CLI;
                 break;
-            case Operations.STI:
-                decodedRTypeOperation = Operations.STI;
+            case EncodedOperations.STI:
+                decodedRTypeOperation = EncodedOperations.STI;
                 break;
-            case Operations.AND:
-                decodedRTypeOperation = Operations.AND;
+            case EncodedOperations.AND:
+                decodedRTypeOperation = EncodedOperations.AND;
                 break;
-            case Operations.OR:
-                decodedRTypeOperation = Operations.OR;
+            case EncodedOperations.OR:
+                decodedRTypeOperation = EncodedOperations.OR;
                 break;
-            case Operations.XOR:
-                decodedRTypeOperation = Operations.XOR;
+            case EncodedOperations.XOR:
+                decodedRTypeOperation = EncodedOperations.XOR;
                 break;
-            case Operations.NOT:
-                decodedRTypeOperation = Operations.NOT;
+            case EncodedOperations.NOT:
+                decodedRTypeOperation = EncodedOperations.NOT;
                 break;
-            case Operations.NOP:
-                decodedRTypeOperation = Operations.NOP;
+            case EncodedOperations.NOP:
+                decodedRTypeOperation = EncodedOperations.NOP;
                 break;
             default:
                 throw Error("Unrecognized R-type instrcution.");
