@@ -3,7 +3,8 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { AddressingModes, InstructionTypes, OperandTypes, Operations, AccessableRegisters, WritableRegisters, DataSize } from "../../types";
+import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations, EncodedAccessableRegisters, EncodedWritableRegisters} from "../../types";
+import { DataSizes } from "../../types/DataSizes";
 import { Doubleword } from "../../types/Doubleword";
 import { VirtualAddress } from "../../types/VirtualAddress";
 import { Bit } from "../../types/Bit";
@@ -15,8 +16,38 @@ import { InstructionOperand } from "../../types/InstructionOperand";
 import { DecodedInstruction } from "../../types/DecodedInstruction";
 import { Address } from "../../types/Address";
 import { Byte } from "../../types/Byte";
+import { PrivilegeViolationError } from "../../error_types";
+import { MissingOperandError } from "../../types/errors/MissingOperandError";
+import { UnsupportedOperandTypeError } from "../../types/errors/UnsupportedOperandTypeError";
+import { Register } from "../functional_units/Register";
+import { RegisterNotWritableInUserModeError } from "../../types/errors/RegisterNotWritableInUserModeError";
+import { RegisterNotAvailableError } from "../../types/errors/RegisterNotAvailableError";
+import { UnknownRegisterError } from "../../types/errors/UnknownRegisterError";
+import { StackUnderflowError } from "../../types/errors/StackUnderflowError";
+import { StackOverflowError } from "../../types/errors/StackOverflowError";
 
+/**
+ * This class represents a CPU core which is capable of executing instructions.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
 export class CPUCore {
+    /**
+     * An error message template that is used when operands are missing.
+     * @readonly
+     */
+    private static readonly _ERROR_MESSAGE_MISSING_OPERAND: string = 
+        "The instruction requires exactly __NBR_REQUIRED__, but found only __NBR_FOUND__.";
+
+    /**
+     * An error message template that is used when an operand with an unsupported type is used.
+     * @readonly
+     */
+    private static readonly _ERROR_MESSAGE_INVALID_OPERANDTYPE: string = 
+        "The operand type '__OPERAND_TYPE__' is not supported by the '__INSTRUCTION__' instruction.";
+
+    private static readonly _ERROR_MESSAGE_REGISTER_NOT_WRITABLE_IN_USER_MODE: string =
+        "Could not write to the __REGISTER__ register as it is read-only in user mode.";
+
     /**
      * This member is used as a flag and indicates, whether virtualization is enabled or not.
      */
@@ -33,6 +64,12 @@ export class CPUCore {
      * @readonly
      */
     public readonly ebx: GeneralPurposeRegister;
+
+    /**
+     * Third general purpose register: can be used for storing all kinds of "datatypes".
+     * @readonly
+     */
+    public readonly edx: GeneralPurposeRegister;
     
     /**
      * Instruction pointer: stores the virtual/physical address of the currently executed instruction.
@@ -100,29 +137,42 @@ export class CPUCore {
     public readonly alu: ArithmeticLogicUnit;
 
     /**
+     * The highest virtual address of the STACK segment in decimal format.
+     * @readonly
+     */
+    private readonly _highestAddressOfStackDec: number;
+
+    /**
+     * The lowest virtual address of the STACK segment in decimal format.
+     * @readonly
+     */
+    private readonly _lowestAddressOfStackDec: number;
+
+    /**
+     * The maximum number of bits that can be processed in one cycle.
+     * Currently, only 32 bits (a doubleword) are supported.
+     * This value is unused at the moment.
+     * @readonly
+     */
+    private readonly _processingWidth: DataSizes;
+
+    /**
      *  The binary encoded type of the currently executed instruction.
      */
     private _decodedInstruction: DecodedInstruction | null;
 
     /**
-     * The start address of any programm.
+     * Constructs an instance of a CPU core.
+     * @param mainMemory The main memory of the system.
+     * @param highestAddressOfStackDec The highest address (bottom) of the STACK segment in decimal format.
+     * @param lowestAddressOfStackDec The lowest address (top) of the STACK segment in decimal format.
+     * @param [processingWidth=DataSizes.DOUBLEWORD] The maximum number of bits that can be processed in one cycle. Defaults to 32 bits (a doubleword).
      */
-    private _programmLowAddressDec: number;
-
-    /**
-     * The highest address of any programm
-     */
-    private _programmHighAddressDec: number;
-
-    /**
-     * Constructs a fresh instance of a CPU core.
-     * @param mainMemory 
-     * @param processingWidth 
-     */
-    public constructor(mainMemory: RAM) {
+    public constructor(mainMemory: RAM, highestAddressOfStackDec: number, lowestAddressOfStackDec: number, processingWidth: DataSizes = DataSizes.DOUBLEWORD) {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
+        this.edx = new GeneralPurposeRegister("EDX");
         this.eip = new PointerRegister("EIP");
         this.eflags = new EFLAGS();
         this.eir = new InstructionRegister();
@@ -132,39 +182,14 @@ export class CPUCore {
         this.itp = new PointerRegister("ITP");
         this.ptp = new PointerRegister("PTP");
         this.gptp = null;
-        this.mmu = new MemoryManagementUnit(mainMemory);
+        // TODO: Adopt ALU to be able to use different processing widths.
         this.alu = new ArithmeticLogicUnit(this.eflags);
+        // TODO: Adopt MMU to be able to use different processing widths.
+        this.mmu = new MemoryManagementUnit(mainMemory, this.ptp, this.alu, this.eflags);
         this._decodedInstruction = null;
-        this._programmLowAddressDec = 0;
-        this._programmHighAddressDec = mainMemory.capacity;
-    }
-
-    /**
-     * This method loads a compiled assembly programm into the main memory and resets the instruction pointer to 0b0.
-     * @param compiledProgram 
-     */
-    public loadProgramm(compiledProgram: Array<Doubleword|Instruction>) {
-        // Load compiled programm into main memory.
-        var currentAddressDec: number = this._programmLowAddressDec;
-        for (const binaryValue of compiledProgram) {
-            this.mmu.writeDoublewordTo(VirtualAddress.fromInteger(currentAddressDec), binaryValue);
-            currentAddressDec += 4;
-        }
-        this._programmHighAddressDec = currentAddressDec;
-        // Reset the instruction pointer
-        this.eip.content = VirtualAddress.fromInteger(this._programmLowAddressDec);
-        return;
-    }
-
-    /**
-     * This method unloads a compiled assembly programm from the main memory and resets the instruction pointer to 0b0.
-     * The process of unloading includes clearing all used frames and reseting the page table for the programm/process.
-     */
-    public unloadProgramm() {
-        // TODO: Unload compiled programm into main memory.
-        // Reset the instruction pointer
-        this.eip.content = VirtualAddress.fromInteger(this._programmLowAddressDec);
-        return;
+        this._processingWidth = processingWidth;
+        this._highestAddressOfStackDec = highestAddressOfStackDec;
+        this._lowestAddressOfStackDec = lowestAddressOfStackDec;
     }
 
     /**
@@ -201,7 +226,7 @@ export class CPUCore {
      */
     public cycle(): boolean {
         this.fetch();
-        if (this.eir.content.toString() === "".padStart(DataSize.DOUBLEWORD, "0")) {
+        if (this.eir.content.toString() === new Doubleword().toString()) {
             return false;
         }
         this.decode();
@@ -217,10 +242,8 @@ export class CPUCore {
     private fetch() {
         // Read address of next instruction from EIP register.
         const instructionAddress: VirtualAddress = this.eip.content;
-
         // Read next instruction from mainMemory.
         const instruction: Doubleword = this.mmu.readDoublewordFrom(instructionAddress);
-        
         // Load instruction into EIR register.
         this.eir.content = instruction;
         return;
@@ -232,7 +255,6 @@ export class CPUCore {
     private decode() {
         // Read instruction from EIR register.
         const instruction: Instruction = this.eir.content;
-
         // Split instruction into its components.
         const binaryEncodedInstructionType: Bit[] = instruction.value.slice(0, 3);
         const binaryEncodedOperation: Bit[] = instruction.value.slice(5, 12);
@@ -240,38 +262,37 @@ export class CPUCore {
         const binaryEncodedTypeFirstOperand: Bit[] = instruction.value.slice(16, 23);
         const binaryEncodedAddressingModeSecondOperand: Bit[] = instruction.value.slice(23, 25);
         const binaryEncodedTypeSecondOperand: Bit[] = instruction.value.slice(25);
-
         // Decode instruction.
-        const decodedInstructionType: InstructionTypes = InstructionDecoder.decodeInstructionType(binaryEncodedInstructionType);
-
-        const decodedOperation: Operations = 
-            (decodedInstructionType === InstructionTypes.I) ? 
+        // Decode instruction type.
+        const decodedInstructionType: EncodedInstructionTypes = InstructionDecoder.decodeInstructionType(binaryEncodedInstructionType);
+        // Decode operation.
+        const decodedOperation: EncodedOperations = 
+            (decodedInstructionType === EncodedInstructionTypes.I) ? 
                 InstructionDecoder.decodeIOperation(binaryEncodedOperation) : 
-                    (decodedInstructionType === InstructionTypes.R) ? 
+                    (decodedInstructionType === EncodedInstructionTypes.R) ? 
                         InstructionDecoder.decodeROperation(binaryEncodedOperation) : 
                         InstructionDecoder.decodeJOperation(binaryEncodedOperation);
-
-        const decodedAddressingModeFirstOperand: AddressingModes = 
+        // Decode addressing mode of first operand.
+        const decodedAddressingModeFirstOperand: EncodedAddressingModes = 
             InstructionDecoder.decodeAddressingMode(binaryEncodedAddressingModeFirstOperand);
-
-        const decodedAddressingModeSecondOperand: AddressingModes = 
+        // Decode addressing mode of second operand.
+        const decodedAddressingModeSecondOperand: EncodedAddressingModes = 
             InstructionDecoder.decodeAddressingMode(binaryEncodedAddressingModeSecondOperand);
-
-        const decodedTypeFirstOperand: OperandTypes = 
+        // Decode type of first operand.
+        const decodedTypeFirstOperand: EncodedOperandTypes = 
             InstructionDecoder.decodeOperandType(binaryEncodedTypeFirstOperand);
-        
-        const decodedTypeSecondOperand: OperandTypes = 
+        // Decode type of second operand.
+        const decodedTypeSecondOperand: EncodedOperandTypes = 
             InstructionDecoder.decodeOperandType(binaryEncodedTypeSecondOperand);
-        
+        // Create a new instance of a DecodedInstruction to save the decoded instruction to.
         this._decodedInstruction = new DecodedInstruction(decodedInstructionType, decodedOperation);
-
         // Retrieve current instruction pointer and convert its binary value to a decimal value.
         const addressOfCurrentInstructionDec: number = parseInt(this.eip.content.toString(), 2);
-
+        // Define variables for decoded operands.
         var decodedSecondOperand: InstructionOperand | undefined = undefined;
         var decodedFirstOperand: InstructionOperand | undefined = undefined;
-        
-        if (decodedTypeSecondOperand !== OperandTypes.NO) {            
+        // Decode second operands value if present.
+        if (decodedTypeSecondOperand !== EncodedOperandTypes.NO) {            
             /**
              * Read second operands value from main memory.
              * It is located at addresses with an offset of 8 from the first 
@@ -292,7 +313,7 @@ export class CPUCore {
             decodedSecondOperand = undefined;
         }
         
-        if (decodedTypeFirstOperand !== OperandTypes.NO) {
+        if (decodedTypeFirstOperand !== EncodedOperandTypes.NO) {
             /**
              * Read second operands value from main memory.
              * It is located at addresses with an offset of 4 from the first 
@@ -331,157 +352,178 @@ export class CPUCore {
         if (this._decodedInstruction === null) {
             throw new Error("No instruction is currently ready to be executed.");
         }
-        const operation: Operations = this._decodedInstruction.operation;
+        const operation: EncodedOperations = this._decodedInstruction.operation;
         var jumpPerformed: boolean = false;
         switch (operation) {
-            case Operations.NOT:
+            case EncodedOperations.NOT:
                 this.not(
                     this._decodedInstruction.operands![0]
                 );
                 break;
-            case Operations.AND:
+            case EncodedOperations.AND:
                 this.and(
                     this._decodedInstruction.operands![0], 
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.OR:
+            case EncodedOperations.OR:
                 this.or(
                     this._decodedInstruction.operands![0], 
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.XOR:
+            case EncodedOperations.XOR:
                 this.xor(
                     this._decodedInstruction.operands![0], 
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.NEG:
+            case EncodedOperations.NEG:
                 this.neg(this._decodedInstruction.operands![0]);
                 break;
-            case Operations.ADD:
+            case EncodedOperations.ADD:
                 this.add(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.ADC:
+            case EncodedOperations.ADC:
                 this.adc(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.SUB:
+            case EncodedOperations.SUB:
                 this.sub(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.SBB:
+            case EncodedOperations.SBB:
                 this.sbb(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.MUL:
+            case EncodedOperations.MUL:
                 this.mul(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.DIV:
+            case EncodedOperations.DIV:
                 this.div(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.TEST:
+            case EncodedOperations.TEST:
                 this.test(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 )
                 break;
-            case Operations.CMP:
+            case EncodedOperations.CMP:
                 this.cmp(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.STI:
+            case EncodedOperations.STI:
                 this.sti();
                 break;
-            case Operations.CLI:
+            case EncodedOperations.CLI:
                 this.cli();
                 break;
-            case Operations.CLC:
+            case EncodedOperations.CLC:
                 this.clc();
                 break;
-            case Operations.CMC:
+            case EncodedOperations.CMC:
                 this.cmc();
                 break;
-            case Operations.STC:
+            case EncodedOperations.STC:
                 this.stc();
                 break;
-            case Operations.POPF:
+            case EncodedOperations.POPF:
                 this.popf();
                 break;
-            case Operations.PUSHF:
+            case EncodedOperations.PUSHF:
                 this.pushf();
                 break;
-            case Operations.POP:
+            case EncodedOperations.POP:
                 this.pop(this._decodedInstruction.operands![0]);
                 break;
-            case Operations.PUSH:
+            case EncodedOperations.PUSH:
                 this.push(this._decodedInstruction.operands![0]);
                 break;
-            case Operations.JMP:
-                jumpPerformed = this.jump(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JMP:
+                this.jmp(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JE:
-                jumpPerformed = this.je(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JE:
+                this.je(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JG:
-                jumpPerformed = this.jg(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JG:
+                this.jg(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JL:
-                jumpPerformed = this.jl(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JL:
+                this.jl(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JGE:
-                jumpPerformed = this.jge(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JGE:
+                this.jge(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JLE:
-                jumpPerformed = this.jle(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JLE:
+                this.jle(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JNE:
-                jumpPerformed = this.jne(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JNE:
+                this.jne(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JNZ:
-                jumpPerformed = this.jnz(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JNZ:
+                this.jnz(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.JZ:
-                jumpPerformed = this.jz(this._decodedInstruction.operands![0]);
+            case EncodedOperations.JZ:
+                this.jz(this._decodedInstruction.operands![0]);
+                jumpPerformed = true;
                 break;
-            case Operations.LEA:
+            case EncodedOperations.LEA:
                 this.lea(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
                 break;
-            case Operations.NOP:
+            case EncodedOperations.NOP:
                 this.nop();
                 break;
-            case Operations.CALL:
+            case EncodedOperations.CALL:
                 this.call(this._decodedInstruction.operands![0]);
                 break;
-            case Operations.RET:
+            case EncodedOperations.RET:
                 this.ret();
                 break;
-            case Operations.MOV:
+            case EncodedOperations.MOV:
                 this.mov(
                     this._decodedInstruction.operands![0],
                     this._decodedInstruction.operands![1]!
                 );
+                break;
+            case EncodedOperations.INT:
+                this.int(this._decodedInstruction.operands![0]);
+                break;
+            case EncodedOperations.IRET:
+                this.iret();
+                break;
+            case EncodedOperations.SYSENTER:
+                this.sysenter(this._decodedInstruction.operands![0]);
+                break;
+            case EncodedOperations.SYSEXIT:
+                this.sysexit();
                 break;
             default:
                 throw new Error("Unrecognized operation found.");
@@ -489,7 +531,7 @@ export class CPUCore {
         }
         if (!jumpPerformed) {
             /**
-             * Increment EIP by 3 x 4 addresses (<-> 12 Bytes) after execution 
+             * Increment EIP by 3 x 4 bytes/addresses (<-> 12 Bytes) after execution 
              * of the current instruction.
              */
             const flags: Byte = this.eflags.content;
@@ -499,673 +541,1118 @@ export class CPUCore {
         return;
     }
 
-    /**
-     * This method is a proxy for the NOT operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to this location.
-     * @param target The operand to perform this operation on.
+    /*
+     * -------------------- Arithmetic operations --------------------
      */
-    private not(target: InstructionOperand) {
-        var operandsValue: Doubleword;
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("NOT instruction does not support an immediate target operand.");
-        } else if (target.type === OperandTypes.NO) {
-            throw new Error("NOT instruction does need at least one operand.");
-        } else if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            operandsValue = this.mmu.readDoublewordFrom(target.value);
-        } else {
-            operandsValue = this.readRegister(target);
-        }
-        const result: Doubleword = this.alu.not(operandsValue);
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, result);
-        } else {
-            this.writeRegister(result, target);
-        }
-    }
-
-    /**
-     * This method is a proxy for the AND operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
-     */
-    private and(source: InstructionOperand, target: InstructionOperand) {
-        var firstOperandsValue: Doubleword;
-        var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
-            firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
-            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
-        } else {
-            firstOperandsValue = this.readRegister(source);
-        }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
-        } else {
-            secondOperandsValue = this.readRegister(target);
-        }
-
-        const result: Doubleword = this.alu.and(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, result);
-        } else {
-            this.writeRegister(result, target);
-        }
-    }
-
-    /**
-     * This method is a proxy for the OR operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
-     */
-    private or(source: InstructionOperand, target: InstructionOperand) {
-        var firstOperandsValue: Doubleword;
-        var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
-            firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
-            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
-        } else {
-            firstOperandsValue = this.readRegister(source);
-        }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
-        } else {
-            secondOperandsValue = this.readRegister(target);
-        }
-
-        const result: Doubleword = this.alu.or(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, result);
-        } else {
-            this.writeRegister(result, target);
-        }
-    }
-
-    /**
-     * This method is a proxy for the XOR operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
-     */
-    private xor(source: InstructionOperand, target: InstructionOperand) {
-        var firstOperandsValue: Doubleword;
-        var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
-            firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
-            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
-        } else {
-            firstOperandsValue = this.readRegister(source);
-        }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
-        } else {
-            secondOperandsValue = this.readRegister(target);
-        }
-
-        const result: Doubleword = this.alu.xor(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, result);
-        } else {
-            this.writeRegister(result, target);
-        }
-    }
-
-    /**
-     * This method is a proxy for the NEG operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the operands location.
-     * @param target The operand to perform this operation on.
-     */
-    private neg(target: InstructionOperand) {
-        var value: Doubleword;
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            value = this.mmu.readDoublewordFrom(target.value);
-        } else {
-            value = this.readRegister(target);
-        }
-
-        const result: Doubleword = this.alu.neg(value);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, result);
-        } else {
-            this.writeRegister(result, target);
-        }
-    }
 
     /**
      * This method is a proxy for the ADD operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private add(source: InstructionOperand, target: InstructionOperand) {
+    private add(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "ADD")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.add(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the ADD operation.
+        const result: Doubleword = this.alu.add(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
     }
 
     /**
      * This method is a proxy for the ADC operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private adc(source: InstructionOperand, target: InstructionOperand) {
+    private adc(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "ADC")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.        
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.adc(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the ADC operation.
+        const result: Doubleword = this.alu.adc(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
     }
 
     /**
      * This method is a proxy for the SUB operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private sub(source: InstructionOperand, target: InstructionOperand) {
+    private sub(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "SUB")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.        
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.sub(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the SUB operation.
+        const result: Doubleword = this.alu.sub(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
     }
 
     /**
      * This method is a proxy for the SBB operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private sbb(source: InstructionOperand, target: InstructionOperand) {
+    private sbb(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "SBB")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.sbb(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the SBB operation.
+        const result: Doubleword = this.alu.sbb(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
     }
 
     /**
      * This method is a proxy for the MUL operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private mul(source: InstructionOperand, target: InstructionOperand) {
+    private mul(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "MUL")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.mul(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the MUL operation
+        const result: Doubleword = this.alu.mul(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
     }
 
     /**
      * This method is a proxy for the DIV operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private div(source: InstructionOperand, target: InstructionOperand) {
+    private div(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "DIV")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
-        const result: Doubleword = this.alu.div(secondOperandsValue, firstOperandsValue);
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Perform the DIV operation.
+        const result: Doubleword = this.alu.div(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, result);
         } else {
             this.writeRegister(result, target);
         }
+        return;
+    }
+
+    /*
+     * -------------------- Logical operations --------------------
+     */
+
+    /**
+     * This method is a proxy for the NEG operation provided by the ALU.
+     * It takes a binary value from the location defined by the given operand to perfom the computation on.
+     * The result is written to the location defined by the operand.
+     * @param target An operand used as an argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private neg(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "NEG")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variable to write the operands value to.
+        var value: Doubleword;
+        // Read the binary value from the location defined by the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            value = this.mmu.readDoublewordFrom(target.value);
+        } else {
+            value = this.readRegister(target);
+        }
+        // Perform the NEG operation
+        const result: Doubleword = this.alu.neg(value);
+        // Write the result to the location defined by the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            this.mmu.writeDoublewordTo(target.value, result);
+        } else {
+            this.writeRegister(result, target);
+        }
+        return;
     }
 
     /**
-     * This method is a proxy for the CMP operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * This method is a proxy for the AND operation provided by the ALU.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private cmp(source: InstructionOperand, target: InstructionOperand) {
+    private and(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "AND")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
+        // Perform the AND operation.
+        const result: Doubleword = this.alu.and(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            this.mmu.writeDoublewordTo(target.value, result);
+        } else {
+            this.writeRegister(result, target);
+        }
+        return;
+    }
 
+    /**
+     * This method is a proxy for the OR operation provided by the ALU.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private or(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "OR")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
+        var firstOperandsValue: Doubleword;
+        var secondOperandsValue: Doubleword;
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
+            firstOperandsValue = source.value;
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
+        } else {
+            firstOperandsValue = this.readRegister(source);
+        }
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
+        } else {
+            secondOperandsValue = this.readRegister(target);
+        }
+        // Perform the OR operation.
+        const result: Doubleword = this.alu.or(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            this.mmu.writeDoublewordTo(target.value, result);
+        } else {
+            this.writeRegister(result, target);
+        }
+        return;
+    }
+
+    /**
+     * This method is a proxy for the OR operation provided by the ALU.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The result is written to the location defined by the second operand.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private xor(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "OR")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
+        var firstOperandsValue: Doubleword;
+        var secondOperandsValue: Doubleword;
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
+            firstOperandsValue = source.value;
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
+        } else {
+            firstOperandsValue = this.readRegister(source);
+        }
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
+        } else {
+            secondOperandsValue = this.readRegister(target);
+        }
+        // Perform the XOR operation.
+        const result: Doubleword = this.alu.xor(firstOperandsValue, secondOperandsValue);
+        // Write the result to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            this.mmu.writeDoublewordTo(target.value, result);
+        } else {
+            this.writeRegister(result, target);
+        }
+        return;
+    }
+
+    /**
+     * This method is a proxy for the NOT operation provided by the ALU.
+     * It takes a binary value from the location defined by the given operand to perfom the computation on.
+     * The result is written to the location defined by the operand.
+     * @param target An operand used as an argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private not(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "NOT")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        } 
+        // Define variable to write the operands value to.
+        var operandsValue: Doubleword;
+        // Read the binary value from the location defined by the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            operandsValue = this.mmu.readDoublewordFrom(target.value);
+        } else {
+            operandsValue = this.readRegister(target);
+        }
+        // Perform the NOT operation
+        const result: Doubleword = this.alu.not(operandsValue);
+        // Write the result to the location defined by the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            this.mmu.writeDoublewordTo(target.value, result);
+        } else {
+            this.writeRegister(result, target);
+        }
+        return;
+    }
+
+    /**
+     * This method is a proxy for the CMP operation provided by the ALU.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The operation leaves both operands intact.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private cmp(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "CMP")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
+        var firstOperandsValue: Doubleword;
+        var secondOperandsValue: Doubleword;
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
+            firstOperandsValue = source.value;
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
+        } else {
+            firstOperandsValue = this.readRegister(source);
+        }
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
+        } else {
+            secondOperandsValue = this.readRegister(target);
+        }
+        // Perform the CMP operation
         this.alu.cmp(secondOperandsValue, firstOperandsValue);
+        // Both operands are read-only, so no need to write the result back.
         return;
     }
 
     /**
      * This method is a proxy for the TEST operation provided by the ALU.
-     * It retrieves the binary value to perfom computation on from the given operands location
-     * and writes the result back to the second operands location.
-     * @param source The first operand to perform this operation on.
-     * @param target The second operand to perform this operation on.
+     * It takes two binary values from the locations defined by the given operands to perfom the computation on.
+     * The operation leaves both operands intact.
+     * @param source An operand used as the first argument for the operation.
+     * @param target An operand used as the second argument for the operation and to write the result to.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private test(source: InstructionOperand, target: InstructionOperand) {
+    private test(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "TEST")
+            );
+        }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variables to write the operands values to.
         var firstOperandsValue: Doubleword;
         var secondOperandsValue: Doubleword;
-
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("AND instruction does not support an immediate target operand.");
-        }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("AND instruction does require at exactly two operands.");
-        }
-        
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             firstOperandsValue = this.mmu.readDoublewordFrom(source.value);
         } else {
             firstOperandsValue = this.readRegister(source);
         }
-
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the binary value from the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             secondOperandsValue = this.mmu.readDoublewordFrom(target.value);
         } else {
             secondOperandsValue = this.readRegister(target);
         }
-
+        // Perform the TEST operation.
         this.alu.test(secondOperandsValue, firstOperandsValue);
+        // Both operands are read-only, so no need to write the result back.
+        return;
     }
 
-    /**
-     * This method performs a jump and loads the given virtual address
-     * into the instruction pointer (**EIP**).
-     * @param target
-     * @returns Returns true.
+    /*
+     * -------------------- Control flow operations --------------------
      */
-    private jump(target: InstructionOperand): boolean {
+
+    /**
+     * This method performs a jump. The jump is performed immediately and unconditionally.
+     * This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address. This operation is an alias for the JZ operation.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private jmp(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JMP")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Load the given virtual address into the instruction pointer in order to perform the jump.
         this.eip.content = target.value;
-        return true;
+        // The jump is automatically performed by the instruction fetcher. There is no need to return something.
+        return;
     }    
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is performed only, if the
-     * last operation performed by the ALU resulted in a binary zero.
-     * @param target 
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the zero flag is set to (1)_2. This is the
+     * case if the last comparison of two binary values resulted in a binary zero. 
+     * This result in turn means that the first compared value was equal to the second. 
+     * This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address. This operation is an alias for the JE operation.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jz(target: InstructionOperand): boolean {
-        var perfomJump: boolean = false;
+    private jz(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JZ")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the zero flag is set to (1)_2.
         if (this.eflags.zero === 1) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            perfomJump = true;
         }
-        return perfomJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is performed only, if the
-     * last operation performed by the ALU resulted in a binary zero. Or in other words
-     * if the last compared two binary values are equal.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the zero flag is set to (1)_2. This is the
+     * case if the last comparison of two binary values resulted in a binary zero. 
+     * This result in turn means that the first compared value was equal to the second. 
+     * This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address. This operation is an alias for the JZ operation.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private je(target: InstructionOperand): boolean {
-        var perfomJump: boolean = false;
-        if (this.eflags.zero === 1) {
-            this.eip.content = target.value;
-            perfomJump = true;
+    private je(target: InstructionOperand): void {
+        // This operation is an alias for the JZ operation.
+        try {
+            this.jz(target);
+        } catch (error) {
+            if (error instanceof UnsupportedOperandTypeError) {
+                throw new UnsupportedOperandTypeError(error.message.replace("JZ", "JE"));
+            }
         }
-        return perfomJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is performed only, if the
-     * last operation performed by the ALU resulted in a value unequal to a binary zero.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the zero flag is set to (0)_2. This is the
+     * case if the last comparison of two binary values resulted in a binary value other than the binary zero. 
+     * This result in turn means that the first compared value was greater or smaller than the second. 
+     * This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address. This operation is an alias for the JNE operation.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jnz(target: InstructionOperand): boolean {
-        var performJump: boolean = false;
+    private jnz(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JNZ")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the zero flag is cleared to (0)_2.
         if (this.eflags.zero === 0) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            performJump = true;
         }
-        return performJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is performed only, if the
-     * last operation performed by the ALU resulted in a value unequal to a binary zero.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the zero flag is set to (0)_2. This is the
+     * case if the last comparison of two binary values resulted in a binary value other than the binary zero. 
+     * This result in turn means that the first compared value was greater or smaller than the second. 
+     * This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address. This operation is an alias for the JNZ operation.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jne(target: InstructionOperand): boolean {
-        var performJump: boolean = false;
-        if (this.eflags.zero === 0) {
-            this.eip.content = target.value;
-            performJump = true;
+    private jne(target: InstructionOperand): void {
+        // This operation is an alias for the JNZ operation.
+        try {
+            this.jnz(target);
+        } catch (error) {
+            if (error instanceof UnsupportedOperandTypeError) {
+                throw new UnsupportedOperandTypeError(error.message.replace("JNZ", "JNE"));
+            }
         }
-        return performJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is only performed if the last
-     * comparison of two binary numbers resulted in the first operand being greater than the second.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the overflow and sign flags 
+     * have identical values, while the zero flag is cleared to (0)_2. This is the case if the last comparison 
+     * of two binary values resulted in a positive binary value. This result in turn means that the first 
+     * compared value was greater than the second. This method takes a binary value from the location defined 
+     * by the specified operand. The binary value is interpreted as a virtual address.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jg(target: InstructionOperand): boolean {
-        var perfomJump: boolean = false;
+    private jg(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JG")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        /*
+         * Check if: 
+         *      1. The zero flag is cleared to (0)_2
+         *      2. The values of the overflow and sign flags are identical. 
+         */
         if (this.eflags.zero === 0 && this.eflags.overflow === this.eflags.sign) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            perfomJump = true;
         }
-        return perfomJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is only performed if the last
-     * comparison of two binary numbers resulted in the first operand being greater than or equal 
-     * to the second.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the overflow and sign flags 
+     * have identical values. This is the case if the last comparison of two binary values resulted in a 
+     * binary zero or a positive binary value. This result in turn means that the first compared value was 
+     * equal to or greater than the second. This method takes a binary value from the location defined by the 
+     * specified operand. The binary value is interpreted as a virtual address.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jge(target: InstructionOperand): boolean {
-        var perfomJump: boolean = false;
+    private jge(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JGE")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the values of the overflow and sign flags are identical.
         if (this.eflags.sign === this.eflags.overflow) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            perfomJump = true;
         }
-        return perfomJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is only performed if the last
-     * comparison of two binary numbers resulted in the first operand being smaller than the second.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the overflow and sign flags 
+     * have different values. This is the case if the last comparison of two binary values resulted in a 
+     * negative binary result. This result in turn means that the first compared value was smaller than the 
+     * second. This method takes a binary value from the location defined by the specified operand. 
+     * The binary value is interpreted as a virtual address.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jl(target: InstructionOperand): boolean {
-        var perfomJump: boolean = false;
+    private jl(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JL")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the values of the overflow and sign flags are not identical.
         if (this.eflags.sign !== this.eflags.overflow) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            perfomJump = true;
         }
-        return perfomJump;
+        return;
     }
 
     /**
-     * This method performs a conditional jump and loads the given virtual address
-     * into the instruction pointer (**EIP**). The jump is only performed if the last
-     * comparison of two binary numbers resulted in the first operand being smaller than or 
-     * equal to the second.
-     * @param target
-     * @returns True, if the jump will is performed, false otherwise.
+     * This method performs a conditional jump. This means that the jump is only executed if a certain 
+     * condition is met. In this case, the jump is only executed if the overflow and sign flags 
+     * have different values, while the zero flag is set to (1)_2. This is the case if the last comparison 
+     * of two binary values resulted in a binary zero or a negative binary value. This result in turn means 
+     * that the first compared value was equal to or smaller than the second. This method takes a binary value 
+     * from the location defined by the specified operand. The binary value is interpreted as a virtual address.
+     * @param target An operand used as an argument for the operation.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
      */
-    private jle(target: InstructionOperand): boolean {
-        var performJump: boolean = false;
+    private jle(target: InstructionOperand): void {
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "JG")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        /*
+         * Check if: 
+         *      1. The zero flag is set to (1)_2
+         *      2. The values of the overflow and sign flags are not identical. 
+         */
         if (this.eflags.zero === 1 && this.eflags.sign !== this.eflags.overflow) {
+            // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            performJump = true;
         }
-        return performJump;
+        return;
     }
 
-    /**
-     * This method does basically nothing.
+    /*
+     * -------------------- Data transfer operations -------------------- 
      */
-    private nop() {}
 
     /**
-     * This method extracts a bnary value from the source defined by the first operand 
-     * and copies it to the target specified by the second operand.
-     * @param source The location from where to copy the binary value from.
-     * @param target The location to copy the binary value to.
+     * This method copies a binary value from a location defined by the first operand to a location defined by the second operand.
+     * The source operand can be of type IMMEDIATE, MEMORY_ADDRESS or REGISTER. The target operand can be of type MEMORY_ADDRESS or REGISTER.
+     * @param source The first operand which defines the value to copy and the location to copy this value from.
+     * @param target The second operand which defines the value to copy and the location to copy this value from.
+     * @throws {UnsupportedOperandTypeError} If the source and target operands are both of type memory address.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     * @throws {UnknownRegisterError} If the source or target operand is of type REGISTER and the register could not be decoded.
+     * @throws {RegisterNotWritableInUserModeError} If the target operand is of type REGISTER and the register is read-only in user mode.
+     * @throws {RegisterNotAvailableError} If source or target operand is of type REGISTER and the register is currently not available.
      */
-    private mov(source: InstructionOperand, target: InstructionOperand) {
-        if (source.type === OperandTypes.MEMORY_ADDRESS && target.type === OperandTypes.MEMORY_ADDRESS) {
-            throw new Error("MOV instruction does not support two operands of type memory address.");
+    private mov(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the source and target operands are both of type memory address.
+        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS && target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            throw new UnsupportedOperandTypeError("MOV instruction does not support two operands of type memory address.");
         }
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("MOV instruction does not support an immediate target operand.");
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "MOV")
+            );
         }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("MOV instruction requires two operands. At least one of the given ones is undefined.");
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
         }
+        // Define variable to write the operands value to.
         var valueToMove: Doubleword;
-        if (source.type === OperandTypes.IMMEDIATE) {
+        // Read the binary value from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
             valueToMove = source.value;
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             valueToMove = this.mmu.readDoublewordFrom(source.value);
         } else {
             valueToMove = this.readRegister(source);
         }
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Write the value to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, valueToMove);
         } else {
             this.writeRegister(valueToMove, target);
@@ -1174,27 +1661,58 @@ export class CPUCore {
     }
 
     /**
-     * This method loads the address of the first operand, which represents the source, into the second operand, the target.
-     * @param source The location from where to find the address of. Only a memory address, or register with indirect addressing mode (references a memory address) is permitted.
-     * @param target The location to copy the address to. Only a memory address or register (direct and indirect addressing mode) is permitted.
+     * This method copies a the (virtual) memory address from a location defined by the first operand to a location defined by the second operand.
+     * The source operand can be of type MEMORY_ADDRESS or REGISTER. The target operand can be of type MEMORY_ADDRESS or REGISTER.
+     * @param source The first operand which defines the (virtual) memory address to copy.
+     * @param target The second operand which defines the value to copy and the location to copy this value from.
+     * @throws {UnsupportedOperandTypeError} If the source and target operands are both of type memory address.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {UnsupportedOperandTypeError} If the source operand is of type REGISTER and uses DIRECT addressing mode.
+     * @throws {MissingOperandError} If one of the operands is missing.
+     * @throws {UnknownRegisterError} If the source or target operand is of type REGISTER and the register could not be decoded.
+     * @throws {RegisterNotWritableInUserModeError} If the target operand is of type REGISTER and the register is read-only in user mode.
+     * @throws {RegisterNotAvailableError} If source or target operand is of type REGISTER and the register is currently not available.
      */
-    private lea(source: InstructionOperand, target: InstructionOperand) {
-        if (source.type === OperandTypes.IMMEDIATE || target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("LEA instruction does not support an immediate source or target operands.");
+    private lea(source: InstructionOperand, target: InstructionOperand): void {
+        // Check if the source and target operands are both of type memory address.
+        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS && target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            throw new UnsupportedOperandTypeError("LEA instruction does not support two operands of type memory address.");
         }
-        if (source.type === OperandTypes.REGISTER && source.addressingMode === AddressingModes.DIRECT) {
-            throw new Error("LEA instruction can not extract an address of a register.");
+        // Check if the source or target operand are of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE || source.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "LEA")
+            );
         }
-        if (source.type === OperandTypes.NO || target.type === OperandTypes.NO) {
-            throw new Error("LEA instruction requires two operands. At least one of the given ones is undefined.");
+        // Check if the source operand is of type REGISTER and the addressing mode is DIRECT.
+        if (source.type === EncodedOperandTypes.REGISTER && source.addressingMode === EncodedAddressingModes.DIRECT) {
+            throw new UnsupportedOperandTypeError("LEA instruction can not extract an (virtual) address of a register.");
         }
+        // Check if exactly two operands are present.
+        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Define variable to write the (virtual) memory address to.
         var address: Address = new Address();
-        if (source.type === OperandTypes.MEMORY_ADDRESS) {
+        // Read the (virtual) memory address from the location defined by the first operand.
+        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             address = source.value;
         } else {
             address = this.readRegister(source);
         }
-        if (target.type === OperandTypes.MEMORY_ADDRESS) {
+        // Write the (virtual) memory address to the location defined by the second operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.mmu.writeDoublewordTo(target.value, address);
         } else {
             this.writeRegister(address, target);
@@ -1202,18 +1720,23 @@ export class CPUCore {
         return;
     }
 
+    /*
+     * -------------------- FLAG operations -------------------- 
+     */
+
     /**
      * This method clears the carry flag.
      */
-    private clc() {
+    private clc(): void {
         this.eflags.clearCarry();
         return;
     }
 
     /**
      * This method complements the carry flag.
+     * If the carry flag is set, it is cleared. If the carry flag is cleared, it is set.
      */
-    private cmc() {
+    private cmc(): void {
         if (this.eflags.carry === 1) {
             this.eflags.clearCarry();
         } else {
@@ -1225,31 +1748,61 @@ export class CPUCore {
     /**
      * This method sets the carry flag.
      */
-    private stc() {
+    private stc(): void {
         this.eflags.setCarry();
         return;
     }
 
     /**
      * This method clears the interrupt flag.
+     * The CPU will ignore all software interrupts to occur.
+     * @throws {PrivilegeViolationError} If the CPU is not in kernel mode.
      */
-    private cli() {
+    private cli(): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("PUSHF can only executed in kernel mode, but current process is running in user mode.");
+        }
         this.eflags.clearInterrupt();
         return;
     }
 
     /**
      * This method sets the interrupt flag.
+     * This enables the CPU to handle software interrupts.
+     * @throws {PrivilegeViolationError} If the CPU is not in kernel mode.
      */
-    private sti() {
+    private sti(): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("PUSHF can only executed in kernel mode, but current process is running in user mode.");
+        }
         this.eflags.setInterrupt();
         return;
     }
 
+    /*
+     * -------------------- Stack operations -------------------- 
+     */
+
     /**
      * This method pushes the contents of the EFLAGS register onto the STACK.
+     * @throws {PrivilegeViolationError} If the CPU is not in kernel mode.
+     * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
      */
-    private pushf() {
+    private pushf(): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("PUSHF can only executed in kernel mode, but current process is running in user mode.");
+        }
+        // Check whether ESP reached lowest address (top) of STACK segment.
+        if (this.esp.content.equal(Doubleword.fromInteger(this._lowestAddressOfStackDec))) {
+            // ESP reached highest possible address (top) of STACK segment.
+            throw new StackUnderflowError("Could not perform PUSHF operation. STACK pointer reached top of the STACK.");
+        }
         // Allocate one byte on STACK by decrementing the value in ESP.
         this.esp.content = this.alu.sub(this.esp.content, Doubleword.fromInteger(1));
         // Write contents of flags register on STACK.
@@ -1259,75 +1812,180 @@ export class CPUCore {
 
     /**
      * This method reads the contents of the EFLAGS register from the STACK into the EFLAGS register.
+     * The STACK pointer is incremented by 1 (byte/address) after the operation and the used memory gets deallocated.
+     * @throws {PrivilegeViolationError} If the CPU is not in kernel mode.
+     * @throws {StackUnderflowError} If the ESP reached the highest possible address (bottom) of the STACK segment.
      */
-    private popf() {
+    private popf(): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("POPF can only executed in kernel mode, but current process is running in user mode.");
+        }
+        // Check whether ESP reached highest address (bottom) of STACK segment.
+        if (this.esp.content.equal(Doubleword.fromInteger(this._highestAddressOfStackDec))) {
+            // ESP reached highest possible address (bottom) of STACK segment.
+            throw new StackOverflowError("Could not perform POPF operation. STACK pointer reached bottom of the STACK.");
+        }
         // Read contents of flags register from STACK into flags register.
         this.eflags.content = this.mmu.readByteFrom(this.esp.content);
-        // Deallocate one byte on STACK by incrementing the value in ESP.
+        // Deallocate four byte or one doubleword from STACK by incrementing the value in ESP.
+        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        // TODO: Call interrupt handler for deallocation of page frame in page table.
         this.esp.content = this.alu.add(this.esp.content, Doubleword.fromInteger(1));
         return;
     }
 
     /**
-     * This method copies a doubleword sized binary value from the STACK to the specified target.
-     * @param target Defines, where to put the red binary value from the STACK.
+     * This method copies a doubleword sized binary value from the STACK to the target defined by the given operand.
+     * The STACK pointer is incremented by four (bytes/addresses), which deallocates memory for a doubleword.
+     * @param target This operand defines where to put the red binary value from the STACK to.
+     * @throws {StackUnderflowError} If the ESP reached the highest possible address (bottom) of the STACK segment.
+     * @throws {RegisterNotWritableInUserModeError} If the targeted register is not writable in user mode.
+     * @throws {UnknownRegisterError} If the targeted register is unknown.
+     * @throws {MissingOperandError} If the operand given is of type NO.
      */
     private pop(target: InstructionOperand) {
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("POP instruction does not support an immediate as a target operand.");
-        } else if (target.type === OperandTypes.NO) {
-            throw new Error("POP instruction requires one operand.");
-        } else if (target.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(
-                target.value, 
-                this.mmu.readDoublewordFrom(this.esp.content)
-            );
-        } else {
-            this.writeRegister(
-                this.mmu.readDoublewordFrom(this.esp.content), 
-                target
+        // Check whether ESP reached highest address (bottom) of STACK segment.
+        if (this.esp.content.equal(Doubleword.fromInteger(this._highestAddressOfStackDec))) {
+            // ESP reached highest address (bottom) of STACK segment.
+            throw new StackUnderflowError("Could not perform POP operation. STACK pointer reached bottom of the STACK.");
+        }
+        // Check if the target operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "POP")
             );
         }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Read the binary value from the STACK.
+        const value: Doubleword = this.mmu.readDoublewordFrom(this.esp.content);
+        // Write the value to the location defined by the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            const address: Address = target.value;
+            this.mmu.writeDoublewordTo(address, value);
+        } else {
+            this.writeRegister(value, target);
+        }
+        // Deallocate one doubleword from STACK by incrementing the value in ESP.
+        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        // TODO: Call interrupt handler for deallocation of page frame in page table.
         this.esp.content = this.alu.add(this.esp.content, Doubleword.fromInteger(4));
         return;
     }
 
     /**
-     * This method puts a doubleword sized binary value onto the STACK.
-     * @param source The binary value to put onto the STACK.
+     * This method copies a doubleword sized binary value defined by the given operand onto the STACK.
+     * Therefore the stack pointer is decremented by 4 (bytes/addresses), which allocates memory for a doubleword on the STACK.
+     * @param target This operand defines from where to copy the binary value.
+     * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
+     * @throws {RegisterNotWritableInUserModeError} If the targeted register is not writable in user mode.
+     * @throws {UnknownRegisterError} If the targeted register is unknown.
+     * @throws {MissingOperandError} If the operand given is of type NO.
      */
     private push(source: InstructionOperand) {
-        // Move STACK pointer towards lower addresses in order to alocate memory.
-        this.esp.content = this.alu.sub(this.esp.content, Doubleword.fromInteger(4));
-        if (source.type === OperandTypes.IMMEDIATE) {
-            throw new Error("PUSH instruction does not support an immediate as a target operand.");
-        } else if (source.type === OperandTypes.NO) {
-            throw new Error("PUSH instruction requires one operand.");
-        } else if (source.type === OperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(
-                this.esp.content, 
-                this.mmu.readDoublewordFrom(source.value)
-            );
-        } else {
-            this.mmu.writeDoublewordTo(
-                this.esp.content, 
-                this.readRegister(source)
+        // Check whether ESP reached lowest address (top) of STACK segment.
+        if (this.esp.content.equal(Doubleword.fromInteger(this._lowestAddressOfStackDec))) {
+            // ESP reached lowest address (top) of STACK segment.
+            throw new StackOverflowError("Could not perform PUSH operation. STACK pointer reached top of the STACK.");
+        }
+        // Check if the source operand is of type IMMEDIATE.
+        if (source.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "PUSH")
             );
         }
+        // Check if exactly one operand is present.
+        if (source.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (source.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Allocate one doubleword (4 byte) on STACK by decrementing ESP.
+        this.esp.content = this.alu.sub(this.esp.content, Doubleword.fromInteger(4));
+        // Create a variable to store the value to write on STACK.
+        var value: Doubleword;
+        // Depending on the operand type, the value is read from the main memory or a register.
+        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            // Read the binary value from the (virtual) memory address defined by the given operand.
+            value = this.mmu.readDoublewordFrom(source.value);            
+        } else {
+            // Read the binary value from the register defined by the given operand.
+            value = this.readRegister(source);
+        }
+        // Write the value to the STACK.
+        this.mmu.writeDoublewordTo(this.esp.content, value);
         return;
     }
 
-    /**
-     * This method sets the EIP register to the specified memory address in order to realize the
-     * call of a subroutine.
-     * @param target 
+    /*
+     * -------------------- Subroutine operations -------------------- 
      */
-    private call(target: InstructionOperand) {
-        if (target.type === OperandTypes.IMMEDIATE) {
-            throw new Error("POP instruction does not support an immediate as a target operand.");
-        } else if (target.type === OperandTypes.NO) {
-            throw new Error("POP instruction requires one operand.");
-        } else if (target.type === OperandTypes.MEMORY_ADDRESS) {
+
+    /**
+     * This method performs a procedure call. It performs a jump to the (virtual) memory address defined by the given operand. 
+     * The (virtual) memory address should be the base address of the subroutine to call. Before transfering control to the callee,
+     * this method writes a return address onto the STACK. Afterwards the (virtual) address gets loaded into the instruction pointer 
+     * (EIP) register and control is transfered to the callee (targeted subroutine).
+     * @param target This operand defines the (virtual) base address of the subroutine to call.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If the operand given is of type NO.
+     * @throws {RegisterNotAvailableError} If the register to read from, is not available.
+     * @throws {UnknownRegisterError} If the register to read from, is unknown.
+     */
+    private call(target: InstructionOperand): void {
+        // Check if the source operand is of type IMMEDIATE.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "CALL")
+            );
+        }
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        /*
+         * Before calling a subroutine, the caller needs to push the return address onto the STACK.
+         * The return address is necessary to hand over control to the caller again after the subroutine 
+         * has finished. The return address is an alias for the address of the instruction following the 
+         * CALL instruction. Therefore, one doubleword ((4)_10 byte) needs to be allocated on the STACK 
+         * by decrementing ESP first.
+         */
+        this.esp.content = this.alu.sub(this.esp.content, Doubleword.fromInteger(4));
+        /*
+         * The instruction following the CALL instruction is located at EIP (currently pointing at
+         * the CALL instruction) plus (12)_10 ((3)_10 * (4)_10 byte per instruction).
+         */
+        const returnAddress: Doubleword = this.alu.add(this.eip.content, Doubleword.fromInteger(12));
+        // Write the return address to the STACK.
+        this.mmu.writeDoublewordTo(this.esp.content, returnAddress);
+        // Transfer control to the subroutine by loading the subroutines base address into EIP register.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             this.eip.content = target.value;
         } else {
             this.eip.content = this.readRegister(target);
@@ -1336,25 +1994,200 @@ export class CPUCore {
     }
 
     /**
-     * This method takes the return address from the stack and transfers control
-     * to the command located at this address (the caller).
-     * @param target 
+     * This method returns from a subroutine. It reads the return address from the STACK and transfers
+     * control to the caller, by loading the return address into the instruction pointer (EIP) register.
      */
-    private ret() {
+    private ret(): void {
+        // Read the return address from the STACK.
         this.eip.content = this.mmu.readDoublewordFrom(this.esp.content);
-        this.alu.add(this.esp.content, Doubleword.fromInteger(4));
+        // Deallocate one doubleword from the STACK by incrementing ESP.
+        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        // TODO: Call interrupt handler for deallocation of page frame in page table.
+        this.esp.content = this.alu.add(this.esp.content, Doubleword.fromInteger(4));
+        return;
+    }
+
+    /*
+     * -------------------- Interrupt operations -------------------- 
+     */
+
+    /**
+     * This method triggers a software interrupt by calling an interrupt handler. The operating system stores the 
+     * interrupt handlers in a list located in a restricted area of the main memory. This erea is only accessable in kernel mode. 
+     * Each interrupt handler is identified by a unique number or index. This method performs a jump to the physical memory address 
+     * of the interrupt handler, which is computed by adding the interrupt handlers number to the interrupt tables base address.
+     * This base address is stored in the interrupt table pointer (ITP) register. Before transfering control to the interrupt handler,
+     * the current EFLAGS are saved on the STACK. In order to do so, this method enters kernel mode. To prevent the handler from beeing
+     * interrupted, the interrupt flag is cleared as well. Afterwards the handler is called. 
+     * The call follows the same rules as a normal function call.
+     * @param target The interrupt handlers number.
+     * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
+     */
+    private int(target: InstructionOperand): void {
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the target operand is of type MEMORY_ADDRESS.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "MEMORY_ADDRESS").replace("__INSTRUCTION__", "INT")
+            );    
+        }
+        // Check if the target operand is of type REGISTER.
+        if (target.type === EncodedOperandTypes.REGISTER) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "REGISTER").replace("__INSTRUCTION__", "INT")
+            );
+        }
+        // Switch to kernel mode.
+        this.eflags.enterKernelMode();
+        // Disable software interrupts by clearing the interrupt flag.
+        this.eflags.clearInterrupt();
+        // Add the number of the interrupt handler to the interrupt tables base address, which is stored in the ITP register.
+        const interruptHandlerAddress: Doubleword = this.alu.add(this.itp.content, target.value);
+        // Push the current EFLAGS onto the STACK to save them for later.
+        this.pushf();
+        // Call subroutine at the interrupt handlers address.
+        this.call(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.MEMORY_ADDRESS, interruptHandlerAddress));
         return;
     }
 
     /**
-     * This method writes a doubleword sized binary value to a given register operand.
-     * Depending on the access type, the value is written directly to the register or
-     * to an referenced address of the main memory.
+     * This method returns from an interrupt handler triggered by a software interrupt. It reads the return address from the STACK
+     * and transfers control back to the interrupted process. Additionally, the EFLAGS gets restored from the STACK, the interrupt flag
+     * is cleared and the CPU switches back to user mode.
+     * @throws {PrivilegeViolationError} If the CPU is not in kernel mode when this mehtod is called.
+     */
+    private iret(): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("IRET can only be called when CPU is in kernel mode.");
+        }
+        // Return from the interrupt handler by calling the RET operation.
+        this.ret();
+        // Enable software interrupts by setting the interrupt flag.
+        this.eflags.setInterrupt();
+        // Restore the old EFLAGS contents from the STACK.
+        this.popf();
+        // Switch back to user mode.
+        this.eflags.enterUserMode();
+        return;
+    }
+
+    /*
+     * -------------------- System operations -------------------- 
+     */
+
+    /**
+     * This method performs a call to a systems subroutine. It performs a jump to the physical memory address defined by the given operand. 
+     * The physical memory address should be the base address of the subroutine to call. Before transfering control to the callee,
+     * this method writes a return address onto the STACK. Afterwards the physical address gets loaded into the instruction pointer 
+     * (EIP) register and control is transfered to the callee (targeted subroutine). As all systems subroutines reside in a restricted 
+     * erea of the main memory, this method needs to enter the kernel mode. In order to ensure, this subroutine can not be interrupted,
+     * the interrupt flag is cleared. The current content of the EFLAGS register is written onto the STACK.
+     * @param target This operand defines the physical base address of the systems subroutine to call.
+     * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
+     * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
+     * @throws {MissingOperandError} If the operand given is of type NO. 
+     * @throws {RegisterNotAvailableError} If the register to read from, is not available.
+     * @throws {UnknownRegisterError} If the register to read from, is unknown.
+     */
+    private sysenter(target: InstructionOperand): void {
+        // Check if exactly one operand is present.
+        if (target.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands: number = 0;
+            if (target.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "one operand").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+        // Check if the target operand is of type MEMORY_ADDRESS.
+        if (target.type === EncodedOperandTypes.IMMEDIATE) {
+            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
+            throw new UnsupportedOperandTypeError(
+                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "SYSENTER")
+            );    
+        }
+        // Create a variable to store the (virtual) address of the systems subroutine.
+        var systemSubroutineAddress: Doubleword;
+        // Read the physical address of the systems subroutine from the operand.
+        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+            systemSubroutineAddress = target.value;
+        } else {
+            systemSubroutineAddress = this.readRegister(target);
+        }
+        // Switch to kernel mode.
+        this.eflags.enterKernelMode();
+        // Push the current EFLAGS onto the STACK.
+        this.pushf();
+        // Disable software interrupts by clearing the interrupt flag.
+        this.eflags.clearInterrupt();
+        // Call the systems subroutine.
+        this.call(
+            new InstructionOperand(
+                EncodedAddressingModes.DIRECT, 
+                EncodedOperandTypes.MEMORY_ADDRESS, 
+                target.value)
+        );
+        return;
+    }
+
+    /**
+     * This method returns from a systems subroutine. It reads the return address from the STACK
+     * and transfers control back to the caller. Additionally, the EFLAGS gets restored from the STACK, the interrupt flag
+     * is cleared and the CPU switches back to user mode.
+     * @throws {StackUnderflowError} If the ESP reached the highest possible address (bottom) of the STACK segment.
+     */
+    private sysexit(): void {
+        if (!this.eflags.isInKernelMode()) {
+            throw new PrivilegeViolationError("SYSEXIT can only be called when kernel mode is enabled.");
+        }
+        // Return from the systems subroutine by calling the RET operation.
+        this.ret();
+        // Enable software interrupts by setting the interrupt flag.
+        this.eflags.setInterrupt();
+        // Restore the old EFLAGS contents from the STACK.
+        this.popf();
+        // Switch back to user mode.
+        this.eflags.enterUserMode();
+        return;
+    }
+
+    /*
+     * -------------------- Special operations -------------------- 
+     */
+
+    /**
+     * This method does nothing.
+     */
+    private nop(): void {}
+
+    /**
+     * This method writes a given doubleword sized binary value to the register defined by the given operand.
+     * Depending on the access type, the value is written directly to the register or to an referenced 
+     * (virtual) memory address.
      * @param operand The register operand to read a binary value from.
+     * @throws {RegisterNotWritableInUserModeError} If the targeted register is not writable in user mode.
+     * @throws {UnknownRegisterError} If the targeted is unknown.
      * @returns The red binary value.
      */
-    private writeRegister(value: Doubleword, operand: InstructionOperand) {
-        if (operand.addressingMode === AddressingModes.INDIRECT) {
+    private writeRegister(value: Doubleword, operand: InstructionOperand): void {
+        // Depending on the addressing mode, the value is written to the register directly or to the referenced (virtual) memory address.
+        if (operand.addressingMode === EncodedAddressingModes.INDIRECT) {
             this.writeRegisterIndirect(value, operand);
         } else {
             this.writeRegisterDirect(value, operand);
@@ -1363,100 +2196,76 @@ export class CPUCore {
     }
 
     /**
-     * This methods writes a given doubleword sized binary value to the given
-     * register.
+     * This method writes a given doubleword sized binary value to the register defined by the given operand.
      * @param value The binary value to write to the given register.
      * @param operand The register to write the value to.
+     * @throws {RegisterNotWritableInUserModeError} If the targeted register is not writable in user mode.
+     * @throws {UnknownRegisterError} If the targeted is unknown.
      */
-    private writeRegisterDirect(value: Doubleword, operand: InstructionOperand) {
-        switch (operand.value.toString()) {
-            case WritableRegisters.EAX:
-                this.eax.content = value;
-                break;
-            case WritableRegisters.EBX:
-                this.ebx.content = value;
-                break;
-            case WritableRegisters.EIP:
-                this.eip.content = value;
-                break;
-            case WritableRegisters.ESP:
-                this.esp.content = value;
-                break;
-            case WritableRegisters.GPTP:
-                if (this.gptp === null) {
-                    throw new Error("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
-                }
-                this.gptp.content = value;
-                break;
-            case WritableRegisters.ITP:
-                this.itp.content = value;
-                break;
-            case WritableRegisters.NPTP:
-                this.nptp.content = value;
-                break;
-            case WritableRegisters.VMPTR:
-                this.vmtpr.content = value;
-                break;
-            default:
-                throw new Error(`Unrecognized binary encoded register: ${operand.value.toString()}.`);
-                break;
+    private writeRegisterDirect(value: Doubleword, operand: InstructionOperand): void {
+        // Decode the register defined by the operand.
+        const register: Register<Doubleword> = this.decodeWritableRegister(operand);
+        // Check if the decoded register is writable in user mode.
+        if (register === this.eir && !this.eflags.isInKernelMode()) {
+            // Writing to the EIP register is only allowed in kernel mode.
+            const msg: string = CPUCore._ERROR_MESSAGE_REGISTER_NOT_WRITABLE_IN_USER_MODE;
+            throw new RegisterNotWritableInUserModeError(
+                msg.replace("__REGISTER__", "EIR")
+            );
+        } else if (register === this.gptp && !this.eflags.isInKernelMode()) {
+            // Writing to the GPTP register is only allowed in kernel mode.
+            const msg: string = CPUCore._ERROR_MESSAGE_REGISTER_NOT_WRITABLE_IN_USER_MODE;
+            throw new RegisterNotWritableInUserModeError(
+                msg.replace("__REGISTER__", "GPTP")
+            );
+        } else if (register === this.nptp && !this.eflags.isInKernelMode()) {
+            // Writing to the NPTP register is only allowed in kernel mode.
+            const msg: string = CPUCore._ERROR_MESSAGE_REGISTER_NOT_WRITABLE_IN_USER_MODE;
+            throw new RegisterNotWritableInUserModeError(
+                msg.replace("__REGISTER__", "NPTP")
+            );
+        } else if (register === this.vmtpr && !this.eflags.isInKernelMode()) {
+            // Writing to the VMPTR register is only allowed in kernel mode.
+            const msg: string = CPUCore._ERROR_MESSAGE_REGISTER_NOT_WRITABLE_IN_USER_MODE;
+            throw new RegisterNotWritableInUserModeError(
+                msg.replace("__REGISTER__", "VMTPR")
+            );
+        } else {
+            // Write the doubleword to the register.
+            register.content = value;
         }
+        return;
     }
 
     /**
-     * This methods writes a given doubleword sized binary value to the memory address
-     * referenced by the given register.
+     * This method writes a given doubleword sized binary value to a (virtual) memory address.
+     * The (virtual memory address) is referenced by the register defined by the given operand.
      * @param value The binary value to write to the memory address referenced by the given register.
      * @param operand The register which references a memory address to write to.
+     * @throws {RegisterNotAvailableError} If the register to write to is not available.
+     * @throws {UnknownRegisterError} If the register to write to is unknown.
      */
-    private writeRegisterIndirect(value: Doubleword, operand: InstructionOperand) {
-        var register: GeneralPurposeRegister|PointerRegister;
-        switch (operand.value.toString()) {
-            case WritableRegisters.EAX:
-                register = this.eax;
-                break;
-            case WritableRegisters.EBX:
-                register = this.ebx;
-                break;
-            case WritableRegisters.EIP:
-                register = this.eip;
-                break;
-            case WritableRegisters.ESP:
-                register = this.esp;
-                break;
-            case WritableRegisters.GPTP:
-                if (this.gptp === null) {
-                    throw new Error("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
-                }
-                register = this.gptp;
-                break;
-            case WritableRegisters.ITP:
-                register = this.itp;
-                break;
-            case WritableRegisters.NPTP:
-                register = this.nptp;
-                break;
-            case WritableRegisters.VMPTR:
-                register = this.vmtpr;
-                break;
-            default:
-                throw new Error(`Unrecognized binary encoded register: ${operand.value.toString()}.`);
-                break;
-        }
+    private writeRegisterIndirect(value: Doubleword, operand: InstructionOperand): void {
+        // Decode the register defined by the operand.
+        const register: Register<Doubleword> = this.decodeWritableRegister(operand);
+        // Write the doubleword to the referenced (virtual) memory address.
         this.mmu.writeDoublewordTo(register.content, value);
         return;
     }
 
     /**
-     * This method reads a doubleword sized binary value from a given register operand.
-     * Depending on the access type, the value is read directly from the register or
-     * from the main memory, if an address is referenced by the register.
+     * This method reads a given doubleword sized binary value from a register defined by the given operand. 
+     * Depending on the addressing mode, the value is read directly from the register or from the main memory. 
+     * In the latter case, the value contained in the register is interpreted as the memory address.
      * @param operand The register operand to read a binary value from.
-     * @returns The red binary value.
+     * @throws {RegisterNotAvailableError} If the register to read from is not available.
+     * @throws {UnknownRegisterError} If the register to read from is unknown.
+     * @returns The binary value red from the register or the referenced (virtual) memory address.
      */
     private readRegister(operand: InstructionOperand): Doubleword {
-        var doubleword: Doubleword = new Doubleword();
-        if (operand.addressingMode === AddressingModes.INDIRECT) {
+        var doubleword: Doubleword;
+        // Depending on the addressing mode, the value is read from the register directly or from the referenced (virtual) memory address.
+        if (operand.addressingMode === EncodedAddressingModes.INDIRECT) {
             doubleword = this.readRegisterIndirect(operand);
         } else {
             doubleword = this.readRegisterDirect(operand);
@@ -1465,58 +2274,128 @@ export class CPUCore {
     }
 
     /**
-     * This method reads a doubleword from the memory address the given register
-     * is pointing to.
-     * @param operand The register which references a memory address.
-     * @returns The binary value read from the memory address referenced by the register.
+     * This method reads a given doubleword sized binary value from a (virtual) memory address.
+     * The (virtual) memory address is referenced by the register defined in the given operand.
+     * @param operand The operand to extract the register from.
+     * @throws {RegisterNotAvailableError} If the register to read from is not available.
+     * @throws {UnknownRegisterError} If the register to read from is unknown.
+     * @returns The binary value red from the referenced (virtual) memory address.
      */
     private readRegisterIndirect(operand: InstructionOperand): Doubleword {
-        const address: Address = this.readRegisterDirect(operand);
+        // Decode the register defined by the operand and read its value.
+        const address: Address = this.decodeReadableRegister(operand).content;
+        // Read the doubleword from the referenced (virtual) memory address.
         return this.mmu.readDoublewordFrom(address);
     }
 
     /**
-     * This method reads a doubleword from the register.
-     * @param operand The register operand.
-     * @returns The binary value read from the register.
+     * This method reads a given doubleword sized binary value from the register defined by the given operand.
+     * @param operand The operand to extract the register from.
+     * @throws {RegisterNotAvailableError} If the register to read from is not available.
+     * @throws {UnknownRegisterError} If the register to read from is unknown.
+     * @returns The binary value red from the register.
      */
     private readRegisterDirect(operand: InstructionOperand): Doubleword {
-        var value: Doubleword;
+        // Decode the register defined by the operand and return its value.
+        return this.decodeReadableRegister(operand).content;
+    }
+
+    /**
+     * This method decodes a given operands value and returns the encoded register.
+     * Only readable registers can be decoded.
+     * @param operand The operand to extract the register from.
+     * @throws {RegisterNotAvailableError} If the register to decode is not available.
+     * @throws {UnknownRegisterError} If the register to decode is unknown.
+     * @returns The decoded register.
+     */
+    private decodeReadableRegister(operand: InstructionOperand): Register<Doubleword> {
+        var register: Register<Doubleword>;
         switch (operand.value.toString()) {
-            case AccessableRegisters.EAX:
-                value = this.eax.content;
+            case EncodedAccessableRegisters.EAX:
+                register = this.eax;
                 break;
-            case AccessableRegisters.EBX:
-                value = this.ebx.content;
+            case EncodedAccessableRegisters.EBX:
+                register = this.ebx;
                 break;
-            case AccessableRegisters.EIP:
-                value = this.eip.content;
+            case EncodedAccessableRegisters.EDX:
+                register = this.edx;
                 break;
-            case AccessableRegisters.EIR:
-                value = this.eir.content;
+            case EncodedAccessableRegisters.EIP:
+                register = this.eip;
                 break;
-            case AccessableRegisters.ESP:
-                value = this.esp.content;
+            case EncodedAccessableRegisters.EIR:
+                register = this.eir;
                 break;
-            case AccessableRegisters.GPTP:
+            case EncodedAccessableRegisters.ESP:
+                register = this.esp;
+                break;
+            case EncodedAccessableRegisters.GPTP:
                 if (this.gptp === null) {
-                    throw new Error("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
+                    throw new RegisterNotAvailableError("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
                 }
-                value = this.gptp.content;
+                register = this.gptp;
                 break;
-            case AccessableRegisters.ITP:
-                value = this.itp.content;
+            case EncodedAccessableRegisters.ITP:
+                register = this.itp;
                 break;
-            case AccessableRegisters.NPTP:
-                value = this.nptp.content;
+            case EncodedAccessableRegisters.NPTP:
+                register = this.nptp;
                 break;
-            case AccessableRegisters.VMPTR:
-                value = this.vmtpr.content;
+            case EncodedAccessableRegisters.VMPTR:
+                register = this.vmtpr;
                 break;
             default:
-                throw new Error(`Unrecognized binary encoded register: ${operand.value.toString()}.`);
+                throw new UnknownRegisterError(`Unrecognized binary encoded register: ${operand.value.toString()}.`);
                 break;
         }
-        return value;
+        return register;
+    }
+
+    /**
+     * This method decodes a given operands value and returns the encoded register. 
+     * Both read- and writable registers can be decoded.
+     * @param operand The operand to extract the register from.
+     * @throws {RegisterNotAvailableError} If the register to decode is not available.
+     * @throws {UnknownRegisterError} If the register to decode is unknown.
+     * @returns The decoded register.
+     */
+    private decodeWritableRegister(operand: InstructionOperand): Register<Doubleword> {
+        var register: Register<Doubleword>;
+        switch (operand.value.toString()) {
+            case EncodedWritableRegisters.EAX:
+                register = this.eax;
+                break;
+            case EncodedWritableRegisters.EBX:
+                register = this.ebx;
+                break;
+            case EncodedWritableRegisters.EDX:
+                register = this.edx;
+                break;
+            case EncodedWritableRegisters.EIP:
+                register = this.eip;
+                break;
+            case EncodedWritableRegisters.ESP:
+                register = this.esp;
+                break;
+            case EncodedWritableRegisters.GPTP:
+                if (this.gptp === null) {
+                    throw new RegisterNotAvailableError("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
+                }
+                register = this.gptp;
+                break;
+            case EncodedWritableRegisters.ITP:
+                register = this.itp;
+                break;
+            case EncodedWritableRegisters.NPTP:
+                register = this.nptp;
+                break;
+            case EncodedWritableRegisters.VMPTR:
+                register = this.vmtpr;
+                break;
+            default:
+                throw new UnknownRegisterError(`Unrecognized binary encoded register: ${operand.value.toString()}.`);
+                break;
+        }
+        return register;
     }
 }
