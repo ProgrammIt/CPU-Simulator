@@ -1,67 +1,50 @@
-export interface LanguageDefinition {
-	instructions: Instruction[];
-	addressable_registers: Register[];
-}
-
-export interface Instruction {
-	mnemonic: string;
-	opcode: string;
-	type: string;
-	regexes: string[];
-}
-
-export interface Register {
-	name: string;
-	aliases: string[];
-	code: string;
-}
-
 export enum NumberSystem {
 	HEX = 16,
 	DEC = 10,
 	BIN = 2
 }
 
-export enum DataSize {
-	BYTE = 8,
-	WORD = 16,
-	DOUBLEWORD = 32,
-	QUADWORD = 64
+export enum OperandTypes {
+	IMMEDIATE = "IMMEDIATE",
+	REGISTER = "REGISTER",
+	MEMORY_ADDRESS = "MEMORY_ADDRESS"
 }
 
 /**
  * An enum representing the accessable and binary encoded registers.
  */
-export const enum AccessableRegisters {
+export const enum EncodedAccessableRegisters {
 	EAX = "00000000000000000000000000000000",
 	EBX = "00000000000000000000000000000001",
-	EIP = "00000000000000000000000000000010",
-	EIR = "00000000000000000000000000000011",
-	NPTP = "00000000000000000000000000000100",
-	VMPTR = "00000000000000000000000000000101",
-	ESP = "00000000000000000000000000000110",
-	ITP = "00000000000000000000000000000111",
-	GPTP = "00000000000000000000000000001000"
+	EDX = "00000000000000000000000000000010",
+	EIP = "00000000000000000000000000000011",
+	EIR = "00000000000000000000000000000100",
+	NPTP = "00000000000000000000000000000101",
+	VMPTR = "00000000000000000000000000000110",
+	ESP = "00000000000000000000000000000111",
+	ITP = "00000000000000000000000000001000",
+	GPTP = "00000000000000000000000000001001"
 }
 
 /**
  * An enum representing the writable and binary encoded registers.
  */
-export const enum WritableRegisters {
+export const enum EncodedWritableRegisters {
 	EAX = "00000000000000000000000000000000",
 	EBX = "00000000000000000000000000000001",
-	EIP = "00000000000000000000000000000010",
-	NPTP = "00000000000000000000000000000100",
-	VMPTR = "00000000000000000000000000000101",
-	ESP = "00000000000000000000000000000110",
-	ITP = "00000000000000000000000000000111",
-	GPTP = "00000000000000000000000000001000"
+	EDX = "00000000000000000000000000000010",
+	EIP = "00000000000000000000000000000011",
+	NPTP = "00000000000000000000000000000101",
+	VMPTR = "00000000000000000000000000000110",
+	ESP = "00000000000000000000000000000111",
+	ITP = "00000000000000000000000000001000",
+	GPTP = "00000000000000000000000000001001"
 }
 
 /**
  * An enum representing the available and binary encoded addressing modes of operands.
  */
-export const enum AddressingModes {
+export const enum EncodedAddressingModes {
 	DIRECT = "10",
 	INDIRECT = "11"
 }
@@ -69,7 +52,7 @@ export const enum AddressingModes {
 /**
  * An enum representing the available and binary encoded operand types.
  */
-export const enum OperandTypes {
+export const enum EncodedOperandTypes {
 	NO = "0000000",
 	IMMEDIATE = "1010000",
 	REGISTER = "1100000",
@@ -79,7 +62,7 @@ export const enum OperandTypes {
 /**
  * An enum representing the available and binary encoded instruction types.
  */
-export const enum InstructionTypes {
+export const enum EncodedInstructionTypes {
 	R = "100",
 	I = "110",
 	J = "111"
@@ -88,7 +71,7 @@ export const enum InstructionTypes {
 /**
  * An enum representing the available and binary encoded operations.
  */
-export const enum Operations {
+export const enum EncodedOperations {
 	ADD = "0000000",
 	ADC = "0000001",
 	SUB = "0000010",
