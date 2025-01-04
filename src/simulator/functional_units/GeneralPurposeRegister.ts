@@ -1,4 +1,4 @@
-import { DataSize } from "../../types";
+import { DataSizes } from "../../types/DataSizes";
 import { Doubleword } from "../../types/Doubleword";
 import { Register } from "./Register";
 
@@ -30,8 +30,8 @@ export class GeneralPurposeRegister extends Register<Doubleword> {
      * @param newValue The new value.
      */
     public set content(newValue: Doubleword) {
-        if (newValue.value.length !== DataSize.DOUBLEWORD) {
-			throw new Error(`A new value must have exactly ${DataSize.DOUBLEWORD} bits: ${newValue.value.length} given.`);
+        if (newValue.value.length !== DataSizes.DOUBLEWORD) {
+			throw new Error(`A new value must have exactly ${DataSizes.DOUBLEWORD} bits: ${newValue.value.length} given.`);
 		}
         this._content = new Doubleword(newValue.value);
     }
