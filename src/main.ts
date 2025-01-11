@@ -1,12 +1,14 @@
-import { app, BrowserWindow, ipcMain, IpcMainEvent } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, Menu } from "electron";
 import path from 'path';
-import { readFileSync } from "fs";
 import { Simulator } from "./simulator/Simulator";
 import { Doubleword } from "./types/Doubleword";
 import { twosComplementToDecimal } from "./helper";
 import { NumberSystem } from "./types";
+import { PhysicalAddress } from "./types/PhysicalAddress";
+import { Byte } from "./types/Byte";
+import { readFileSync } from "original-fs";
 
-const createWindow = () => {
+const createWindow = (simulator: Simulator) => {
   	const win = new BrowserWindow({
 		width: 800,
 		height: 600,
@@ -15,14 +17,49 @@ const createWindow = () => {
     	}
   	});
 
+	// setting up the menu with just two items 
+	const menu = Menu.buildFromTemplate([
+		{
+		label: 'Menu',
+		submenu: [
+			{
+				label:'Open Assembly Program',
+				accelerator: 'CmdOrCtrl+O',
+				// this is the main bit hijack the click event 
+				click() {
+					// construct the select file dialog 
+					dialog.showOpenDialog({
+						properties: ["openFile", "createDirectory"],
+						filters: [{ name: "Assembly Files", extensions: ['asm'] }]
+					}).then(function(fileObj) {
+						if (!fileObj.canceled) {
+							win.webContents.send("open_program", fileObj.filePaths);
+							// TODO: Load assembly program into simulator!
+							// simulator.loadProgram(fileObj.filePaths);
+						}
+					}).catch((err) => win.webContents.send("error_open_program", err))
+				}
+			},
+			{
+				label:'Exit',
+				accelerator: 'CmdOrCtrl+Q',
+				click() {
+					app.quit()
+				} 
+			}
+		]
+		}
+	])
+	Menu.setApplicationMenu(menu);
+
   	win.loadFile("./src/index.html");
 };
 
 app.whenReady().then(() => {
 	const simulator = Simulator.getInstance(Math.pow(2, 32));
-	simulator.loadProgramm(readFileSync("./src/assets/programs/examples/array.asm", "utf8"));
+	// simulator.loadProgramm(readFileSync("./assets/programs/examples/for_loop.asm", "utf8"));    
 	
-	createWindow();
+	createWindow(simulator);
 
 	// Create listeners.
   	app.on("window-all-closed", () => {
@@ -30,8 +67,25 @@ app.whenReady().then(() => {
   	});
 
   	app.on("activate", () => {
-		if (BrowserWindow.getAllWindows().length === 0) createWindow();
+		if (BrowserWindow.getAllWindows().length === 0) createWindow(simulator);
   	});
+
+	ipcMain.handle("readRangeFromMainMemory", async (event: Electron.IpcMainInvokeEvent, fromPhysicalAddressHexString: string, toPhysicalAddressHexString: string): Promise<Map<string, string>> => {
+		const tmp: Map<string, string> = new Map<string, string>();
+		const from: number = parseInt(fromPhysicalAddressHexString, 16);
+		const to: number = parseInt(toPhysicalAddressHexString, 16);
+		for (let i = from; i <= to; ++i) {
+			const byte: Byte = simulator.mainMemory.readByteFrom(PhysicalAddress.fromInteger(i));
+			tmp.set(`0x${(i).toString(16)}`, byte.toString());
+		}
+		return tmp;
+	});
+
+	ipcMain.handle("readFromMainMemory", async (event: Electron.IpcMainInvokeEvent, physicalAddressHexString: string): Promise<string> => {
+		const physicalAddressDec: number = parseInt(physicalAddressHexString, 16);
+		const byte: Byte = simulator.mainMemory.readByteFrom(PhysicalAddress.fromInteger(physicalAddressDec));
+		return byte.toString();
+	});
 
 	ipcMain.handle("retrieveMainMemoryCells", async (): Promise<Map<string, string>> => {
 		var tmp: Map<string, string> = new Map<string, string>();
@@ -42,7 +96,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEAX", async (event, basis): Promise<string> => {
-		const content: Doubleword = simulator.cpuCore.eax.content;
+		const content: Doubleword = simulator.core.eax.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -54,7 +108,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEBX", async (event, basis): Promise<string> => {
-		const content: Doubleword = simulator.cpuCore.ebx.content;
+		const content: Doubleword = simulator.core.ebx.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -66,7 +120,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEIP", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.eip.content;
+		const content = simulator.core.eip.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -78,17 +132,17 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEFLAGS", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.eflags.content;
+		const content = simulator.core.eflags.content;
 		return content.toString();
 	});
 
 	ipcMain.handle("readEIR", async (event): Promise<string> => {
-		const content = simulator.cpuCore.eir.content;
+		const content = simulator.core.eir.content;
 		return content.toString();
 	});
 
 	ipcMain.handle("readNPTP", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.nptp.content;
+		const content = simulator.core.nptp.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -100,7 +154,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readVMPTR", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.vmtpr.content;
+		const content = simulator.core.vmtpr.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -112,7 +166,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readESP", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.esp.content;
+		const content = simulator.core.esp.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -124,7 +178,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readITP", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.itp.content;
+		const content = simulator.core.itp.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -136,10 +190,10 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readGPTP", async (event, basis): Promise<string> => {
-		if (simulator.cpuCore.gptp === null) {
+		if (simulator.core.gptp === null) {
 			return " ";
 		}
-		const content = simulator.cpuCore.gptp.content;
+		const content = simulator.core.gptp.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -151,7 +205,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readPTP", async (event, basis): Promise<string> => {
-		const content = simulator.cpuCore.ptp.content;
+		const content = simulator.core.ptp.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystem.HEX) {
 			result = `0x${result}`;
@@ -163,6 +217,12 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("nextCycle", async (): Promise<boolean> => {
-		return simulator.cycle();
+		var resultOfCycle: boolean = false;
+		try {
+			resultOfCycle = simulator.cycle();
+		} catch (error) {
+			// 
+		}
+		return resultOfCycle;
 	});
 });
