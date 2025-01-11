@@ -8,15 +8,7 @@ import { PhysicalAddress } from "./types/PhysicalAddress";
 import { Byte } from "./types/Byte";
 import { readFileSync } from "original-fs";
 
-const createWindow = (simulator: Simulator) => {
-  	const win = new BrowserWindow({
-		width: 800,
-		height: 600,
-		webPreferences: {
-      		preload: path.join(__dirname, 'preload.js')
-    	}
-  	});
-
+const createWindow = (win: BrowserWindow, simulator: Simulator) => {
 	// setting up the menu with just two items 
 	const menu = Menu.buildFromTemplate([
 		{
@@ -56,10 +48,18 @@ const createWindow = (simulator: Simulator) => {
 };
 
 app.whenReady().then(() => {
+	const win = new BrowserWindow({
+		width: 800,
+		height: 600,
+		webPreferences: {
+      		preload: path.join(__dirname, 'preload.js')
+    	}
+  	});
+
 	const simulator = Simulator.getInstance(Math.pow(2, 32));
 	// simulator.loadProgramm(readFileSync("./assets/programs/examples/for_loop.asm", "utf8"));    
 	
-	createWindow(simulator);
+	createWindow(win, simulator);
 
 	// Create listeners.
   	app.on("window-all-closed", () => {
@@ -67,7 +67,7 @@ app.whenReady().then(() => {
   	});
 
   	app.on("activate", () => {
-		if (BrowserWindow.getAllWindows().length === 0) createWindow(simulator);
+		if (BrowserWindow.getAllWindows().length === 0) createWindow(win, simulator);
   	});
 
 	ipcMain.handle("readRangeFromMainMemory", async (event: Electron.IpcMainInvokeEvent, fromPhysicalAddressHexString: string, toPhysicalAddressHexString: string): Promise<Map<string, string>> => {
@@ -221,7 +221,7 @@ app.whenReady().then(() => {
 		try {
 			resultOfCycle = simulator.cycle();
 		} catch (error) {
-			// 
+			
 		}
 		return resultOfCycle;
 	});
