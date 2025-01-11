@@ -29,7 +29,7 @@ const createWindow = (win: BrowserWindow, simulator: Simulator) => {
 							// TODO: Load assembly program into simulator!
 							// simulator.loadProgram(fileObj.filePaths);
 						}
-					}).catch((err) => win.webContents.send("error_open_program", err))
+					}).catch((err) => win.webContents.send("on_error", err))
 				}
 			},
 			{
@@ -221,7 +221,9 @@ app.whenReady().then(() => {
 		try {
 			resultOfCycle = simulator.cycle();
 		} catch (error) {
-			
+			if (error instanceof Error) {
+				win.webContents.send("error", error.message);
+			}
 		}
 		return resultOfCycle;
 	});
