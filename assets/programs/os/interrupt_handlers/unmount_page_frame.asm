@@ -15,21 +15,20 @@
 ; -----------------------------------------------------------------------------------------------------------------
 
 ; Put an argument on the STACK.
-PUSH $4291821565                            ; This value represents the first address of the list with used page frames.
+PUSH @4291821565                            ; This value represents the first address of the list with used page frames.
 
 CALL remove_page_frame_from_list_of_used    ; Call function to search for any available page frame.
 
 POP %eax                                    ; Remove argument from STACK.
 
 ; Put an argument on the STACK.
-PUSH $4292870142                            ; This value represents the first address of the list with available page frames.
+PUSH @4292870142                            ; This value represents the first address of the list with available page frames.
 
 CALL add_page_frame_to_list_of_available    ; Call function to search for any available page frame.
 
 POP %eax                                    ; Remove argument from STACK.
 
-MOV $0, %eax                                ; Set exit code for program (sys_exit).
-INT $0x1                                    ; Call Kernel to exit the program.
+IRET
 
 ; -----------------------------------------------------------------------------------------------------------------
 ; |                                     "remove_page_frame_from_list_of_used"                                     |
@@ -37,8 +36,12 @@ INT $0x1                                    ; Call Kernel to exit the program.
 ; | This function removes a given page frame from the lis of used page frames.                                    |
 ; -----------------------------------------------------------------------------------------------------------------
 .remove_page_frame_from_list_of_used:
-    
-    MOV *(%esp+4), %eax                     ; Write first physical address of list with used page frames to register EAX.
+
+    PUSH %ebx                               ; Save content of EBX temporarily to STACK.
+    MOV %esp, %ebx                          ; Move virtual memory address saved in ESP to EBX.
+    ADD $4, %ebx                            ; Increase this virtual memory address by decimal 4 (because first arguement is stored at %esp+4).
+    MOV *%ebx, %eax                         ; Write first physical address of list with used page frames to register EAX.
+    POP %ebx                                ; Restore old content of EBX.
 
     .loop_used:                             ; Loop through list of used page frames, until the entry containing the page frame was found.
         CMP *%eax, %ebx                     ; Compare the entry's value EAX is pointing at, with the page frame to unmount.
@@ -48,7 +51,7 @@ INT $0x1                                    ; Call Kernel to exit the program.
         JLE loop_used
         JG error
 
-    .error
+    .error:
         ; Quit program with an error, because page frame is not present in list of used page frames.
         MOV $-1, %eax
         INT $0x1 
@@ -73,7 +76,7 @@ INT $0x1                                    ; Call Kernel to exit the program.
         CMP $0, *%eax                       ; Compare the entry's value EAX is pointing at, with the page frame to unmount.
         JZ add_entry
         ADD $4, %eax
-        JUMP loop_available
+        JMP loop_available
     
     .add_entry:
         MOV %ebx, *%eax                      ; Add the available page frame stored in EBX to the list of available page frames.
