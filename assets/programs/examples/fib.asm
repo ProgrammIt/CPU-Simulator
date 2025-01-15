@@ -19,7 +19,7 @@ MOV $0x0, @0x204     ; store a
 MOV $0x1, @0x208     ; store b
 MOV $0x1, @0x20C     ; store i
 
-loop:
+.loop:
     ; tmp = a + b
     MOV @0x204, %eax        ; load a -> eax
     MOV @0x208, %ebx        ; load b -> ebx
