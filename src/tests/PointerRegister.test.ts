@@ -1,5 +1,4 @@
 import { PointerRegister } from "../simulator/functional_units/PointerRegister";
-import { Doubleword } from "../types/Doubleword";
 import { VirtualAddress } from "../types/VirtualAddress";
 
 describe("Test register for addresses", () => {
