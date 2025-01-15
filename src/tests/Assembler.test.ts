@@ -3,53 +3,87 @@ import { Assembler } from '../simulator/Assembler';
 import { Doubleword } from '../types/Doubleword';
 
 describe('Encode instructions', () => {
-    var assembler = Assembler.instance;
-    assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
-
+    const assembler = new Assembler(32);
+    
     test('Encode instruction "ADD $1, %eax"', () => {
-        const result: Doubleword = assembler.compile("ADD $1, %eax")[0];
-        expect(result.toString()).toBe("10011000000011101010000101100000");
+        let result: Doubleword[] = assembler.compile("ADD $1, %eax");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
     });
 
     test('Encode instruction "MOV $0x64, %eax"', () => {
-        const result: Doubleword = assembler.compile("MOV $0x64, %eax")[0];
-        expect(result.toString()).toBe("11011001001011101010000101100000");
+        let result: Doubleword[] = assembler.compile("MOV $0x64, %eax");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
     });
 
     test('Encode instruction "NOP"', () => {
-        const result: Doubleword = assembler.compile("NOP")[0];
-        expect(result.toString()).toBe("10011111111111100000000100000000");
+        let result: Doubleword[] = assembler.compile("NOP");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
     });
 
-    test("Encode assembly programs", () => {
-        var assembler = Assembler.instance;
-        assembler.loadLanguageDefinition(readFileSync("./src/settings/language_definition.json", "utf-8"));
-        
-        var loopTestProgram: string = readFileSync("./src/assets/programs/examples/loop.asm", "utf8");
-        var expectedOutputLoopProgram: string[] = [
-            "11011001001011101010000101100000",
-            "00000000000000000000000001100100",
-            "00000000000000000000000000000000",
-
-            "10011000001011101010000101100000",
-            "00000000000000000000000000000001",
-            "00000000000000000000000000000000",
-
-            "10011000011111101010000101100000",
-            "00000000000000000000000000000000",
-            "00000000000000000000000000000000",
-
-            "11111000111011101110000100000000",
-            "00000000000000000000000000001100",
-            "00000000000000000000000000000000"
+    test('Encode instruction "ADD" with negative decimal immediate', () => {
+        let result: Doubleword[] = assembler.compile("ADD $-10, %eax");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         ];
+        expect(result).toEqual(expectedOutput);
+    });
 
-        const compiledProgramm: Doubleword[] = assembler.compile(loopTestProgram);
-        const stringyfiedCompiledProgramm: string[] = [];
-        compiledProgramm.forEach(doubleword => {
-            stringyfiedCompiledProgramm.push(doubleword.toString());
-        });
-        
-        expect(stringyfiedCompiledProgramm).toEqual(expectedOutputLoopProgram);
+    test('Encode instruction "ADD" with negative hexadecimal immediate', () => {
+        let result: Doubleword[] = assembler.compile("ADD $-0x10, %eax");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
+    });
+
+    test('Encode instruction "ADD" with negative binary immediate', () => {
+        let result: Doubleword[] = assembler.compile("ADD $0b10, %eax");
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
+    });
+
+    test("Encode assembly programs", () => {        
+        let result: Doubleword[] = assembler.compile(readFileSync("./assets/programs/examples/loop.asm", "utf8"));
+        let expectedOutput: Doubleword[] = [
+            new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+
+            new Doubleword([1,0,0,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+
+            new Doubleword([1,0,0,1,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+
+            new Doubleword([1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0]),
+            new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        ];
+        expect(result).toEqual(expectedOutput);
     });
 });
