@@ -6,6 +6,9 @@ import { twosComplementToDecimal } from "./helper";
 import { NumberSystem } from "./types";
 import { PhysicalAddress } from "./types/PhysicalAddress";
 import { Byte } from "./types/Byte";
+import { VirtualAddress } from "./types/VirtualAddress";
+import { Bit } from "./types/Bit";
+import { MemoryManagementUnit } from "./simulator/execution_units/MemoryManagementUnit";
 
 const createWindow = (win: BrowserWindow, simulator: Simulator) => {
 	const menu = Menu.buildFromTemplate([
@@ -198,9 +201,9 @@ app.whenReady().then(() => {
 
 	ipcMain.handle("readRangeFromPhysicalMemory", async (event: Electron.IpcMainInvokeEvent, fromPhysicalAddressHexString: string, toPhysicalAddressHexString: string): Promise<Map<string, string>> => {
 		const tmp: Map<string, string> = new Map<string, string>();
-		const from: number = parseInt(fromPhysicalAddressHexString, 16);
-		const to: number = parseInt(toPhysicalAddressHexString, 16);
-		for (let i = from; i <= to; ++i) {
+		const fromPhysicalAddressDec: number = parseInt(fromPhysicalAddressHexString, 16);
+		const toPhysicalAddressDec: number = parseInt(toPhysicalAddressHexString, 16);
+		for (let i = fromPhysicalAddressDec; i <= toPhysicalAddressDec; ++i) {
 			const byte: Byte = simulator.mainMemory.readByteFrom(PhysicalAddress.fromInteger(i));
 			tmp.set(`0x${(i).toString(16)}`, byte.toString());
 		}
@@ -215,9 +218,9 @@ app.whenReady().then(() => {
 
 	ipcMain.handle("readRangeFromVirtualMemory", async (event: Electron.IpcMainInvokeEvent, fromVirtualAddressHexString: string, toVirtualAddressHexString: string): Promise<Map<string, string>> => {
 		const tmp: Map<string, string> = new Map<string, string>();
-		const from: number = parseInt(fromVirtualAddressHexString, 16);
-		const to: number = parseInt(toVirtualAddressHexString, 16);
-		for (let i = from; i <= to; ++i) {
+		const fromPhysicalAddressDec: number = parseInt(fromVirtualAddressHexString, 16);
+		const toPhysicalAddressDec: number = parseInt(toVirtualAddressHexString, 16);
+		for (let i = fromPhysicalAddressDec; i <= toPhysicalAddressDec; ++i) {
 			const byte: Byte = simulator.core.mmu.readByteFrom(PhysicalAddress.fromInteger(i));
 			tmp.set(`0x${(i).toString(16)}`, byte.toString());
 		}
@@ -235,6 +238,24 @@ app.whenReady().then(() => {
 		simulator.mainMemory.cells.forEach((byte, address) => {
 			tmp.set(address, byte.toString());
 		});
+		return tmp;
+	});
+
+	ipcMain.handle("readPageTableEntries", async (event: Electron.IpcMainInvokeEvent, firstPageNumberToReadDec: number, lastPageNumberToReadDec: number): Promise<Map<string, string>> => {
+		const tmp: Map<string, string> = new Map<string, string>();
+		// Add base address of the 
+		const fromPhysicalAddressDec: number = firstPageNumberToReadDec + parseInt(simulator.core.ptp.content.toString(), 2);
+		const toPhysicalAddressDec: number = lastPageNumberToReadDec + parseInt(simulator.core.ptp.content.toString(), 2);
+		const addressesPerPage: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
+		var currentPageNumber: number = firstPageNumberToReadDec;
+		for (let i = fromPhysicalAddressDec; i <= toPhysicalAddressDec; i += 4) {
+			const pageTableEntry: Doubleword = simulator.mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(i));
+			const pageFrameNumber: Array<Bit> = VirtualAddress.fromInteger(currentPageNumber)
+				.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS)
+				.concat(new Array<Bit>(MemoryManagementUnit.NUMBER_BITS_OFFSET).fill(0));
+			tmp.set(pageFrameNumber.toString(), pageTableEntry.toString());
+			currentPageNumber += addressesPerPage;
+		}
 		return tmp;
 	});
 
