@@ -81,11 +81,11 @@ export class BinaryValue {
      * @param nbrOfBits 
      * @returns 
      */
-    public getLeastSignificantBits(nbrOfBits: number): BinaryValue {
+    public getLeastSignificantBits(nbrOfBits: number): Array<Bit> {
         if (nbrOfBits > this._value.length) {
             throw new Error(`The value does not contain enough bits to retrieve a subset of ${nbrOfBits} bits.`);
         }
-        return new BinaryValue(this._value.slice(-nbrOfBits));
+        return this._value.slice(-nbrOfBits);
     }
 
     /**
@@ -94,10 +94,10 @@ export class BinaryValue {
      * @param nbrOfBits 
      * @returns 
      */
-    public getMostSignificantBits(nbrOfBits: number): BinaryValue {
+    public getMostSignificantBits(nbrOfBits: number): Array<Bit> {
         if (nbrOfBits > this._value.length) {
             throw new Error(`The value does not contain enough bits to retrieve a subset of ${nbrOfBits} bits.`);
         }
-        return new BinaryValue(this._value.slice(0, nbrOfBits));
+        return this._value.slice(0, nbrOfBits);
     }
 }
