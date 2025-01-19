@@ -116,6 +116,18 @@ button img {
     margin-right: 0.5rem;
 }
 
+footer {
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+}
+
+th, td {
+    padding: 1rem;
+    border-top: 2px solid var(--cadet-gray);
+    border-bottom: 2px solid var(--cadet-gray);
+}
+
 .widget {
     padding: 1rem;
     background-color: var(--cadet-gray);
@@ -245,6 +257,20 @@ button img {
 .pulse {
     box-shadow: 0 0 0 var(--pumpkin);
     animation: pulse 2s infinite;
+}
+
+.page-table {
+    max-height: 100px;
+    table-layout: auto;
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.page-table-header {
+    margin: 0;
+    padding: 1rem;
+    background-color: var(--prussian-blue);
 }
 
 @-webkit-keyframes pulse {
