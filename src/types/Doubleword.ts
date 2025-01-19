@@ -1,4 +1,6 @@
 import { twosComplementToDecimal } from "../helper";
+import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
+import { EFLAGS } from "../simulator/functional_units/EFLAGS";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
@@ -6,7 +8,7 @@ import { DataSizes } from "./DataSizes";
 export class Doubleword extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.DOUBLEWORD - 1) - 1;
 	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.DOUBLEWORD - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.DOUBLEWORD);
+	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.DOUBLEWORD) - 1;
 
 	/**
 	 * Instantiates a new object.
@@ -111,10 +113,16 @@ export class Doubleword extends BinaryValue {
 
 	/**
 	 * Converts the binary value into a string representation.
-	 * @returns 
+	 * @returns The string representation of the binary value.
 	 */
-	public toString(): string {
-		return this._value.join("");
+	public toString(groupBytes: boolean = false): string {
+		var result: string = "";
+		if (groupBytes) {
+			result = `${this.value[0]}${this.value[1]}${this._value[2]}${this._value[3]}${this.value[4]}${this.value[5]}${this._value[6]}${this._value[7]} ${this.value[8]}${this.value[9]}${this._value[10]}${this._value[11]}${this.value[12]}${this.value[13]}${this._value[14]}${this._value[15]} ${this.value[16]}${this.value[17]}${this._value[18]}${this._value[19]}${this.value[20]}${this.value[21]}${this._value[22]}${this._value[23]} ${this.value[24]}${this.value[25]}${this._value[26]}${this._value[27]}${this.value[28]}${this.value[29]}${this._value[30]}${this._value[31]}`;
+		} else {
+			result = this._value.join("");
+		}
+		return result;
 	}
 
 	/**
