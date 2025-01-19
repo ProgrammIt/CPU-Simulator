@@ -3,92 +3,184 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CPU-Simulator</title>
+        <title>Ihme Core X1 Simulator</title>
         <link rel="stylesheet" href="dark.css">
-        <script src="./../out/render.js"></script>
     </head>
     <body>
         <header>
             <!-- Controls for the simulator -->
-            <div class="controls">
-                <button onclick="cycle()" class="next-btn">
-                    <img class="control-icon" src="./assets/img/next_dark.svg" alt="Button for triggering the next instruction cycle">
-                </button>
-            </div>
+            <menu class="controls">
+                <li>
+                    <button onclick="cycle()">
+                        <img class="next-cycle" title="Triggers next instruction cycle" src="./../assets/img/cycle.svg" alt="Button for triggering the next instruction cycle">
+                        Next cycle
+                    </button>
+                </li>
+            </menu>
         </header>
         <main>
-            <!-- Registers -->
-            <section id="registers" class="registers">
-                <h2>Registers</h2>
-                <div class="widget-grid">
-                    <!-- EAX register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="eax-label">EAX</label>
-                        <div class="register" id="eax"> </div>
+            <section class="registers">
+                <h1 class="header sticky-top">Registers</h1>
+                <div class="grid">
+                    <div class="register widget" id="eax">
+                        <div class="lg-text">EAX</div>
+                        <div class="sm-text subtitle">General Purpose Register</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- EBX register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="ebx-label">EBX</label>
-                        <div class="register" id="ebx"> </div>
+                    <div class="register widget" id="ebx">
+                        <div class="lg-text">EBX</div>
+                        <div class="sm-text subtitle">General Purpose Register</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- EIP register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="eip-label">EIP</label>
-                        <div class="register" id="eip"> </div>
+                    <div class="register widget" id="edx">
+                        <div class="lg-text">EDX</div>
+                        <div class="sm-text subtitle">General Purpose Register</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- EIR register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="eir-label">EIR</label>
-                        <div class="register" id="eir"> </div>
+                    <div class="register widget" id="eflags">
+                        <div class="lg-text">EFLAGS</div>
+                        <div class="sm-text subtitle">State register</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            11000000
+                        </div>
                     </div>
-
-                    <!-- ESP register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="esp-label">ESP</label>
-                        <div class="register" id="esp"> </div>
+                    <div class="register widget" id="eip">
+                        <div class="lg-text">EIP</div>
+                        <div class="sm-text subtitle">Instruction Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- ITP register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="itp-label">ITP</label>
-                        <div class="register" id="itp"> </div>
+                    <div class="register widget" id="eir">
+                        <div class="lg-text">EIR</div>
+                        <div class="sm-text subtitle">Instruction Register</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <!-- <option selected value="INSTRUCTION">Instruction</option> -->
+                        </select>
                     </div>
-
-                    <!-- NPTP register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="nptp-label">NPTP</label>
-                        <div class="register" id="nptp"> </div>
+                    <div class="register widget" id="esp">
+                        <div class="lg-text">ESP</div>
+                        <div class="sm-text subtitle">STACK Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- VMPTR register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="vmptr-label">VMPTR</label>
-                        <div class="register" id="vmptr"> </div>
+                    <div class="register widget" id="ptp">
+                        <div class="lg-text">PTP</div>
+                        <div class="sm-text subtitle">Page Table Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- PTP register -->
-                    <div class="register-widget">
-                        <label class="register-label" id="ptp-label">PTP</label>
-                        <div class="register" id="ptp"> </div>
+                    <div class="register widget none" id="gptp">
+                        <div class="lg-text">GPTP</div>
+                        <div class="sm-text subtitle">Guest Page Table Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
-
-                    <!-- EFLAGS register -->
-                    <div class="register-widget">
-                        <label class="register-label" for="eflags" id="eflags-label">EFLAGS</label>
-                        <div class="register" id="eflags"> </div>
+                    <div class="register widget" id="itp">
+                        <div class="lg-text">ITP</div>
+                        <div class="sm-text subtitle">Interrupt Table Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
+                    </div>
+                    <div class="register widget" id="nptp">
+                        <div class="lg-text">NPTP</div>
+                        <div class="sm-text subtitle">Nested Page Table Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
+                    </div>
+                    <div class="register widget" id="vmptr">
+                        <div class="lg-text">VMPTR</div>
+                        <div class="sm-text subtitle">Virtual Machine Pointer</div>
+                        <div name="register-content" class="register-content" data-value="">
+                            00000000 00000000 00000000 00000000
+                        </div>
+                        <select name="register-select-representation" title="Switch for changing representation of content">
+                            <option selected value="BINARY">Binary</option>
+                            <option value="HEXADECIMAL">Hexadecimal</option>
+                            <option value="DECIMAL">Decimal</option>
+                        </select>
                     </div>
                 </div>
             </section>
-
-            <!-- RAM -->
-            <section class="ram">
-                <h2>RAM</h2>
-                <div id="ram-cells" class="fixed-col-2-grid">
+            <section class="virtual-ram">
+                <h1 class="header sticky-top">Virtual RAM</h1>
+                <div class="ram-cells" id="virtual-ram-cells" class="flex-col">
+                </div>
+            </section>
+            <section class="physical-ram">
+                <h1 class="header sticky-top">Physical RAM</h1>
+                <div class="ram-cells" id="physical-ram-cells" class="flex-col">
                 </div>
             </section>
         </main>
+        <footer>
+            <section>
+                <h1 class="header sticky-top">Page Table</h1>
+                <div class="page-table" id="page-table" class="flex-col">
+                    
+                </div>
+            </section>
+        </footer>
+        <script src="./../out/render.js"></script>
     </body>
 </html>
