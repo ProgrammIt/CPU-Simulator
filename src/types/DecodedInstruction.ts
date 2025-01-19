@@ -1,4 +1,4 @@
-import { InstructionTypes, Operations, AccessableRegisters } from "../types";
+import { EncodedInstructionTypes, EncodedOperations, EncodedAccessableRegisters } from "../types";
 import { InstructionOperand } from "./InstructionOperand";
 
 /**
@@ -9,12 +9,12 @@ export class DecodedInstruction {
 	/**
 	 * The instructions type.
 	 */
-	public type: InstructionTypes;
+	public type: EncodedInstructionTypes;
 	
 	/**
 	 * The instructions operation.
 	 */
-	public operation: Operations;
+	public operation: EncodedOperations;
 
 	/**
 	 * A list of the operations operands or undefined, if no operand is present.
@@ -26,7 +26,7 @@ export class DecodedInstruction {
 	 * @param type The instructions type.
 	 * @param operation The instructions operation.
 	 */
-    public constructor(type: InstructionTypes, operation: Operations) {
+    public constructor(type: EncodedInstructionTypes, operation: EncodedOperations) {
         this.type = type;
         this.operation = operation;
         this.operands = undefined;
