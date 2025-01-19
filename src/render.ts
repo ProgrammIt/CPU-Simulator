@@ -1,246 +1,1177 @@
-var eax: HTMLElement | null;
-var ebx: HTMLElement | null;
-var eip: HTMLElement | null;
-var eflags: HTMLElement | null;
-var eir: HTMLElement | null;
-var nptp: HTMLElement | null;
-var vmptr: HTMLElement | null;
-var esp: HTMLElement | null;
-var itp: HTMLElement | null;
-var gptp: HTMLElement | null;
-var ptp: HTMLElement | null;
-var ramObserver: IntersectionObserver;
-const listOfVisibleRAMGuiElements: Array<Element> = new Array<Element>();
+/**
+ * This enumeration is a duplicate of the one, that can be
+ * found in src/types/types.ts. This is intended, as imports
+ * are problemativ to use in frontend. Maybe there is a solution.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+enum NumberSystem {
+	HEX = 16,
+	DEC = 10,
+	BIN = 2,
+}
 
-const ramObserverCallback: IntersectionObserverCallback = async (entries) => {
-    const ramCellsHTMLElement: HTMLElement | null = document.getElementById("ram-cells");
-    if (!ramCellsHTMLElement) {
-        return;
-    }
-    for (const entry of entries) {
-        if (entry.isIntersecting && entry.rootBounds !== null) {
-            // Element enters viewport. Calculate the direction from which the element is entering the viewport.
-            const fromTop: number = entry.intersectionRect.top;
-            const fromBottom: number = entry.rootBounds.height - entry.intersectionRect.bottom;
-            // Make entered element visible.
-            entry.target.classList.remove("invisible");
-            // Check if element enters from top of viewport.
-            if (entry.target.isEqualNode(ramCellsHTMLElement.firstElementChild) && fromTop < fromBottom) {
-                // Element is scrolling in from top of viewport and is the first child node of the HTMLElement representing the RAM view.
-                // Insert element and a preceding element at the front of the list.
-                const physicalAddressHexString: string = entry.target.getAttribute("data-physical-address")!;
-                const nextHigherPhysicalAddressDec: number = parseInt(physicalAddressHexString, 16) + 1;
-                if (nextHigherPhysicalAddressDec >= Math.pow(2, 32)) {
-                    return;
+/**
+ * This class encapsulates the logic needed to initialize and sync the GUI
+ * with the backend process.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+class Renderer {
+    /**
+     * This class member stores the highest available physical memory address.
+     */
+    public static readonly HIGH_ADDRESS_PHYSICAL_MEMORY_DEC: number = 4_294_967_295;
+
+    /**
+     * This field stores a reference to the browser "window".
+     */
+    private readonly _window: Window & typeof globalThis;
+
+    /**
+     * This field stores a reference to the HTML document.
+     */
+    private readonly _document: Document;
+
+    /**
+     * This field indicates, whether an assembly program is currently loaded.
+     */
+    public programLoaded: boolean;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EAX register.
+     * @readonly
+     */
+    private readonly _eax: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the EAX register.
+     */
+    public dataRepresentationEAX: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EBX register.
+     * @readonly
+     */
+    private readonly _ebx: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the EBX register.
+     */
+    public dataRepresentationEBX: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EDX register.
+     * @readonly
+     */
+    private readonly _edx: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the EDX register.
+     */
+    public dataRepresentationEDX: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EIP register.
+     * @readonly
+     */
+    private readonly _eip: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the EIP register.
+     */
+    public dataRepresentationEIP: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EFLAGS register.
+     * @readonly
+     */
+    private readonly _eflags: HTMLElement | null;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the EIR register.
+     * @readonly
+     */
+    private readonly _eir: HTMLElement | null;
+
+    /**
+     * TODO: Implement mechanism for retrieving textual instruction from main process of the Simulator!
+     * This field is currently unused, as there is no such mechanism.
+     * The only available representation for the EIR register is binary.
+     * 
+     * This field stores the currently selected representation of the data for the EIR register.
+     */
+    public dataRepresentationEIR: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the NPTP register.
+     * @readonly
+     */
+    private readonly _nptp: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the NPTP register.
+     */
+    public dataRepresentationNPTP: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the VMPTR register.
+     * @readonly
+     */
+    private readonly _vmptr: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the VMPTR register.
+     */
+    public dataRepresentationVMPTR: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the ESP register.
+     * @readonly
+     */
+    private readonly _esp: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the ESP register.
+     */
+    public dataRepresentationESP: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the ITP register.
+     * @readonly
+     */
+    private readonly _itp: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the ITP register.
+     */
+    public dataRepresentationITP: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the GPTP register.
+     * @readonly
+     */
+    private readonly _gptp: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the GPTP register.
+     */
+    public dataRepresentationGPTP: NumberSystem;
+
+    /**
+     * This field stores a reference to the HTMLElement representing the PTP register.
+     * @readonly
+     */
+    private readonly _ptp: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the data for the PTP register.
+     */
+    public dataRepresentationPTP: NumberSystem;
+
+    /**
+     * This field is used to observe the visibility of the HTMLElements representing cells of the physical RAM.
+     * @readonly
+     */
+    private readonly _physicalRAMObserver: IntersectionObserver;
+
+    /**
+     * This field is used to observe the visibility of the HTMLElements representing cells of the virtual RAM.
+     * @readonly
+     */
+    private readonly _virtualRAMObserver: IntersectionObserver;
+
+    /**
+     * This field stores a list with all visible GUI elements associated with the widget of the physical main memory.
+     * @readonly
+     */
+    private readonly _listOfVisiblePhysicalRAMGuiElements: Array<Element>;
+
+    /**
+     * This field stores a list with all visible GUI elements associated with the widget of the virtual main memory.
+     * @readonly
+     */
+    private readonly _listOfVisibleVirtualRAMGuiElements: Array<Element>;
+
+    /**
+     * This field stores a callback used to observe the HTMLElements representing the cells of the pyhsical RAM.
+     * @param entries A list of elements, which triggered the intersection observer. 
+     * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
+     */
+    private readonly _physicalRAMObserverCallback: IntersectionObserverCallback = async (entries: IntersectionObserverEntry[]) => {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("physical-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        for (const entry of entries) {
+            if (entry.isIntersecting && entry.rootBounds !== null) {
+                // Element enters viewport. Calculate the direction from which the element is entering the viewport.
+                const fromTop: number = entry.intersectionRect.top;
+                const fromBottom: number = entry.rootBounds.height - entry.intersectionRect.bottom;
+                // Make entered element visible.
+                entry.target.classList.remove("invisible");
+                // Check if element enters from top of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.firstElementChild) && fromTop < fromBottom) {
+                    // Element is scrolling in from top of viewport and is the first child node of the HTMLElement representing the RAM view.
+                    // Insert element and a preceding element at the front of the list.
+                    const physicalAddressHexString: string = entry.target.getAttribute("data-physical-address")!;
+                    const nextHigherPhysicalAddressDec: number = parseInt(physicalAddressHexString, 16) + 1;
+                    if (nextHigherPhysicalAddressDec >= Math.pow(2, 32)) {
+                        return;
+                    }
+                    const nextHigherPhysicalAddressHexString: string = nextHigherPhysicalAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromPhysicalMemory(`0x${nextHigherPhysicalAddressHexString}`);
+                    const element: Element = this.createPhysicalRAMGuiElement(`0x${nextHigherPhysicalAddressHexString}`, binaryStringContent);
+                    this._physicalRAMObserver.observe(element);
+                    ramCellsHTMLElement.insertBefore(element, ramCellsHTMLElement.firstElementChild);
+                    this._listOfVisiblePhysicalRAMGuiElements.unshift(element);
+                    this._physicalRAMObserver.unobserve(ramCellsHTMLElement.lastElementChild!);
+                    this._listOfVisiblePhysicalRAMGuiElements.splice(this._listOfVisiblePhysicalRAMGuiElements.indexOf(ramCellsHTMLElement.lastElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.lastElementChild!);
                 }
-                const nextHigherPhysicalAddressHexString: string = nextHigherPhysicalAddressDec.toString(16);
-                const binaryStringContent: string = await window.mainMemory.readFromMainMemory(`0x${nextHigherPhysicalAddressHexString}`);
-                const element: Element = createRAMGuiElement(`0x${nextHigherPhysicalAddressHexString}`, binaryStringContent);
-                ramObserver.observe(element);
-                ramCellsHTMLElement.insertBefore(element, ramCellsHTMLElement.firstElementChild);
-                listOfVisibleRAMGuiElements.unshift(element);
-                ramObserver.unobserve(ramCellsHTMLElement.lastElementChild!);
-                listOfVisibleRAMGuiElements.splice(listOfVisibleRAMGuiElements.indexOf(ramCellsHTMLElement.lastElementChild!), 1);
-                ramCellsHTMLElement.removeChild(ramCellsHTMLElement.lastElementChild!);
-            }
-            // Check if element enters from bottom of viewport.
-            if (entry.target.isEqualNode(ramCellsHTMLElement.lastElementChild) && fromTop > fromBottom) {
-                // Element is scrolling in from bottom of viewport and is the last child node of the HTMLElement representing the RAM view.
-                // Insert element at the end of the list.
-                const physicalAddressHexString: string = entry.target.getAttribute("data-physical-address")!;
-                const nextLowerPhysicalAddressDec: number = parseInt(physicalAddressHexString, 16) - 1;
-                if (nextLowerPhysicalAddressDec < 0) {
-                    return;
+                // Check if element enters from bottom of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.lastElementChild) && fromTop > fromBottom) {
+                    // Element is scrolling in from bottom of viewport and is the last child node of the HTMLElement representing the RAM view.
+                    // Insert element at the end of the list.
+                    const physicalAddressHexString: string = entry.target.getAttribute("data-physical-address")!;
+                    const nextLowerPhysicalAddressDec: number = parseInt(physicalAddressHexString, 16) - 1;
+                    if (nextLowerPhysicalAddressDec < 0) {
+                        return;
+                    }
+                    const nextLowerPhysicalAddressHexString: string = nextLowerPhysicalAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromPhysicalMemory(`0x${nextLowerPhysicalAddressHexString}`);
+                    const element: Element = this.createPhysicalRAMGuiElement(`0x${nextLowerPhysicalAddressHexString}`, binaryStringContent);
+                    this._physicalRAMObserver.observe(element);
+                    ramCellsHTMLElement.appendChild(element);
+                    this._listOfVisiblePhysicalRAMGuiElements.push(element);
+                    this._physicalRAMObserver.unobserve(ramCellsHTMLElement.firstElementChild!);
+                    this._listOfVisiblePhysicalRAMGuiElements.splice(this._listOfVisiblePhysicalRAMGuiElements.indexOf(ramCellsHTMLElement.firstElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.firstElementChild!);
                 }
-                const nextLowerPhysicalAddressHexString: string = nextLowerPhysicalAddressDec.toString(16);
-                const binaryStringContent: string = await window.mainMemory.readFromMainMemory(`0x${nextLowerPhysicalAddressHexString}`);
-                const element: Element = createRAMGuiElement(`0x${nextLowerPhysicalAddressHexString}`, binaryStringContent);
-                ramObserver.observe(element);
-                ramCellsHTMLElement.appendChild(element);
-                listOfVisibleRAMGuiElements.push(element);
-                ramObserver.unobserve(ramCellsHTMLElement.firstElementChild!);
-                listOfVisibleRAMGuiElements.splice(listOfVisibleRAMGuiElements.indexOf(ramCellsHTMLElement.firstElementChild!), 1);
-                ramCellsHTMLElement.removeChild(ramCellsHTMLElement.firstElementChild!);
+            } else {
+                // Element not in the viewport.
+                entry.target.classList.add("invisible");
             }
-        } else {
-            // Element not in the viewport.
-            entry.target.classList.add("invisible");
         }
     }
-}
 
-/**
- * This method initializes the view of the physical RAM by reading the first twenty
- * entries of the main memory and creating HTMLElements, which represents the individual 
- * RAM cells.
- */
-async function initializeRAMView(observer: IntersectionObserver): Promise<void> {
-    const ramCellsHTMLElement: HTMLElement | null = document.getElementById("ram-cells");
-    if (!ramCellsHTMLElement) {
+    /**
+     * This field stores a callback used to observe the HTMLElements representing the cells of the pyhsical RAM.
+     * @param entries A list of elements, which triggered the intersection observer. 
+     * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
+     */
+    private readonly _virtualRAMObserverCallback: IntersectionObserverCallback = async (entries: IntersectionObserverEntry[]) => {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("virtual-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        for (const entry of entries) {
+            if (entry.isIntersecting && entry.rootBounds !== null) {
+                // Element enters viewport. Calculate the direction from which the element is entering the viewport.
+                const fromTop: number = entry.intersectionRect.top;
+                const fromBottom: number = entry.rootBounds.height - entry.intersectionRect.bottom;
+                // Make entered element visible.
+                entry.target.classList.remove("invisible");
+                // Check if element enters from top of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.firstElementChild) && fromTop < fromBottom) {
+                    // Element is scrolling in from top of viewport and is the first child node of the HTMLElement representing the RAM view.
+                    // Insert element and a preceding element at the front of the list.
+                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
+                    const nextHigherVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) + 1;
+                    if (nextHigherVirtualAddressDec >= Math.pow(2, 32)) {
+                        return;
+                    }
+                    const nextHigherVirtualAddressHexString: string = nextHigherVirtualAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextHigherVirtualAddressHexString}`);
+                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextHigherVirtualAddressHexString}`, binaryStringContent);
+                    this._virtualRAMObserver.observe(element);
+                    ramCellsHTMLElement.insertBefore(element, ramCellsHTMLElement.firstElementChild);
+                    this._listOfVisibleVirtualRAMGuiElements.unshift(element);
+                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.lastElementChild!);
+                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.lastElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.lastElementChild!);
+                }
+                // Check if element enters from bottom of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.lastElementChild) && fromTop > fromBottom) {
+                    // Element is scrolling in from bottom of viewport and is the last child node of the HTMLElement representing the RAM view.
+                    // Insert element at the end of the list.
+                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
+                    const nextLowerVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) - 1;
+                    if (nextLowerVirtualAddressDec < 0) {
+                        return;
+                    }
+                    const nextLowerVirtualAddressHexString: string = nextLowerVirtualAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextLowerVirtualAddressHexString}`);
+                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextLowerVirtualAddressHexString}`, binaryStringContent);
+                    this._virtualRAMObserver.observe(element);
+                    ramCellsHTMLElement.appendChild(element);
+                    this._listOfVisibleVirtualRAMGuiElements.push(element);
+                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.firstElementChild!);
+                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.firstElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.firstElementChild!);
+                }
+            } else {
+                // Element not in the viewport.
+                entry.target.classList.add("invisible");
+            }
+        }
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the EAX register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerEAX: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationEAX = NumberSystem.DEC;
+                this.readEAX(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationEAX = NumberSystem.HEX;
+                this.readEAX(16);
+            } else {
+                this.dataRepresentationEAX = NumberSystem.BIN;
+                this.readEAX(2);
+            }
+        }
         return;
     }
-    const firstPhysicalAddressToReadHex: string = "0x0";
-    const lastPhysicalAddressToReadHex: string = `0x${(30).toString(16)}`;
-    const ramCells: Map<string, string> = await window.mainMemory.readRangeFromMainMemory(firstPhysicalAddressToReadHex, lastPhysicalAddressToReadHex);
-    for (const [physicalAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
-        const element: HTMLElement = createRAMGuiElement(physicalAddressHexString, binaryStringContent);
-        ramCellsHTMLElement.appendChild(element);
-        listOfVisibleRAMGuiElements.push(element);
-        observer.observe(element);
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the EBX register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerEBX: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationEBX = NumberSystem.DEC;
+                this.readEBX(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationEBX = NumberSystem.HEX;
+                this.readEBX(16);
+            } else {
+                this.dataRepresentationEBX = NumberSystem.BIN;
+                this.readEBX(2);
+            }
+        }
+        return;
     }
-    // Jump to lowest available address to prevent endless scrolling.
-    document.querySelector(`[data-physical-address="${firstPhysicalAddressToReadHex}"]`)!.scrollIntoView();
-    // document.querySelector(`[data-physical-address="${firstPhysicalAddressToReadHex}"]`)!.scrollIntoView({ behavior: 'smooth' });
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the EDX register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerEDX: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationEDX = NumberSystem.DEC;
+                this.readEDX(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationEDX = NumberSystem.HEX;
+                this.readEDX(16);
+            } else {
+                this.dataRepresentationEDX = NumberSystem.BIN;
+                this.readEDX(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the EIP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerEIP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationEIP = NumberSystem.DEC;
+                this.readEIP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationEIP = NumberSystem.HEX;
+                this.readEIP(16);
+            } else {
+                this.dataRepresentationEIP = NumberSystem.BIN;
+                this.readEIP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * TODO: This callback is currently unused. It will be used to switch between binary and textual representation of the loaded instruction!
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the EIR register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerEIR: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "INSTRUCTION") {
+                // TODO: Implement mechanism for retrieving textual instruction from main process of the Simulator!
+                this.readEIR(true);
+            } else {
+                this.readEIR(false);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the NPTP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerNPTP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationNPTP = NumberSystem.DEC;
+                this.readNPTP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationNPTP = NumberSystem.HEX;
+                this.readNPTP(16);
+            } else {
+                this.dataRepresentationNPTP = NumberSystem.BIN;
+                this.readNPTP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the VMPTR register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerVMPTR: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationVMPTR = NumberSystem.DEC;
+                this.readVMPTR(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationVMPTR = NumberSystem.HEX;
+                this.readVMPTR(16);
+            } else {
+                this.dataRepresentationVMPTR = NumberSystem.BIN;
+                this.readVMPTR(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the ESP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerESP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationESP = NumberSystem.DEC;
+                this.readESP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationESP = NumberSystem.HEX;
+                this.readESP(16);
+            } else {
+                this.dataRepresentationESP = NumberSystem.BIN;
+                this.readESP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the ITP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerITP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationITP = NumberSystem.DEC;
+                this.readITP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationITP = NumberSystem.HEX;
+                this.readITP(16);
+            } else {
+                this.dataRepresentationITP = NumberSystem.BIN;
+                this.readITP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the GPTP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerGPTP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationGPTP = NumberSystem.DEC;
+                this.readGPTP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationGPTP = NumberSystem.HEX;
+                this.readGPTP(16);
+            } else {
+                this.dataRepresentationGPTP = NumberSystem.BIN;
+                this.readGPTP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the PTP register.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerPTP: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentRepresentation: string = parent.getAttribute("data-representation")!;
+            const demandedRepresentation: string = target.value;
+            parent.setAttribute("data-representation", demandedRepresentation);
+            if (currentRepresentation === demandedRepresentation) {
+                return;
+            } else if (demandedRepresentation === "DECIMAL") {
+                this.dataRepresentationPTP = NumberSystem.DEC;
+                this.readPTP(10);
+            } else if (demandedRepresentation === "HEXADECIMAL") {
+                this.dataRepresentationPTP = NumberSystem.HEX;
+                this.readPTP(16);
+            } else {
+                this.dataRepresentationPTP = NumberSystem.BIN;
+                this.readPTP(2);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
+     */
+    public autoScrollForVirtualRAMEnabled: boolean;
+
+    /**
+     * This field represents a flag, which enables automatic scroll for the GUIs physical RAM widget.
+     */
+    public autoScrollForPhysicalRAMEnabled: boolean;
+
+    /**
+     * This field represents a flag, which enables automatic scroll for the GUIs Page Table widget.
+     */
+    public autoScrollForPageTableEnabled: boolean;
+
+    /**
+     * Constructs an instance with the given HTML document associated.
+     * @param document A reference to an HTML document.
+     * @param window A reference to the browser "window".
+     */
+    public constructor(document: Document, window: Window & typeof globalThis) {
+        this._document = document;
+        this._eax = document.getElementById("eax");
+        this.dataRepresentationEAX = NumberSystem.BIN;
+        this._ebx = document.getElementById("ebx");
+        this.dataRepresentationEBX = NumberSystem.BIN;
+        this._edx = document.getElementById("edx");
+        this.dataRepresentationEDX = NumberSystem.BIN;
+        this._eflags = document.getElementById("eflags");
+        this._eip = document.getElementById("eip");
+        this.dataRepresentationEIP = NumberSystem.BIN;
+        this._eir = document.getElementById("eir");
+        this.dataRepresentationEIR = NumberSystem.BIN;
+        this._esp = document.getElementById("esp");
+        this.dataRepresentationESP = NumberSystem.BIN;
+        this._gptp = document.getElementById("gptp");
+        this.dataRepresentationGPTP = NumberSystem.BIN;
+        this._itp = document.getElementById("itp");
+        this.dataRepresentationITP = NumberSystem.BIN;
+        this._nptp = document.getElementById("nptp");
+        this.dataRepresentationNPTP = NumberSystem.BIN;
+        this._ptp = document.getElementById("ptp");
+        this.dataRepresentationPTP = NumberSystem.BIN;
+        this._vmptr = document.getElementById("vmptr");
+        this.dataRepresentationVMPTR = NumberSystem.BIN;
+        this._physicalRAMObserver = new IntersectionObserver(this._physicalRAMObserverCallback, {
+            root: null,             // Viewport is root element.
+            rootMargin: "0px",      // Margin for root element.
+            threshold: 0            // The element will be displayed, if it enters the rootMargin.
+        });
+        this._virtualRAMObserver = new IntersectionObserver(this._virtualRAMObserverCallback, {
+            root: null,             // Viewport is root element.
+            rootMargin: "0px",      // Margin for root element.
+            threshold: 0            // The element will be displayed, if it enters the rootMargin.
+        });
+        this._listOfVisiblePhysicalRAMGuiElements = new Array<Element>();
+        this._listOfVisibleVirtualRAMGuiElements = new Array<Element>();
+        this.autoScrollForPhysicalRAMEnabled = true;
+        this.autoScrollForVirtualRAMEnabled = true;
+        this.autoScrollForPageTableEnabled = true;
+        this.programLoaded = false;
+        this._window = window;
+    }
+
+    /**
+     * This method registers the change listeners for all <select> elements inside the GUI elements, which represent
+     * registers during start of the simulator.
+     */
+    public registerChangeListener(): void {
+        const registerElements: HTMLCollectionOf<Element> = this._document.getElementsByClassName("register");
+        for (var register of registerElements) {
+            const selectElement: Element = register.children.namedItem("register-select-representation")!;
+            var eventListener: EventListenerOrEventListenerObject | undefined = undefined;
+            switch (register.getAttribute("id")!.toLowerCase()) {
+                case "eax":
+                    eventListener = this.onChangeListenerEAX;
+                    break;
+                case "ebx":
+                    eventListener = this.onChangeListenerEBX;
+                    break;
+                case "edx":
+                    eventListener = this.onChangeListenerEDX;
+                    break;
+                case "vmptr":
+                    eventListener = this.onChangeListenerVMPTR;
+                    break;
+                case "eip":
+                    eventListener = this.onChangeListenerEIP;
+                    break;
+                case "eir":
+                    /**
+                     * TODO: Create mechanism to retrieve textual representation of the loaded instruction.
+                     * As this is currently not implemented, the EIR register can display its content
+                     * only in its binary representation.
+                     */
+                    // eventListener = this.onChangeListenerEIR;
+                    break;
+                case "esp":
+                    eventListener = this.onChangeListenerESP;
+                    break;
+                case "gptp":
+                    eventListener = this.onChangeListenerGPTP;
+                    break;
+                case "ptp":
+                    eventListener = this.onChangeListenerPTP;
+                    break;
+                case "itp":
+                    eventListener = this.onChangeListenerITP;
+                    break;
+                case "nptp":
+                    eventListener = this.onChangeListenerNPTP;
+                    break;
+                default:
+                    break;
+            }
+            if (eventListener !== undefined) {
+                selectElement.addEventListener("change", eventListener);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This function reloads the RAM view, by taking the visible elements into account. This is done in order to avoid
+     * weird jumps in the widget, representing the physical main memory.
+     */
+    public async reloadPhysicalRAMView(): Promise<void> {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("physical-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        if (ramCellsHTMLElement.innerText !== "") {
+            ramCellsHTMLElement.innerText = "";
+            // Disconnect obersever, which results in no element beeing observed. 
+            this._physicalRAMObserver.disconnect();
+        }
+        // Read physical memory address from the last element, which should have the lowest visible memory address.
+        const firstPhysicalAddressToReadHex: string = 
+            this._listOfVisiblePhysicalRAMGuiElements.at(this._listOfVisiblePhysicalRAMGuiElements.length - 1)!.getAttribute("data-physical-address")!;
+        // Read physical memory address from the first element, which should have the highest visible memory adress.
+        const lastPhysicalAddressToReadHex: string = this._listOfVisiblePhysicalRAMGuiElements.at(0)!.getAttribute("data-physical-address")!;
+        const ramCells: Map<string, string> = 
+            await this._window.mainMemory.readRangeFromPhysicalMemory(firstPhysicalAddressToReadHex, lastPhysicalAddressToReadHex);
+        for (const [physicalAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
+            const element: HTMLElement = this.createPhysicalRAMGuiElement(physicalAddressHexString, binaryStringContent);
+            ramCellsHTMLElement.appendChild(element);
+            this._listOfVisiblePhysicalRAMGuiElements.push(element);
+            this._physicalRAMObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-physical-address="${firstPhysicalAddressToReadHex}"]`)!.scrollIntoView();
+        return;
+    }
+
+    /**
+     * This function reloads the RAM view, by taking the visible elements into account. This is done in order to avoid
+     * weird jumps in the widget, representing the virtual main memory.
+     */
+    public async reloadVirtualRAMView(): Promise<void> {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("virtual-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        if (ramCellsHTMLElement.innerText !== "") {
+            ramCellsHTMLElement.innerText = "";
+            // Disconnect obersever, which results in no element beeing observed. 
+            this._virtualRAMObserver.disconnect();
+        }
+        // Read physical memory address from the last element, which should have the lowest visible memory address.
+        const firstVirtualAddressToReadHex: string = 
+            this._listOfVisibleVirtualRAMGuiElements.at(this._listOfVisibleVirtualRAMGuiElements.length - 1)!.getAttribute("data-virtual-address")!;
+        // Read physical memory address from the first element, which should have the highest visible memory adress.
+        const lastVirtualAddressToReadHex: string = this._listOfVisibleVirtualRAMGuiElements.at(0)!.getAttribute("data-virtual-address")!;
+        const ramCells: Map<string, string> = 
+            await this._window.mainMemory.readRangeFromVirtualMemory(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
+        for (const [virtualAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
+            const element: HTMLElement = this.createVirtualRAMGuiElement(virtualAddressHexString, binaryStringContent);
+            ramCellsHTMLElement.appendChild(element);
+            this._listOfVisibleVirtualRAMGuiElements.push(element);
+            this._virtualRAMObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-virtual-address="${firstVirtualAddressToReadHex}"]`)!.scrollIntoView();
+        return;
+    }
+
+    /**
+     * This method initializes the view of the physical RAM by reading the first twenty
+     * entries of the main memory and creating HTMLElements, which represents the individual 
+     * RAM cells.
+     * @param [firstPhysicalAddressToReadHex="0x0"] The first physical memory address to read from main memory in hexadecimal representation.
+     * @param [lastPhysicalAddressToReadHex="0x1e"] The last physical memory address to read from main memory in hexadecimal representation.
+     */
+    public async createPhysicalRAMView(firstPhysicalAddressToReadHex: string = "0x0", lastPhysicalAddressToReadHex: string = "0x1e"): Promise<void> {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("physical-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        if (ramCellsHTMLElement.innerText !== "") {
+            ramCellsHTMLElement.innerText = "";
+            // Disconnect obersever, which results in no element beeing observed. 
+            this._physicalRAMObserver.disconnect();
+        }
+        const ramCells: Map<string, string> = await this._window.mainMemory.readRangeFromPhysicalMemory(firstPhysicalAddressToReadHex, lastPhysicalAddressToReadHex);
+        for (const [physicalAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
+            const element: HTMLElement = this.createPhysicalRAMGuiElement(physicalAddressHexString, binaryStringContent);
+            ramCellsHTMLElement.appendChild(element);
+            this._listOfVisiblePhysicalRAMGuiElements.push(element);
+            this._physicalRAMObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-physical-address="${firstPhysicalAddressToReadHex}"]`)!.scrollIntoView();
+        return;
+    }
+
+    /**
+     * This method initializes the view of the virtual RAM by reading the first twenty entries of the main memory 
+     * and creating HTMLElements, which represents the individual RAM cells.
+     * @param [firstVirtualAddressToReadHex="0x0"] The first virtual memory address to read from main memory in hexadecimal representation.
+     * @param [lastVirtualAddressToReadHex="0x1e"] The last virtual memory address to read from main memory in hexadecimal representation.
+     */
+    public async createVirtualRAMView(firstVirtualAddressToReadHex: string = "0x0", lastVirtualAddressToReadHex: string = "0x1e"): Promise<void> {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("virtual-ram-cells");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        if (ramCellsHTMLElement.innerText !== "") {
+            ramCellsHTMLElement.innerText = "";
+            // Disconnect obersever, which results in no element beeing observed. 
+            this._virtualRAMObserver.disconnect();
+        }
+        const ramCells: Map<string, string> = await this._window.mainMemory.readRangeFromVirtualMemory(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
+        for (const [virtualAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
+            const element: HTMLElement = this.createVirtualRAMGuiElement(virtualAddressHexString, binaryStringContent);
+            ramCellsHTMLElement.appendChild(element);
+            this._listOfVisibleVirtualRAMGuiElements.push(element);
+            this._virtualRAMObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-virtual-address="${firstVirtualAddressToReadHex}"]`)!.scrollIntoView();
+        return;
+    }
+
+    /**
+     * This method creates an HTMLElement representing a physical RAM cell. This element consist out of a label with the 
+     * pyhsical memory address and the binary content of the main memory at this address.
+     * @param physicalAddressHexString The physical memory address of the RAM cell.
+     * @param binaryStringContent The binary content of this RAM cell.
+     * @returns A HTMLElement representing a RAM cell.
+     */
+    public createPhysicalRAMGuiElement(physicalAddressHexString: string, binaryStringContent: string): HTMLElement {
+        const outerDivElement: HTMLElement = this._document.createElement("div");
+        outerDivElement.setAttribute("class", "ram-cell widget");
+        outerDivElement.setAttribute("id", `physical-ram-cell-${physicalAddressHexString}`);
+        outerDivElement.setAttribute("data-physical-address", physicalAddressHexString);
+        const labelDivElement: HTMLElement = this._document.createElement("label");
+        labelDivElement.setAttribute("class", "lg-text");
+        labelDivElement.innerHTML = physicalAddressHexString;
+        const contentDivElement: HTMLElement = this._document.createElement("div");
+        contentDivElement.setAttribute("class", "ram-cell-content");
+        contentDivElement.setAttribute("name", "ram-cell-content");
+        contentDivElement.innerText = binaryStringContent;
+        outerDivElement.appendChild(labelDivElement);
+        outerDivElement.appendChild(contentDivElement);
+        return outerDivElement;
+    }
+
+    /**
+     * This method creates an HTMLElement representing a virtual RAM cell. This element consist out of a label with the 
+     * pyhsical memory address and the binary content of the main memory at this address.
+     * @param virtualAddressHexString The virtual memory address of the RAM cell.
+     * @param binaryStringContent The binary content of this RAM cell.
+     * @returns A HTMLElement representing a RAM cell.
+     */
+    public createVirtualRAMGuiElement(virtualAddressHexString: string, binaryStringContent: string): HTMLElement {
+        const outerDivElement: HTMLElement = this._document.createElement("div");
+        outerDivElement.setAttribute("class", "ram-cell widget");
+        outerDivElement.setAttribute("id", `virtual-ram-cell-${virtualAddressHexString}`);
+        outerDivElement.setAttribute("data-virtual-address", virtualAddressHexString);
+        const labelDivElement: HTMLElement = this._document.createElement("label");
+        labelDivElement.setAttribute("class", "lg-text");
+        labelDivElement.innerHTML = virtualAddressHexString;
+        const contentDivElement: HTMLElement = this._document.createElement("div");
+        contentDivElement.setAttribute("class", "ram-cell-content");
+        contentDivElement.setAttribute("name", "ram-cell-content");
+        contentDivElement.innerText = binaryStringContent;
+        outerDivElement.appendChild(labelDivElement);
+        outerDivElement.appendChild(contentDivElement);
+        return outerDivElement;
+    }
+
+    /**
+     * This method reads the content of the EAX register.
+     */
+    public async readEAX(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readEAX(radix);
+        if (this._eax !== null) {
+            this._eax.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the EBX register.
+     */
+    public async readEBX(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readEBX(radix);
+        if (this._ebx !== null) {
+            this._ebx.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the EDX register.
+     */
+    public async readEDX(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readEDX(radix);
+        if (this._edx !== null) {
+            this._edx.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the EIP register.
+     */
+    public async readEIP(radix: NumberSystem): Promise<void> {
+        var content: string = await this._window.simulator.readEIP(radix);
+        if (this._eip !== null) {
+            this._eip.children.namedItem("register-content")!.textContent = content;
+            var virtualAddressHexString: string = "";
+            if (this.dataRepresentationEIP === NumberSystem.HEX) {
+                virtualAddressHexString = content;
+            } else if (this.dataRepresentationEIP === NumberSystem.DEC) {
+                virtualAddressHexString = `0x${parseInt(content, 10).toString(16)}`;
+            } else {
+                content = content.replace(/[\s]+/g, "");
+                virtualAddressHexString = `0x${parseInt(content, 2).toString(16)}`;
+            }
+            // Remove CSS class "highlighted" from any other HTML element(s).
+            for (let element of this._document.querySelectorAll(`div[data-virtual-address="${virtualAddressHexString}"]`)) {
+                if (element.classList.contains("highlighted")) {
+                    element.classList.remove("highlighted");
+                }
+            }
+            // Find HTML element representing the loaded virtual memory address.
+            var element: Element | null = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
+            /**
+             *  Check if automatic scroll for the virtual memory widget is enabled.
+             */
+            if (this.autoScrollForVirtualRAMEnabled && this.programLoaded) {
+                // Check if a GUI element, representing a virtual memory address, is currently present in the document
+                if (element === null) {
+                    // Element is not present in document. Load it (alongside 30 addresses above and beneath) into the document.
+                    let firstVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) - 15;
+                    let lastVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) + 14;
+                    if (firstVirtualAddressToReadDec <= 0) {
+                        firstVirtualAddressToReadDec = 0;
+                    }
+                    if (lastVirtualAddressToReadDec >= Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
+                        lastVirtualAddressToReadDec = Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC;
+                    }
+                    const firstVirtualAddressToReadHex: string = `0x${(firstVirtualAddressToReadDec).toString(16)}`;
+                    const lastVirtualAddressToReadHex: string = `0x${(lastVirtualAddressToReadDec).toString(16)}`;
+                    await this.createVirtualRAMView(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
+                    element = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
+                }
+                if (element !== null) {
+                    // Scroll this element into view.
+                    element.scrollIntoView();
+                }
+            }
+            if (element !== null) {
+                // Emphesize this element.
+                element.classList.add("highlighted");
+            }
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the EFLAGS register.
+     */
+    public async readEFLAGS(): Promise<void> {
+        const content: string = await this._window.simulator.readEFLAGS();
+        if (this._eflags !== null) {
+            this._eflags.children.namedItem("register-content")!.textContent = content;
+        }
+        const bodyElement: HTMLElement = this._document.getElementsByTagName("body")[0];
+        // Check if kernel mode is enabled.
+        if (content[0] === "1" && content[1] === "1") {
+            // Kernel mode is enabled. Display pulse animation.
+            bodyElement.classList.add("pulse");
+        } else {
+            // Kernel mode is not enabled. Remove pulse animation.
+            bodyElement.classList.remove("pulse");
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the EIR register.
+     * @param asInstruction Indicates, wethert to display the instruction in its textual representation or not.
+     */
+    public async readEIR(asInstruction: boolean = false): Promise<void> {
+        const content: string = await this._window.simulator.readEIR();
+        if (this._eir !== null) {
+            this._eir.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the NPTP register.
+     */
+    public async readNPTP(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readNPTP(radix);
+        if (this._nptp !== null) {
+            this._nptp.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the VMPTR register.
+     */
+    public async readVMPTR(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readVMPTR(radix);
+        if (this._vmptr !== null) {
+            this._vmptr.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the ESP register.
+     */
+    public async readESP(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readESP(radix);
+        if (this._esp !== null) {
+            this._esp.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the ITP register.
+     */
+    public async readITP(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readITP(radix);
+        if (this._itp !== null) {
+            this._itp.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the GPTP register.
+     */
+    public async readGPTP(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readGPTP(radix);
+        if (this._gptp !== null) {
+            this._gptp.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * This method reads the content of the PTP register.
+     */
+    public async readPTP(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readPTP(radix);
+        if (this._ptp !== null) {
+            this._ptp.children.namedItem("register-content")!.textContent = content;
+        }
+        return;
+    }
+
+    /**
+     * Performs the next CPU cycle (fetch, decode, execute).
+     */
+    public async cycle(): Promise<void> {    
+        if (!await this._window.simulator.nextCycle()) {
+            alert("Programm finished execution.")
+        }
+        await this.reloadPhysicalRAMView();
+        await this.reloadVirtualRAMView();
+        await renderer.readEAX(renderer.dataRepresentationEAX);
+        await renderer.readEBX(renderer.dataRepresentationEBX);
+        await renderer.readEDX(renderer.dataRepresentationEDX);
+        await renderer.readEFLAGS();
+        await renderer.readEIP(renderer.dataRepresentationEIP);
+        await renderer.readEIR();
+        await renderer.readESP(renderer.dataRepresentationESP);
+        await renderer.readGPTP(renderer.dataRepresentationGPTP);
+        await renderer.readITP(renderer.dataRepresentationITP);
+        await renderer.readNPTP(renderer.dataRepresentationNPTP);
+        await renderer.readVMPTR(renderer.dataRepresentationVMPTR);
+        return;
+    }
 }
 
-/**
- * This method creates an HTMLElement representing a RAM cell. This element consist out of a label with the 
- * pyhsical memory address and the binary content of the main memory at this address.
- * @param physicalAddressHexString The physical memory address of the RAM cell.
- * @param binaryStringContent The binary content of this RAM cell.
- * @returns A HTMLElement representing a RAM cell.
- */
-function createRAMGuiElement(physicalAddressHexString: string, binaryStringContent: string): HTMLElement {
-    const divRamCellHTMLElement: HTMLElement = document.createElement("div");
-    const labelRamCellAddressHTMLElement: HTMLElement = document.createElement("label");
-    const divRamCellContentHTMLElement: HTMLElement = document.createElement("div");
-
-    divRamCellHTMLElement.setAttribute("class", "ram-cell");
-    divRamCellHTMLElement.setAttribute("data-physical-address", `${physicalAddressHexString}`);
-
-    labelRamCellAddressHTMLElement.innerHTML = physicalAddressHexString;
-    labelRamCellAddressHTMLElement.setAttribute("for", `ram-${physicalAddressHexString}`);
-    labelRamCellAddressHTMLElement.setAttribute("class", "ram-cell-address");
-                
-    divRamCellContentHTMLElement.innerHTML = binaryStringContent;
-    divRamCellContentHTMLElement.setAttribute("id", `ram-${physicalAddressHexString}`);
-    divRamCellContentHTMLElement.setAttribute("class", "ram-cell-content");
-            
-    divRamCellHTMLElement.appendChild(labelRamCellAddressHTMLElement);
-    divRamCellHTMLElement.appendChild(divRamCellContentHTMLElement);
-    return divRamCellHTMLElement;
-}
+const renderer: Renderer = new Renderer(document, window);
 
 window.onload = async () => {
-    eax = document.getElementById("eax");
-    ebx = document.getElementById("ebx");
-    eip = document.getElementById("eip");
-    eflags = document.getElementById("eflags");
-    eir = document.getElementById("eir");
-    nptp = document.getElementById("nptp");
-    vmptr = document.getElementById("vmptr");
-    esp = document.getElementById("esp");
-    itp = document.getElementById("itp");
-    gptp = document.getElementById("gptp");
-    ptp = document.getElementById("ptp");
-    ramObserver = new IntersectionObserver(ramObserverCallback, {
-        root: null,             // Viewport is root element.
-        rootMargin: "0px",      // Margin for root element.
-        threshold: 0            // The element will be displayed, if it enters the rootMargin.
-    });
+    renderer.registerChangeListener();
+    renderer.createPhysicalRAMView();
+};
 
-    readEAX();
-    readEBX();
-    readEFLAGS();
-    readEIP();
-    readEIR();
-    readESP();
-    readGPTP();
-    readITP();
-    readNPTP();
-    readVMPTR();
-    initializeRAMView(ramObserver);
-}
+window.simulator.onLoadedAssemblyProgram(async (filePath: string[]) => {
+    renderer.programLoaded = true;
+    await renderer.reloadPhysicalRAMView();
+    await renderer.createVirtualRAMView();
+    await renderer.readEAX(renderer.dataRepresentationEAX);
+    await renderer.readEBX(renderer.dataRepresentationEBX);
+    await renderer.readEDX(renderer.dataRepresentationEDX);
+    await renderer.readEFLAGS();
+    await renderer.readEIP(renderer.dataRepresentationEIP);
+    await renderer.readEIR();
+    await renderer.readESP(renderer.dataRepresentationESP);
+    await renderer.readGPTP(renderer.dataRepresentationGPTP);
+    await renderer.readITP(renderer.dataRepresentationITP);
+    await renderer.readNPTP(renderer.dataRepresentationNPTP);
+    await renderer.readVMPTR(renderer.dataRepresentationVMPTR);
+    alert("Assembly program at " + filePath + " loaded.");
+});
+
+window.simulator.onError((errorDescription: string) => {
+    alert(errorDescription);
+});
+
+window.simulator.onDisableAutoScrollForPhysicalRAM(() => {
+    renderer.autoScrollForPhysicalRAMEnabled = false;
+    return;
+});
+
+window.simulator.onDisableAutoScrollForVirtualRAM(() => {
+    renderer.autoScrollForVirtualRAMEnabled = false;
+    return;
+});
+
+
+window.simulator.onDisableAutoScrollForPageTable(() => {
+    renderer.autoScrollForPageTableEnabled = false;
+    return;
+});
+
+window.simulator.onEnableAutoScrollForPhysicalRAM(() => {
+    renderer.autoScrollForPhysicalRAMEnabled = true;
+    return;
+});
+
+window.simulator.onEnableAutoScrollForVirtualRAM(() => {
+    renderer.autoScrollForVirtualRAMEnabled = true;
+    return;
+});
+
+window.simulator.onEnableAutoScrollForPageTable(() => {
+    renderer.autoScrollForPageTableEnabled = true;
+    return;
+});
 
 async function cycle() {    
-    if (!await window.simulator.nextCycle()) {
-        alert("Programm finished execution.")
-    }
-    readEAX();
-    readEBX();
-    readEFLAGS();
-    readEIP();
-    readEIR();
-    readESP();
-    readGPTP();
-    readITP();
-    readNPTP();
-    readVMPTR();
-}
-
-async function readEAX() {
-    const content: string = await window.simulator.readEAX();
-    if (eax !== null) {
-        eax.innerText = content;
-    }
-}
-
-async function readEBX() {
-    const content: string = await window.simulator.readEBX();
-    if (ebx !== null) {
-        ebx.innerText = content;
-    }
-}
-
-async function readEIP() {
-    const content: string = await window.simulator.readEIP();
-    if (eip !== null) {
-        eip.innerText = content;
-    }
-}
-
-async function readEFLAGS() {
-    const content: string = await window.simulator.readEFLAGS();
-    if (eflags !== null) {
-        eflags.innerText = content;
-    }
-}
-
-async function readEIR() {
-    const content: string = await window.simulator.readEIR();
-    if (eir !== null) {
-        eir.innerText = content;
-    }
-}
-
-async function readNPTP() {
-    const content: string = await window.simulator.readNPTP();
-    if (nptp !== null) {
-        nptp.innerText = content;
-    }
-}
-
-async function readVMPTR() {
-    const content: string = await window.simulator.readVMPTR();
-    if (vmptr !== null) {
-        vmptr.innerText = content;
-    }
-}
-
-async function readESP() {
-    const content: string = await window.simulator.readESP();
-    if (esp !== null) {
-        esp.innerText = content;
-    }
-}
-
-async function readITP() {
-    const content: string = await window.simulator.readITP();
-    if (itp !== null) {
-        itp.innerText = content;
-    }
-}
-
-async function readGPTP() {
-    const content: string = await window.simulator.readGPTP();
-    if (gptp !== null) {
-        gptp.innerText = content;
-    }
-}
-
-async function readPTP() {
-    const content: string = await window.simulator.readPTP();
-    if (ptp !== null) {
-        ptp.innerText = content;
-    }
+    renderer.cycle();
 }
