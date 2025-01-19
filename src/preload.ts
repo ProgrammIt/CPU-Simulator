@@ -16,7 +16,9 @@ contextBridge.exposeInMainWorld("mainMemory", {
 	readRangeFromVirtualMemory: (fromVirtualAddressHexString: string, toVirtualAddressHexString: string): Promise<Map<string, string>> => 
 		ipcRenderer.invoke("readRangeFromVirtualMemory", fromVirtualAddressHexString, toVirtualAddressHexString),
 	readFromVirtualMemory: (virtualAddressHexString: string): Promise<Map<string, string>> => 
-		ipcRenderer.invoke("readFromVirtualMemory", virtualAddressHexString)
+		ipcRenderer.invoke("readFromVirtualMemory", virtualAddressHexString),
+	readPageTableEntries: (firstPageNumberToReadDec: number, lastPageNumberToReadDec: number): Promise<Map<string, string>> =>
+		ipcRenderer.invoke("readPageTableEntries", firstPageNumberToReadDec, lastPageNumberToReadDec),
 });
 
 contextBridge.exposeInMainWorld("simulator", {
