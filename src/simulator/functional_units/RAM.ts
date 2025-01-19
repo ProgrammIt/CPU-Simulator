@@ -1,14 +1,13 @@
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { Doubleword } from "../../types/Doubleword";
-import { Instruction } from "../../types/Instruction";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
     private _cells: Map<string, Byte>;
     private _capacity: number;
     private _freeMemory: number;
-    private _usedMemory: number;    // Counter for written memory cells. Only the memory cells that have been actively written to by a process will increase the count.
+    private _availableMemory: number;    // Counter for written memory cells. Only the memory cells that have been actively written to by a process will increase the count.
     private _highAddressDec: number;
     private _lowAddressDec: number;
     private static _instance: RAM;
@@ -17,13 +16,13 @@ export class RAM {
      * This method constructs an instance of the RAM class.
      * @param capacity The max. capacity of this instance of the RAM class.
      */
-    private constructor(capacity: number) {
+    private constructor(capacity: number,) {
         this._cells = new Map<string, Byte>();
         this._capacity = capacity;
         this._freeMemory = capacity;
         this._highAddressDec = capacity;
         this._lowAddressDec = 0;
-        this._usedMemory = 0;
+        this._availableMemory = 0;
     }
 
     /**
@@ -31,6 +30,7 @@ export class RAM {
      * RAM class. If the instance was initialized beforehand,
      * this instance will be returned. Otherwise a single new instance 
      * will be created.
+     * @param capacity The max. capacity of this instance of the RAM class.
      * @returns The single instance of the RAM class.
      */
     public static getInstance(capacity: number): RAM {
@@ -52,7 +52,7 @@ export class RAM {
      * This method returns the current number of unused memory cells.
      * @returns The total number of unused memory cells.
      */
-    public get freeMemory(): number {
+    public get availableMemory(): number {
         return this._freeMemory;
     }
 
@@ -61,7 +61,7 @@ export class RAM {
      * @returns The total number of used memory cells.
      */
     public get usedMemory(): number {
-        return this._usedMemory;
+        return this._availableMemory;
     }
 
     /**
@@ -84,10 +84,30 @@ export class RAM {
         const fourthByte: Byte = new Byte();
         // Bit 24 - 32
         fourthByte.value = doubleword.value.slice(24);
-        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
-        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 1), secondByte);
-        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 2), thirdByte);
-        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 3), fourthByte);
+        // Only write byte, if it is not a zero byte.
+        if (!firstByte.equal(new Byte())) {
+            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
+        } else {
+            this.clearByte(PhysicalAddress.fromInteger(startAddressDec));
+        }
+        // Only write byte, if it is not a zero byte.
+        if (!secondByte.equal(new Byte())) {
+            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 1), secondByte);
+        } else {
+            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 1));
+        }
+        // Only write byte, if it is not a zero byte.
+        if (!thirdByte.equal(new Byte())) {
+            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 2), thirdByte);
+        } else {
+            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 2));
+        }
+        // Only write byte, if it is not a zero byte.
+        if (!fourthByte.equal(new Byte())) {
+            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 3), fourthByte);
+        } else {
+            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 3));
+        }
         return;
     }
 
@@ -101,10 +121,10 @@ export class RAM {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHex: string = 
             `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
-        // Write byte to memory.
+        // Write byte to "memory".
         this._cells.set(physicalAddressHex, data);
         --this._freeMemory;
-        ++this._usedMemory;
+        ++this._availableMemory;
         return;
     }
 
@@ -157,7 +177,7 @@ export class RAM {
         const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         this._cells.delete(physicalAddressHex);
         ++this._freeMemory;
-        --this._usedMemory;
+        --this._availableMemory;
         return;
     }
 
@@ -169,12 +189,12 @@ export class RAM {
     public setByte(physicalAddress: PhysicalAddress) {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHex: string = 
-            `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
+            `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
         const byte = new Byte();
         byte.value = new Array<Bit>(8).fill(1);
         this._cells.set(physicalAddressHex, byte);
         --this._freeMemory;
-        ++this._usedMemory;
+        ++this._availableMemory;
         return;
     }
 
@@ -198,5 +218,18 @@ export class RAM {
      */
     public get cells(): Map<string, Byte>{
         return this._cells;
+    }
+
+    /**
+     * This method clears all bits at the specified location.
+     * @param physicalAddress The physical address to clear all bits at.
+     */
+    public clearMemory(physicalAddress: PhysicalAddress): void {
+        this.validatePhysicalAddress(physicalAddress);
+        const physicalAddressDec: number = parseInt(physicalAddress.toString(), 2);
+        this._cells.delete(`0x${(physicalAddressDec).toString(16).toUpperCase()}`);
+        this._freeMemory += 1;
+        this._availableMemory -= 1;    
+        return;
     }
 }
