@@ -1,8 +1,8 @@
-import { PhysicalAddress } from "../../types/PhysicalAddress";
+import { PageTableEntry } from "../../types/PageTableEntry";
 import { VirtualAddress } from "../../types/VirtualAddress";
 
 export class TranslationLookasideBuffer {
-    private _data: [number, [VirtualAddress, PhysicalAddress]][];
+    private _data: [number, [VirtualAddress, PageTableEntry]][];
     private _capacity: number;
 
     public constructor(capacity: number) {
@@ -10,7 +10,10 @@ export class TranslationLookasideBuffer {
         this._capacity = capacity;
     }
     
-    public insert(item: [VirtualAddress, PhysicalAddress]): void {
+    public insert(item: [VirtualAddress, PageTableEntry]): void {
+        if (this.has(item[0])) {
+            return;
+        }
         if (this._data.length === this._capacity) {
             this._data.pop();
         }
@@ -19,7 +22,7 @@ export class TranslationLookasideBuffer {
         return;
     }
 
-    public get data(): [number, [VirtualAddress, PhysicalAddress]][] {
+    public get data(): [number, [VirtualAddress, PageTableEntry]][] {
         return this._data;
     }
 
@@ -27,13 +30,13 @@ export class TranslationLookasideBuffer {
         this._data.sort((current, successor) => (current[0] < successor[0]) ? current[0] : successor[0]);
     }
 
-    public peek(): [number, [VirtualAddress, PhysicalAddress]] | undefined {
+    public peek(): [number, [VirtualAddress, PageTableEntry]] | undefined {
         return (this._data.length === 0) 
             ? undefined
             : this._data[0];
     }
 
-    public pop(): [number, [VirtualAddress, PhysicalAddress]] | undefined {
+    public pop(): [number, [VirtualAddress, PageTableEntry]] | undefined {
         return (this._data.length === 0) ? undefined : this._data.pop();
     }
     
@@ -55,16 +58,16 @@ export class TranslationLookasideBuffer {
         return includes;
     }
 
-    public get(virtualAddress: VirtualAddress): PhysicalAddress | undefined {
-        var physicalAddress: PhysicalAddress | undefined = undefined;
+    public get(virtualAddress: VirtualAddress): PageTableEntry | undefined {
+        var pageTableEntry: PageTableEntry | undefined = undefined;
         for (let i = 0; i < this._data.length; ++i) {
             if (this._data[i][1][0].equal(virtualAddress)) {
-                physicalAddress = this._data[i][1][1];
+                pageTableEntry = this._data[i][1][1];
                 this._data[i][0] += 1;
             }
         }
         this.sort();
-        return physicalAddress;
+        return pageTableEntry;
     }
 
     public toString(): string {
