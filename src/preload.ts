@@ -9,20 +9,44 @@ declare global {
 }
 
 contextBridge.exposeInMainWorld("mainMemory", {
-  	readCells: () => ipcRenderer.invoke("retrieveMainMemoryCells"),
+	readRangeFromPhysicalMemory: (fromPhysicalAddressHexString: string, toPhysicalAddressHexString: string): Promise<Map<string, string>> => 
+		ipcRenderer.invoke("readRangeFromPhysicalMemory", fromPhysicalAddressHexString, toPhysicalAddressHexString),
+	readFromPhysicalMemory: (physicalAddressHexString: string): Promise<Map<string, string>> => 
+		ipcRenderer.invoke("readFromPhysicalMemory", physicalAddressHexString),
+	readRangeFromVirtualMemory: (fromVirtualAddressHexString: string, toVirtualAddressHexString: string): Promise<Map<string, string>> => 
+		ipcRenderer.invoke("readRangeFromVirtualMemory", fromVirtualAddressHexString, toVirtualAddressHexString),
+	readFromVirtualMemory: (virtualAddressHexString: string): Promise<Map<string, string>> => 
+		ipcRenderer.invoke("readFromVirtualMemory", virtualAddressHexString)
 });
 
 contextBridge.exposeInMainWorld("simulator", {
 	nextCycle: () => ipcRenderer.invoke("nextCycle"),
-	readEAX: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEAX", basis),
-	readEBX: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEBX", basis),
-	readEIP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEIP", basis),
-	readEFLAGS: (basis: NumberSystem = 16) => ipcRenderer.invoke("readEFLAGS", basis),
-	readEIR: () => ipcRenderer.invoke("readEIR"),
-	readNPTP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readNPTP", basis),
-	readVMPTR: (basis: NumberSystem = 16) => ipcRenderer.invoke("readVMPTR", basis),
-	readESP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readESP", basis),
-	readITP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readITP", basis),
-	readGPTP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readGPTP", basis),
-	readPTP: (basis: NumberSystem = 16) => ipcRenderer.invoke("readPTP", basis)
+	readEAX: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readEAX", radix),
+	readEBX: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readEBX", radix),
+	readEDX: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readEDX", radix),
+	readEIP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readEIP", radix),
+	readEFLAGS: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readEFLAGS", radix),
+	readEIR: (asInstruction: boolean): Promise<string> => ipcRenderer.invoke("readEIR", asInstruction),
+	readNPTP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readNPTP", radix),
+	readVMPTR: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readVMPTR", radix),
+	readESP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readESP", radix),
+	readITP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readITP", radix),
+	readGPTP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readGPTP", radix),
+	readPTP: (radix: NumberSystem = 16): Promise<string> => ipcRenderer.invoke("readPTP", radix),
+	onLoadedAssemblyProgram: (callback: (filePath: string[]) => void) => 
+		ipcRenderer.on("loaded_program", (_event, filePath: string[]) => callback(filePath)),
+	onError: (callback: (errorDescription: string) => void) => 
+		ipcRenderer.on("on_error", (_event, errorDescription: string) => callback(errorDescription)),
+	onDisableAutoScrollForPhysicalRAM: (callback: () => void) => 
+		ipcRenderer.on("disable_auto_scroll_physical_ram", () => callback()),
+	onDisableAutoScrollForVirtualRAM: (callback: () => void) => 
+		ipcRenderer.on("disable_auto_scroll_virtual_ram", () => callback()),
+	onDisableAutoScrollForPageTable: (callback: () => void) => 
+		ipcRenderer.on("disable_auto_scroll_page_table", () => callback()),
+	onEnableAutoScrollForPhysicalRAM: (callback: () => void) => 
+		ipcRenderer.on("enable_auto_scroll_physical_ram", () => callback()),
+	onEnableAutoScrollForVirtualRAM: (callback: () => void) => 
+		ipcRenderer.on("enable_auto_scroll_virtual_ram", () => callback()),
+	onEnableAutoScrollForPageTable: (callback: () => void) => 
+		ipcRenderer.on("enable_auto_scroll_page_table", () => callback())
 });
