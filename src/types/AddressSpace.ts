@@ -33,7 +33,7 @@ export class AddressSpace<T extends Address> {
      * @returns True, if the given address is in range, false otherwise.
      */
     public inRange(address: T): boolean {
-        const upperBoundryDec: number = parseInt(this.lowAddress.toString(), 2);
+        const upperBoundryDec: number = parseInt(this.highAddress.toString(), 2);
         const lowerBoundryDec: number = parseInt(this.lowAddress.toString(), 2);
         const addressDec: number = parseInt(address.toString(), 2);
         return (lowerBoundryDec <= addressDec && addressDec <= upperBoundryDec);
