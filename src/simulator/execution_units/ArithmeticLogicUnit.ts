@@ -1,11 +1,9 @@
-import { DivisionByZeroError } from "../../error_types";
-import { DataSize } from "../../types";
 import { BinaryValue } from "../../types/BinaryValue";
 import { Bit } from "../../types/Bit";
-import { Byte } from "../../types/Byte";
+import { DataSizes } from "../../types/DataSizes";
 import { Doubleword } from "../../types/Doubleword";
+import { DivisionByZeroError } from "../../types/errors/DivisionByZeroError";
 import { Quadword } from "../../types/Quadword";
-import { Word } from "../../types/Word";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
 /**
@@ -50,7 +48,7 @@ export class ArithmeticLogicUnit {
      */
     private checkForParity(operand: Doubleword) {
         var noSetBits: number = 0;
-        operand.value.slice(-DataSize.BYTE).forEach(bit => {
+        operand.value.slice(-DataSizes.BYTE).forEach(bit => {
             if (bit === 1) {
                 ++noSetBits
             }
@@ -243,7 +241,7 @@ export class ArithmeticLogicUnit {
         const result: Doubleword = new Doubleword();
         var carry: Array<Bit> = [0];
 
-        for (let index = DataSize.DOUBLEWORD - 1; index >= 0; --index) {
+        for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
             const bitSecondOperand: Bit = secondSummand.value[index];
             const carryBit: Bit = carry[carry.length - 1];
@@ -284,7 +282,7 @@ export class ArithmeticLogicUnit {
     public adc(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
         const result: Doubleword = new Doubleword();
         var carry: Array<Bit> = (this._eflags.carry === 1) ? [1] : [0];
-        for (let index = DataSize.DOUBLEWORD - 1; index >= 0; --index) {
+        for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
             const bitSecondOperand: Bit = secondSummand.value[index];
             const carryBit: Bit = carry[carry.length - 1];
@@ -331,7 +329,7 @@ export class ArithmeticLogicUnit {
             subtrahend = this.not(subtrahend);
         } else {
             /**
-             * + -(x) <=> - (x)
+             * - (+ x) <=> - (x)
              */
             subtrahend = this.neg(subtrahend);
         }
@@ -444,12 +442,12 @@ export class ArithmeticLogicUnit {
             }
             tmp.value = a.value.slice().concat(q.value.slice()).concat(q_1);
             this.rightShift<BinaryValue>(tmp);
-            a.value = tmp.value.slice(0, DataSize.DOUBLEWORD);
-            q.value = tmp.value.slice(DataSize.DOUBLEWORD, 64);
+            a.value = tmp.value.slice(0, DataSizes.DOUBLEWORD);
+            q.value = tmp.value.slice(DataSizes.DOUBLEWORD, 64);
             q_1 = tmp.value[tmp.value.length - 1];
             --cnt;
         }
-        return new Doubleword(tmp.value.slice(-DataSize.DOUBLEWORD));
+        return new Doubleword(tmp.value.slice(-DataSizes.DOUBLEWORD));
     }
 
     /**
