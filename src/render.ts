@@ -22,6 +22,14 @@ class Renderer {
     public static readonly HIGH_ADDRESS_PHYSICAL_MEMORY_DEC: number = 4_294_967_295;
 
     /**
+     * This class member stores the number of bits representing the page frame number.
+     * The page frame number can be extracted from a phyiscal memory address by removing the offset bits from the right.
+     * @readonly
+     */
+    public static readonly NUMBER_BITS_PAGE_FRAME_ADDRESS: number = 20;
+
+
+    /**
      * This field stores a reference to the browser "window".
      */
     private readonly _window: Window & typeof globalThis;
@@ -168,16 +176,21 @@ class Renderer {
     public dataRepresentationPTP: NumberSystem;
 
     /**
-     * This field is used to observe the visibility of the HTMLElements representing cells of the physical RAM.
+     * This field is used to observe the visibility of the GUI elements representing cells of the physical RAM.
      * @readonly
      */
     private readonly _physicalRAMObserver: IntersectionObserver;
 
     /**
-     * This field is used to observe the visibility of the HTMLElements representing cells of the virtual RAM.
+     * This field is used to observe the visibility of the GUI elements representing cells of the virtual RAM.
      * @readonly
      */
     private readonly _virtualRAMObserver: IntersectionObserver;
+
+    /**
+     * This field is used to observe the visibility of the GUI elements representing Page Table entries.
+     */
+    private readonly _pageTableObserver: IntersectionObserver;
 
     /**
      * This field stores a list with all visible GUI elements associated with the widget of the physical main memory.
@@ -190,6 +203,12 @@ class Renderer {
      * @readonly
      */
     private readonly _listOfVisibleVirtualRAMGuiElements: Array<Element>;
+
+    /**
+     * This field stores a list with all visible GUI elements associated with the widget of the Page Table.
+     * @readonly
+     */
+    private readonly _listOfVisiblePageTableEntries: Array<Element>;
 
     /**
      * This field stores a callback used to observe the HTMLElements representing the cells of the pyhsical RAM.
@@ -264,6 +283,71 @@ class Renderer {
             return;
         }
         for (const entry of entries) {
+            if (entry.isIntersecting && entry.rootBounds !== null) {
+                // Element enters viewport. Calculate the direction from which the element is entering the viewport.
+                const fromTop: number = entry.intersectionRect.top;
+                const fromBottom: number = entry.rootBounds.height - entry.intersectionRect.bottom;
+                // Make entered element visible.
+                entry.target.classList.remove("invisible");
+                // Check if element enters from top of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.firstElementChild) && fromTop < fromBottom) {
+                    // Element is scrolling in from top of viewport and is the first child node of the HTMLElement representing the RAM view.
+                    // Insert element and a preceding element at the front of the list.
+                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
+                    const nextHigherVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) + 1;
+                    if (nextHigherVirtualAddressDec >= Math.pow(2, 32)) {
+                        return;
+                    }
+                    const nextHigherVirtualAddressHexString: string = nextHigherVirtualAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextHigherVirtualAddressHexString}`);
+                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextHigherVirtualAddressHexString}`, binaryStringContent);
+                    this._virtualRAMObserver.observe(element);
+                    ramCellsHTMLElement.insertBefore(element, ramCellsHTMLElement.firstElementChild);
+                    this._listOfVisibleVirtualRAMGuiElements.unshift(element);
+                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.lastElementChild!);
+                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.lastElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.lastElementChild!);
+                }
+                // Check if element enters from bottom of viewport.
+                if (entry.target.isEqualNode(ramCellsHTMLElement.lastElementChild) && fromTop > fromBottom) {
+                    // Element is scrolling in from bottom of viewport and is the last child node of the HTMLElement representing the RAM view.
+                    // Insert element at the end of the list.
+                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
+                    const nextLowerVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) - 1;
+                    if (nextLowerVirtualAddressDec < 0) {
+                        return;
+                    }
+                    const nextLowerVirtualAddressHexString: string = nextLowerVirtualAddressDec.toString(16);
+                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextLowerVirtualAddressHexString}`);
+                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextLowerVirtualAddressHexString}`, binaryStringContent);
+                    this._virtualRAMObserver.observe(element);
+                    ramCellsHTMLElement.appendChild(element);
+                    this._listOfVisibleVirtualRAMGuiElements.push(element);
+                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.firstElementChild!);
+                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.firstElementChild!), 1);
+                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.firstElementChild!);
+                }
+            } else {
+                // Element not in the viewport.
+                entry.target.classList.add("invisible");
+            }
+        }
+    }
+
+    /**
+     * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
+     * @param entries A list of elements, which triggered the intersection observer. 
+     * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
+     */
+    private readonly _pageTableObserverCallback: IntersectionObserverCallback = async (entries: IntersectionObserverEntry[]) => {
+        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("page-table");
+        if (!ramCellsHTMLElement) {
+            return;
+        }
+        for (const entry of entries) {
+            if (!entry.target.hasAttribute("data-page-number")) {
+                continue;
+            }
             if (entry.isIntersecting && entry.rootBounds !== null) {
                 // Element enters viewport. Calculate the direction from which the element is entering the viewport.
                 const fromTop: number = entry.intersectionRect.top;
@@ -664,8 +748,14 @@ class Renderer {
             rootMargin: "0px",      // Margin for root element.
             threshold: 0            // The element will be displayed, if it enters the rootMargin.
         });
+        this._pageTableObserver = new IntersectionObserver(this._pageTableObserverCallback, {
+            root: null,             // Viewport is root element.
+            rootMargin: "0px",      // Margin for root element.
+            threshold: 0            // The element will be displayed, if it enters the rootMargin.
+        })
         this._listOfVisiblePhysicalRAMGuiElements = new Array<Element>();
         this._listOfVisibleVirtualRAMGuiElements = new Array<Element>();
+        this._listOfVisiblePageTableEntries = new Array<Element>();
         this.autoScrollForPhysicalRAMEnabled = true;
         this.autoScrollForVirtualRAMEnabled = true;
         this.autoScrollForPageTableEnabled = true;
@@ -867,12 +957,12 @@ class Renderer {
         const labelDivElement: HTMLElement = this._document.createElement("label");
         labelDivElement.setAttribute("class", "lg-text");
         labelDivElement.innerHTML = physicalAddressHexString;
-        const contentDivElement: HTMLElement = this._document.createElement("div");
-        contentDivElement.setAttribute("class", "ram-cell-content");
-        contentDivElement.setAttribute("name", "ram-cell-content");
-        contentDivElement.innerText = binaryStringContent;
+        const contendivivElement: HTMLElement = this._document.createElement("div");
+        contendivivElement.setAttribute("class", "ram-cell-content");
+        contendivivElement.setAttribute("name", "ram-cell-content");
+        contendivivElement.innerText = binaryStringContent;
         outerDivElement.appendChild(labelDivElement);
-        outerDivElement.appendChild(contentDivElement);
+        outerDivElement.appendChild(contendivivElement);
         return outerDivElement;
     }
 
@@ -891,13 +981,157 @@ class Renderer {
         const labelDivElement: HTMLElement = this._document.createElement("label");
         labelDivElement.setAttribute("class", "lg-text");
         labelDivElement.innerHTML = virtualAddressHexString;
-        const contentDivElement: HTMLElement = this._document.createElement("div");
-        contentDivElement.setAttribute("class", "ram-cell-content");
-        contentDivElement.setAttribute("name", "ram-cell-content");
-        contentDivElement.innerText = binaryStringContent;
+        const contendivivElement: HTMLElement = this._document.createElement("div");
+        contendivivElement.setAttribute("class", "ram-cell-content");
+        contendivivElement.setAttribute("name", "ram-cell-content");
+        contendivivElement.innerText = binaryStringContent;
         outerDivElement.appendChild(labelDivElement);
-        outerDivElement.appendChild(contentDivElement);
+        outerDivElement.appendChild(contendivivElement);
         return outerDivElement;
+    }
+
+    /**
+     * This method creates a GUI element, which represents an entry of the Page Table.
+     * @param pageNumberDecString The virtual page address, which is often refered to as the pages number.
+     * @param presentFlag This flag indicates whether the page is currently mounted to a page frame.
+     * @param writableFlag This flag indicates whether the page is writable or read-only.
+     * @param executableFlag This flag indicates whether the page is executable or not.
+     * @param accessableOnlyInKernelModeFlag This flag indicates whether the page can only be accessed in kernel mode.
+     * @param pinnedFlag This flag indicates whether the page is protected against attempts to write it to a background memory.
+     * @param changedFlag This flag indicates whether the page was changed since it was mounted to a page frame.
+     * @param pageFrameNumberDecString The physical page frame address, which is often refered to as the page frames number.
+     * @returns An GUI element representing a single Page Table entry.
+     */
+    public createPageTableEntryElement(
+        pageNumberDecString: string, 
+        presentFlag: boolean,
+        writableFlag: boolean,
+        executableFlag: boolean,
+        accessableOnlyInKernelModeFlag: boolean,
+        pinnedFlag: boolean,
+        changedFlag: boolean,
+        pageFrameNumberDecString: string
+    ): HTMLElement {
+        const divParentElement: HTMLElement = this._document.createElement("div");
+        divParentElement.setAttribute("class", "page-table-entry");
+        divParentElement.setAttribute("data-page-number", `${pageNumberDecString}`);
+        const divElementPageNumber: HTMLElement = this._document.createElement("div");
+        divElementPageNumber.innerText = pageFrameNumberDecString;
+        const divElementPresent: HTMLElement = this._document.createElement("div");
+        divElementPresent.innerText = (presentFlag) ? "true" : "false";
+        const divElementWritable: HTMLElement = this._document.createElement("div");
+        divElementWritable.innerText = (writableFlag) ? "true" : "false";
+        const divElementExecutable: HTMLElement = this._document.createElement("div");
+        divElementExecutable.innerText = (executableFlag) ? "true" : "false";
+        const divElementAccessableOnlyInKernelMode: HTMLElement = this._document.createElement("div");
+        divElementAccessableOnlyInKernelMode.innerText = (accessableOnlyInKernelModeFlag) ? "true" : "false";
+        const divElementPinned: HTMLElement = this._document.createElement("div");
+        divElementPinned.innerText = (pinnedFlag) ? "true" : "false";
+        const divElementChanged: HTMLElement = this._document.createElement("div");
+        divElementChanged.innerText = (changedFlag) ? "true" : "false";
+        const divElementPageFrameNumber: HTMLElement = this._document.createElement("div");
+        divElementPageFrameNumber.innerText = pageFrameNumberDecString;
+        divParentElement.appendChild(divElementPageNumber);
+        divParentElement.appendChild(divElementPresent);
+        divParentElement.appendChild(divElementWritable);
+        divParentElement.appendChild(divElementExecutable);
+        divParentElement.appendChild(divElementAccessableOnlyInKernelMode);
+        divParentElement.appendChild(divElementPinned);
+        divParentElement.appendChild(divElementChanged);
+        divParentElement.appendChild(divElementPageFrameNumber);
+        return divParentElement;
+    }
+
+    /**
+     * This method initializes the view of the Page Table reading the first thirty entries of the Page Table
+     * and creats GUI elements, which represents the individual entries.
+     * @param [firstPageNumberToReadDec="0"] The first page number to read from Page Table.
+     * @param [lastPageNumberToReadDec="30"] The last page number to read from Page Table.
+     */
+    public async createPageTableView(firstPageNumberToReadDec: number = 0, lastPageNumberToReadDec: number = 30): Promise<void> {
+        const pageTableEntiresElement: HTMLElement | null = this._document.getElementById("page-table-entries");
+        if (pageTableEntiresElement === null) {
+            return;
+        }
+        if (pageTableEntiresElement.innerText !== "") {
+            pageTableEntiresElement.innerHTML = "";
+            // Disconnect obersever, which results in no element beeing observed.
+            this._pageTableObserver.disconnect();
+        }
+        const ramCells: Map<string, string> = 
+            await this._window.mainMemory.readPageTableEntries(firstPageNumberToReadDec, lastPageNumberToReadDec);
+        for (const [pageNumberHexString, pageTableEntry] of Array.from(ramCells).reverse()) {
+            const presentFlag: boolean = (pageTableEntry.slice(0, 1) === "1") ? true : false;
+            const writableFlag: boolean = (pageTableEntry.slice(1, 2) === "1") ? true : false;
+            const executableFlag: boolean = (pageTableEntry.slice(2, 3) === "1") ? true : false;
+            const accessableOnlyInKernelModeFlag: boolean = (pageTableEntry.slice(3, 4) === "1") ? true : false;
+            const pinnedFlag: boolean = (pageTableEntry.slice(4, 5) === "1") ? true : false;
+            const changedFlag: boolean = (pageTableEntry.slice(5, 6) === "1") ? true : false;
+            const pageFrameNumberHexString: string = `0x${parseInt(pageTableEntry.slice(-Renderer.NUMBER_BITS_PAGE_FRAME_ADDRESS), 2)}`;
+            const element: HTMLElement = this.createPageTableEntryElement(
+                pageNumberHexString,
+                presentFlag,
+                writableFlag,
+                executableFlag,
+                accessableOnlyInKernelModeFlag,
+                pinnedFlag,
+                changedFlag,
+                pageFrameNumberHexString
+            );
+            pageTableEntiresElement.appendChild(element);
+            this._listOfVisiblePageTableEntries.push(element);
+            this._pageTableObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-page-number="${firstPageNumberToReadDec}"]`)!.scrollIntoView();
+        return;
+    }
+
+    /**
+     * This method reloads the view of the Page Table depending on the visible Page Table entries.
+     */
+    public async reloadPageTableView(): Promise<void> {
+        const pageTableEntiresElement: HTMLElement | null = this._document.getElementById("page-table-entries");
+        if (pageTableEntiresElement === null) {
+            return;
+        }
+        if (pageTableEntiresElement.innerText !== "") {
+            pageTableEntiresElement.innerHTML = "";
+            // Disconnect obersever, which results in no element beeing observed.
+            this._pageTableObserver.disconnect();
+        }
+        // Read physical memory address from the last element, which should have the lowest visible memory address.
+        const firstPageNumberToReadDec: string = 
+            this._listOfVisiblePageTableEntries.at(this._listOfVisiblePageTableEntries.length - 1)!.getAttribute("data-page-number")!;
+        // Read physical memory address from the first element, which should have the highest visible memory adress.
+        const lastPageNumberToReadDec: string = this._listOfVisiblePageTableEntries.at(0)!.getAttribute("data-page-number")!;
+        const ramCells: Map<string, string> = 
+            await this._window.mainMemory.readPageTableEntries(firstPageNumberToReadDec, lastPageNumberToReadDec);
+        for (const [pageNumberHexString, pageTableEntry] of Array.from(ramCells).reverse()) {
+            const presentFlag: boolean = (pageTableEntry.slice(0, 1) === "1") ? true : false;
+            const writableFlag: boolean = (pageTableEntry.slice(1, 2) === "1") ? true : false;
+            const executableFlag: boolean = (pageTableEntry.slice(2, 3) === "1") ? true : false;
+            const accessableOnlyInKernelModeFlag: boolean = (pageTableEntry.slice(3, 4) === "1") ? true : false;
+            const pinnedFlag: boolean = (pageTableEntry.slice(4, 5) === "1") ? true : false;
+            const changedFlag: boolean = (pageTableEntry.slice(5, 6) === "1") ? true : false;
+            const pageFrameNumberHexString: string = `0x${parseInt(pageTableEntry.slice(-Renderer.NUMBER_BITS_PAGE_FRAME_ADDRESS), 2)}`;
+            const element: HTMLElement = this.createPageTableEntryElement(
+                pageNumberHexString,
+                presentFlag,
+                writableFlag,
+                executableFlag,
+                accessableOnlyInKernelModeFlag,
+                pinnedFlag,
+                changedFlag,
+                pageFrameNumberHexString
+            );
+            pageTableEntiresElement.appendChild(element);
+            this._listOfVisiblePageTableEntries.push(element);
+            this._pageTableObserver.observe(element);
+        }
+        // Jump to lowest available address to prevent endless scrolling.
+        this._document.querySelector(`[data-page-number="${firstPageNumberToReadDec}"]`)!.scrollIntoView();
+        return;
     }
 
     /**
