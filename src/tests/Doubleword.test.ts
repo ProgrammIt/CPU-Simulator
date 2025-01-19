@@ -9,6 +9,10 @@ describe("Create doubleword from decimal integer values", () => {
         expect(Doubleword.fromInteger(-300).value.join("")).toBe("11111111111111111111111011010100");
     });
 
+    test("Group bytes in doubleword string", () => {
+        expect(Doubleword.fromInteger(8).toString(true)).toBe("00000000 00000000 00000000 00001000");
+    });
+
     test("Trigger error because of converting a too large negative decimal integer", () => {
         const attemptToConvert = () => {
             Doubleword.fromInteger(-6_000_000_000_000);
