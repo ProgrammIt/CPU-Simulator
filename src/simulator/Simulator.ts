@@ -661,12 +661,12 @@ export class Simulator {
 
     /**
      * This method creates the flag bits for a new page.
-     * @param present Is this page currently mounted/bound to a frame?
-     * @param writable Is this page writable?
-     * @param executable Is the content of this page an instruction?
-     * @param accessableOnlyInKernelMode Is this page accessable only in kernel mode?
-     * @param changed Was this page modified since creation?
-     * @param pinned Can this page be outsourced to a background memory?
+     * @param present This flag indicates whether the page is currently mounted to a page frame.
+     * @param writable This flag indicates whether the page is writable or read-only.
+     * @param executable This flag indicates whether the page is executable or not.
+     * @param accessableOnlyInKernelMode This flag indicates whether the page can only be accessed in kernel mode.
+     * @param changed This flag indicates whether the page was changed since it was mounted to a page frame.
+     * @param pinned This flag indicates whether the page is protected against attempts to write it to a background memory.
      * @returns 
      */
     private createPageFlagBits(
