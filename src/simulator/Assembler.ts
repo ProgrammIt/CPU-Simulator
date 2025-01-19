@@ -1,13 +1,10 @@
 import { readFileSync } from "node:fs";
-import { UnrecognizedInstructionError } from "../error_types";
+import { UnrecognizedInstructionError } from "../types/errors/UnrecognizedInstructionError";
 import { Bit } from "../types/Bit";
 import { AssemblyLanguageDefinition } from "../types/compiler/AssemblyLanguageDefinition";
 import { DataSizes } from "../types/DataSizes";
 import { Doubleword } from "../types/Doubleword";
 import { VirtualAddress } from "../types/VirtualAddress";
-import { off } from "node:process";
-import { twosComplementToDecimal } from "../helper";
-import { EncodedOperandTypes, OperandTypes } from "../types";
 
 export class Assembler {
   	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
@@ -297,7 +294,7 @@ export class Assembler {
 
 		if (operand.startsWith("*@") || operand.startsWith("*$")) {
 			throw new Error(
-				`In line ${line}: Indirect addressing mode is only supported for usage with registers.`
+				`In line ${line + 1}: Indirect addressing mode is only supported for usage with registers.`
 			);
 		}
 
@@ -346,7 +343,7 @@ export class Assembler {
 			// Register used with direct addressing mode
 			operand32BitEncoded = this.encodeRegister(operand.replace("%", ""), line);
 		} else {
-			throw Error(`In line ${line}: Unrecognized operand type and value.`);
+			throw Error(`In line ${line + 1}: Unrecognized operand type and value.`);
 		}
 		return operand32BitEncoded;
 	}
@@ -359,7 +356,7 @@ export class Assembler {
 	 */
 	private encodeBinaryValue(operand: string, line: number): Doubleword {
 		if (operand.length > this.processingWidth) {
-			throw Error(`In line ${line}: Binary immediate consists of more than ${this.processingWidth} bits.`);
+			throw Error(`In line ${line + 1}: Binary immediate consists of more than ${this.processingWidth} bits.`);
 		}
 		// Sign extend binary value.
 		operand = operand.padStart(this.processingWidth, operand.charAt(0));
@@ -415,7 +412,7 @@ export class Assembler {
 	 */
 	private encodeBinaryAddress(operand: string, line: number): VirtualAddress {
 		if (operand.length > this.processingWidth) {
-			throw Error(`In line ${line}: Binary memory address consists of more than ${this.processingWidth} bits.`);
+			throw Error(`In line ${line + 1}: Binary memory address consists of more than ${this.processingWidth} bits.`);
 		}
 		// Extend binary address with zeros if necessary.
 		operand = operand.padStart(this.processingWidth, "0");
@@ -434,7 +431,7 @@ export class Assembler {
 		try {
 			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 16));
 		} catch (error) {
-			throw Error(`In line ${line}: Invalid hexadecimal memory address.`);
+			throw Error(`In line ${line + 1}: Invalid hexadecimal memory address.`);
 		}
 		return virtualAddress;
 	}
@@ -451,7 +448,7 @@ export class Assembler {
 		try {
 			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 10));
 		} catch (error) {
-			throw Error(`In line ${line}: Invalid hexadecimal memory address.`);
+			throw Error(`In line ${line + 1}: Invalid hexadecimal memory address.`);
 		}
 		return virtualAddress;
 	}
@@ -473,7 +470,7 @@ export class Assembler {
 		} else if (operand.startsWith("@") || operand.match(this.languageDefinition.label_formats.usage)) {
 			encodedType = new Array<Bit>(1, 1, 1, 0, 0, 0, 0);
 		} else {
-			throw Error(`In line ${line}: Unrecognized type of operand.`);
+			throw Error(`In line ${line + 1}: Unrecognized type of operand.`);
 		}
 		return encodedType;
 	}
