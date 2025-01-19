@@ -9,7 +9,7 @@ export class Word {
 
 	protected static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.WORD - 1) - 1;
 	protected static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.WORD - 1);
-	protected static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.WORD);
+	protected static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.WORD) - 1;
 
 	public signed: boolean;
 
@@ -86,7 +86,7 @@ export class Word {
 		}
 
 		if (!signed && integer > Word.MAX_NUMBER_UNSIGNED) {
-			throw new Error(`The given number cannot be expressed with ${DataSizes.WORD - 1} bits.`);
+			throw new Error(`The given number cannot be expressed with ${DataSizes.WORD} bits.`);
 		}
 
 		var word: Word;
