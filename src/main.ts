@@ -243,18 +243,18 @@ app.whenReady().then(() => {
 
 	ipcMain.handle("readPageTableEntries", async (event: Electron.IpcMainInvokeEvent, firstPageNumberToReadDec: number, lastPageNumberToReadDec: number): Promise<Map<string, string>> => {
 		const tmp: Map<string, string> = new Map<string, string>();
-		// Add base address of the 
 		const fromPhysicalAddressDec: number = firstPageNumberToReadDec + parseInt(simulator.core.ptp.content.toString(), 2);
 		const toPhysicalAddressDec: number = lastPageNumberToReadDec + parseInt(simulator.core.ptp.content.toString(), 2);
-		const addressesPerPage: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
-		var currentPageNumber: number = firstPageNumberToReadDec;
-		for (let i = fromPhysicalAddressDec; i <= toPhysicalAddressDec; i += 4) {
-			const pageTableEntry: Doubleword = simulator.mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(i));
-			const pageFrameNumber: Array<Bit> = VirtualAddress.fromInteger(currentPageNumber)
-				.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS)
-				.concat(new Array<Bit>(MemoryManagementUnit.NUMBER_BITS_OFFSET).fill(0));
-			tmp.set(pageFrameNumber.toString(), pageTableEntry.toString());
-			currentPageNumber += addressesPerPage;
+		var currentPageFrameNumber: number = firstPageNumberToReadDec;
+		var currentPhysicalAddressDec: number = fromPhysicalAddressDec;
+		while (currentPhysicalAddressDec <= toPhysicalAddressDec) {
+			const pageTableEntry: Doubleword = simulator.mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(currentPhysicalAddressDec));
+			var currentPageFrameNumberBinaryString: string = currentPageFrameNumber.toString(2)
+				.padStart(20, "0")
+				.padEnd(32, "0");
+			tmp.set(currentPageFrameNumberBinaryString, pageTableEntry.toString());
+			currentPhysicalAddressDec += 4;
+			currentPageFrameNumber += 1;
 		}
 		return tmp;
 	});
