@@ -1366,6 +1366,7 @@ class Renderer {
         }
         await this.reloadPhysicalRAMView();
         await this.reloadVirtualRAMView();
+        // TODO: Fix bug!
         // await this.reloadPageTableView();
         await renderer.readEAX(renderer.dataRepresentationEAX);
         await renderer.readEBX(renderer.dataRepresentationEBX);
@@ -1393,6 +1394,7 @@ window.simulator.onLoadedAssemblyProgram(async (filePath: string[]) => {
     renderer.programLoaded = true;
     await renderer.reloadPhysicalRAMView();
     await renderer.createVirtualRAMView();
+    // TODO: Fix bug!
     // await renderer.createPageTableView();
     await renderer.readEAX(renderer.dataRepresentationEAX);
     await renderer.readEBX(renderer.dataRepresentationEBX);
