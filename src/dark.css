@@ -117,8 +117,9 @@ button img {
 }
 
 footer {
-    margin: 0;
+    margin: 0.5rem;
     padding: 0;
+    border-radius: 10px;
     overflow-y: auto;
 }
 
@@ -260,7 +261,7 @@ th, td {
 }
 
 .page-table {
-    max-height: 100px;
+    height: 300px;
     table-layout: auto;
     width: 100%;
     border-collapse: collapse;
