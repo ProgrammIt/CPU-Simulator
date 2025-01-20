@@ -22,7 +22,7 @@
             <section class="registers">
                 <h1 class="header sticky-top">Registers</h1>
                 <div class="grid">
-                    <div class="register widget" id="eax">
+                    <div class="register widget" id="eax" data-representation="BINARY">
                         <div class="lg-text">EAX</div>
                         <div class="sm-text subtitle">General Purpose Register</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -34,7 +34,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="ebx">
+                    <div class="register widget" id="ebx" data-representation="BINARY">
                         <div class="lg-text">EBX</div>
                         <div class="sm-text subtitle">General Purpose Register</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -46,7 +46,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="edx">
+                    <div class="register widget" id="edx" data-representation="BINARY">
                         <div class="lg-text">EDX</div>
                         <div class="sm-text subtitle">General Purpose Register</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -58,14 +58,14 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="eflags">
+                    <div class="register widget" id="eflags" data-representation="BINARY">
                         <div class="lg-text">EFLAGS</div>
                         <div class="sm-text subtitle">State register</div>
                         <div name="register-content" class="register-content" data-value="">
                             11000000
                         </div>
                     </div>
-                    <div class="register widget" id="eip">
+                    <div class="register widget" id="eip" data-representation="BINARY">
                         <div class="lg-text">EIP</div>
                         <div class="sm-text subtitle">Instruction Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -77,7 +77,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="eir">
+                    <div class="register widget" id="eir" data-representation="BINARY">
                         <div class="lg-text">EIR</div>
                         <div class="sm-text subtitle">Instruction Register</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -88,7 +88,7 @@
                             <!-- <option selected value="INSTRUCTION">Instruction</option> -->
                         </select>
                     </div>
-                    <div class="register widget" id="esp">
+                    <div class="register widget" id="esp" data-representation="BINARY">
                         <div class="lg-text">ESP</div>
                         <div class="sm-text subtitle">STACK Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -100,7 +100,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="ptp">
+                    <div class="register widget" id="ptp" data-representation="BINARY">
                         <div class="lg-text">PTP</div>
                         <div class="sm-text subtitle">Page Table Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -112,7 +112,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget none" id="gptp">
+                    <div class="register widget none" id="gptp" data-representation="BINARY">
                         <div class="lg-text">GPTP</div>
                         <div class="sm-text subtitle">Guest Page Table Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -124,7 +124,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="itp">
+                    <div class="register widget" id="itp" data-representation="BINARY">
                         <div class="lg-text">ITP</div>
                         <div class="sm-text subtitle">Interrupt Table Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -136,7 +136,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="nptp">
+                    <div class="register widget" id="nptp" data-representation="BINARY">
                         <div class="lg-text">NPTP</div>
                         <div class="sm-text subtitle">Nested Page Table Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -148,7 +148,7 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="vmptr">
+                    <div class="register widget" id="vmptr" data-representation="BINARY">
                         <div class="lg-text">VMPTR</div>
                         <div class="sm-text subtitle">Virtual Machine Pointer</div>
                         <div name="register-content" class="register-content" data-value="">
@@ -174,12 +174,23 @@
             </section>
         </main>
         <footer>
-            <section>
-                <h1 class="header sticky-top">Page Table</h1>
-                <div class="page-table" id="page-table" class="flex-col">
-                    
-                </div>
-            </section>
+            <h1 class="header sticky-top">Page Table</h1>
+            <table class="page-table" id="page-table">
+                <thead name="page-table-header" class="page-table-header" id="page-table-header">
+                    <tr>
+                        <th>Page Number</th>
+                        <th>Present</th>
+                        <th>Writable</th>
+                        <th>Executable</th>
+                        <th>Accessable only in Kernel mode</th>
+                        <th>Pinned</th>
+                        <th>Changed</th>
+                        <th>Page Frame Number</th>
+                    </tr>
+                </thead>
+                <tbody name="page-table-entries" class="page-table-entries" id="page-table-entries">
+                </tbody>
+            </table>
         </footer>
         <script src="./../out/render.js"></script>
     </body>
