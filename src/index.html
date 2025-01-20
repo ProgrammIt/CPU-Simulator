@@ -13,7 +13,7 @@
                 <li>
                     <button onclick="cycle()">
                         <img class="next-cycle" title="Triggers next instruction cycle" src="./../assets/img/cycle.svg" alt="Button for triggering the next instruction cycle">
-                        Next cycle
+                        Next instruction
                     </button>
                 </li>
             </menu>
@@ -77,7 +77,8 @@
                             <option value="DECIMAL">Decimal</option>
                         </select>
                     </div>
-                    <div class="register widget" id="eir" data-representation="BINARY">
+                    <!-- Hide register for now. Should be located elswhere in the GUI, as this register is not intended to be used by the programmer directly -->
+                    <div class="register widget none" id="eir" data-representation="BINARY">
                         <div class="lg-text">EIR</div>
                         <div class="sm-text subtitle">Instruction Register</div>
                         <div name="register-content" class="register-content" data-value="">
