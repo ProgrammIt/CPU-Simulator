@@ -50,37 +50,37 @@ export class Simulator {
     /**
      * This field stores the physical address space used to store the list with available page frames.
      */
-    private _physicalAddressSpaceListOfAvailablePageFrames: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceListOfAvailablePageFrames: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the physical address space used to store the list with used page frames.
      */
-    private _physicalAddressSpaceListOfUsedPageFrames: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceListOfUsedPageFrames: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the physical address space used to store the interrupt handlers.
      */
-    private _physicalAddressSpaceForInterruptHandlers: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceForInterruptHandlers: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the physical address sapce used to store the systems functions.
      */
-    private _physicalAddressSpaceForSystemFunctions: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceForSystemFunctions: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the physical address sapce used to store the systems functions.
      */
-    private _physicalAddressSpaceForInterruptTable: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceForInterruptTable: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the physical address sapce used to store the systems functions.
      */
-    private _physicalAddressSpaceForPageTable: AddressSpace<PhysicalAddress>;
+    private _physicalAddressSpaceForPageTable: AddressSpace<PhysicalAddress> | undefined;
 
     /**
      * This field stores the virtual address space used to store an compiled assembly program.
      */
-    private _virtualAddressSpaceCodeSegment: AddressSpace<VirtualAddress>;
+    private _virtualAddressSpaceCodeSegment: AddressSpace<VirtualAddress> | undefined;
 
     /**
      * This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
@@ -107,20 +107,13 @@ export class Simulator {
         this.core = new CPUCore(this.mainMemory, processingWidth);
         this._assembler = new Assembler(processingWidth);
         this._programmLoaded = false;
-        this._physicalAddressSpaceListOfAvailablePageFrames =  
-            new AddressSpace(VirtualAddress.fromInteger(0), VirtualAddress.fromInteger(0));
-        this._physicalAddressSpaceListOfUsedPageFrames =  
-            new AddressSpace(VirtualAddress.fromInteger(0), VirtualAddress.fromInteger(0));
-        this._virtualAddressSpaceCodeSegment = 
-            new AddressSpace(VirtualAddress.fromInteger(0), VirtualAddress.fromInteger(0));
-        this._physicalAddressSpaceForInterruptHandlers = 
-            new AddressSpace(PhysicalAddress.fromInteger(0), PhysicalAddress.fromInteger(0));
-        this._physicalAddressSpaceForSystemFunctions = 
-            new AddressSpace(PhysicalAddress.fromInteger(0), PhysicalAddress.fromInteger(0));
-        this._physicalAddressSpaceForInterruptTable = 
-            new AddressSpace(PhysicalAddress.fromInteger(0), PhysicalAddress.fromInteger(0));
-        this._physicalAddressSpaceForPageTable = 
-            new AddressSpace(PhysicalAddress.fromInteger(0), PhysicalAddress.fromInteger(0));
+        this._physicalAddressSpaceListOfAvailablePageFrames =  undefined;
+        this._physicalAddressSpaceListOfUsedPageFrames = undefined;
+        this._virtualAddressSpaceCodeSegment = undefined;
+        this._physicalAddressSpaceForInterruptHandlers = undefined;
+        this._physicalAddressSpaceForSystemFunctions = undefined;
+        this._physicalAddressSpaceForInterruptTable = undefined;
+        this._physicalAddressSpaceForPageTable = undefined;
         this.autoScrollForPageTableEnabled = true;
         this.autoScrollForPhysicalRAMEnabled = true;
         this.autoScrollForVirtualRAMEnabled = true;
@@ -404,7 +397,7 @@ export class Simulator {
         const totalAvailablePhysicalAddressesDec: number = Math.pow(2, DataSizes.DOUBLEWORD);
         const totalNumberOfPageFramesDec: number = totalAvailablePhysicalAddressesDec/addressesPerPageFrameDec;
         // Calculate the base address of the page table.
-        const physicalBaseAddressPageTableDec: number = this._physicalAddressSpaceListOfUsedPageFrames.lowAddressDec() - totalNumberOfPageFramesDec;
+        const physicalBaseAddressPageTableDec: number = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddressDec() - totalNumberOfPageFramesDec;
         /*
          * In order to map the kernel space into the virtual address space of a process 
          * a page table needs to be created that maps high virtual memory addresses to 
@@ -461,13 +454,13 @@ export class Simulator {
                  */
                 presentFlag = true;
                 if (
-                    this._physicalAddressSpaceForInterruptHandlers.inRange(physicalAddressOfCurrentPageFrame)
+                    this._physicalAddressSpaceForInterruptHandlers!.inRange(physicalAddressOfCurrentPageFrame)
                     // -> TODO: If there are system functions, the following code needs to be commented out.
                     // || this._physicalAddressSpaceForSystemFunctions.inRange(virtualAddressOfCurrentPage)
                 ) {
                     writableFlag = false;
                     executableFlag = true;
-                } else if (this._physicalAddressSpaceForInterruptTable.inRange(physicalAddressOfCurrentPageFrame)) {
+                } else if (this._physicalAddressSpaceForInterruptTable!.inRange(physicalAddressOfCurrentPageFrame)) {
                     writableFlag = false;
                     executableFlag = false;
                 } else {
@@ -488,7 +481,7 @@ export class Simulator {
                     ),
                     physicalAddressOfCurrentPageFrame.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                 );
-            } else if (this._virtualAddressSpaceCodeSegment.inRange(physicalAddressOfCurrentPageFrame)) {
+            } else if (this._virtualAddressSpaceCodeSegment!.inRange(physicalAddressOfCurrentPageFrame)) {
                 /**
                  * This is the part of the virtual address space, where the CODE segment resides.
                  * All binary values in here are treated as instructions. Instructions can be
@@ -578,9 +571,9 @@ export class Simulator {
                  */
                 this.core.eax.content = error.addressOfPageTableEntry;
                 // Load physical base address of list with available page frames into EBX register.
-                this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames.lowAddress;
+                this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
                 // Load phyiscal base address of list with used page frames into EDX register.
-                this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames.lowAddress;
+                this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                 // Call interrupt handler.
                 this.core.int(new InstructionOperand(
                     EncodedAddressingModes.DIRECT,
@@ -634,9 +627,9 @@ export class Simulator {
                      */
                     this.core.eax.content = error.addressOfPageTableEntry;
                     // Load physical base address of list with available page frames into EBX register.
-                    this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames.lowAddress;
+                    this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
                     // Load phyiscal base address of list with used page frames into EDX register.
-                    this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames.lowAddress;
+                    this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                     // Call interrupt handler.
                     this.core.int(new InstructionOperand(
                         EncodedAddressingModes.DIRECT,
