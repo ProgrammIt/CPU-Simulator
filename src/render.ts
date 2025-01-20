@@ -194,21 +194,18 @@ class Renderer {
 
     /**
      * This field stores a list with all visible GUI elements associated with the widget of the physical main memory.
-     * @readonly
      */
-    private readonly _listOfVisiblePhysicalRAMGuiElements: Array<Element>;
+    private _listOfVisiblePhysicalRAMGuiElements: Array<Element>;
 
     /**
      * This field stores a list with all visible GUI elements associated with the widget of the virtual main memory.
-     * @readonly
      */
-    private readonly _listOfVisibleVirtualRAMGuiElements: Array<Element>;
+    private _listOfVisibleVirtualRAMGuiElements: Array<Element>;
 
     /**
      * This field stores a list with all visible GUI elements associated with the widget of the Page Table.
-     * @readonly
      */
-    private readonly _listOfVisiblePageTableEntries: Array<Element>;
+    private _listOfVisiblePageTableEntries: Array<Element>;
 
     /**
      * This field stores a callback used to observe the HTMLElements representing the cells of the pyhsical RAM.
@@ -340,8 +337,8 @@ class Renderer {
      * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
      */
     private readonly _pageTableObserverCallback: IntersectionObserverCallback = async (entries: IntersectionObserverEntry[]) => {
-        const ramCellsHTMLElement: HTMLElement | null = this._document.getElementById("page-table");
-        if (!ramCellsHTMLElement) {
+        const pageTableEntriesHTMLElement: HTMLElement | null = this._document.getElementById("page-table-entries");
+        if (!pageTableEntriesHTMLElement) {
             return;
         }
         for (const entry of entries) {
@@ -355,42 +352,77 @@ class Renderer {
                 // Make entered element visible.
                 entry.target.classList.remove("invisible");
                 // Check if element enters from top of viewport.
-                if (entry.target.isEqualNode(ramCellsHTMLElement.firstElementChild) && fromTop < fromBottom) {
+                if (entry.target.isEqualNode(pageTableEntriesHTMLElement.firstElementChild) && fromTop < fromBottom) {
                     // Element is scrolling in from top of viewport and is the first child node of the HTMLElement representing the RAM view.
                     // Insert element and a preceding element at the front of the list.
-                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
-                    const nextHigherVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) + 1;
-                    if (nextHigherVirtualAddressDec >= Math.pow(2, 32)) {
+                    const pageNumberDecString: string = entry.target.getAttribute("data-page-number")!;
+                    const numberAddressesPerPageDec: number = Math.pow(2, 12);
+                    const nextHigherPageNumberDec: number = parseInt(pageNumberDecString, 10) + 1;
+                    if (nextHigherPageNumberDec >= (Math.pow(2, 32)/numberAddressesPerPageDec) - 1) {
                         return;
                     }
-                    const nextHigherVirtualAddressHexString: string = nextHigherVirtualAddressDec.toString(16);
-                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextHigherVirtualAddressHexString}`);
-                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextHigherVirtualAddressHexString}`, binaryStringContent);
-                    this._virtualRAMObserver.observe(element);
-                    ramCellsHTMLElement.insertBefore(element, ramCellsHTMLElement.firstElementChild);
-                    this._listOfVisibleVirtualRAMGuiElements.unshift(element);
-                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.lastElementChild!);
-                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.lastElementChild!), 1);
-                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.lastElementChild!);
+                    const pageTableEntries: Map<string, string> = await this._window.mainMemory.readPageTableEntries(nextHigherPageNumberDec, nextHigherPageNumberDec);
+                    for (const [pageNumberHexString, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
+                        const presentFlag: boolean = (pageTableEntry[0].slice(0, 1) === "1") ? true : false;
+                        const writableFlag: boolean = (pageTableEntry[0].slice(1, 2) === "1") ? true : false;
+                        const executableFlag: boolean = (pageTableEntry[0].slice(2, 3) === "1") ? true : false;
+                        const accessableOnlyInKernelModeFlag: boolean = (pageTableEntry[0].slice(3, 4) === "1") ? true : false;
+                        const pinnedFlag: boolean = (pageTableEntry[0].slice(4, 5) === "1") ? true : false;
+                        const changedFlag: boolean = (pageTableEntry[0].slice(5, 6) === "1") ? true : false;
+                        const pageFrameNumberHexString: string = `0x${parseInt(pageTableEntry.slice(-Renderer.NUMBER_BITS_PAGE_FRAME_ADDRESS), 2)}`;
+                        const element: HTMLElement = this.createPageTableEntryElement(
+                            pageNumberHexString,
+                            presentFlag,
+                            writableFlag,
+                            executableFlag,
+                            accessableOnlyInKernelModeFlag,
+                            pinnedFlag,
+                            changedFlag,
+                            pageFrameNumberHexString
+                        );
+                        this._pageTableObserver.observe(element);
+                        pageTableEntriesHTMLElement.insertBefore(element, pageTableEntriesHTMLElement.firstElementChild);
+                        this._listOfVisiblePageTableEntries.unshift(element);
+                        this._pageTableObserver.unobserve(pageTableEntriesHTMLElement.lastElementChild!);
+                        this._listOfVisiblePageTableEntries.splice(this._listOfVisiblePageTableEntries.indexOf(pageTableEntriesHTMLElement.lastElementChild!), 1);
+                        pageTableEntriesHTMLElement.removeChild(pageTableEntriesHTMLElement.lastElementChild!);
+                    }
                 }
                 // Check if element enters from bottom of viewport.
-                if (entry.target.isEqualNode(ramCellsHTMLElement.lastElementChild) && fromTop > fromBottom) {
+                if (entry.target.isEqualNode(pageTableEntriesHTMLElement.lastElementChild) && fromTop > fromBottom) {
                     // Element is scrolling in from bottom of viewport and is the last child node of the HTMLElement representing the RAM view.
                     // Insert element at the end of the list.
-                    const virtualAddressHexString: string = entry.target.getAttribute("data-virtual-address")!;
-                    const nextLowerVirtualAddressDec: number = parseInt(virtualAddressHexString, 16) - 1;
-                    if (nextLowerVirtualAddressDec < 0) {
+                    const pageNumberDecString: string = entry.target.getAttribute("data-page-number")!;
+                    const nextLowerPageNumberDec: number = parseInt(pageNumberDecString, 10) - 1;
+                    if (nextLowerPageNumberDec < 0) {
                         return;
                     }
-                    const nextLowerVirtualAddressHexString: string = nextLowerVirtualAddressDec.toString(16);
-                    const binaryStringContent: string = await this._window.mainMemory.readFromVirtualMemory(`0x${nextLowerVirtualAddressHexString}`);
-                    const element: Element = this.createVirtualRAMGuiElement(`0x${nextLowerVirtualAddressHexString}`, binaryStringContent);
-                    this._virtualRAMObserver.observe(element);
-                    ramCellsHTMLElement.appendChild(element);
-                    this._listOfVisibleVirtualRAMGuiElements.push(element);
-                    this._virtualRAMObserver.unobserve(ramCellsHTMLElement.firstElementChild!);
-                    this._listOfVisibleVirtualRAMGuiElements.splice(this._listOfVisibleVirtualRAMGuiElements.indexOf(ramCellsHTMLElement.firstElementChild!), 1);
-                    ramCellsHTMLElement.removeChild(ramCellsHTMLElement.firstElementChild!);
+                    const pageTableEntries: Map<string, string> = await this._window.mainMemory.readPageTableEntries(nextLowerPageNumberDec, nextLowerPageNumberDec);
+                    for (const [pageNumberHexString, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
+                        const presentFlag: boolean = (pageTableEntry[0].slice(0, 1) === "1") ? true : false;
+                        const writableFlag: boolean = (pageTableEntry[0].slice(1, 2) === "1") ? true : false;
+                        const executableFlag: boolean = (pageTableEntry[0].slice(2, 3) === "1") ? true : false;
+                        const accessableOnlyInKernelModeFlag: boolean = (pageTableEntry[0].slice(3, 4) === "1") ? true : false;
+                        const pinnedFlag: boolean = (pageTableEntry[0].slice(4, 5) === "1") ? true : false;
+                        const changedFlag: boolean = (pageTableEntry[0].slice(5, 6) === "1") ? true : false;
+                        const pageFrameNumberHexString: string = `0x${parseInt(pageTableEntry.slice(-Renderer.NUMBER_BITS_PAGE_FRAME_ADDRESS), 2)}`;
+                        const element: HTMLElement = this.createPageTableEntryElement(
+                            pageNumberHexString,
+                            presentFlag,
+                            writableFlag,
+                            executableFlag,
+                            accessableOnlyInKernelModeFlag,
+                            pinnedFlag,
+                            changedFlag,
+                            pageFrameNumberHexString
+                        );
+                        this._pageTableObserver.observe(element);
+                        pageTableEntriesHTMLElement.appendChild(element);
+                        this._listOfVisiblePageTableEntries.push(element);
+                        this._virtualRAMObserver.unobserve(pageTableEntriesHTMLElement.firstElementChild!);
+                        this._listOfVisiblePageTableEntries.splice(this._listOfVisiblePageTableEntries.indexOf(pageTableEntriesHTMLElement.firstElementChild!), 1);
+                        pageTableEntriesHTMLElement.removeChild(pageTableEntriesHTMLElement.firstElementChild!);
+                    }
                 }
             } else {
                 // Element not in the viewport.
@@ -901,6 +933,7 @@ class Renderer {
             ramCellsHTMLElement.innerText = "";
             // Disconnect obersever, which results in no element beeing observed. 
             this._physicalRAMObserver.disconnect();
+            this._listOfVisiblePhysicalRAMGuiElements = new Array<Element>();
         }
         const ramCells: Map<string, string> = await this._window.mainMemory.readRangeFromPhysicalMemory(firstPhysicalAddressToReadHex, lastPhysicalAddressToReadHex);
         for (const [physicalAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
@@ -929,6 +962,7 @@ class Renderer {
             ramCellsHTMLElement.innerText = "";
             // Disconnect obersever, which results in no element beeing observed. 
             this._virtualRAMObserver.disconnect();
+            this._listOfVisibleVirtualRAMGuiElements = new Array<Element>();
         }
         const ramCells: Map<string, string> = await this._window.mainMemory.readRangeFromVirtualMemory(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
         for (const [virtualAddressHexString, binaryStringContent] of Array.from(ramCells).reverse()) {
@@ -1012,34 +1046,34 @@ class Renderer {
         changedFlag: boolean,
         pageFrameNumberDecString: string
     ): HTMLElement {
-        const divParentElement: HTMLElement = this._document.createElement("div");
-        divParentElement.setAttribute("class", "page-table-entry");
-        divParentElement.setAttribute("data-page-number", `${pageNumberDecString}`);
-        const divElementPageNumber: HTMLElement = this._document.createElement("div");
-        divElementPageNumber.innerText = pageFrameNumberDecString;
-        const divElementPresent: HTMLElement = this._document.createElement("div");
-        divElementPresent.innerText = (presentFlag) ? "true" : "false";
-        const divElementWritable: HTMLElement = this._document.createElement("div");
-        divElementWritable.innerText = (writableFlag) ? "true" : "false";
-        const divElementExecutable: HTMLElement = this._document.createElement("div");
-        divElementExecutable.innerText = (executableFlag) ? "true" : "false";
-        const divElementAccessableOnlyInKernelMode: HTMLElement = this._document.createElement("div");
-        divElementAccessableOnlyInKernelMode.innerText = (accessableOnlyInKernelModeFlag) ? "true" : "false";
-        const divElementPinned: HTMLElement = this._document.createElement("div");
-        divElementPinned.innerText = (pinnedFlag) ? "true" : "false";
-        const divElementChanged: HTMLElement = this._document.createElement("div");
-        divElementChanged.innerText = (changedFlag) ? "true" : "false";
-        const divElementPageFrameNumber: HTMLElement = this._document.createElement("div");
-        divElementPageFrameNumber.innerText = pageFrameNumberDecString;
-        divParentElement.appendChild(divElementPageNumber);
-        divParentElement.appendChild(divElementPresent);
-        divParentElement.appendChild(divElementWritable);
-        divParentElement.appendChild(divElementExecutable);
-        divParentElement.appendChild(divElementAccessableOnlyInKernelMode);
-        divParentElement.appendChild(divElementPinned);
-        divParentElement.appendChild(divElementChanged);
-        divParentElement.appendChild(divElementPageFrameNumber);
-        return divParentElement;
+        const trElement: HTMLElement = this._document.createElement("tr");
+        trElement.setAttribute("class", "page-table-entry");
+        trElement.setAttribute("data-page-number", `${pageNumberDecString}`);
+        const tdElementPageNumber: HTMLElement = this._document.createElement("td");
+        tdElementPageNumber.innerText = pageFrameNumberDecString;
+        const tdElementPresent: HTMLElement = this._document.createElement("td");
+        tdElementPresent.innerText = (presentFlag) ? "true" : "false";
+        const tdElementWritable: HTMLElement = this._document.createElement("td");
+        tdElementWritable.innerText = (writableFlag) ? "true" : "false";
+        const tdElementExecutable: HTMLElement = this._document.createElement("td");
+        tdElementExecutable.innerText = (executableFlag) ? "true" : "false";
+        const tdElementAccessableOnlyInKernelMode: HTMLElement = this._document.createElement("td");
+        tdElementAccessableOnlyInKernelMode.innerText = (accessableOnlyInKernelModeFlag) ? "true" : "false";
+        const tdElementPinned: HTMLElement = this._document.createElement("td");
+        tdElementPinned.innerText = (pinnedFlag) ? "true" : "false";
+        const tdElementChanged: HTMLElement = this._document.createElement("td");
+        tdElementChanged.innerText = (changedFlag) ? "true" : "false";
+        const tdElementPageFrameNumber: HTMLElement = this._document.createElement("td");
+        tdElementPageFrameNumber.innerText = pageFrameNumberDecString;
+        trElement.appendChild(tdElementPageNumber);
+        trElement.appendChild(tdElementPresent);
+        trElement.appendChild(tdElementWritable);
+        trElement.appendChild(tdElementExecutable);
+        trElement.appendChild(tdElementAccessableOnlyInKernelMode);
+        trElement.appendChild(tdElementPinned);
+        trElement.appendChild(tdElementChanged);
+        trElement.appendChild(tdElementPageFrameNumber);
+        return trElement;
     }
 
     /**
@@ -1057,10 +1091,11 @@ class Renderer {
             pageTableEntiresElement.innerHTML = "";
             // Disconnect obersever, which results in no element beeing observed.
             this._pageTableObserver.disconnect();
+            this._listOfVisiblePageTableEntries = new Array<Element>();
         }
-        const ramCells: Map<string, string> = 
+        const pageTableEntries: Map<string, string> = 
             await this._window.mainMemory.readPageTableEntries(firstPageNumberToReadDec, lastPageNumberToReadDec);
-        for (const [pageNumberHexString, pageTableEntry] of Array.from(ramCells).reverse()) {
+        for (const [pageNumberHexString, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
             const presentFlag: boolean = (pageTableEntry.slice(0, 1) === "1") ? true : false;
             const writableFlag: boolean = (pageTableEntry.slice(1, 2) === "1") ? true : false;
             const executableFlag: boolean = (pageTableEntry.slice(2, 3) === "1") ? true : false;
@@ -1331,6 +1366,7 @@ class Renderer {
         }
         await this.reloadPhysicalRAMView();
         await this.reloadVirtualRAMView();
+        // await this.reloadPageTableView();
         await renderer.readEAX(renderer.dataRepresentationEAX);
         await renderer.readEBX(renderer.dataRepresentationEBX);
         await renderer.readEDX(renderer.dataRepresentationEDX);
@@ -1357,6 +1393,7 @@ window.simulator.onLoadedAssemblyProgram(async (filePath: string[]) => {
     renderer.programLoaded = true;
     await renderer.reloadPhysicalRAMView();
     await renderer.createVirtualRAMView();
+    // await renderer.createPageTableView();
     await renderer.readEAX(renderer.dataRepresentationEAX);
     await renderer.readEBX(renderer.dataRepresentationEBX);
     await renderer.readEDX(renderer.dataRepresentationEDX);
