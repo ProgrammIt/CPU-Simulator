@@ -1364,6 +1364,9 @@ class Renderer {
         if (!await this._window.simulator.nextCycle()) {
             alert("Programm finished execution.")
         }
+        if (!renderer.programLoaded) {
+            alert("No programm is currently loaded!");
+        }
         await this.reloadPhysicalRAMView();
         await this.reloadVirtualRAMView();
         // TODO: Fix bug!
@@ -1373,7 +1376,8 @@ class Renderer {
         await renderer.readEDX(renderer.dataRepresentationEDX);
         await renderer.readEFLAGS();
         await renderer.readEIP(renderer.dataRepresentationEIP);
-        await renderer.readEIR();
+        // TODO: Hide until a new place for the GUI element, representing the EIR register, is found.
+        // await renderer.readEIR();
         await renderer.readESP(renderer.dataRepresentationESP);
         await renderer.readGPTP(renderer.dataRepresentationGPTP);
         await renderer.readITP(renderer.dataRepresentationITP);
@@ -1401,7 +1405,8 @@ window.simulator.onLoadedAssemblyProgram(async (filePath: string[]) => {
     await renderer.readEDX(renderer.dataRepresentationEDX);
     await renderer.readEFLAGS();
     await renderer.readEIP(renderer.dataRepresentationEIP);
-    await renderer.readEIR();
+    // TODO: Hide until a new place for the GUI element, representing the EIR register, is found.
+    // await renderer.readEIR();
     await renderer.readESP(renderer.dataRepresentationESP);
     await renderer.readGPTP(renderer.dataRepresentationGPTP);
     await renderer.readITP(renderer.dataRepresentationITP);
