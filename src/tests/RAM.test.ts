@@ -6,7 +6,7 @@ import { PhysicalAddress } from '../types/PhysicalAddress';
 import { Bit } from '../types/Bit';
 
 describe("Read and write from or to main memory", () => {
-    const mainMemory: RAM = RAM.getInstance(Math.pow(2, 32));
+    const mainMemory: RAM = new RAM(Math.pow(2, 32));
     
     test("Set byte", () => {
         mainMemory.setByte(PhysicalAddress.fromInteger(parseInt("0x0", 16)));

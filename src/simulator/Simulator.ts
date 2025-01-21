@@ -103,7 +103,7 @@ export class Simulator {
      * @param [processingWidth=DataSizes.DOUBLEWORD] The processing width of the simulated CPU.
      */
     private constructor(capacityOfMainMemory: number, processingWidth: DataSizes = DataSizes.DOUBLEWORD) {
-        this.mainMemory = RAM.getInstance(capacityOfMainMemory);
+        this.mainMemory = new RAM(capacityOfMainMemory);
         this.core = new CPUCore(this.mainMemory, processingWidth);
         this._assembler = new Assembler(processingWidth);
         this._programmLoaded = false;

@@ -8,7 +8,7 @@ import { Doubleword } from "../types/Doubleword";
 import { VirtualAddress } from "../types/VirtualAddress";
 
 describe("Read from and write to main memory using MMU as proxy", () => {
-    const mainMemory = RAM.getInstance(Math.pow(2, 32));
+    const mainMemory = new RAM(Math.pow(2, 32));
     const flags: EFLAGS = new EFLAGS();
     const mmu = new MemoryManagementUnit(mainMemory, new PointerRegister("PTP"), new ArithmeticLogicUnit(flags), flags);
 
