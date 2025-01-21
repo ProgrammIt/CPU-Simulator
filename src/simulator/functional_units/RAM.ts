@@ -4,12 +4,10 @@ import { Doubleword } from "../../types/Doubleword";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
-    private _cells: Map<string, Byte>;
-    private _capacity: number;
-    private _freeMemory: number;
-    private _availableMemory: number;    // Counter for written memory cells. Only the memory cells that have been actively written to by a process will increase the count.
-    private _highAddressDec: number;
-    private _lowAddressDec: number;
+    private readonly _cells: Map<string, Byte>;
+    private readonly _capacity: number;
+    private readonly _highAddressDec: number;
+    private readonly _lowAddressDec: number;
     private static _instance: RAM;
 
     /**
@@ -19,10 +17,8 @@ export class RAM {
     private constructor(capacity: number,) {
         this._cells = new Map<string, Byte>();
         this._capacity = capacity;
-        this._freeMemory = capacity;
         this._highAddressDec = capacity;
         this._lowAddressDec = 0;
-        this._availableMemory = 0;
     }
 
     /**
@@ -46,22 +42,6 @@ export class RAM {
      */
     public get capacity(): number {
         return this._capacity;
-    }
-
-    /**
-     * This method returns the current number of unused memory cells.
-     * @returns The total number of unused memory cells.
-     */
-    public get availableMemory(): number {
-        return this._freeMemory;
-    }
-
-    /**
-     * This method returns the current number of used memory cells.
-     * @returns The total number of used memory cells.
-     */
-    public get usedMemory(): number {
-        return this._availableMemory;
     }
 
     /**
@@ -123,8 +103,6 @@ export class RAM {
             `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         // Write byte to "memory".
         this._cells.set(physicalAddressHex, data);
-        --this._freeMemory;
-        ++this._availableMemory;
         return;
     }
 
@@ -176,8 +154,6 @@ export class RAM {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         this._cells.delete(physicalAddressHex);
-        ++this._freeMemory;
-        --this._availableMemory;
         return;
     }
 
@@ -193,8 +169,6 @@ export class RAM {
         const byte = new Byte();
         byte.value = new Array<Bit>(8).fill(1);
         this._cells.set(physicalAddressHex, byte);
-        --this._freeMemory;
-        ++this._availableMemory;
         return;
     }
 
@@ -228,8 +202,6 @@ export class RAM {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressDec: number = parseInt(physicalAddress.toString(), 2);
         this._cells.delete(`0x${(physicalAddressDec).toString(16).toUpperCase()}`);
-        this._freeMemory += 1;
-        this._availableMemory -= 1;    
         return;
     }
 }
