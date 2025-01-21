@@ -13,7 +13,7 @@ export class RAM {
      * This method constructs an instance of the RAM class.
      * @param capacity The max. capacity of this instance of the RAM class.
      */
-    public constructor(capacity: number,) {
+    public constructor(capacity: number) {
         this._cells = new Map<string, Byte>();
         this._capacity = capacity;
         this._highAddressDec = capacity;
