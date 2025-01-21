@@ -8,32 +8,16 @@ export class RAM {
     private readonly _capacity: number;
     private readonly _highAddressDec: number;
     private readonly _lowAddressDec: number;
-    private static _instance: RAM;
 
     /**
      * This method constructs an instance of the RAM class.
      * @param capacity The max. capacity of this instance of the RAM class.
      */
-    private constructor(capacity: number,) {
+    public constructor(capacity: number,) {
         this._cells = new Map<string, Byte>();
         this._capacity = capacity;
         this._highAddressDec = capacity;
         this._lowAddressDec = 0;
-    }
-
-    /**
-     * This method returns a refference to the single instance of the 
-     * RAM class. If the instance was initialized beforehand,
-     * this instance will be returned. Otherwise a single new instance 
-     * will be created.
-     * @param capacity The max. capacity of this instance of the RAM class.
-     * @returns The single instance of the RAM class.
-     */
-    public static getInstance(capacity: number): RAM {
-        if (RAM._instance === null || RAM._instance === undefined) {
-            RAM._instance = new RAM(capacity);
-        }
-        return RAM._instance;
     }
 
     /**
