@@ -4,8 +4,8 @@ import { Doubleword } from "../../types/Doubleword";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
+    public readonly capacity: number;
     private readonly _cells: Map<string, Byte>;
-    private readonly _capacity: number;
     private readonly _highAddressDec: number;
     private readonly _lowAddressDec: number;
 
@@ -15,17 +15,9 @@ export class RAM {
      */
     public constructor(capacity: number) {
         this._cells = new Map<string, Byte>();
-        this._capacity = capacity;
+        this.capacity = capacity;
         this._highAddressDec = capacity;
         this._lowAddressDec = 0;
-    }
-
-    /**
-     * This method returns the max. capacity of the RAM instance.
-     * @returns The total number of available memory cells.
-     */
-    public get capacity(): number {
-        return this._capacity;
     }
 
     /**
