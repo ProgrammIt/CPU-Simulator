@@ -41,29 +41,13 @@ export class RAM {
         // Bit 24 - 32
         fourthByte.value = doubleword.value.slice(24);
         // Only write byte, if it is not a zero byte.
-        if (!firstByte.equal(new Byte())) {
-            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
-        } else {
-            this.clearByte(PhysicalAddress.fromInteger(startAddressDec));
-        }
+        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
         // Only write byte, if it is not a zero byte.
-        if (!secondByte.equal(new Byte())) {
-            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 1), secondByte);
-        } else {
-            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 1));
-        }
+        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 1), secondByte);
         // Only write byte, if it is not a zero byte.
-        if (!thirdByte.equal(new Byte())) {
-            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 2), thirdByte);
-        } else {
-            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 2));
-        }
+        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 2), thirdByte);
         // Only write byte, if it is not a zero byte.
-        if (!fourthByte.equal(new Byte())) {
-            this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 3), fourthByte);
-        } else {
-            this.clearByte(PhysicalAddress.fromInteger(startAddressDec + 3));
-        }
+        this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec + 3), fourthByte);
         return;
     }
 
@@ -75,6 +59,10 @@ export class RAM {
      */
     public writeByteTo(physicalAddress: PhysicalAddress, data: Byte) {
         this.validatePhysicalAddress(physicalAddress);
+        if (data.equal(new Byte())) {
+            this.clearByte(physicalAddress);
+            return;
+        }
         const physicalAddressHex: string = 
             `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         // Write byte to "memory".
