@@ -70,6 +70,7 @@ export class Byte extends BinaryValue {
 	 * Depending on the second parameter, the range of allowed values is slightly different. This method throws an error, if
 	 * the value to be converted is too large or too small.
 	 * @param integer The number to initialize the new instances value with.
+	 * @constructor
 	 * @returns A new instance.
 	 */
 	public static fromInteger(integer: number): Byte {
