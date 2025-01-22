@@ -110,6 +110,7 @@ export class DoubleWord extends BinaryValue {
 
 	/**
 	 * Converts the binary value into a string representation.
+	 * @param [groupBytes=false] If set to true, the string representation of the binary value is grouped into bytes.
 	 * @returns The string representation of the binary value.
 	 */
 	public toString(groupBytes: boolean = false): string {
