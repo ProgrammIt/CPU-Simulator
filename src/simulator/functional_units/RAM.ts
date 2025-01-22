@@ -28,18 +28,14 @@ export class RAM {
     public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword) {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
-        const firstByte: Byte = new Byte();
         // Bit 0 - 7
-        firstByte.value = doubleword.value.slice(0, 8);
-        const secondByte: Byte = new Byte();
+        const firstByte: Byte = new Byte(doubleword.value.slice(0, 8));
         // Bit 8 - 15
-        secondByte.value = doubleword.value.slice(8, 16);
-        const thirdByte: Byte = new Byte();
+        const secondByte: Byte = new Byte(doubleword.value.slice(8, 16));
         // Bit 16 - 24
-        thirdByte.value = doubleword.value.slice(16, 24);
-        const fourthByte: Byte = new Byte();
+        const thirdByte: Byte = new Byte(doubleword.value.slice(16, 24));
         // Bit 24 - 32
-        fourthByte.value = doubleword.value.slice(24);
+        const fourthByte: Byte = new Byte(doubleword.value.slice(24));
         // Only write byte, if it is not a zero byte.
         this.writeByteTo(PhysicalAddress.fromInteger(startAddressDec), firstByte);
         // Only write byte, if it is not a zero byte.
