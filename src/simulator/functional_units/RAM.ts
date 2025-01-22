@@ -109,7 +109,7 @@ export class RAM {
      * address from the cells map. Both is done only if there is an entry in cells map.
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
      */
-    public clearByte(physicalAddress: PhysicalAddress) {
+    public clearByte(physicalAddress: PhysicalAddress): void {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHexString: string = `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
         if (this._cells.has(physicalAddressHexString)) {
@@ -134,7 +134,7 @@ export class RAM {
      * sets all bits at the specified memory address to 1.
      * @param physicalAddress A physical memory address.
      */
-    public setByte(physicalAddress: PhysicalAddress) {
+    public setByte(physicalAddress: PhysicalAddress): void {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHex: string = 
             `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
@@ -148,7 +148,7 @@ export class RAM {
      * This method validates a given physical memory address. If the address is invalid, an error will be thrown, preventing further processing.
      * @param physicalAddress A phyiscal memory address to validate.
      */
-    private validatePhysicalAddress(physicalAddress: PhysicalAddress) {
+    private validatePhysicalAddress(physicalAddress: PhysicalAddress): void {
         var physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
         if (physicalAddressDec > this._highAddressDec || physicalAddressDec < this._lowAddressDec) {
             throw Error(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
@@ -162,7 +162,7 @@ export class RAM {
      * display the contents of the main memory.
      * @returns The current content of this RAM instance.
      */
-    public get cells(): Map<string, Byte>{
+    public get cells(): Map<string, Byte> {
         return this._cells;
     }
 }
