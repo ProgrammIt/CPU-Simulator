@@ -7,15 +7,6 @@ import { Bit } from '../types/Bit';
 
 describe("Read and write from or to main memory", () => {
     const mainMemory: RAM = new RAM(Math.pow(2, 32));
-    
-    test("Set byte", () => {
-        mainMemory.setByte(PhysicalAddress.fromInteger(parseInt("0x0", 16)));
-        const byteExpected: Byte = new Byte();
-        byteExpected.value = new Array<Bit>(8).fill(1);
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>([
-            ["0x0", byteExpected]
-        ]));
-    });
 
     test("Clear byte", () => {
         mainMemory.clearByte(PhysicalAddress.fromInteger(parseInt("0x0", 16)));

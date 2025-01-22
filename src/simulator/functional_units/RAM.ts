@@ -119,21 +119,6 @@ export class RAM {
     }
 
     /**
-     * This method adds a memory address key to the cells map of this MemoryInstance and 
-     * sets all bits at the specified memory address to 1.
-     * @param physicalAddress A physical memory address.
-     */
-    public setByte(physicalAddress: PhysicalAddress): void {
-        this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = 
-            `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
-        const byte = new Byte();
-        byte.value = new Array<Bit>(8).fill(1);
-        this._cells.set(physicalAddressHex, byte);
-        return;
-    }
-
-    /**
      * This method validates a given physical memory address. If the address is invalid, an error will be thrown, preventing further processing.
      * @param physicalAddress A phyiscal memory address to validate.
      */
