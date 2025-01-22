@@ -1,7 +1,7 @@
 import {describe, expect, test} from '@jest/globals';
 import { RAM } from '../simulator/functional_units/RAM';
 import { Byte } from '../types/Byte';
-import { Doubleword } from '../types/Doubleword';
+import { DoubleWord } from '../types/DoubleWord';
 import { PhysicalAddress } from '../types/PhysicalAddress';
 import { Bit } from '../types/Bit';
 
@@ -27,7 +27,7 @@ describe("Read and write from or to main memory", () => {
 
     test("Write doubleword to main memory", () => {
         mainMemory.cells.clear();
-        var doubleword = new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        var doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), doubleword);
         expect(mainMemory.cells).toEqual(new Map<string, Byte>([
             ["0x0", new Byte([1,1,0,1,1,0,0,1])],
@@ -38,7 +38,7 @@ describe("Read and write from or to main memory", () => {
     });
 
     test("Write doubleword to high memory address, expecting an Error", () => {
-        const doubleword = new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        const doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         const attemptToWrite = () => {
             mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0xFFFFFFFE", 16)), doubleword);
         }      
@@ -58,24 +58,24 @@ describe("Read and write from or to main memory", () => {
     });
 
     test("Read doubleword from memory address", () => {
-        const result: Doubleword = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0x0", 16)));
-        const expectedDoubleword: Doubleword = new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        const result: DoubleWord = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0x0", 16)));
+        const expectedDoubleword: DoubleWord = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         expect(result).toEqual(expectedDoubleword);
     });
 
     test("Read doubleword from a previously unused memory address", () => {
         mainMemory.cells.clear();
-        const result: Doubleword = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0xFFFF", 16)));
-        const expectedDoubleword: Doubleword = new Doubleword([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        const result: DoubleWord = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0xFFFF", 16)));
+        const expectedDoubleword: DoubleWord = new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         expect(result).toEqual(expectedDoubleword);
     });
 
     test("Read doubleword from partially unused memory address", () => {
         mainMemory.cells.clear();
-        var doubleword = new Doubleword([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        var doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), doubleword);
-        const result: Doubleword = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0x3", 16)));
-        const expectedDoubleword: Doubleword = new Doubleword([0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        const result: DoubleWord = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0x3", 16)));
+        const expectedDoubleword: DoubleWord = new DoubleWord([0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 
         expect(result).toEqual(expectedDoubleword);
     });

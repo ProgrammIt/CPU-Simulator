@@ -1,7 +1,7 @@
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { DataSizes } from "../../types/DataSizes";
-import { Doubleword } from "../../types/Doubleword";
+import { DoubleWord } from "../../types/DoubleWord";
 import { PageFaultError } from "../../types/errors/PageFaultError";
 import { PageFrameNotExecutableError } from "../../types/errors/PageFrameNotExecutableError";
 import { PageFrameNotWritableError } from "../../types/errors/PageFrameNotWritableError";
@@ -154,7 +154,7 @@ export class MemoryManagementUnit {
      * @throws {PageFrameNotExecutableError} If the page frame associated with this page is not executable.
      * @throws {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      */
-    public writeDoublewordTo(virtualAddress: VirtualAddress, doubleword: Doubleword, attemptsToExecute: boolean): void {
+    public writeDoublewordTo(virtualAddress: VirtualAddress, doubleword: DoubleWord, attemptsToExecute: boolean): void {
         const physicalAddress: PhysicalAddress = this.translate(virtualAddress, true, attemptsToExecute);
         this._mainMemory.writeDoublewordTo(physicalAddress, doubleword);
         return;
@@ -170,7 +170,7 @@ export class MemoryManagementUnit {
      * @throws {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      * @returns Doubleword-sized binary data.
      */
-    public readDoublewordFrom(virtualAddress: VirtualAddress, attemptsToExecute: boolean): Doubleword {
+    public readDoublewordFrom(virtualAddress: VirtualAddress, attemptsToExecute: boolean): DoubleWord {
         const physicalAddress: PhysicalAddress = this.translate(virtualAddress, false, attemptsToExecute);
         return this._mainMemory.readDoublewordFrom(physicalAddress);
     }
@@ -293,7 +293,7 @@ export class MemoryManagementUnit {
             // Copy the flag bits.
             const tmpFlagBits = pageTableEntry.flagBits.slice();
             // Update flag bits of page table entry in memory as well.
-            this._mainMemory.writeDoublewordTo(virtualAddress, new Doubleword(tmpFlagBits.concat(pageTableEntry.frameNbr)));
+            this._mainMemory.writeDoublewordTo(virtualAddress, new DoubleWord(tmpFlagBits.concat(pageTableEntry.frameNbr)));
         }
         // Page frame is present and operation is permitted.
         // Create a valid physical memory address from the page frame number and the offset extracted from the given virtual memory address.
@@ -331,7 +331,7 @@ export class MemoryManagementUnit {
         const addressOfPageTableEntry: PhysicalAddress = 
             PhysicalAddress.fromInteger(parseInt(this._ptp.content.toString(), 2) + parseInt(pageNbr.toString(), 2));
         // Read page table entry from memory.
-        const contentOfPageTableEntry: Doubleword = this._mainMemory.readDoublewordFrom(addressOfPageTableEntry);
+        const contentOfPageTableEntry: DoubleWord = this._mainMemory.readDoublewordFrom(addressOfPageTableEntry);
         // Create object from this content.
         const pageTableEntry: PageTableEntry = new PageTableEntry(
             contentOfPageTableEntry.value.slice(0, MemoryManagementUnit.NUMBER_FLAG_BITS),

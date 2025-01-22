@@ -4,7 +4,7 @@ import { EFLAGS } from "../simulator/functional_units/EFLAGS";
 import { PointerRegister } from "../simulator/functional_units/PointerRegister";
 import { RAM } from "../simulator/functional_units/RAM";
 import { Byte } from "../types/Byte";
-import { Doubleword } from "../types/Doubleword";
+import { DoubleWord } from "../types/DoubleWord";
 import { VirtualAddress } from "../types/VirtualAddress";
 
 describe("Read from and write to main memory using MMU as proxy", () => {
@@ -27,7 +27,7 @@ describe("Read from and write to main memory using MMU as proxy", () => {
         var virtualAddress = VirtualAddress.fromInteger(parseInt("0x1000000", 16));
         mmu.writeDoublewordTo(
             virtualAddress, 
-            Doubleword.fromInteger(parseInt("01101100100101110101000010110000", 2)),
+            DoubleWord.fromInteger(parseInt("01101100100101110101000010110000", 2)),
             false
         );
         expect(mainMemory.cells).toEqual(new Map<string, Byte>([
@@ -40,7 +40,7 @@ describe("Read from and write to main memory using MMU as proxy", () => {
 
     test("Write doubleword to high memory address, expecting an Error", () => {
         var virtualAddress: VirtualAddress = VirtualAddress.fromInteger(parseInt("0xFFFFFFFE", 16));
-        const doubleword = Doubleword.fromInteger(parseInt("01101100100101110101000010110000", 2));
+        const doubleword = DoubleWord.fromInteger(parseInt("01101100100101110101000010110000", 2));
         const attemptToWrite = () => {
             mmu.writeDoublewordTo(virtualAddress, doubleword, false);
         }      
@@ -64,23 +64,23 @@ describe("Read from and write to main memory using MMU as proxy", () => {
         var virtualAddress = VirtualAddress.fromInteger(parseInt("0x0", 16));
         mmu.writeDoublewordTo(
             virtualAddress, 
-            Doubleword.fromInteger(parseInt("01101100100101110101000010110000", 2)),
+            DoubleWord.fromInteger(parseInt("01101100100101110101000010110000", 2)),
             false
         );
         virtualAddress = VirtualAddress.fromInteger(parseInt("0x0", 16));
-        var result: Doubleword = mmu.readDoublewordFrom(virtualAddress, false);
+        var result: DoubleWord = mmu.readDoublewordFrom(virtualAddress, false);
         expect(result.value.join("")).toBe("01101100100101110101000010110000");
     });
 
     test("Read doubleword from a previously unused memory address", () => {
         var virtualAddress: VirtualAddress = VirtualAddress.fromInteger(parseInt("0xFFFF", 16));
-        let result: Doubleword = mmu.readDoublewordFrom(virtualAddress, false);
+        let result: DoubleWord = mmu.readDoublewordFrom(virtualAddress, false);
         expect(result.value.join("")).toBe("00000000000000000000000000000000");
     });
 
     test("Read doubleword from partially unused memory address", () => {
         var virtualAddress: VirtualAddress = VirtualAddress.fromInteger(parseInt("0x3", 16));
-        let result: Doubleword = mmu.readDoublewordFrom(virtualAddress, false);
+        let result: DoubleWord = mmu.readDoublewordFrom(virtualAddress, false);
         expect(result.value.join("")).toBe("10110000000000000000000000000000");
     });
 });

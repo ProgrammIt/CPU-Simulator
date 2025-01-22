@@ -1,11 +1,11 @@
 import { Bit } from "./Bit";
-import { Doubleword } from "./Doubleword";
+import { DoubleWord } from "./DoubleWord";
 
 /**
  * This class represents an 32-bit instruction.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class Instruction extends Doubleword {
+export class Instruction extends DoubleWord {
 	/**
 	 * Instantiates a new object.
 	 * @constructor

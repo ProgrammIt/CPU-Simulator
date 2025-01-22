@@ -3,7 +3,7 @@ import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
 
-export class Doubleword extends BinaryValue {
+export class DoubleWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -2_147_483_648;
 
@@ -54,7 +54,7 @@ export class Doubleword extends BinaryValue {
 	 * @param doubleword The binary value to compare to.
 	 * @returns True, if both binary values are identical, false otherwise.
 	 */
-	public equal(doubleword: Doubleword): boolean {
+	public equal(doubleword: DoubleWord): boolean {
 		return doubleword.toString() === this.toString();
 	}
 
@@ -63,7 +63,7 @@ export class Doubleword extends BinaryValue {
 	 * @param other The binary value to compare to.
 	 * @returns True, if this value is less than the one compared to, false otherwise.
 	 */
-    public isSmallerThan(other: Doubleword): boolean {
+    public isSmallerThan(other: DoubleWord): boolean {
 		return twosComplementToDecimal(this) < twosComplementToDecimal(other);
     }
 
@@ -72,7 +72,7 @@ export class Doubleword extends BinaryValue {
 	 * @param other The binary value to compare to.
 	 * @returns True, if this value is greater than the one compared to, false otherwise.
 	 */
-	public isGreaterThan(other: Doubleword): boolean {
+	public isGreaterThan(other: DoubleWord): boolean {
 		return twosComplementToDecimal(this) > twosComplementToDecimal(other);
 	}
 
@@ -81,7 +81,7 @@ export class Doubleword extends BinaryValue {
 	 * @returns True, if the binary value is zero, false otherwise.
 	 */
 	public isZero(): boolean {
-		return this.equal(new Doubleword());
+		return this.equal(new DoubleWord());
 	}
 
 	/**
@@ -132,16 +132,16 @@ export class Doubleword extends BinaryValue {
 	 * @param integer The number to initialize the new instances value with.
 	 * @returns A new instance.
 	 */
-	public static fromInteger(integer: number): Doubleword {
+	public static fromInteger(integer: number): DoubleWord {
 		if (!Number.isInteger(integer)) {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (integer < Doubleword.MAX_NEGATIVE_NUMBER_DEC || integer > Doubleword.MAX_POSITIVE_NUMBER_DEC) {
+		if (integer < DoubleWord.MAX_NEGATIVE_NUMBER_DEC || integer > DoubleWord.MAX_POSITIVE_NUMBER_DEC) {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.DOUBLEWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
-		var doubleword: Doubleword = new Doubleword();
+		var doubleword: DoubleWord = new DoubleWord();
 
 		// A bit shift converts the given number to a signed 32-bit value.
 		var binaryNumber: string = (integer < 0) ? 

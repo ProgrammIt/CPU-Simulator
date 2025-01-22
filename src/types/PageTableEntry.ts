@@ -1,5 +1,5 @@
 import { Bit } from "./Bit";
-import { Doubleword } from "./Doubleword";
+import { DoubleWord } from "./DoubleWord";
 
 /**
  * This class represents a page table entry.
@@ -49,8 +49,8 @@ export class PageTableEntry {
      * This method converts the page table entry to a doubleword.
      * @returns A doubleword representing the page table entry.
      */
-    public toDoubleword(): Doubleword {
-        return new Doubleword(this.flagBits.concat(this.frameNbr));
+    public toDoubleword(): DoubleWord {
+        return new DoubleWord(this.flagBits.concat(this.frameNbr));
     }
 
     /**

@@ -1,11 +1,11 @@
 import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
-import { Doubleword } from "./Doubleword";
+import { DoubleWord } from "./DoubleWord";
 
 /**
  * This class represents doubleword (4 byte) sized binary data.
  */
-export class Address extends Doubleword {
+export class Address extends DoubleWord {
 	public static readonly MAX_NUMBER_UNSIGNED_DEC: number = 4_294_967_295;
 
 	/**

@@ -1,6 +1,6 @@
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
-import { Doubleword } from "../../types/Doubleword";
+import { DoubleWord } from "../../types/DoubleWord";
 import { AddressOutOfRangeError } from "../../types/errors/AddressOutOfRangeError";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
@@ -27,7 +27,7 @@ export class RAM {
      * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @param doubleword Doubleword-sized data to write.
      */
-    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword) {
+    public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: DoubleWord) {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
         // Bit 0 - 7
@@ -75,10 +75,10 @@ export class RAM {
      * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @returns Doubleword-sized binary data.
      */
-    public readDoublewordFrom(physicalAddress: PhysicalAddress): Doubleword {
+    public readDoublewordFrom(physicalAddress: PhysicalAddress): DoubleWord {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
-        const doubleword = new Doubleword();
+        const doubleword = new DoubleWord();
         var firstByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec));
         var secondByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 1));
         var thirdByte: Byte =  this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 2));

@@ -1,5 +1,5 @@
 import { DataSizes } from "../../types/DataSizes";
-import { Doubleword } from "../../types/Doubleword";
+import { DoubleWord } from "../../types/DoubleWord";
 import { Instruction } from "../../types/Instruction";
 import { Register } from "./Register";
 
@@ -13,7 +13,7 @@ export class InstructionRegister extends Register<Instruction> {
      * @constructor
      */
     public constructor() {
-        super("EIR", new Doubleword());
+        super("EIR", new DoubleWord());
     }
 
     /**
@@ -21,18 +21,18 @@ export class InstructionRegister extends Register<Instruction> {
      * @override
      * @returns A copy of the current registers content.
      */
-    public get content(): Doubleword {
-        return new Doubleword(this._content.value);
+    public get content(): DoubleWord {
+        return new DoubleWord(this._content.value);
     }
 
     /**
      * Accessor for setting the current registers content to a new value.
      * @param newValue The new value.
      */
-    public set content(newValue: Doubleword) {
+    public set content(newValue: DoubleWord) {
         if (newValue.value.length !== DataSizes.DOUBLEWORD) {
 			throw new Error(`A new value must have exactly ${DataSizes.DOUBLEWORD} bits: ${newValue.value.length} given.`);
 		}
-        this._content = new Doubleword(newValue.value);
+        this._content = new DoubleWord(newValue.value);
     }
 }

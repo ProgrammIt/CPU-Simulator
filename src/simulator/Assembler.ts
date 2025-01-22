@@ -3,13 +3,13 @@ import { UnrecognizedInstructionError } from "../types/errors/UnrecognizedInstru
 import { Bit } from "../types/Bit";
 import { AssemblyLanguageDefinition } from "../types/compiler/AssemblyLanguageDefinition";
 import { DataSizes } from "../types/DataSizes";
-import { Doubleword } from "../types/Doubleword";
+import { DoubleWord } from "../types/DoubleWord";
 import { VirtualAddress } from "../types/VirtualAddress";
 
 export class Assembler {
   	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
   	public readonly languageDefinition: AssemblyLanguageDefinition;
-	public readonly translations: Map<string, Doubleword[]>;
+	public readonly translations: Map<string, DoubleWord[]>;
 	public readonly processingWidth: DataSizes;
 
 	/**
@@ -20,7 +20,7 @@ export class Assembler {
   	public constructor(processingWidth: DataSizes, pathToLanguageDefinition: string = "./assets/settings/language_definition.json") {
 		this.processingWidth = processingWidth;
 		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
-		this.translations = new Map<string, Doubleword[]>();
+		this.translations = new Map<string, DoubleWord[]>();
   	}
 
 	/**
@@ -75,9 +75,9 @@ export class Assembler {
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
-	private encode(lines: Map<number, string>): Doubleword[] {
+	private encode(lines: Map<number, string>): DoubleWord[] {
 		var lineEncoded: boolean = false;
-		var encodedInstructions: Doubleword[] = [];
+		var encodedInstructions: DoubleWord[] = [];
 		var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
 
 		// Remove jump labels as they will not be encoded.
@@ -127,7 +127,7 @@ export class Assembler {
 							const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 							if (regexMatchArrayInstruction !== null) {
 								// Instruction found. Encode it.							
-								const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+								const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
 								// Store the instruction along its encoded representation in the translations map.
 								this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
 								encodedInstructions.push(...encodedInstruction);
@@ -158,7 +158,7 @@ export class Assembler {
 						const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 						if (regexMatchArrayInstruction !== null) {
 							// Instruction found. Encode it.
-							const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+							const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
 							// Store the instruction along its encoded representation in the translations map.
 							this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
 							encodedInstructions.push(...encodedInstruction);
@@ -172,7 +172,7 @@ export class Assembler {
 					const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 					if (regexMatchArrayInstruction !== null) {
 						// Instruction found. Encode it.
-						const encodedInstruction: Doubleword[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+						const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
 						// Store the instruction along its encoded representation in the translations map.
 						this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
 						encodedInstructions.push(...encodedInstruction);
@@ -223,14 +223,14 @@ export class Assembler {
 	 * @param jumpLabels The jump labels found in the assembly code.
 	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
 	 */
-	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): Doubleword[] {
-		var encodedInstruction: Doubleword = new Doubleword();
+	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): DoubleWord[] {
+		var encodedInstruction: DoubleWord = new DoubleWord();
 		var addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
 		var typeOperand1: Array<Bit> = new Array<Bit>(7);
 		var addressingModeOperand2: Array<Bit> = new Array<Bit>(2);
 		var typeOperand2: Array<Bit> = new Array<Bit>(7);
-		var encodedOperandValue1: Doubleword = new Doubleword();
-		var encodedOperandValue2: Doubleword = new Doubleword();
+		var encodedOperandValue1: DoubleWord = new DoubleWord();
+		var encodedOperandValue2: DoubleWord = new DoubleWord();
 		var instructionType: Array<Bit> = new Array<Bit>(3);
 		var opcode: Array<Bit> = new Array<Bit>(7);
 		var instructionMnemonic: string = regexMatchArrayInstruction[1];
@@ -311,10 +311,10 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns The binary encoded operand
 	 */
-	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): Doubleword {
-		var operand32BitEncoded: Doubleword;
+	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): DoubleWord {
+		var operand32BitEncoded: DoubleWord;
 		if (operand.length === 0) {
-			operand32BitEncoded = new Doubleword();
+			operand32BitEncoded = new DoubleWord();
 		} else if (jumpLabels.has(operand)) {
 			// Operand is jump label.
 			operand32BitEncoded = VirtualAddress.fromInteger(parseInt(jumpLabels.get(operand)!, 2));
@@ -354,13 +354,13 @@ export class Assembler {
 	 * @param line The line of code which this operand originates from.
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
-	private encodeBinaryValue(operand: string, line: number): Doubleword {
+	private encodeBinaryValue(operand: string, line: number): DoubleWord {
 		if (operand.length > this.processingWidth) {
 			throw Error(`In line ${line + 1}: Binary immediate consists of more than ${this.processingWidth} bits.`);
 		}
 		// Sign extend binary value.
 		operand = operand.padStart(this.processingWidth, operand.charAt(0));
-		const binaryValue: Doubleword = new Doubleword();
+		const binaryValue: DoubleWord = new DoubleWord();
 		operand.split("").map((bit, index) => {
 			binaryValue.value[index] = (bit === "0") ? 0 : 1;
 		})
@@ -373,7 +373,7 @@ export class Assembler {
 	 * @param line The line of code which this operand originates from.
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
-	private encodeHexadecimalValue(operand: string, line: number): Doubleword {
+	private encodeHexadecimalValue(operand: string, line: number): DoubleWord {
 		let operandDec: number = 0;
 		if (operand.startsWith("-")) {
 			// Negative hex value.
@@ -382,7 +382,7 @@ export class Assembler {
 			// Positive hex value.
 			operandDec = parseInt(operand, 16);
 		}
-		return Doubleword.fromInteger(operandDec);
+		return DoubleWord.fromInteger(operandDec);
 	}
 
 	/**
@@ -391,7 +391,7 @@ export class Assembler {
 	 * @param line The line of code which this operand originates from.
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
-	private encodeDecimalValue(operand: string, line: number): Doubleword {
+	private encodeDecimalValue(operand: string, line: number): DoubleWord {
 		let operandDec: number = 0;
 		if (operand.startsWith("-")) {
 			// Negative dec value.
@@ -400,7 +400,7 @@ export class Assembler {
 			// Positive dec value.
 			operandDec = parseInt(operand, 10);
 		}
-		return Doubleword.fromInteger(operandDec);
+		return DoubleWord.fromInteger(operandDec);
 	}
 
 	/**
@@ -483,12 +483,12 @@ export class Assembler {
 	 * @returns The 32-bit encoded register.
 	 * @throws An error if the given register is not recognized.
 	 */
-	private encodeRegister(register: string, line: number): Doubleword {
+	private encodeRegister(register: string, line: number): DoubleWord {
 		register = register.replace("%", "").toLowerCase().trim();
 		for (const reg of this.languageDefinition.addressable_registers) {
 			if (register === reg.name.toLowerCase()) {
 				const tmp: string = reg.code.padStart(this.processingWidth, "0");
-				const encodedRegister: Doubleword = new Doubleword();
+				const encodedRegister: DoubleWord = new DoubleWord();
 				tmp.split("").forEach((bit, index) => {
 					encodedRegister.value[index] = (bit === "0") ? 0 : 1;
 				});
@@ -529,7 +529,7 @@ export class Assembler {
 	 * @param s File contents of an .asm file containing a computer program written in assembly language.
 	 * @returns An array of strings representing the binary encoded instructions of the given computer program.
 	 */
-	public compile(s: string): Doubleword[] {
+	public compile(s: string): DoubleWord[] {
 		const lines: Map<number, string> = this.preprocess(s);
 		return this.encode(lines);
 	}

@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, shell } from "electron";
 import path from 'path';
 import { Simulator } from "./simulator/Simulator";
-import { Doubleword } from "./types/Doubleword";
+import { DoubleWord } from "./types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
 import { NumberSystem } from "./types";
 import { PhysicalAddress } from "./types/PhysicalAddress";
@@ -248,7 +248,7 @@ app.whenReady().then(() => {
 		var currentPageFrameNumber: number = firstPageNumberToReadDec;
 		var currentPhysicalAddressDec: number = fromPhysicalAddressDec;
 		while (currentPhysicalAddressDec <= toPhysicalAddressDec) {
-			const pageTableEntry: Doubleword = simulator.mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(currentPhysicalAddressDec));
+			const pageTableEntry: DoubleWord = simulator.mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(currentPhysicalAddressDec));
 			var currentPageFrameNumberBinaryString: string = currentPageFrameNumber.toString(2)
 				.padStart(20, "0")
 				.padEnd(32, "0");
@@ -260,7 +260,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEAX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
-		const content: Doubleword = simulator.core.eax.content;
+		const content: DoubleWord = simulator.core.eax.content;
 		var result: string;
 		if (basis === NumberSystem.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;
@@ -273,7 +273,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEBX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
-		const content: Doubleword = simulator.core.ebx.content;
+		const content: DoubleWord = simulator.core.ebx.content;
 		var result: string;
 		if (basis === NumberSystem.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;
@@ -286,7 +286,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.handle("readEDX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
-		const content: Doubleword = simulator.core.edx.content;
+		const content: DoubleWord = simulator.core.edx.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		var result: string;
 		if (basis === NumberSystem.HEX) {

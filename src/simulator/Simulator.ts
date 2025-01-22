@@ -1,7 +1,7 @@
 import { Assembler } from "./Assembler";
 import { CPUCore } from "./execution_units/CPUCore";
 import { RAM } from "./functional_units/RAM";
-import { Doubleword } from "../types/Doubleword";
+import { DoubleWord } from "../types/DoubleWord";
 import { PhysicalAddress } from "../types/PhysicalAddress";
 import { VirtualAddress } from "../types/VirtualAddress";
 import { Bit } from "../types/Bit";
@@ -150,8 +150,8 @@ export class Simulator {
         // Enable real mode and disable memory virtualization.
         this.core.mmu.disableMemoryVirtualization();
         // Compile and write interrupt handlers.
-        const compiledIRH1: Doubleword[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/mount_page_frame.asm", "utf-8"));
-        const compiledIRH2: Doubleword[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/unmount_page_frame.asm", "utf-8"));
+        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/mount_page_frame.asm", "utf-8"));
+        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/unmount_page_frame.asm", "utf-8"));
         // -> TODO: Compile other interrupt handlers
         // Load interrupt handlers into kernel space.
         const baseAddressesInterruptHandlers: Array<PhysicalAddress> = this.loadInterruptHandlers(
@@ -204,7 +204,7 @@ export class Simulator {
      * @param compiledInterruptHandlers The list of compiled interrupt handlers.
      * @return A list of the interrupt handlers base addresses to create the interrupt table from.
      */
-    private loadInterruptHandlers(highestPhysicalAddress: PhysicalAddress, compiledInterruptHandlers: Array<Array<Doubleword>>): Array<PhysicalAddress> {
+    private loadInterruptHandlers(highestPhysicalAddress: PhysicalAddress, compiledInterruptHandlers: Array<Array<DoubleWord>>): Array<PhysicalAddress> {
         const baseAddresses: Array<PhysicalAddress> = new Array<PhysicalAddress>();
         var currentPhysicalAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         // Load the given interrupt handlers to kernel space.
@@ -225,7 +225,7 @@ export class Simulator {
      * @param compiledIRH The compiled interrupt handler.
      * @returns The physical base address of the interrupt handler.
      */
-    private loadInterruptHandler(highestPhysicalAddress: PhysicalAddress, compiledIRH: Doubleword[]): PhysicalAddress {
+    private loadInterruptHandler(highestPhysicalAddress: PhysicalAddress, compiledIRH: DoubleWord[]): PhysicalAddress {
         // Load compiled interrupt handler into the main memory.
         var currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
         for (const binaryValue of compiledIRH) {
@@ -242,7 +242,7 @@ export class Simulator {
      * @param baseAddressesInterruptHandlers The physical base addresses of the interrupt handlers.
      * @returns The physical base address of the interrupt table, which is the lowest physical address of the interrupt table.
      */
-    private initializeInterruptTable(highestPhysicalAddress: PhysicalAddress, baseAddressesInterruptHandlers: Doubleword[]): PhysicalAddress {
+    private initializeInterruptTable(highestPhysicalAddress: PhysicalAddress, baseAddressesInterruptHandlers: DoubleWord[]): PhysicalAddress {
         var currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         for (const physicalBaseAddress of Array.from(baseAddressesInterruptHandlers).reverse()) {
             currentAddressDec -= 4;
@@ -368,7 +368,7 @@ export class Simulator {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<Doubleword> = this._assembler.compile(fileContents);
+        const compiledProgram: Array<DoubleWord> = this._assembler.compile(fileContents);
         // -> TODO: Create process control block.
         /**
          * Retrieve the size of the compiled program. The program code is loaded to a specific 
@@ -578,13 +578,13 @@ export class Simulator {
                 this.core.int(new InstructionOperand(
                     EncodedAddressingModes.DIRECT,
                     EncodedOperandTypes.IMMEDIATE,
-                    Doubleword.fromInteger(1)
+                    DoubleWord.fromInteger(1)
                 ));
                 // Retry instruction.
                 resultOfCycle = this.core.cycle();
             } else {
                 // Load error code into EAX register.
-                this.core.eax.content = Doubleword.fromInteger(-1);
+                this.core.eax.content = DoubleWord.fromInteger(-1);
                 /**
                  * Call the first interrupt handler, as this interrupt handler suspends the process,
                  * which caused this error.
@@ -592,7 +592,7 @@ export class Simulator {
                 this.core.int(new InstructionOperand(
                     EncodedAddressingModes.DIRECT,
                     EncodedOperandTypes.IMMEDIATE,
-                    Doubleword.fromInteger(0)
+                    DoubleWord.fromInteger(0)
                 ));
             }
             // Rethrow error and pass it to the next higher instance (main.ts).
@@ -610,7 +610,7 @@ export class Simulator {
      * @throws — {PageFrameNotExecutableError} If the page frame associated with this page is not executable.
      * @throws — {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      */
-    public loadProgramm(compiledProgram: Array<Doubleword>, virtualBaseAddressDec: number = 0): void {
+    public loadProgramm(compiledProgram: Array<DoubleWord>, virtualBaseAddressDec: number = 0): void {
         // Enter kernel mode in order to ignore the write-protection for the CODE segment.
         this.core.eflags.enterKernelMode();
         // Load compiled programm into main memory.
@@ -634,7 +634,7 @@ export class Simulator {
                     this.core.int(new InstructionOperand(
                         EncodedAddressingModes.DIRECT,
                         EncodedOperandTypes.IMMEDIATE,
-                        Doubleword.fromInteger(1)
+                        DoubleWord.fromInteger(1)
                     ));
                     // Retry to write to address.
                     this.core.mmu.writeDoublewordTo(virtualAddress, binaryValue, true);

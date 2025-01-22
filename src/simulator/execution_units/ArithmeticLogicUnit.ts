@@ -1,7 +1,7 @@
 import { BinaryValue } from "../../types/BinaryValue";
 import { Bit } from "../../types/Bit";
 import { DataSizes } from "../../types/DataSizes";
-import { Doubleword } from "../../types/Doubleword";
+import { DoubleWord } from "../../types/DoubleWord";
 import { DivisionByZeroError } from "../../types/errors/DivisionByZeroError";
 import { Quadword } from "../../types/Quadword";
 import { EFLAGS } from "../functional_units/EFLAGS";
@@ -31,7 +31,7 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value.
      * @returns
      */
-    private checkForZero(operand: Doubleword) {
+    private checkForZero(operand: DoubleWord) {
         if (operand.value.every(bit => (bit === 0))) {
             this._eflags.setZero();
         } else {
@@ -46,7 +46,7 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value.
      * @returns
      */
-    private checkForParity(operand: Doubleword) {
+    private checkForParity(operand: DoubleWord) {
         var noSetBits: number = 0;
         operand.value.slice(-DataSizes.BYTE).forEach(bit => {
             if (bit === 1) {
@@ -68,7 +68,7 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value. 
      * @returns
      */
-    private checkForSigned(operand: Doubleword) {
+    private checkForSigned(operand: DoubleWord) {
         if (operand.value[0] === 1) {
             this._eflags.setSigned();
         } else {
@@ -112,8 +112,8 @@ export class ArithmeticLogicUnit {
      * @param operand The doubleword sized binary value to invert.
      * @returns The inverted binary value.
      */
-    public not(operand: Doubleword): Doubleword {
-        const result: Doubleword = new Doubleword(operand.value.slice());
+    public not(operand: DoubleWord): DoubleWord {
+        const result: DoubleWord = new DoubleWord(operand.value.slice());
         operand.value.forEach((bit, index) => {
             result.value[index] = (bit === 1) ? 0 : 1;
         });
@@ -137,8 +137,8 @@ export class ArithmeticLogicUnit {
      * @param secondOperand The second doubleword.
      * @returns The resulting binary value.
      */
-    public and(firstOperand: Doubleword, secondOperand: Doubleword): Doubleword {
-        const result: Doubleword = new Doubleword();
+    public and(firstOperand: DoubleWord, secondOperand: DoubleWord): DoubleWord {
+        const result: DoubleWord = new DoubleWord();
         this._eflags.clearCarry();
         this._eflags.clearOverflow();
         firstOperand.value.forEach((bitFirstOperand, index) => {
@@ -168,8 +168,8 @@ export class ArithmeticLogicUnit {
      * @param secondOperand The second word.
      * @returns The resulting binary value.
      */
-    public or(firstOperand: Doubleword, secondOperand: Doubleword): Doubleword {
-        const result: Doubleword = new Doubleword();
+    public or(firstOperand: DoubleWord, secondOperand: DoubleWord): DoubleWord {
+        const result: DoubleWord = new DoubleWord();
         this._eflags.clearCarry();
         this._eflags.clearOverflow();
         firstOperand.value.forEach((bitFirstOperand, index) => {
@@ -199,8 +199,8 @@ export class ArithmeticLogicUnit {
      * @param secondOperand The second doubleword.
      * @returns The resulting binary value.
      */
-    public xor(firstOperand: Doubleword, secondOperand: Doubleword) {
-        const result: Doubleword = new Doubleword();
+    public xor(firstOperand: DoubleWord, secondOperand: DoubleWord) {
+        const result: DoubleWord = new DoubleWord();
         this._eflags.clearCarry();
         this._eflags.clearOverflow();
         firstOperand.value.forEach((bitFirstOperand, index) => {
@@ -224,9 +224,9 @@ export class ArithmeticLogicUnit {
      * @param operand The operand.
      * @returns The two's complement.
      */
-    public neg(operand: Doubleword): Doubleword {
+    public neg(operand: DoubleWord): DoubleWord {
         operand = this.not(operand);
-        return this.add(operand, Doubleword.fromInteger(1));
+        return this.add(operand, DoubleWord.fromInteger(1));
     }
 
     /**
@@ -237,8 +237,8 @@ export class ArithmeticLogicUnit {
      * @param secondSummand The second operand/summand.
      * @returns The sum of both operands/summands.
      */
-    public add(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
-        const result: Doubleword = new Doubleword();
+    public add(firstSummand: DoubleWord, secondSummand: DoubleWord): DoubleWord {
+        const result: DoubleWord = new DoubleWord();
         var carry: Array<Bit> = [0];
 
         for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
@@ -279,8 +279,8 @@ export class ArithmeticLogicUnit {
      * @param secondSummand The second operand/summand.
      * @returns The sum of both operands/summands.
      */
-    public adc(firstSummand: Doubleword, secondSummand: Doubleword): Doubleword {
-        const result: Doubleword = new Doubleword();
+    public adc(firstSummand: DoubleWord, secondSummand: DoubleWord): DoubleWord {
+        const result: DoubleWord = new DoubleWord();
         var carry: Array<Bit> = (this._eflags.carry === 1) ? [1] : [0];
         for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
@@ -320,12 +320,12 @@ export class ArithmeticLogicUnit {
      * @param subtrahend The binary value to subtract.
      * @returns The difference of the first operand (minuend) and the second operand (subtrahend).
      */
-    public sub(minuend: Doubleword, subtrahend: Doubleword): Doubleword {
+    public sub(minuend: DoubleWord, subtrahend: DoubleWord): DoubleWord {
         if (subtrahend.value[0] === 1) {
             /**
              * - -(x) <=> + (x)
              */
-            subtrahend = this.sub(subtrahend, Doubleword.fromInteger(1));
+            subtrahend = this.sub(subtrahend, DoubleWord.fromInteger(1));
             subtrahend = this.not(subtrahend);
         } else {
             /**
@@ -344,13 +344,13 @@ export class ArithmeticLogicUnit {
      * @param subtrahend The binary value to subtract.
      * @returns The difference of the first operand (minuend) and the second operand (subtrahend).
      */
-    public sbb(minuend: Doubleword, subtrahend: Doubleword): Doubleword {
+    public sbb(minuend: DoubleWord, subtrahend: DoubleWord): DoubleWord {
         var carryFlag: Bit = this._eflags.carry;
         if (subtrahend.value[0] === 1) {
             /**
              * - -(x) <=> + (x)
              */
-            subtrahend = this.sub(subtrahend, Doubleword.fromInteger(1));
+            subtrahend = this.sub(subtrahend, DoubleWord.fromInteger(1));
             this._eflags.clearCarry();
             subtrahend = this.not(subtrahend);
         } else {
@@ -427,12 +427,12 @@ export class ArithmeticLogicUnit {
      * @param multiplicand The operand, which gets multiplied by the multiplicand.
      * @returns The resulting product.
      */
-    public mul(multiplier: Doubleword, multiplicand: Doubleword): Doubleword {
-        var a: Doubleword = new Doubleword();
+    public mul(multiplier: DoubleWord, multiplicand: DoubleWord): DoubleWord {
+        var a: DoubleWord = new DoubleWord();
         var q_1: Bit = 0;
-        var q: Doubleword = new Doubleword(multiplicand.value.slice());
+        var q: DoubleWord = new DoubleWord(multiplicand.value.slice());
         var cnt: number = a.value.length;
-        var m: Doubleword = new Doubleword(multiplier.value.slice());
+        var m: DoubleWord = new DoubleWord(multiplier.value.slice());
         var tmp: BinaryValue = new BinaryValue(new Array<Bit>((a.value.length * 2) + 1).fill(0));
         while (cnt >= 0) {
             if (q.value[q.value.length - 1] === 1 && q_1 === 0) {
@@ -447,7 +447,7 @@ export class ArithmeticLogicUnit {
             q_1 = tmp.value[tmp.value.length - 1];
             --cnt;
         }
-        return new Doubleword(tmp.value.slice(-DataSizes.DOUBLEWORD));
+        return new DoubleWord(tmp.value.slice(-DataSizes.DOUBLEWORD));
     }
 
     /**
@@ -458,35 +458,35 @@ export class ArithmeticLogicUnit {
      * @param divisor The second operand, which gets divided by the divisor.
      * @returns The resulting quotient.
      */
-    public div(dividend: Doubleword, divisor: Doubleword): Doubleword {
-        var quotient: Doubleword = new Doubleword();
+    public div(dividend: DoubleWord, divisor: DoubleWord): DoubleWord {
+        var quotient: DoubleWord = new DoubleWord();
         var flipQuotientSign: boolean = false;
         this.checkForZero(divisor);
         if (this._eflags.zero === 1) {
             throw new DivisionByZeroError("Dividing by zero is not permittet.");
         }
         if (dividend.value[0] === 1 && divisor.value[0] === 1) {
-            dividend = this.sub(dividend, Doubleword.fromInteger(1));
+            dividend = this.sub(dividend, DoubleWord.fromInteger(1));
             dividend = this.not(dividend);
-            divisor = this.sub(divisor, Doubleword.fromInteger(1));
+            divisor = this.sub(divisor, DoubleWord.fromInteger(1));
             divisor = this.not(divisor);
         }
         if (divisor.value[0] === 1) {
             // Calc the absolute value of the negative divisor first.
-            divisor = this.sub(divisor, Doubleword.fromInteger(1));
+            divisor = this.sub(divisor, DoubleWord.fromInteger(1));
             divisor = this.not(divisor);
             flipQuotientSign = true;
         }
         if (dividend.value[0] === 1) {
             // Calc the absolute value of the negative divisor first.
-            dividend = this.sub(dividend, Doubleword.fromInteger(1));
+            dividend = this.sub(dividend, DoubleWord.fromInteger(1));
             dividend = this.not(dividend);
             flipQuotientSign = true;
         }
         this.cmp(dividend, divisor);
         while (this._eflags.sign === this._eflags.overflow) {
             dividend = this.sub(dividend, divisor);
-            quotient = this.add(quotient, Doubleword.fromInteger(1));
+            quotient = this.add(quotient, DoubleWord.fromInteger(1));
             this.cmp(dividend, divisor);
         }
         if (flipQuotientSign) {
@@ -504,7 +504,7 @@ export class ArithmeticLogicUnit {
      * @param firstOperand 
      * @param secondOperand 
      */
-    public cmp(firstOperand: Doubleword, secondOperand: Doubleword) {
+    public cmp(firstOperand: DoubleWord, secondOperand: DoubleWord) {
         this.sub(firstOperand, secondOperand);
         return;
     }
@@ -518,9 +518,9 @@ export class ArithmeticLogicUnit {
      * @param firstOperand 
      * @param secondOperand 
      */
-    public test(firstOperand: Doubleword, secondOperand: Doubleword) {
+    public test(firstOperand: DoubleWord, secondOperand: DoubleWord) {
         // Create a copy of the second operand.
-        var copy: Doubleword = new Doubleword(secondOperand.value.slice());
+        var copy: DoubleWord = new DoubleWord(secondOperand.value.slice());
         this.and(firstOperand, copy);
     }
 }
