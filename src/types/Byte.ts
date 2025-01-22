@@ -7,8 +7,8 @@ import { DataSizes } from "./DataSizes";
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 export class Byte extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.BYTE - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.BYTE - 1);
+	public static readonly MAX_POSITIVE_NUMBER: number = Math.pow(2, DataSizes.BYTE - 1) - 1;
+	public static readonly MAX_NEGATIVE_NUMBER: number = -1 * Math.pow(2, DataSizes.BYTE - 1);
 
 	/**
 	 * Instantiates a new object.
@@ -77,7 +77,7 @@ export class Byte extends BinaryValue {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (integer < Byte.MAX_NEGATIVE_NUMBER_SIGNED || integer > Byte.MAX_POSITIVE_NUMBER_SIGNED) {
+		if (integer < Byte.MAX_NEGATIVE_NUMBER || integer > Byte.MAX_POSITIVE_NUMBER) {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.BYTE} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
