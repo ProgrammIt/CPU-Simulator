@@ -24,7 +24,7 @@ export class RAM {
     /**
      * This methods writes a doubleword (32-bit- or 4-byte-) value to memory to the specified memory address.
      * @param physicalAddress A physical memory address to write the doubleword-sized data to.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @param doubleword Doubleword-sized data to write.
      */
     public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: Doubleword) {
@@ -53,7 +53,7 @@ export class RAM {
      * This method writes a specified byte of data to the specified address in
      * in the main memory. Throws an error, if the data exeeds a byte.
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @param data Byte-sized data to write to the specified pyhsical memory address.
      */
     public writeByteTo(physicalAddress: PhysicalAddress, data: Byte) {
@@ -72,7 +72,7 @@ export class RAM {
     /**
      * This method reads doubleword sized data from the main memory starting at the specified physical memory address.
      * @param physicalAddress A binary physical memory address to read the doubleword-sized data from.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @returns Doubleword-sized binary data.
      */
     public readDoublewordFrom(physicalAddress: PhysicalAddress): Doubleword {
@@ -94,7 +94,7 @@ export class RAM {
      * Returns a binary zero for address not conatined in the
      * map in order to simulate a full size memory.
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      * @returns The byte-sized data found at the specified address.
      */
     public readByteFrom(physicalAddress: PhysicalAddress): Byte {
@@ -113,7 +113,7 @@ export class RAM {
      * This method clears all bits at the specified location and removes the entry with the given physical memory
      * address from the cells map. Both is done only if there is an entry in cells map.
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      */
     public clearByte(physicalAddress: PhysicalAddress): void {
         this.validatePhysicalAddress(physicalAddress);
@@ -127,7 +127,7 @@ export class RAM {
     /**
      * This method validates a given physical memory address. If the address is invalid, an error will be thrown, preventing further processing.
      * @param physicalAddress A phyiscal memory address to validate.
-     * @throws AddressOutOfRangeError If the physical memory address is out of range.
+     * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      */
     private validatePhysicalAddress(physicalAddress: PhysicalAddress): void {
         var physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
