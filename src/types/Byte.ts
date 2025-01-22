@@ -9,7 +9,6 @@ import { DataSizes } from "./DataSizes";
 export class Byte extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.BYTE - 1) - 1;
 	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.BYTE - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.BYTE) - 1;
 
 	/**
 	 * Instantiates a new object.
