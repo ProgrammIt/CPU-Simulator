@@ -95,11 +95,11 @@ export class RAM {
     public readByteFrom(physicalAddress: PhysicalAddress): Byte {
         this.validatePhysicalAddress(physicalAddress);
         const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
-        var result: Byte = new Byte();
+        var result: Byte;
         if (this._cells.has(physicalAddressHex)) {
             result = this._cells.get(physicalAddressHex)!;
         } else {
-            result.value = new Array<Bit>(8).fill(0);
+            result = new Byte()
         }
         return result;
     }
