@@ -6,6 +6,8 @@ import { Doubleword } from "./Doubleword";
  * This class represents doubleword (4 byte) sized binary data.
  */
 export class Address extends Doubleword {
+	public static readonly MAX_NUMBER_UNSIGNED_DEC: number = 4_294_967_295;
+
 	/**
 	 * Constructs a new instance.
 	 */
@@ -78,7 +80,7 @@ export class Address extends Doubleword {
 			throw new Error("Minimal value for an address is a decimal zero, but the given integer is smaller than zero.");
 		}
 
-		if (integer > Doubleword.MAX_NUMBER_UNSIGNED) {
+		if (integer > Address.MAX_NUMBER_UNSIGNED_DEC) {
 			throw new Error(`The given number cannot be expressed with ${DataSizes.DOUBLEWORD} bits.`);
 		}
 

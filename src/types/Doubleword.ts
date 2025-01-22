@@ -1,14 +1,11 @@
 import { twosComplementToDecimal } from "../helper";
-import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
 
 export class Doubleword extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.DOUBLEWORD - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.DOUBLEWORD - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.DOUBLEWORD) - 1;
+	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;
+	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -2_147_483_648;
 
 	/**
 	 * Instantiates a new object.
@@ -140,7 +137,7 @@ export class Doubleword extends BinaryValue {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (integer < Doubleword.MAX_NEGATIVE_NUMBER_SIGNED || integer > Doubleword.MAX_POSITIVE_NUMBER_SIGNED) {
+		if (integer < Doubleword.MAX_NEGATIVE_NUMBER_DEC || integer > Doubleword.MAX_POSITIVE_NUMBER_DEC) {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.DOUBLEWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
