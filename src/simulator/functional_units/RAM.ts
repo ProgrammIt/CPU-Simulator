@@ -105,15 +105,27 @@ export class RAM {
     }
 
     /**
-     * This method delets a memory address key from the cells map of this MemoryInstance.
-     * This is equivalent to clear all bits at the specified memory address to 0.
-     * Using this approach reduces memory consumption of the simulator.
+     * This method clears all bits at the specified location and removes the entry with the given physical memory
+     * address from the cells map. Both is done only if there is an entry in cells map.
      * @param physicalAddress A binary value representing a physical memory address to write the data to.
      */
     public clearByte(physicalAddress: PhysicalAddress) {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
-        this._cells.delete(physicalAddressHex);
+        const physicalAddressHexString: string = `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
+        if (this._cells.has(physicalAddressHexString)) {
+            this._cells.delete(physicalAddressHexString);
+        }
+        return;
+    }
+
+    /**
+     * This method clears all bits at the specified location.
+     * @param physicalAddress The physical address to clear all bits at.
+     */
+    public clearMemory(physicalAddress: PhysicalAddress): void {
+        this.validatePhysicalAddress(physicalAddress);
+        const physicalAddressDec: number = parseInt(physicalAddress.toString(), 2);
+        this._cells.delete(`0x${(physicalAddressDec).toString(16).toUpperCase()}`);
         return;
     }
 
@@ -152,16 +164,5 @@ export class RAM {
      */
     public get cells(): Map<string, Byte>{
         return this._cells;
-    }
-
-    /**
-     * This method clears all bits at the specified location.
-     * @param physicalAddress The physical address to clear all bits at.
-     */
-    public clearMemory(physicalAddress: PhysicalAddress): void {
-        this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressDec: number = parseInt(physicalAddress.toString(), 2);
-        this._cells.delete(`0x${(physicalAddressDec).toString(16).toUpperCase()}`);
-        return;
     }
 }

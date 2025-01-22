@@ -236,7 +236,7 @@ export class MemoryManagementUnit {
              */
             let physicalAddress: PhysicalAddress | null = this.translate(currentVirtualAddress, true, false);
             // Clear all bits at the resulting physical memory address.
-            this._mainMemory.clearMemory(physicalAddress);
+            this._mainMemory.clearByte(physicalAddress);
         }
     }
 
