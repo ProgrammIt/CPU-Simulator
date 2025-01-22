@@ -7,8 +7,8 @@ import { DataSizes } from "./DataSizes";
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 export class Byte extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_DEC: number = Math.pow(2, DataSizes.BYTE - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -1 * Math.pow(2, DataSizes.BYTE - 1);
+	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 127;
+	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -128;
 
 	/**
 	 * Instantiates a new object.
