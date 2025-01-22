@@ -119,17 +119,6 @@ export class RAM {
     }
 
     /**
-     * This method clears all bits at the specified location.
-     * @param physicalAddress The physical address to clear all bits at.
-     */
-    public clearMemory(physicalAddress: PhysicalAddress): void {
-        this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressDec: number = parseInt(physicalAddress.toString(), 2);
-        this._cells.delete(`0x${(physicalAddressDec).toString(16).toUpperCase()}`);
-        return;
-    }
-
-    /**
      * This method adds a memory address key to the cells map of this MemoryInstance and 
      * sets all bits at the specified memory address to 1.
      * @param physicalAddress A physical memory address.
