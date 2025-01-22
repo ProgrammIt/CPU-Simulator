@@ -1,6 +1,7 @@
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { Doubleword } from "../../types/Doubleword";
+import { AddressOutOfRangeError } from "../../types/errors/AddressOutOfRangeError";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {
@@ -121,11 +122,12 @@ export class RAM {
     /**
      * This method validates a given physical memory address. If the address is invalid, an error will be thrown, preventing further processing.
      * @param physicalAddress A phyiscal memory address to validate.
+     * @throws AddressOutOfRangeError If the physical memory address is out of range.
      */
     private validatePhysicalAddress(physicalAddress: PhysicalAddress): void {
         var physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
         if (physicalAddressDec > this._highAddressDec || physicalAddressDec < this._lowAddressDec) {
-            throw Error(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
+            throw new AddressOutOfRangeError(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
         }
         return;
     }
