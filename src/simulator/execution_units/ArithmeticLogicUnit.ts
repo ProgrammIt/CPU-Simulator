@@ -3,7 +3,7 @@ import { Bit } from "../../types/Bit";
 import { DataSizes } from "../../types/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { DivisionByZeroError } from "../../types/errors/DivisionByZeroError";
-import { Quadword } from "../../types/Quadword";
+import { QuadWord } from "../../types/QuadWord";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
 /**
@@ -390,7 +390,7 @@ export class ArithmeticLogicUnit {
      * @returns The bit right shifted.
      */
     public rightShift<T extends BinaryValue>(operand: T): Bit {
-        const copy: Quadword = new Quadword(operand.value.slice());
+        const copy: QuadWord = new QuadWord(operand.value.slice());
         for (let index = 0; index < copy.value.length - 1; ++index) {
             const bitToShift: Bit = copy.value[index];
             if (index === 0) {

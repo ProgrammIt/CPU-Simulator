@@ -2,10 +2,9 @@ import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
 
-export class Quadword extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.QUADWORD - 1) - 1;
-	public static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.QUADWORD - 1);
-	public static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.QUADWORD) - 1;
+export class QuadWord extends BinaryValue {
+	public static readonly MAX_POSITIVE_NUMBER_DEC: bigint = 9_223_372_036_854_775_807n;
+	public static readonly MAX_NEGATIVE_NUMBER_DEC: bigint = -9_223_372_036_854_775_808n;
 
 	/**
 	 * Instantiates a new object.
@@ -60,7 +59,7 @@ export class Quadword extends BinaryValue {
 	 * @param quadword The binary value to compare to.
 	 * @returns True, when both binary values are identical, false otherwise.
 	 */
-	public equal(quadword: Quadword): boolean {
+	public equal(quadword: QuadWord): boolean {
 		return quadword._value.toString() === this._value.toString();
 	}
 
@@ -82,16 +81,16 @@ export class Quadword extends BinaryValue {
 	 * @param integer The number to initialize the new instances value with.
 	 * @returns A new instance.
 	 */
-	public static fromInteger(integer: number): Quadword {
+	public static fromInteger(integer: number): QuadWord {
 		if (!Number.isInteger(integer)) {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (integer < Quadword.MAX_NEGATIVE_NUMBER_SIGNED || integer > Quadword.MAX_POSITIVE_NUMBER_SIGNED) {
+		if (integer < QuadWord.MAX_NEGATIVE_NUMBER_DEC || integer > QuadWord.MAX_POSITIVE_NUMBER_DEC) {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.QUADWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
-		var quadword: Quadword = new Quadword();
+		var quadword: QuadWord = new QuadWord();
 		
 		// A bit shift converts the given number to a signed 32-bit value, so we need to extend the result to 64 bit.
 		var binaryNumber = (integer < 0) ? (integer >>> 0).toString(2).padStart(DataSizes.QUADWORD, "1") : integer.toString(2).padStart(DataSizes.QUADWORD, "0");
