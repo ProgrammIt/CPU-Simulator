@@ -1,4 +1,4 @@
-import { EncodedAddressingModes } from "../types";
+import { EncodedAddressingModes } from "../types/EncodedAdressingModes";
 import { Bit } from "../types/Bit";
 import { EncodedInstructionTypes } from "../types/EncodedInstructionTypes";
 import { EncodedOperandTypes } from "../types/EncodedOperandTypes";

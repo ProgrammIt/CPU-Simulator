@@ -3,7 +3,7 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { EncodedAddressingModes} from "../../types";
+import { EncodedAddressingModes} from "../../types/EncodedAdressingModes";
 import { DataSizes } from "../../types/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { VirtualAddress } from "../../types/VirtualAddress";

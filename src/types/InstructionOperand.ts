@@ -1,4 +1,4 @@
-import { EncodedAddressingModes as AddressingMode } from "../types";
+import { EncodedAddressingModes as AddressingMode } from "./EncodedAdressingModes";
 import { DoubleWord } from "./DoubleWord";
 import { EncodedOperandTypes } from "./EncodedOperandTypes";
 
