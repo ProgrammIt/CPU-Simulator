@@ -3,7 +3,6 @@ import { RAM } from '../simulator/functional_units/RAM';
 import { Byte } from '../types/Byte';
 import { DoubleWord } from '../types/DoubleWord';
 import { PhysicalAddress } from '../types/PhysicalAddress';
-import { Bit } from '../types/Bit';
 
 describe("Read and write from or to main memory", () => {
     const mainMemory: RAM = new RAM(Math.pow(2, 32));

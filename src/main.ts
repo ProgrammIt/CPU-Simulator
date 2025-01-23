@@ -6,9 +6,6 @@ import { twosComplementToDecimal } from "./helper";
 import { NumberSystem } from "./types";
 import { PhysicalAddress } from "./types/PhysicalAddress";
 import { Byte } from "./types/Byte";
-import { VirtualAddress } from "./types/VirtualAddress";
-import { Bit } from "./types/Bit";
-import { MemoryManagementUnit } from "./simulator/execution_units/MemoryManagementUnit";
 
 const createWindow = (win: BrowserWindow, simulator: Simulator) => {
 	const menu = Menu.buildFromTemplate([
