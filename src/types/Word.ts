@@ -7,9 +7,9 @@ export class Word {
 	 */
 	protected _value: Array<Bit>;
 
-	protected static readonly MAX_POSITIVE_NUMBER_SIGNED: number = Math.pow(2, DataSizes.WORD - 1) - 1;
-	protected static readonly MAX_NEGATIVE_NUMBER_SIGNED: number = -1 * Math.pow(2, DataSizes.WORD - 1);
-	protected static readonly MAX_NUMBER_UNSIGNED: number = Math.pow(2, DataSizes.WORD) - 1;
+	protected static readonly MAX_POSITIVE_NUMBER_DEC: number = 32_767;
+	protected static readonly MAX_NEGATIVE_NUMBER_DEC: number = -32_768;
+	public static readonly NUMBER_OF_BITS_DEC: number = 16;
 
 	public signed: boolean;
 
@@ -58,50 +58,28 @@ export class Word {
 	}
 
 	/**
-	 * This method creates an instance from the given number. Throws an error, if the given number is not an integer.
-	 * It uses the second parameter as an indicator whether to convert the integer value into a signed or unsigned binary value.
-	 * This parameter is needed, because not all values in the context of a CPU can be treated as signed binary values.
-	 * For example a memory address can never be a negative value. Therefore, such a binary value should always be considered unsigned.
-	 * Depending on the second parameter, the range of allowed values is slightly different. This method throws an error, if
-	 * the value to be converted is too large or too small.
+	 * This method creates an instance from the given number.
+	 * Throws an error, if the given number is not an integer.
 	 * @param integer The number to initialize the new instances value with.
-	 * @param signed [signed=false] Indicates, whether this binary value should be treated as a signed value.
 	 * @returns A new instance.
 	 */
-	public static fromInteger(integer: number, signed: boolean = false): Word {
+	public static fromInteger(integer: number): Word {
 		if (!Number.isInteger(integer)) {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (signed && (integer < Word.MAX_NEGATIVE_NUMBER_SIGNED || integer > Word.MAX_POSITIVE_NUMBER_SIGNED)) {
-			throw new Error(`The given number cannot be expressed using ${DataSizes.WORD} bits, if the most significant bit should be treated as the sign bit.`);
+		if (integer < Word.MAX_NEGATIVE_NUMBER_DEC || integer > Word.MAX_POSITIVE_NUMBER_DEC) {
+			throw new Error(`The given number cannot be expressed using ${Word.NUMBER_OF_BITS_DEC} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
-		if (!signed && integer < 0) {
-			/**
-			 * A user can enter a negative number and still specify that this value should be treated as an unsigned binary value after conversion.
-			 * This is fine, but the sign must be removed.
-			 */
-			integer *= -1;
-		}
+		var word: Word = new Word();
 
-		if (!signed && integer > Word.MAX_NUMBER_UNSIGNED) {
-			throw new Error(`The given number cannot be expressed with ${DataSizes.WORD} bits.`);
-		}
+		// A bit shift converts the given number to a signed 32-bit value.
+		var binaryNumber: string = (integer < 0) ? 
+			(integer >>> 0).toString(2) : 
+			integer.toString(2).padStart(Word.NUMBER_OF_BITS_DEC, "0");
 
-		var word: Word;
-		var binaryNumber: string;
-		
-		if (signed && integer < 0) {
-			word = new Word(true);
-			// A bit shift converts the given number to a signed 32-bit value.
-			binaryNumber = (integer >>> 0).toString(2);
-		} else {
-			word = (signed) ? new Word(true) : new Word(false);
-			binaryNumber = integer.toString(2).padStart(DataSizes.WORD, "0");
-		}
-
-		binaryNumber.split("").forEach((bit, index) => {
+		binaryNumber.split("").slice(-Word.NUMBER_OF_BITS_DEC).forEach((bit, index) => {
 			word._value[index] = (bit === "0") ? 0 : 1;
 		});
 
