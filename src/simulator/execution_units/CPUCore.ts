@@ -3,7 +3,7 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations, EncodedWritableRegisters} from "../../types";
+import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations} from "../../types";
 import { DataSizes } from "../../types/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { VirtualAddress } from "../../types/VirtualAddress";
@@ -26,6 +26,7 @@ import { PrivilegeViolationError } from "../../types/errors/PrivilegeViolationEr
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 import { PageFaultError } from "../../types/errors/PageFaultError";
 import { EncodedReadableRegisters } from "../../types/EncodedReadableRegisters";
+import { EncodedWritableRegisters } from "../../types/EncodedWritableRegisters";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.

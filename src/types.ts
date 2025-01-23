@@ -1,19 +1,4 @@
 /**
- * An enum representing the writable and binary encoded registers.
- */
-export const enum EncodedWritableRegisters {
-	EAX = "00000000000000000000000000000000",
-	EBX = "00000000000000000000000000000001",
-	EDX = "00000000000000000000000000000010",
-	EIP = "00000000000000000000000000000011",
-	NPTP = "00000000000000000000000000000101",
-	VMPTR = "00000000000000000000000000000110",
-	ESP = "00000000000000000000000000000111",
-	ITP = "00000000000000000000000000001000",
-	GPTP = "00000000000000000000000000001001"
-}
-
-/**
  * An enum representing the available and binary encoded addressing modes of operands.
  */
 export const enum EncodedAddressingModes {
