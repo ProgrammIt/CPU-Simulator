@@ -43,11 +43,11 @@ export class DoubleWord extends BinaryValue {
 	 * This method checks whethter the current binary value is equal to the given one or not.
 	 * For comparison, both binary values are converted to strings.
 	 * Conversion presarves the order of items, which is important for the comparison.
-	 * @param doubleword The binary value to compare to.
+	 * @param other The binary value to compare to.
 	 * @returns True, if both binary values are identical, false otherwise.
 	 */
-	public equal(doubleword: DoubleWord): boolean {
-		return doubleword.toString() === this.toString();
+	public equal(other: DoubleWord): boolean {
+		return other.toString() === this.toString();
 	}
 
 	/**
