@@ -397,7 +397,7 @@ export class Simulator {
         const totalAvailablePhysicalAddressesDec: number = Math.pow(2, DataSizes.DOUBLEWORD);
         const totalNumberOfPageFramesDec: number = totalAvailablePhysicalAddressesDec/addressesPerPageFrameDec;
         // Calculate the base address of the page table.
-        const physicalBaseAddressPageTableDec: number = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddressDec() - totalNumberOfPageFramesDec;
+        const physicalBaseAddressPageTableDec: number = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddressToDecimal() - totalNumberOfPageFramesDec;
         /*
          * In order to map the kernel space into the virtual address space of a process 
          * a page table needs to be created that maps high virtual memory addresses to 

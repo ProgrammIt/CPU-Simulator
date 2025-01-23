@@ -43,7 +43,7 @@ export class AddressSpace<T extends Address> {
      * This method returns the decimal representation of the address spaces highest physical address.
      * @returns The decimal representation of the upper boundry.
      */
-    public highAddressDec(): number {
+    public highAddressToDecimal(): number {
         return parseInt(this.highAddress.toString(), 2);
     }
 
@@ -51,7 +51,7 @@ export class AddressSpace<T extends Address> {
      * This method returns the decimal representation of the address spaces lowest physical address.
      * @returns The decimal representation of the upper boundry.
      */
-    public lowAddressDec(): number {
+    public lowAddressToDecimal(): number {
         return parseInt(this.lowAddress.toString(), 2);
     }
 
@@ -59,6 +59,6 @@ export class AddressSpace<T extends Address> {
      * This accessor calculates and returns the size of this range.
      */
     public get size(): number {
-        return this.highAddressDec() - this.lowAddressDec();
+        return this.highAddressToDecimal() - this.lowAddressToDecimal();
     }
 }
