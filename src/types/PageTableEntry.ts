@@ -169,7 +169,7 @@ export class PageTableEntry {
      * This method checks whether the page is pinned.
      * @returns True if the page is pinned, false otherwise.
      */
-    public pinned(): boolean {
+    public isPinned(): boolean {
         return this.flagBits[4] === 1;
     };
 
@@ -193,7 +193,7 @@ export class PageTableEntry {
      * This method checks whether the page was changed.
      * @returns True if the page was changed, false otherwise.
      */
-    public isChanged(): boolean {
+    public wasChanged(): boolean {
         return this.flagBits[5] === 1;
     }
 }
