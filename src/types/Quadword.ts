@@ -5,7 +5,7 @@ import { DataSizes } from "./DataSizes";
 export class QuadWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: bigint = 9_223_372_036_854_775_807n;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: bigint = -9_223_372_036_854_775_808n;
-	public static readonly NUMBER_OF_BITS: number = 64;
+	public static readonly NUMBER_OF_BITS_DEC: number = 64;
 
 	/**
 	 * Instantiates a new object.

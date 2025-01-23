@@ -6,7 +6,7 @@ import { DataSizes } from "./DataSizes";
 export class DoubleWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -2_147_483_648;
-	public static readonly NUMBER_OF_BITS: number = 32;
+	public static readonly NUMBER_OF_BITS_DEC: number = 32;
 
 	/**
 	 * Instantiates a new object.
