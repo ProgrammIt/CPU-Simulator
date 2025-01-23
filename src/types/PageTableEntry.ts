@@ -9,12 +9,12 @@ export class PageTableEntry {
     /**
      * The number of bits used for the flags.
      */
-    public static readonly NUMBER_OF_BITS_FOR_FLAGS: number = 12;
+    public static readonly NUMBER_OF_BITS_FOR_FLAGS_DEC: number = 12;
 
     /**
      * The number of bits used for the page frame number.
      */
-    public static readonly NUMBER_OF_BITS_FOR_PAGE_FRAME_NUMBER: number = 20;
+    public static readonly NUMBER_OF_BITS_FOR_PAGE_FRAME_NUMBER_DEC: number = 20;
 
     /**
      * This field stores the flag bits of the page table entry.
