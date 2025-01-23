@@ -11,8 +11,9 @@ import { PageFaultError } from "../types/errors/PageFaultError";
 import { readFileSync } from "fs";
 import { PageTableEntry } from "../types/PageTableEntry";
 import { InstructionOperand } from "../types/InstructionOperand";
-import { EncodedAddressingModes, EncodedOperandTypes } from "../types";
+import { EncodedAddressingModes } from "../types";
 import { AddressSpace } from "../types/AddressSpace";
+import { EncodedOperandTypes } from "../types/EncodedOperandTypes";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
