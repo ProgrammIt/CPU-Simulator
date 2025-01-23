@@ -28,6 +28,14 @@ export class DoubleWord extends BinaryValue {
 	}
 
 	/**
+	 * Accessor for reading the binary value.
+	 * @override
+	 */
+	public get value(): Array<Bit> {
+		return this._value;
+	}
+
+	/**
 	 * Accessor for setting the binary value.
 	 * @param newValue The new value.
 	 * @override

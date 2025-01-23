@@ -28,6 +28,14 @@ export class Address extends DoubleWord {
 	}
 
 	/**
+	 * Accessor for reading the binary value.
+	 * @override
+	 */
+	public get value(): Array<Bit> {
+		return this._value;
+	}
+
+	/**
 	 * Accessor for setting the binary value.
 	 * @param newValue The new value.
 	 * @override
@@ -37,14 +45,6 @@ export class Address extends DoubleWord {
 			throw new Error(`A new value must have exactly ${this._value.length} bits.`);
 		}
 		this._value = newValue.slice();
-	}
-
-	/**
-	 * Accessor for reading the binary value.
-	 * @override
-	 */
-	public get value(): Array<Bit> {
-		return this._value;
 	}
 
 	/**
