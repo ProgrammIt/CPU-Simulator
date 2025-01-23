@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { NumberSystem } from './types';
+import { NumberSystem } from './types/NumberSystem';
 
 declare global {
 	interface Window {

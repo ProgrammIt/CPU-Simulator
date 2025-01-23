@@ -1,9 +1,3 @@
-export enum NumberSystem {
-	HEX = 16,
-	DEC = 10,
-	BIN = 2
-}
-
 export enum OperandTypes {
 	IMMEDIATE = "IMMEDIATE",
 	REGISTER = "REGISTER",

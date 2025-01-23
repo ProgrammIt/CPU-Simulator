@@ -3,7 +3,7 @@ import path from 'path';
 import { Simulator } from "./simulator/Simulator";
 import { DoubleWord } from "./types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
-import { NumberSystem } from "./types";
+import { NumberSystem } from "./types/NumberSystem";
 import { PhysicalAddress } from "./types/PhysicalAddress";
 import { Byte } from "./types/Byte";
 
