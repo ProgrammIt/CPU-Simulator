@@ -40,7 +40,7 @@ export class AddressSpace<T extends Address> {
     }
 
     /**
-     * This method returns the decimal representation of the address spaces highest physical address.
+     * This method returns the decimal representation of the address spaces highest address.
      * @returns The decimal representation of the upper boundry.
      */
     public highAddressToDecimal(): number {
@@ -48,7 +48,7 @@ export class AddressSpace<T extends Address> {
     }
 
     /**
-     * This method returns the decimal representation of the address spaces lowest physical address.
+     * This method returns the decimal representation of the address spaces lowest address.
      * @returns The decimal representation of the upper boundry.
      */
     public lowAddressToDecimal(): number {
