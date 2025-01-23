@@ -3,7 +3,8 @@ import { DataSizes } from "./DataSizes";
 import { DoubleWord } from "./DoubleWord";
 
 /**
- * This class represents doubleword (4 byte) sized binary data.
+ * This class represents a generic doubleword sized binary memory address.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 export class Address extends DoubleWord {
 	public static readonly MAX_NUMBER_UNSIGNED_DEC: number = 4_294_967_295;
