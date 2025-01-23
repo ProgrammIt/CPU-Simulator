@@ -37,11 +37,11 @@ export class Instruction extends DoubleWord {
 	/**
 	 * For comparison, both binary values are converted to strings.
 	 * Conversion presarves the order of items, which is important for the comparison.
-	 * @param instruction The instruction to compare to.
+	 * @param other The instruction to compare to.
 	 * @returns True, when both binary values are identical, false otherwise.
 	 */
-	public equal(instruction: Instruction): boolean {
-		return instruction.value.toString() === this.value.toString();
+	public equal(other: Instruction): boolean {
+		return other.value.toString() === this.value.toString();
 	}
 
 	/**
