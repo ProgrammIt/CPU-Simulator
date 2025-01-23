@@ -2,31 +2,29 @@ import { Bit } from "./Bit";
 import { DataSizes } from "./DataSizes";
 
 export class Word {
+	protected static readonly MAX_POSITIVE_NUMBER_DEC: number = 32_767;
+	protected static readonly MAX_NEGATIVE_NUMBER_DEC: number = -32_768;
+	public static readonly NUMBER_OF_BITS_DEC: number = 16;
+
 	/**
 	 * The binary data this object holds.
 	 */
 	protected _value: Array<Bit>;
 
-	protected static readonly MAX_POSITIVE_NUMBER_DEC: number = 32_767;
-	protected static readonly MAX_NEGATIVE_NUMBER_DEC: number = -32_768;
-	public static readonly NUMBER_OF_BITS_DEC: number = 16;
-
-	public signed: boolean;
-
 	/**
 	 * Instantiates a new object.
-	 * @param signed [signed=false] Indicates whether this binary value should be treated as a signed value.
+	 * @param [value] The binary data to initialize the new object with.
 	 * @constructor
 	 */
-	public constructor(signed: boolean = false) {
-		this._value = new Array<Bit>(
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0
-		);
-		this.signed = signed;
+	public constructor(value: Array<Bit> = new Array<Bit>(
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0
+	)){
+		this._value = value;
 	}
+	
 
 	public get value(): Array<Bit> {
 		return this._value;
