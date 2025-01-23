@@ -10,18 +10,7 @@ export class Instruction extends DoubleWord {
 	 * Instantiates a new object.
 	 * @constructor
 	 */
-	public constructor(
-		value: Array<Bit> = new Array<Bit>(
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0
-		)
-	) {
+	public constructor(value: Array<Bit>) {
 		super(value);
 	}
 
