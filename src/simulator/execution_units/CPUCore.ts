@@ -3,7 +3,7 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations, EncodedAccessableRegisters, EncodedWritableRegisters} from "../../types";
+import { EncodedAddressingModes, EncodedInstructionTypes, EncodedOperandTypes, EncodedOperations, EncodedWritableRegisters} from "../../types";
 import { DataSizes } from "../../types/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { VirtualAddress } from "../../types/VirtualAddress";
@@ -25,6 +25,7 @@ import { UnknownRegisterError } from "../../types/errors/UnknownRegisterError";
 import { PrivilegeViolationError } from "../../types/errors/PrivilegeViolationError";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 import { PageFaultError } from "../../types/errors/PageFaultError";
+import { EncodedReadableRegisters } from "../../types/EncodedReadableRegisters";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.
@@ -2323,37 +2324,37 @@ export class CPUCore {
     private decodeReadableRegister(operand: InstructionOperand): Register<DoubleWord> {
         var register: Register<DoubleWord>;
         switch (operand.value.toString()) {
-            case EncodedAccessableRegisters.EAX:
+            case EncodedReadableRegisters.EAX:
                 register = this.eax;
                 break;
-            case EncodedAccessableRegisters.EBX:
+            case EncodedReadableRegisters.EBX:
                 register = this.ebx;
                 break;
-            case EncodedAccessableRegisters.EDX:
+            case EncodedReadableRegisters.EDX:
                 register = this.edx;
                 break;
-            case EncodedAccessableRegisters.EIP:
+            case EncodedReadableRegisters.EIP:
                 register = this.eip;
                 break;
-            case EncodedAccessableRegisters.EIR:
+            case EncodedReadableRegisters.EIR:
                 register = this.eir;
                 break;
-            case EncodedAccessableRegisters.ESP:
+            case EncodedReadableRegisters.ESP:
                 register = this.esp;
                 break;
-            case EncodedAccessableRegisters.GPTP:
+            case EncodedReadableRegisters.GPTP:
                 if (this.gptp === null) {
                     throw new RegisterNotAvailableError("Could not access GPTP register. Please enable virtualization before trying to access GPTP.");
                 }
                 register = this.gptp;
                 break;
-            case EncodedAccessableRegisters.ITP:
+            case EncodedReadableRegisters.ITP:
                 register = this.itp;
                 break;
-            case EncodedAccessableRegisters.NPTP:
+            case EncodedReadableRegisters.NPTP:
                 register = this.nptp;
                 break;
-            case EncodedAccessableRegisters.VMPTR:
+            case EncodedReadableRegisters.VMPTR:
                 register = this.vmtpr;
                 break;
             default:
