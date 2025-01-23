@@ -1,6 +1,6 @@
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
-import { DataSizes } from "./DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 
 export class QuadWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: bigint = 9_223_372_036_854_775_807n;

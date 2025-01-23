@@ -1,5 +1,5 @@
 import { Address } from "../../types/Address";
-import { DataSizes } from "../../types/DataSizes";
+import { DataSizes } from "../../enumerations/DataSizes";
 import { Register } from "./Register";
 
 /**

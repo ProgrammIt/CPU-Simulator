@@ -1,5 +1,5 @@
 import { Bit } from "./Bit";
-import { DataSizes } from "./DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 
 export class Word {
 	protected static readonly MAX_POSITIVE_NUMBER_DEC: number = 32_767;

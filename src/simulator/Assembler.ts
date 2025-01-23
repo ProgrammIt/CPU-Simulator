@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { UnrecognizedInstructionError } from "../types/errors/UnrecognizedInstructionError";
 import { Bit } from "../types/Bit";
 import { AssemblyLanguageDefinition } from "../types/compiler/AssemblyLanguageDefinition";
-import { DataSizes } from "../types/DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 import { DoubleWord } from "../types/DoubleWord";
 import { VirtualAddress } from "../types/VirtualAddress";
 

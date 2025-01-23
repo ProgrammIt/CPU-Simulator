@@ -4,7 +4,7 @@ import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegist
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
 import { EncodedAddressingModes} from "../../types/EncodedAdressingModes";
-import { DataSizes } from "../../types/DataSizes";
+import { DataSizes } from "../../enumerations/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { VirtualAddress } from "../../types/VirtualAddress";
 import { Bit } from "../../types/Bit";

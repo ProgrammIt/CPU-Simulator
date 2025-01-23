@@ -1,5 +1,5 @@
 import { Bit } from "./Bit";
-import { DataSizes } from "./DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 import { DoubleWord } from "./DoubleWord";
 
 /**

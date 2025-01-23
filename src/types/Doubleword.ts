@@ -1,7 +1,7 @@
 import { twosComplementToDecimal } from "../helper";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
-import { DataSizes } from "./DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 
 export class DoubleWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;

@@ -1,6 +1,6 @@
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
-import { DataSizes } from "./DataSizes";
+import { DataSizes } from "../enumerations/DataSizes";
 
 /**
  * This class represents a byte sized binary value.
