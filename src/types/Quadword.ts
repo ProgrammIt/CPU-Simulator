@@ -111,12 +111,8 @@ export class QuadWord extends BinaryValue {
 	}
 
 	/**
-	 * This method creates an instance from the given number. Throws an error, if the given number is not an integer.
-	 * It uses the second parameter as an indicator whether to convert the integer value into a signed or unsigned binary value.
-	 * This parameter is needed, because not all values in the context of a CPU can be treated as signed binary values.
-	 * For example a memory address can never be a negative value. Therefore, such a binary value should always be considered unsigned.
-	 * Depending on the second parameter, the range of allowed values is slightly different. This method throws an error, if
-	 * the value to be converted is too large or too small.
+	 * This method creates an instance from the given number. 
+	 * Throws an error, if the given number is not an integer.
 	 * @param integer The number to initialize the new instances value with.
 	 * @returns A new instance.
 	 */
