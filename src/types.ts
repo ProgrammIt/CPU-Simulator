@@ -15,12 +15,3 @@ export const enum EncodedOperandTypes {
 	REGISTER = "1100000",
 	MEMORY_ADDRESS = "1110000"
 }
-
-/**
- * An enum representing the available and binary encoded instruction types.
- */
-export const enum EncodedInstructionTypes {
-	R = "100",
-	I = "110",
-	J = "111"
-}
