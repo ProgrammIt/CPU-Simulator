@@ -9,6 +9,7 @@ import { DataSizes } from "./DataSizes";
 export class Byte extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 127;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -128;
+	public static readonly NUMBER_OF_BITS: number = 8;
 
 	/**
 	 * Instantiates a new object.
