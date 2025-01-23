@@ -49,10 +49,18 @@ export class Word {
 
 	/**
 	 * Converts the binary value into a string representation.
+	 * @param groupBytes When true, the bytes are grouped into two groups with 8 bits each.
 	 * @returns 
 	 */
-	public toString(): string {
-		return this._value.join("");
+	public toString(groupBytes: boolean): string {
+		var result: string = "";
+		if (groupBytes) {
+			result = `${this.value[0]}${this.value[1]}${this._value[2]}${this._value[3]}${this.value[4]}${this.value[5]}${this._value[6]}${this._value[7]} `;
+			result += `${this.value[8]}${this.value[9]}${this._value[10]}${this._value[11]}${this.value[12]}${this.value[13]}${this._value[14]}${this._value[15]}`;
+		} else {
+			result = this._value.join("");
+		}
+		return result;
 	}
 
 	/**
