@@ -3,7 +3,7 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { EncodedAddressingModes} from "../../types/EncodedAdressingModes";
+import { EncodedAddressingModes} from "../../enumerations/EncodedAdressingModes";
 import { DataSizes } from "../../enumerations/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
 import { VirtualAddress } from "../../types/VirtualAddress";
@@ -25,11 +25,11 @@ import { UnknownRegisterError } from "../../types/errors/UnknownRegisterError";
 import { PrivilegeViolationError } from "../../types/errors/PrivilegeViolationError";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 import { PageFaultError } from "../../types/errors/PageFaultError";
-import { EncodedReadableRegisters } from "../../types/EncodedReadableRegisters";
-import { EncodedWritableRegisters } from "../../types/EncodedWritableRegisters";
-import { EncodedOperations } from "../../types/EncodedOperations";
-import { EncodedInstructionTypes } from "../../types/EncodedInstructionTypes";
-import { EncodedOperandTypes } from "../../types/EncodedOperandTypes";
+import { EncodedReadableRegisters } from "../../enumerations/EncodedReadableRegisters";
+import { EncodedWritableRegisters } from "../../enumerations/EncodedWritableRegisters";
+import { EncodedOperations } from "../../enumerations/EncodedOperations";
+import { EncodedInstructionTypes } from "../../enumerations/EncodedInstructionTypes";
+import { EncodedOperandTypes } from "../../enumerations/EncodedOperandTypes";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.

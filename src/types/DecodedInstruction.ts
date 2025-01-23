@@ -1,5 +1,5 @@
-import { EncodedInstructionTypes } from "./EncodedInstructionTypes";
-import { EncodedOperations } from "./EncodedOperations";
+import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
+import { EncodedOperations } from "../enumerations/EncodedOperations";
 import { InstructionOperand } from "./InstructionOperand";
 
 /**

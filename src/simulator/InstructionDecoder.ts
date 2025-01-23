@@ -1,8 +1,8 @@
-import { EncodedAddressingModes } from "../types/EncodedAdressingModes";
+import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
 import { Bit } from "../types/Bit";
-import { EncodedInstructionTypes } from "../types/EncodedInstructionTypes";
-import { EncodedOperandTypes } from "../types/EncodedOperandTypes";
-import { EncodedOperations } from "../types/EncodedOperations";
+import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
+import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
+import { EncodedOperations } from "../enumerations/EncodedOperations";
 
 /**
  * This class is dedicated to decoding a binary instruction.

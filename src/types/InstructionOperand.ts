@@ -1,6 +1,6 @@
-import { EncodedAddressingModes as AddressingMode } from "./EncodedAdressingModes";
+import { EncodedAddressingModes as AddressingMode } from "../enumerations/EncodedAdressingModes";
 import { DoubleWord } from "./DoubleWord";
-import { EncodedOperandTypes } from "./EncodedOperandTypes";
+import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 
 // Operand types: Immediate, Register, Memory address
 // Access types: Direct, Indirect

@@ -3,7 +3,7 @@ import path from 'path';
 import { Simulator } from "./simulator/Simulator";
 import { DoubleWord } from "./types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
-import { NumberSystem } from "./types/NumberSystem";
+import { NumberSystems } from "./enumerations/NumberSystems";
 import { PhysicalAddress } from "./types/PhysicalAddress";
 import { Byte } from "./types/Byte";
 
@@ -256,12 +256,12 @@ app.whenReady().then(() => {
 		return tmp;
 	});
 
-	ipcMain.handle("readEAX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readEAX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content: DoubleWord = simulator.core.eax.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${twosComplementToDecimal(content)}`;
 		} else {
 			result = content.toString(true);
@@ -269,12 +269,12 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readEBX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readEBX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content: DoubleWord = simulator.core.ebx.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${twosComplementToDecimal(content)}`;
 		} else {
 			result = content.toString(true);
@@ -282,13 +282,13 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readEDX", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readEDX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content: DoubleWord = simulator.core.edx.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${twosComplementToDecimal(content)}`;
 		} else {
 			result = content.toString(true);
@@ -296,13 +296,13 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readEIP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readEIP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.eip.content;
 		var result: string = parseInt(content.toString(), 2).toString(basis);
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -310,7 +310,7 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readEFLAGS", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readEFLAGS", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.eflags.content;
 		return content.toString();
 	});
@@ -323,12 +323,12 @@ app.whenReady().then(() => {
 		return content.toString(true);
 	});
 
-	ipcMain.handle("readNPTP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readNPTP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.nptp.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -336,12 +336,12 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readVMPTR", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readVMPTR", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.vmtpr.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -349,12 +349,12 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readESP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readESP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.esp.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -362,12 +362,12 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readITP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readITP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.itp.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -375,15 +375,15 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readGPTP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readGPTP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		if (simulator.core.gptp === null) {
 			return "-";
 		}
 		const content = simulator.core.gptp.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
@@ -391,12 +391,12 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readPTP", async (event: IpcMainInvokeEvent, basis: NumberSystem): Promise<string> => {
+	ipcMain.handle("readPTP", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content = simulator.core.ptp.content;
 		var result: string;
-		if (basis === NumberSystem.HEX) {
+		if (basis === NumberSystems.HEX) {
 			result = `0x${parseInt(content.toString(), 2).toString(16)}`;
-		} else if (basis === NumberSystem.DEC) {
+		} else if (basis === NumberSystems.DEC) {
 			result = `${parseInt(content.toString(), 2)}`;
 		} else {
 			result = content.toString(true);
