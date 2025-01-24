@@ -3,9 +3,6 @@
     "entryPoints": [
         "./src/main.ts"
     ],
-    "plugin": [
-        "typedoc-plugin-markdown"
-    ],
     "out": "./docs/developers",
     "highlightLanguages": [
         "bash",
@@ -19,7 +16,6 @@
         "tsx",
         "typescript"
     ],
-    "cleanOutputDir": false,
     "theme": "default",
     "darkHighlightTheme": "dark-plus",
     "lightHighlightTheme": "light-plus",
