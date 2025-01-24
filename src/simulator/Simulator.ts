@@ -7,7 +7,7 @@ import { VirtualAddress } from "../types/VirtualAddress";
 import { Bit } from "../types/Bit";
 import { MemoryManagementUnit } from "./execution_units/MemoryManagementUnit";
 import { DataSizes } from "../enumerations/DataSizes";
-import { PageFaultError } from "../types/errors/PageFaultError";
+import { PageFaultError } from "../error_types/PageFaultError";
 import { readFileSync } from "fs";
 import { PageTableEntry } from "../types/PageTableEntry";
 import { InstructionOperand } from "../types/InstructionOperand";

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { UnrecognizedInstructionError } from "../types/errors/UnrecognizedInstructionError";
+import { UnrecognizedInstructionError } from "../error_types/UnrecognizedInstructionError";
 import { Bit } from "../types/Bit";
 import { AssemblyLanguageDefinition } from "./compiler/AssemblyLanguageDefinition";
 import { DataSizes } from "../enumerations/DataSizes";

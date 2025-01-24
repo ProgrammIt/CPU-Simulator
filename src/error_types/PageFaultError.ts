@@ -1,5 +1,5 @@
-import { Bit } from "../Bit";
-import { PhysicalAddress } from "../PhysicalAddress";
+import { Bit } from "../types/Bit";
+import { PhysicalAddress } from "../types/PhysicalAddress";
 
 /**
  * Error which gets thrown whenever a page is currently not associated with a page frame.

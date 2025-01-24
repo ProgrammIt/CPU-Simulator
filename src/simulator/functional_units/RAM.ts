@@ -1,7 +1,7 @@
 import { Bit } from "../../types/Bit";
 import { Byte } from "../../types/Byte";
 import { DoubleWord } from "../../types/DoubleWord";
-import { AddressOutOfRangeError } from "../../types/errors/AddressOutOfRangeError";
+import { AddressOutOfRangeError } from "../../error_types/AddressOutOfRangeError";
 import { PhysicalAddress } from "../../types/PhysicalAddress";
 
 export class RAM {

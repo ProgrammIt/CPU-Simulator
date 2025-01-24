@@ -2,7 +2,7 @@ import { BinaryValue } from "../../types/BinaryValue";
 import { Bit } from "../../types/Bit";
 import { DataSizes } from "../../enumerations/DataSizes";
 import { DoubleWord } from "../../types/DoubleWord";
-import { DivisionByZeroError } from "../../types/errors/DivisionByZeroError";
+import { DivisionByZeroError } from "../../error_types/DivisionByZeroError";
 import { QuadWord } from "../../types/QuadWord";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
