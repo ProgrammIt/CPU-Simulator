@@ -20,5 +20,8 @@
         "typescript"
     ],
     "githubPages": false,
-    "cleanOutputDir": false
+    "cleanOutputDir": false,
+    "theme": "default",
+    "darkHighlightTheme": "dark-plus",
+    "lightHighlightTheme": "light-plus"
 }
