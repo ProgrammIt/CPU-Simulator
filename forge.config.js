@@ -15,7 +15,9 @@ module.exports = {
           owner: 'ProgrammIt',
           name: 'CPU-Simulator'
         },
-        prerelease: true
+        prerelease: true,
+        draft: true,
+        authToken: env.GITHUB_TOKEN
       }
     }
   ],

@@ -3,7 +3,22 @@
     "entryPoints": [
         "./src/main.ts"
     ],
-    "out": "docs",
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "out": "./docs",
+    "highlightLanguages": [
+        "bash",
+        "console",
+        "css",
+        "html",
+        "javascript",
+        "json",
+        "jsonc",
+        "json5",
+        "tsx",
+        "typescript"
+    ],
     "githubPages": false,
     "cleanOutputDir": false
 }
