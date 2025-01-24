@@ -6,7 +6,7 @@
 
 # Class: UnknownRegisterError
 
-Defined in: [src/error\_types/UnknownRegisterError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/UnknownRegisterError.ts#L5)
+Defined in: [src/error\_types/UnknownRegisterError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/UnknownRegisterError.ts#L5)
 
 Error which gets thrown whenever a process tries to access an unkown register.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new UnknownRegisterError**(`description`): [`UnknownRegisterError`](UnknownRegisterError.md)
 
-Defined in: [src/error\_types/UnknownRegisterError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/UnknownRegisterError.ts#L10)
+Defined in: [src/error\_types/UnknownRegisterError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/UnknownRegisterError.ts#L10)
 
 Constructs a new instance with the given message.
 

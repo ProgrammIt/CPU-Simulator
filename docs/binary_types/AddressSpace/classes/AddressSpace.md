@@ -6,7 +6,7 @@
 
 # Class: AddressSpace\<T\>
 
-Defined in: [src/binary\_types/AddressSpace.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L7)
+Defined in: [src/binary\_types/AddressSpace.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L7)
 
 This class represents an address space or a range of addresses.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new AddressSpace**\<`T`\>(`lowAddress`, `highAddress`): [`AddressSpace`](AddressSpace.md)\<`T`\>
 
-Defined in: [src/binary\_types/AddressSpace.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L25)
+Defined in: [src/binary\_types/AddressSpace.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L25)
 
 Constructs a new address space from the given boundries.
 
@@ -52,7 +52,7 @@ The upper boundry of the address space.
 
 > `readonly` **highAddress**: `T`
 
-Defined in: [src/binary\_types/AddressSpace.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L12)
+Defined in: [src/binary\_types/AddressSpace.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L12)
 
 This member stores the upper boundry of the address space.
 
@@ -62,7 +62,7 @@ This member stores the upper boundry of the address space.
 
 > `readonly` **lowAddress**: `T`
 
-Defined in: [src/binary\_types/AddressSpace.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L18)
+Defined in: [src/binary\_types/AddressSpace.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L18)
 
 This member stores the lower boundry of the address space.
 
@@ -74,7 +74,7 @@ This member stores the lower boundry of the address space.
 
 > **get** **size**(): `number`
 
-Defined in: [src/binary\_types/AddressSpace.ts:61](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L61)
+Defined in: [src/binary\_types/AddressSpace.ts:61](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L61)
 
 This accessor calculates and returns the size of this range.
 
@@ -88,7 +88,7 @@ This accessor calculates and returns the size of this range.
 
 > **highAddressToDecimal**(): `number`
 
-Defined in: [src/binary\_types/AddressSpace.ts:46](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L46)
+Defined in: [src/binary\_types/AddressSpace.ts:46](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L46)
 
 This method returns the decimal representation of the address spaces highest address.
 
@@ -104,7 +104,7 @@ The decimal representation of the upper boundry.
 
 > **inRange**(`address`): `boolean`
 
-Defined in: [src/binary\_types/AddressSpace.ts:35](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L35)
+Defined in: [src/binary\_types/AddressSpace.ts:35](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L35)
 
 This method tests whether a given address is in range of the address space.
 
@@ -126,7 +126,7 @@ True, if the given address is in range, false otherwise.
 
 > **lowAddressToDecimal**(): `number`
 
-Defined in: [src/binary\_types/AddressSpace.ts:54](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/AddressSpace.ts#L54)
+Defined in: [src/binary\_types/AddressSpace.ts:54](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/AddressSpace.ts#L54)
 
 This method returns the decimal representation of the address spaces lowest address.
 

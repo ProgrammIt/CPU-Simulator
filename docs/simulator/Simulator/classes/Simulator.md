@@ -6,7 +6,7 @@
 
 # Class: Simulator
 
-Defined in: [src/simulator/Simulator.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L21)
+Defined in: [src/simulator/Simulator.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L21)
 
 The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
 
@@ -16,7 +16,7 @@ The main logic of the simulator. Trough this class, the CPU cores and execution 
 
 > **autoScrollForPageTableEnabled**: `boolean`
 
-Defined in: [src/simulator/Simulator.ts:99](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L99)
+Defined in: [src/simulator/Simulator.ts:99](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L99)
 
 This field represents a flag, which enables automatic scroll for the GUIs Page Table widget.
 
@@ -26,7 +26,7 @@ This field represents a flag, which enables automatic scroll for the GUIs Page T
 
 > **autoScrollForPhysicalRAMEnabled**: `boolean`
 
-Defined in: [src/simulator/Simulator.ts:94](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L94)
+Defined in: [src/simulator/Simulator.ts:94](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L94)
 
 This field represents a flag, which enables automatic scroll for the GUIs physical RAM widget.
 
@@ -36,7 +36,7 @@ This field represents a flag, which enables automatic scroll for the GUIs physic
 
 > **autoScrollForVirtualRAMEnabled**: `boolean`
 
-Defined in: [src/simulator/Simulator.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L89)
+Defined in: [src/simulator/Simulator.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L89)
 
 This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
 
@@ -46,7 +46,7 @@ This field represents a flag, which enables automatic scroll for the GUIs virtua
 
 > `readonly` **core**: [`CPUCore`](../../execution_units/CPUCore/classes/CPUCore.md)
 
-Defined in: [src/simulator/Simulator.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L22)
+Defined in: [src/simulator/Simulator.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L22)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/simulator/Simulator.ts:22](https://github.com/ProgrammIt/CPU-Si
 
 > `readonly` **mainMemory**: [`RAM`](../../functional_units/RAM/classes/RAM.md)
 
-Defined in: [src/simulator/Simulator.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L23)
+Defined in: [src/simulator/Simulator.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L23)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/simulator/Simulator.ts:23](https://github.com/ProgrammIt/CPU-Si
 
 > `readonly` `static` **HIGH\_ADDRESS\_PHYSICAL\_MEMORY\_DEC**: `number` = `4_294_967_295`
 
-Defined in: [src/simulator/Simulator.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L32)
+Defined in: [src/simulator/Simulator.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L32)
 
 This class member stores the highest available memory address of physical memory.
 
@@ -72,7 +72,7 @@ This class member stores the highest available memory address of physical memory
 
 > `readonly` `static` **LOW\_ADDRESS\_PHYSICAL\_MEMORY\_DEC**: `number` = `0`
 
-Defined in: [src/simulator/Simulator.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L38)
+Defined in: [src/simulator/Simulator.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L38)
 
 This class member stores the highest available memory address of physical memory.
 
@@ -84,7 +84,7 @@ This class member stores the highest available memory address of physical memory
 
 > **get** **programmLoaded**(): `boolean`
 
-Defined in: [src/simulator/Simulator.ts:127](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L127)
+Defined in: [src/simulator/Simulator.ts:127](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L127)
 
 This method checks whether an assembly programm is currently loaded into the main memory.
 
@@ -100,7 +100,7 @@ True, if an assembly programm is currently loaded into main memory, false otherw
 
 > **bootProcess**(`pathToProgramCode`): `void`
 
-Defined in: [src/simulator/Simulator.ts:364](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L364)
+Defined in: [src/simulator/Simulator.ts:364](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L364)
 
 This method is used to initialize a process and prepare its execution.
 
@@ -120,7 +120,7 @@ This method is used to initialize a process and prepare its execution.
 
 > **cycle**(): `boolean`
 
-Defined in: [src/simulator/Simulator.ts:563](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L563)
+Defined in: [src/simulator/Simulator.ts:563](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L563)
 
 This method triggers execution of the next instruction of a loaded programm.
 
@@ -136,7 +136,7 @@ True, if the cycle was performed normally and false, if the cycle could not be p
 
 > **loadProgramm**(`compiledProgram`, `virtualBaseAddressDec`?): `void`
 
-Defined in: [src/simulator/Simulator.ts:614](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L614)
+Defined in: [src/simulator/Simulator.ts:614](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L614)
 
 This method loads the given and compiled assembly program into the main memory based on 
 the given base address.
@@ -177,7 +177,7 @@ The virtual base address of the program in decimal representation.
 
 > `static` **getInstance**(`capacityOfMainMemory`): [`Simulator`](Simulator.md)
 
-Defined in: [src/simulator/Simulator.ts:136](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Simulator.ts#L136)
+Defined in: [src/simulator/Simulator.ts:136](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Simulator.ts#L136)
 
 This method can be used to retrieve an initialized instance of the simulator.
 

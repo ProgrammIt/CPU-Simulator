@@ -6,7 +6,7 @@
 
 # Enumeration: EncodedReadableRegisters
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L5)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L5)
 
 An enum representing the readable registers and their binary code.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **EAX**: `"00000000000000000000000000000000"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L6)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L6)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:6](https://github.com/
 
 > **EBX**: `"00000000000000000000000000000001"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L7)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L7)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:7](https://github.com/
 
 > **EDX**: `"00000000000000000000000000000010"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L8)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L8)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:8](https://github.com/
 
 > **EIP**: `"00000000000000000000000000000011"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L9)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L9)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:9](https://github.com/
 
 > **EIR**: `"00000000000000000000000000000100"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L10)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L10)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:10](https://github.com
 
 > **ESP**: `"00000000000000000000000000000111"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L13)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L13)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:13](https://github.com
 
 > **GPTP**: `"00000000000000000000000000001001"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L15)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L15)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:15](https://github.com
 
 > **ITP**: `"00000000000000000000000000001000"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:14](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L14)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:14](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L14)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:14](https://github.com
 
 > **NPTP**: `"00000000000000000000000000000101"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L11)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L11)
 
 ***
 
@@ -92,4 +92,4 @@ Defined in: [src/enumerations/EncodedReadableRegisters.ts:11](https://github.com
 
 > **VMPTR**: `"00000000000000000000000000000110"`
 
-Defined in: [src/enumerations/EncodedReadableRegisters.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedReadableRegisters.ts#L12)
+Defined in: [src/enumerations/EncodedReadableRegisters.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedReadableRegisters.ts#L12)

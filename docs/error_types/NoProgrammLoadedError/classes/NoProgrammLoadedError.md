@@ -6,7 +6,7 @@
 
 # Class: NoProgrammLoadedError
 
-Defined in: [src/error\_types/NoProgrammLoadedError.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/NoProgrammLoadedError.ts#L6)
+Defined in: [src/error\_types/NoProgrammLoadedError.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/NoProgrammLoadedError.ts#L6)
 
 Error which gets thrown when the user attempts to start execution of an
 assembly programm but forgot to load one into the simulator beforehand.
@@ -25,7 +25,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new NoProgrammLoadedError**(`description`): [`NoProgrammLoadedError`](NoProgrammLoadedError.md)
 
-Defined in: [src/error\_types/NoProgrammLoadedError.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/NoProgrammLoadedError.ts#L11)
+Defined in: [src/error\_types/NoProgrammLoadedError.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/NoProgrammLoadedError.ts#L11)
 
 Constructs a new instance with the given message.
 

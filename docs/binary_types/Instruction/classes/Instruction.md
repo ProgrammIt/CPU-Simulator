@@ -6,7 +6,7 @@
 
 # Class: Instruction
 
-Defined in: [src/binary\_types/Instruction.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L8)
+Defined in: [src/binary\_types/Instruction.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L8)
 
 This class represents an 32-bit instruction.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new Instruction**(`value`): [`Instruction`](Instruction.md)
 
-Defined in: [src/binary\_types/Instruction.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L13)
+Defined in: [src/binary\_types/Instruction.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L13)
 
 Instantiates a new object.
 
@@ -48,7 +48,7 @@ Instantiates a new object.
 
 > `protected` **\_value**: [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L12)
+Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L12)
 
 An array of bits, representing a binary value.
 
@@ -62,7 +62,7 @@ An array of bits, representing a binary value.
 
 > `readonly` `static` **MAX\_NEGATIVE\_NUMBER\_DEC**: `number` = `-2_147_483_648`
 
-Defined in: [src/binary\_types/DoubleWord.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L8)
+Defined in: [src/binary\_types/DoubleWord.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L8)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: [src/binary\_types/DoubleWord.ts:8](https://github.com/ProgrammIt/CP
 
 > `readonly` `static` **MAX\_POSITIVE\_NUMBER\_DEC**: `number` = `2_147_483_647`
 
-Defined in: [src/binary\_types/DoubleWord.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L7)
+Defined in: [src/binary\_types/DoubleWord.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L7)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [src/binary\_types/DoubleWord.ts:7](https://github.com/ProgrammIt/CP
 
 > `readonly` `static` **NUMBER\_OF\_BITS\_DEC**: `number` = `32`
 
-Defined in: [src/binary\_types/DoubleWord.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L9)
+Defined in: [src/binary\_types/DoubleWord.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L9)
 
 #### Inherited from
 
@@ -100,7 +100,7 @@ Defined in: [src/binary\_types/DoubleWord.ts:9](https://github.com/ProgrammIt/CP
 
 > **get** **value**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/Instruction.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L21)
+Defined in: [src/binary\_types/Instruction.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L21)
 
 Accessor for reading the binary value.
 
@@ -112,7 +112,7 @@ Accessor for reading the binary value.
 
 > **set** **value**(`newValue`): `void`
 
-Defined in: [src/binary\_types/Instruction.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L30)
+Defined in: [src/binary\_types/Instruction.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L30)
 
 Accessor for setting the binary value.
 
@@ -138,7 +138,7 @@ The new value.
 
 > **equal**(`other`): `boolean`
 
-Defined in: [src/binary\_types/Instruction.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L43)
+Defined in: [src/binary\_types/Instruction.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L43)
 
 For comparison, both binary values are converted to strings.
 Conversion presarves the order of items, which is important for the comparison.
@@ -167,7 +167,7 @@ True, when both binary values are identical, false otherwise.
 
 > **getLeastSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L44)
+Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L44)
 
 This method returns the least significant bit of this value.
 
@@ -187,7 +187,7 @@ The least significant bit.
 
 > **getLeastSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L84)
+Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L84)
 
 This method returns the last bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -212,7 +212,7 @@ The number of bits returned depends on the argument passed.
 
 > **getLeastSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L60)
+Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L60)
 
 This method returns the least significant byte of this value.
 
@@ -232,7 +232,7 @@ The least significant byte.
 
 > **getMostSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L52)
+Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L52)
 
 This method returns the most significant bit of this value.
 
@@ -252,7 +252,7 @@ The most significant bit.
 
 > **getMostSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L97)
+Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L97)
 
 This method returns the first bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -277,7 +277,7 @@ The number of bits returned depends on the argument passed.
 
 > **getMostSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L71)
+Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L71)
 
 This method returns the least significant byte of this value.
 
@@ -297,7 +297,7 @@ The least significant byte.
 
 > **isGreaterThan**(`other`): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:76](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L76)
+Defined in: [src/binary\_types/DoubleWord.ts:76](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L76)
 
 This method checks whether the current binary value is greater than the given one.
 
@@ -325,7 +325,7 @@ True, if this value is greater than the one compared to, false otherwise.
 
 > **isNegative**(): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:100](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L100)
+Defined in: [src/binary\_types/DoubleWord.ts:100](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L100)
 
 This method checks whether this binary value represents a negative number.
 
@@ -345,7 +345,7 @@ True, if the most significant bit is set to 1, false otherwise.
 
 > **isNotZero**(): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:92](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L92)
+Defined in: [src/binary\_types/DoubleWord.ts:92](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L92)
 
 This method checks whether the current binary value is not a binary zero or not.
 
@@ -365,7 +365,7 @@ True, if the binary value is not zero, false otherwise.
 
 > **isPositive**(): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:108](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L108)
+Defined in: [src/binary\_types/DoubleWord.ts:108](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L108)
 
 This method checks whether this binary value represents a positive number.
 
@@ -385,7 +385,7 @@ True, if the most significant bit is set to 0, false otherwise.
 
 > **isSmallerThan**(`other`): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:67](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L67)
+Defined in: [src/binary\_types/DoubleWord.ts:67](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L67)
 
 This method checks whether the current binary value is smaller than the given one.
 
@@ -413,7 +413,7 @@ True, if this value is less than the one compared to, false otherwise.
 
 > **isZero**(): `boolean`
 
-Defined in: [src/binary\_types/DoubleWord.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L84)
+Defined in: [src/binary\_types/DoubleWord.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L84)
 
 This method checks whether the current binary value is a binary zero or not.
 
@@ -433,7 +433,7 @@ True, if the binary value is zero, false otherwise.
 
 > **toString**(`groupBytes`): `string`
 
-Defined in: [src/binary\_types/Instruction.ts:51](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Instruction.ts#L51)
+Defined in: [src/binary\_types/Instruction.ts:51](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Instruction.ts#L51)
 
 Converts the binary value into a string representation.
 
@@ -459,7 +459,7 @@ The string representation of the binary value.
 
 > `static` **fromInteger**(`integer`): [`DoubleWord`](../../DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/binary\_types/DoubleWord.ts:133](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/DoubleWord.ts#L133)
+Defined in: [src/binary\_types/DoubleWord.ts:133](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/DoubleWord.ts#L133)
 
 This method creates an instance from the given number. 
 Throws an error, if the given number is not an integer.

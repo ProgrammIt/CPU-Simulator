@@ -6,7 +6,7 @@
 
 # Class: Renderer
 
-Defined in: [src/render.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L18)
+Defined in: [src/render.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L18)
 
 This class encapsulates the logic needed to initialize and sync the GUI
 with the backend process.
@@ -21,7 +21,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new Renderer**(`document`, `window`): [`Renderer`](Renderer.md)
 
-Defined in: [src/render.ts:748](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L748)
+Defined in: [src/render.ts:748](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L748)
 
 Constructs an instance with the given HTML document associated.
 
@@ -49,7 +49,7 @@ A reference to the browser "window".
 
 > **autoScrollForPageTableEnabled**: `boolean`
 
-Defined in: [src/render.ts:741](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L741)
+Defined in: [src/render.ts:741](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L741)
 
 This field represents a flag, which enables automatic scroll for the GUIs Page Table widget.
 
@@ -59,7 +59,7 @@ This field represents a flag, which enables automatic scroll for the GUIs Page T
 
 > **autoScrollForPhysicalRAMEnabled**: `boolean`
 
-Defined in: [src/render.ts:736](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L736)
+Defined in: [src/render.ts:736](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L736)
 
 This field represents a flag, which enables automatic scroll for the GUIs physical RAM widget.
 
@@ -69,7 +69,7 @@ This field represents a flag, which enables automatic scroll for the GUIs physic
 
 > **autoScrollForVirtualRAMEnabled**: `boolean`
 
-Defined in: [src/render.ts:731](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L731)
+Defined in: [src/render.ts:731](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L731)
 
 This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
 
@@ -79,7 +79,7 @@ This field represents a flag, which enables automatic scroll for the GUIs virtua
 
 > **dataRepresentationEAX**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:56](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L56)
+Defined in: [src/render.ts:56](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L56)
 
 This field stores the currently selected representation of the data for the EAX register.
 
@@ -89,7 +89,7 @@ This field stores the currently selected representation of the data for the EAX 
 
 > **dataRepresentationEBX**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:67](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L67)
+Defined in: [src/render.ts:67](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L67)
 
 This field stores the currently selected representation of the data for the EBX register.
 
@@ -99,7 +99,7 @@ This field stores the currently selected representation of the data for the EBX 
 
 > **dataRepresentationEDX**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:78](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L78)
+Defined in: [src/render.ts:78](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L78)
 
 This field stores the currently selected representation of the data for the EDX register.
 
@@ -109,7 +109,7 @@ This field stores the currently selected representation of the data for the EDX 
 
 > **dataRepresentationEIP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L89)
+Defined in: [src/render.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L89)
 
 This field stores the currently selected representation of the data for the EIP register.
 
@@ -119,7 +119,7 @@ This field stores the currently selected representation of the data for the EIP 
 
 > **dataRepresentationEIR**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:110](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L110)
+Defined in: [src/render.ts:110](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L110)
 
 TODO: Implement mechanism for retrieving textual instruction from main process of the Simulator!
 This field is currently unused, as there is no such mechanism.
@@ -133,7 +133,7 @@ This field stores the currently selected representation of the data for the EIR 
 
 > **dataRepresentationESP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:143](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L143)
+Defined in: [src/render.ts:143](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L143)
 
 This field stores the currently selected representation of the data for the ESP register.
 
@@ -143,7 +143,7 @@ This field stores the currently selected representation of the data for the ESP 
 
 > **dataRepresentationGPTP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:165](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L165)
+Defined in: [src/render.ts:165](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L165)
 
 This field stores the currently selected representation of the data for the GPTP register.
 
@@ -153,7 +153,7 @@ This field stores the currently selected representation of the data for the GPTP
 
 > **dataRepresentationITP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:154](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L154)
+Defined in: [src/render.ts:154](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L154)
 
 This field stores the currently selected representation of the data for the ITP register.
 
@@ -163,7 +163,7 @@ This field stores the currently selected representation of the data for the ITP 
 
 > **dataRepresentationNPTP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:121](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L121)
+Defined in: [src/render.ts:121](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L121)
 
 This field stores the currently selected representation of the data for the NPTP register.
 
@@ -173,7 +173,7 @@ This field stores the currently selected representation of the data for the NPTP
 
 > **dataRepresentationPTP**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:176](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L176)
+Defined in: [src/render.ts:176](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L176)
 
 This field stores the currently selected representation of the data for the PTP register.
 
@@ -183,7 +183,7 @@ This field stores the currently selected representation of the data for the PTP 
 
 > **dataRepresentationVMPTR**: [`NumberSystem`](../enumerations/NumberSystem.md)
 
-Defined in: [src/render.ts:132](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L132)
+Defined in: [src/render.ts:132](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L132)
 
 This field stores the currently selected representation of the data for the VMPTR register.
 
@@ -193,7 +193,7 @@ This field stores the currently selected representation of the data for the VMPT
 
 > **programLoaded**: `boolean`
 
-Defined in: [src/render.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L45)
+Defined in: [src/render.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L45)
 
 This field indicates, whether an assembly program is currently loaded.
 
@@ -203,7 +203,7 @@ This field indicates, whether an assembly program is currently loaded.
 
 > `readonly` `static` **HIGH\_ADDRESS\_PHYSICAL\_MEMORY\_DEC**: `number` = `4_294_967_295`
 
-Defined in: [src/render.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L22)
+Defined in: [src/render.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L22)
 
 This class member stores the highest available physical memory address.
 
@@ -213,7 +213,7 @@ This class member stores the highest available physical memory address.
 
 > `readonly` `static` **NUMBER\_BITS\_PAGE\_FRAME\_ADDRESS**: `number` = `20`
 
-Defined in: [src/render.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L29)
+Defined in: [src/render.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L29)
 
 This class member stores the number of bits representing the page frame number.
 The page frame number can be extracted from a phyiscal memory address by removing the offset bits from the right.
@@ -224,7 +224,7 @@ The page frame number can be extracted from a phyiscal memory address by removin
 
 > **createPageTableEntryElement**(`pageNumberDecString`, `presentFlag`, `writableFlag`, `executableFlag`, `accessableOnlyInKernelModeFlag`, `pinnedFlag`, `changedFlag`, `pageFrameNumberDecString`): `HTMLElement`
 
-Defined in: [src/render.ts:1039](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1039)
+Defined in: [src/render.ts:1039](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1039)
 
 This method creates a GUI element, which represents an entry of the Page Table.
 
@@ -290,7 +290,7 @@ An GUI element representing a single Page Table entry.
 
 > **createPageTableView**(`firstPageNumberToReadDec`?, `lastPageNumberToReadDec`?): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1085](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1085)
+Defined in: [src/render.ts:1085](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1085)
 
 This method initializes the view of the Page Table reading the first thirty entries of the Page Table
 and creats GUI elements, which represents the individual entries.
@@ -319,7 +319,7 @@ The last page number to read from Page Table.
 
 > **createPhysicalRAMGuiElement**(`physicalAddressHexString`, `binaryStringContent`): `HTMLElement`
 
-Defined in: [src/render.ts:986](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L986)
+Defined in: [src/render.ts:986](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L986)
 
 This method creates an HTMLElement representing a physical RAM cell. This element consist out of a label with the 
 pyhsical memory address and the binary content of the main memory at this address.
@@ -350,7 +350,7 @@ A HTMLElement representing a RAM cell.
 
 > **createPhysicalRAMView**(`firstPhysicalAddressToReadHex`?, `lastPhysicalAddressToReadHex`?): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:927](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L927)
+Defined in: [src/render.ts:927](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L927)
 
 This method initializes the view of the physical RAM by reading the first twenty
 entries of the main memory and creating HTMLElements, which represents the individual 
@@ -380,7 +380,7 @@ The last physical memory address to read from main memory in hexadecimal represe
 
 > **createVirtualRAMGuiElement**(`virtualAddressHexString`, `binaryStringContent`): `HTMLElement`
 
-Defined in: [src/render.ts:1010](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1010)
+Defined in: [src/render.ts:1010](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1010)
 
 This method creates an HTMLElement representing a virtual RAM cell. This element consist out of a label with the 
 pyhsical memory address and the binary content of the main memory at this address.
@@ -411,7 +411,7 @@ A HTMLElement representing a RAM cell.
 
 > **createVirtualRAMView**(`firstVirtualAddressToReadHex`?, `lastVirtualAddressToReadHex`?): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:956](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L956)
+Defined in: [src/render.ts:956](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L956)
 
 This method initializes the view of the virtual RAM by reading the first twenty entries of the main memory 
 and creating HTMLElements, which represents the individual RAM cells.
@@ -440,7 +440,7 @@ The last virtual memory address to read from main memory in hexadecimal represen
 
 > **cycle**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1363](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1363)
+Defined in: [src/render.ts:1363](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1363)
 
 Performs the next CPU cycle (fetch, decode, execute).
 
@@ -454,7 +454,7 @@ Performs the next CPU cycle (fetch, decode, execute).
 
 > **readEAX**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1175](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1175)
+Defined in: [src/render.ts:1175](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1175)
 
 This method reads the content of the EAX register.
 
@@ -474,7 +474,7 @@ This method reads the content of the EAX register.
 
 > **readEBX**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1186](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1186)
+Defined in: [src/render.ts:1186](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1186)
 
 This method reads the content of the EBX register.
 
@@ -494,7 +494,7 @@ This method reads the content of the EBX register.
 
 > **readEDX**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1197](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1197)
+Defined in: [src/render.ts:1197](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1197)
 
 This method reads the content of the EDX register.
 
@@ -514,7 +514,7 @@ This method reads the content of the EDX register.
 
 > **readEFLAGS**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1265](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1265)
+Defined in: [src/render.ts:1265](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1265)
 
 This method reads the content of the EFLAGS register.
 
@@ -528,7 +528,7 @@ This method reads the content of the EFLAGS register.
 
 > **readEIP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1208](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1208)
+Defined in: [src/render.ts:1208](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1208)
 
 This method reads the content of the EIP register.
 
@@ -548,7 +548,7 @@ This method reads the content of the EIP register.
 
 > **readEIR**(`asInstruction`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1286](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1286)
+Defined in: [src/render.ts:1286](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1286)
 
 This method reads the content of the EIR register.
 
@@ -570,7 +570,7 @@ Indicates, wethert to display the instruction in its textual representation or n
 
 > **readESP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1319](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1319)
+Defined in: [src/render.ts:1319](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1319)
 
 This method reads the content of the ESP register.
 
@@ -590,7 +590,7 @@ This method reads the content of the ESP register.
 
 > **readGPTP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1341](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1341)
+Defined in: [src/render.ts:1341](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1341)
 
 This method reads the content of the GPTP register.
 
@@ -610,7 +610,7 @@ This method reads the content of the GPTP register.
 
 > **readITP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1330](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1330)
+Defined in: [src/render.ts:1330](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1330)
 
 This method reads the content of the ITP register.
 
@@ -630,7 +630,7 @@ This method reads the content of the ITP register.
 
 > **readNPTP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1297](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1297)
+Defined in: [src/render.ts:1297](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1297)
 
 This method reads the content of the NPTP register.
 
@@ -650,7 +650,7 @@ This method reads the content of the NPTP register.
 
 > **readPTP**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1352](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1352)
+Defined in: [src/render.ts:1352](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1352)
 
 This method reads the content of the PTP register.
 
@@ -670,7 +670,7 @@ This method reads the content of the PTP register.
 
 > **readVMPTR**(`radix`): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1308](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1308)
+Defined in: [src/render.ts:1308](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1308)
 
 This method reads the content of the VMPTR register.
 
@@ -690,7 +690,7 @@ This method reads the content of the VMPTR register.
 
 > **registerChangeListener**(): `void`
 
-Defined in: [src/render.ts:802](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L802)
+Defined in: [src/render.ts:802](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L802)
 
 This method registers the change listeners for all <select> elements inside the GUI elements, which represent
 registers during start of the simulator.
@@ -705,7 +705,7 @@ registers during start of the simulator.
 
 > **reloadPageTableView**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1128](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L1128)
+Defined in: [src/render.ts:1128](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L1128)
 
 This method reloads the view of the Page Table depending on the visible Page Table entries.
 
@@ -719,7 +719,7 @@ This method reloads the view of the Page Table depending on the visible Page Tab
 
 > **reloadPhysicalRAMView**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:860](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L860)
+Defined in: [src/render.ts:860](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L860)
 
 This function reloads the RAM view, by taking the visible elements into account. This is done in order to avoid
 weird jumps in the widget, representing the physical main memory.
@@ -734,7 +734,7 @@ weird jumps in the widget, representing the physical main memory.
 
 > **reloadVirtualRAMView**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:892](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/render.ts#L892)
+Defined in: [src/render.ts:892](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/render.ts#L892)
 
 This function reloads the RAM view, by taking the visible elements into account. This is done in order to avoid
 weird jumps in the widget, representing the virtual main memory.

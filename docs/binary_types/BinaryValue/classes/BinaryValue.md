@@ -6,7 +6,7 @@
 
 # Class: BinaryValue
 
-Defined in: [src/binary\_types/BinaryValue.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L8)
+Defined in: [src/binary\_types/BinaryValue.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L8)
 
 This class represents a generic binary value.
 
@@ -26,7 +26,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new BinaryValue**(`value`): [`BinaryValue`](BinaryValue.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L18)
+Defined in: [src/binary\_types/BinaryValue.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L18)
 
 Constructs a new binary value from the given array of bits.
 
@@ -48,7 +48,7 @@ An array of bits representing a binary value.
 
 > `protected` **\_value**: [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L12)
+Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L12)
 
 An array of bits, representing a binary value.
 
@@ -60,7 +60,7 @@ An array of bits, representing a binary value.
 
 > **get** **value**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L25)
+Defined in: [src/binary\_types/BinaryValue.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L25)
 
 Accessor for reading the binary value.
 
@@ -72,7 +72,7 @@ Accessor for reading the binary value.
 
 > **set** **value**(`newValue`): `void`
 
-Defined in: [src/binary\_types/BinaryValue.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L33)
+Defined in: [src/binary\_types/BinaryValue.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L33)
 
 Accessor for setting the binary value.
 
@@ -94,7 +94,7 @@ The new value.
 
 > **getLeastSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L44)
+Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L44)
 
 This method returns the least significant bit of this value.
 
@@ -110,7 +110,7 @@ The least significant bit.
 
 > **getLeastSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L84)
+Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L84)
 
 This method returns the last bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -131,7 +131,7 @@ The number of bits returned depends on the argument passed.
 
 > **getLeastSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L60)
+Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L60)
 
 This method returns the least significant byte of this value.
 
@@ -147,7 +147,7 @@ The least significant byte.
 
 > **getMostSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L52)
+Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L52)
 
 This method returns the most significant bit of this value.
 
@@ -163,7 +163,7 @@ The most significant bit.
 
 > **getMostSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L97)
+Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L97)
 
 This method returns the first bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -184,7 +184,7 @@ The number of bits returned depends on the argument passed.
 
 > **getMostSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L71)
+Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/BinaryValue.ts#L71)
 
 This method returns the least significant byte of this value.
 

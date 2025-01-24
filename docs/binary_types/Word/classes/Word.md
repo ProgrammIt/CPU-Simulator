@@ -6,7 +6,7 @@
 
 # Class: Word
 
-Defined in: [src/binary\_types/Word.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L4)
+Defined in: [src/binary\_types/Word.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L4)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/binary\_types/Word.ts:4](https://github.com/ProgrammIt/CPU-Simu
 
 > **new Word**(`value`?): [`Word`](Word.md)
 
-Defined in: [src/binary\_types/Word.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L19)
+Defined in: [src/binary\_types/Word.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L19)
 
 Instantiates a new object.
 
@@ -36,7 +36,7 @@ The binary data to initialize the new object with.
 
 > `protected` **\_value**: [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/Word.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L12)
+Defined in: [src/binary\_types/Word.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L12)
 
 The binary data this object holds.
 
@@ -46,7 +46,7 @@ The binary data this object holds.
 
 > `protected` `readonly` `static` **MAX\_NEGATIVE\_NUMBER\_DEC**: `number` = `-32_768`
 
-Defined in: [src/binary\_types/Word.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L6)
+Defined in: [src/binary\_types/Word.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L6)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/binary\_types/Word.ts:6](https://github.com/ProgrammIt/CPU-Simu
 
 > `protected` `readonly` `static` **MAX\_POSITIVE\_NUMBER\_DEC**: `number` = `32_767`
 
-Defined in: [src/binary\_types/Word.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L5)
+Defined in: [src/binary\_types/Word.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L5)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/binary\_types/Word.ts:5](https://github.com/ProgrammIt/CPU-Simu
 
 > `readonly` `static` **NUMBER\_OF\_BITS\_DEC**: `number` = `16`
 
-Defined in: [src/binary\_types/Word.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L7)
+Defined in: [src/binary\_types/Word.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L7)
 
 ## Accessors
 
@@ -72,7 +72,7 @@ Defined in: [src/binary\_types/Word.ts:7](https://github.com/ProgrammIt/CPU-Simu
 
 > **get** **value**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/Word.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L29)
+Defined in: [src/binary\_types/Word.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L29)
 
 ##### Returns
 
@@ -82,7 +82,7 @@ Defined in: [src/binary\_types/Word.ts:29](https://github.com/ProgrammIt/CPU-Sim
 
 > **set** **value**(`newValue`): `void`
 
-Defined in: [src/binary\_types/Word.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L33)
+Defined in: [src/binary\_types/Word.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L33)
 
 ##### Parameters
 
@@ -100,7 +100,7 @@ Defined in: [src/binary\_types/Word.ts:33](https://github.com/ProgrammIt/CPU-Sim
 
 > **equal**(`word`): `boolean`
 
-Defined in: [src/binary\_types/Word.ts:46](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L46)
+Defined in: [src/binary\_types/Word.ts:46](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L46)
 
 For comparison, both binary values are converted to strings.
 Conversion presarves the order of items, which is important for the comparison.
@@ -125,7 +125,7 @@ True, when both binary values are identical, false otherwise.
 
 > **toString**(`groupBytes`): `string`
 
-Defined in: [src/binary\_types/Word.ts:55](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L55)
+Defined in: [src/binary\_types/Word.ts:55](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L55)
 
 Converts the binary value into a string representation.
 
@@ -147,7 +147,7 @@ When true, the bytes are grouped into two groups with 8 bits each.
 
 > `static` **fromInteger**(`integer`): [`Word`](Word.md)
 
-Defined in: [src/binary\_types/Word.ts:72](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Word.ts#L72)
+Defined in: [src/binary\_types/Word.ts:72](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/Word.ts#L72)
 
 This method creates an instance from the given number.
 Throws an error, if the given number is not an integer.

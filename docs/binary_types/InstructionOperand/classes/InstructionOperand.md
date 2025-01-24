@@ -6,7 +6,7 @@
 
 # Class: InstructionOperand
 
-Defined in: [src/binary\_types/InstructionOperand.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/InstructionOperand.ts#L12)
+Defined in: [src/binary\_types/InstructionOperand.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/InstructionOperand.ts#L12)
 
 A class representing a decoded (non-binary) operand of an instruction.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new InstructionOperand**(`addressingMode`, `type`, `value`): [`InstructionOperand`](InstructionOperand.md)
 
-Defined in: [src/binary\_types/InstructionOperand.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/InstructionOperand.ts#L38)
+Defined in: [src/binary\_types/InstructionOperand.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/InstructionOperand.ts#L38)
 
 Creates a new instance from the given arguments.
 
@@ -54,7 +54,7 @@ The operands value in binary representation.
 
 > `readonly` **addressingMode**: [`EncodedAddressingModes`](../../../enumerations/EncodedAdressingModes/enumerations/EncodedAddressingModes.md)
 
-Defined in: [src/binary\_types/InstructionOperand.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/InstructionOperand.ts#L17)
+Defined in: [src/binary\_types/InstructionOperand.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/InstructionOperand.ts#L17)
 
 The operands addressing mode. Can be either direct or indirect. Indirect mode is only valid for registers.
 
@@ -64,7 +64,7 @@ The operands addressing mode. Can be either direct or indirect. Indirect mode is
 
 > `readonly` **type**: [`EncodedOperandTypes`](../../../enumerations/EncodedOperandTypes/enumerations/EncodedOperandTypes.md)
 
-Defined in: [src/binary\_types/InstructionOperand.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/InstructionOperand.ts#L23)
+Defined in: [src/binary\_types/InstructionOperand.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/InstructionOperand.ts#L23)
 
 The operands type. Can be either a constant/immediate, a memory address or a register.
 
@@ -74,6 +74,6 @@ The operands type. Can be either a constant/immediate, a memory address or a reg
 
 > `readonly` **value**: [`DoubleWord`](../../DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/binary\_types/InstructionOperand.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/InstructionOperand.ts#L29)
+Defined in: [src/binary\_types/InstructionOperand.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/binary_types/InstructionOperand.ts#L29)
 
 The operands value in binary representation.

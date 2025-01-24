@@ -6,7 +6,7 @@
 
 # Class: InstructionDecoder
 
-Defined in: [src/simulator/InstructionDecoder.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L12)
+Defined in: [src/simulator/InstructionDecoder.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L12)
 
 This class is dedicated to decoding a binary instruction.
 It offers an interface for decoding different parts of an instruction.
@@ -31,7 +31,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > `static` **decodeAddressingMode**(`encodedAddressingMode`): [`EncodedAddressingModes`](../../../enumerations/EncodedAdressingModes/enumerations/EncodedAddressingModes.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L45)
+Defined in: [src/simulator/InstructionDecoder.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L45)
 
 This method decodes the addressing mode of an instructions operand.
 
@@ -51,7 +51,7 @@ This method decodes the addressing mode of an instructions operand.
 
 > `static` **decodeInstructionType**(`encodedInstructionType`): [`EncodedInstructionTypes`](../../../enumerations/EncodedInstructionTypes/enumerations/EncodedInstructionTypes.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:66](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L66)
+Defined in: [src/simulator/InstructionDecoder.ts:66](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L66)
 
 This methods decodes an instructions type.
 
@@ -75,7 +75,7 @@ A decoded representation of the type.
 
 > `static` **decodeIOperation**(`encodedOperation`): [`EncodedOperations`](../../../enumerations/EncodedOperations/enumerations/EncodedOperations.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:83](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L83)
+Defined in: [src/simulator/InstructionDecoder.ts:83](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L83)
 
 This methods decodes an I-type instructions operation.
 
@@ -99,7 +99,7 @@ A decoded representation of the operation.
 
 > `static` **decodeJOperation**(`encodedOperation`): [`EncodedOperations`](../../../enumerations/EncodedOperations/enumerations/EncodedOperations.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:116](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L116)
+Defined in: [src/simulator/InstructionDecoder.ts:116](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L116)
 
 This methods decodes a J-type instructions operation.
 
@@ -123,7 +123,7 @@ A decoded representation of the operation.
 
 > `static` **decodeOperandType**(`encodedOperandType`): [`EncodedOperandTypes`](../../../enumerations/EncodedOperandTypes/enumerations/EncodedOperandTypes.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L18)
+Defined in: [src/simulator/InstructionDecoder.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L18)
 
 This method decodes the type of an instructions operand.
 
@@ -143,7 +143,7 @@ This method decodes the type of an instructions operand.
 
 > `static` **decodeROperation**(`encodedOperation`): [`EncodedOperations`](../../../enumerations/EncodedOperations/enumerations/EncodedOperations.md)
 
-Defined in: [src/simulator/InstructionDecoder.ts:179](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/InstructionDecoder.ts#L179)
+Defined in: [src/simulator/InstructionDecoder.ts:179](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/InstructionDecoder.ts#L179)
 
 This methods decodes a R-type instructions operation.
 

@@ -266,7 +266,7 @@ Returns true if the location bar is visible; otherwise, returns false.
 
 > **mainMemory**: `any`
 
-Defined in: [src/preload.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/preload.ts#L6)
+Defined in: [src/preload.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/preload.ts#L6)
 
 ***
 
@@ -2498,7 +2498,7 @@ Defined in: node\_modules/typescript/lib/lib.dom.d.ts:25797
 
 > **simulator**: `any`
 
-Defined in: [src/preload.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/preload.ts#L7)
+Defined in: [src/preload.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/preload.ts#L7)
 
 ***
 

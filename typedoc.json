@@ -19,8 +19,8 @@
         "tsx",
         "typescript"
     ],
-    "githubPages": true,
-    "cleanOutputDir": false,
+    "githubPages": false,
+    "cleanOutputDir": true,
     "theme": "default",
     "darkHighlightTheme": "dark-plus",
     "lightHighlightTheme": "light-plus"

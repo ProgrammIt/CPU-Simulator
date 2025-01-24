@@ -6,7 +6,7 @@
 
 # Class: `abstract` Register\<T\>
 
-Defined in: [src/simulator/functional\_units/Register.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L5)
+Defined in: [src/simulator/functional\_units/Register.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L5)
 
 This class represents a generic register.
 
@@ -31,7 +31,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new Register**\<`T`\>(`name`, `content`): [`Register`](Register.md)\<`T`\>
 
-Defined in: [src/simulator/functional\_units/Register.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L23)
+Defined in: [src/simulator/functional\_units/Register.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L23)
 
 This method constructs an instance of the Register class.
 
@@ -59,7 +59,7 @@ The initial content of the register.
 
 > `protected` **\_content**: `T`
 
-Defined in: [src/simulator/functional\_units/Register.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L9)
+Defined in: [src/simulator/functional\_units/Register.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L9)
 
 The registers content.
 
@@ -69,7 +69,7 @@ The registers content.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/simulator/functional\_units/Register.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L15)
+Defined in: [src/simulator/functional\_units/Register.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L15)
 
 The name of the register.
 
@@ -81,7 +81,7 @@ The name of the register.
 
 > **get** `abstract` **content**(): `T`
 
-Defined in: [src/simulator/functional\_units/Register.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L32)
+Defined in: [src/simulator/functional\_units/Register.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L32)
 
 Accessor for retrieving a copy of the current registers content.
 
@@ -95,7 +95,7 @@ A copy of the current registers content.
 
 > **set** `abstract` **content**(`newValue`): `void`
 
-Defined in: [src/simulator/functional\_units/Register.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/Register.ts#L37)
+Defined in: [src/simulator/functional\_units/Register.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/Register.ts#L37)
 
 Accessor for setting a new value as registers content.
 

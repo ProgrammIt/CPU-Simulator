@@ -6,7 +6,7 @@
 
 # Enumeration: NumberSystems
 
-Defined in: [src/enumerations/NumberSystems.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/NumberSystems.ts#L1)
+Defined in: [src/enumerations/NumberSystems.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/NumberSystems.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [src/enumerations/NumberSystems.ts:1](https://github.com/ProgrammIt/
 
 > **BIN**: `2`
 
-Defined in: [src/enumerations/NumberSystems.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/NumberSystems.ts#L4)
+Defined in: [src/enumerations/NumberSystems.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/NumberSystems.ts#L4)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/enumerations/NumberSystems.ts:4](https://github.com/ProgrammIt/
 
 > **DEC**: `10`
 
-Defined in: [src/enumerations/NumberSystems.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/NumberSystems.ts#L3)
+Defined in: [src/enumerations/NumberSystems.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/NumberSystems.ts#L3)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/enumerations/NumberSystems.ts:3](https://github.com/ProgrammIt/
 
 > **HEX**: `16`
 
-Defined in: [src/enumerations/NumberSystems.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/NumberSystems.ts#L2)
+Defined in: [src/enumerations/NumberSystems.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/NumberSystems.ts#L2)

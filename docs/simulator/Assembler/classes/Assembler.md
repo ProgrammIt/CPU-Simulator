@@ -6,7 +6,7 @@
 
 # Class: Assembler
 
-Defined in: [src/simulator/Assembler.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L9)
+Defined in: [src/simulator/Assembler.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L9)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/Assembler.ts:9](https://github.com/ProgrammIt/CPU-Sim
 
 > **new Assembler**(`processingWidth`, `pathToLanguageDefinition`): [`Assembler`](Assembler.md)
 
-Defined in: [src/simulator/Assembler.ts:20](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L20)
+Defined in: [src/simulator/Assembler.ts:20](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L20)
 
 Constructs a new assembler object with the given processing width.
 
@@ -42,7 +42,7 @@ The path to the language definition file of the assembly language used by this a
 
 > `readonly` **languageDefinition**: [`AssemblyLanguageDefinition`](../../compiler/AssemblyLanguageDefinition/interfaces/AssemblyLanguageDefinition.md)
 
-Defined in: [src/simulator/Assembler.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L11)
+Defined in: [src/simulator/Assembler.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L11)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [src/simulator/Assembler.ts:11](https://github.com/ProgrammIt/CPU-Si
 
 > `readonly` **processingWidth**: [`DataSizes`](../../../enumerations/DataSizes/enumerations/DataSizes.md)
 
-Defined in: [src/simulator/Assembler.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L13)
+Defined in: [src/simulator/Assembler.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L13)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/simulator/Assembler.ts:13](https://github.com/ProgrammIt/CPU-Si
 
 > `readonly` **translations**: `Map`\<`string`, [`DoubleWord`](../../../binary_types/DoubleWord/classes/DoubleWord.md)[]\>
 
-Defined in: [src/simulator/Assembler.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L12)
+Defined in: [src/simulator/Assembler.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L12)
 
 ## Methods
 
@@ -66,7 +66,7 @@ Defined in: [src/simulator/Assembler.ts:12](https://github.com/ProgrammIt/CPU-Si
 
 > **compile**(`s`): [`DoubleWord`](../../../binary_types/DoubleWord/classes/DoubleWord.md)[]
 
-Defined in: [src/simulator/Assembler.ts:532](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/Assembler.ts#L532)
+Defined in: [src/simulator/Assembler.ts:532](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/Assembler.ts#L532)
 
 This method compiles a given computer program written in assembly language into its binary representation.
 The instructions will be encoded using the opcodes defined in the language definition.

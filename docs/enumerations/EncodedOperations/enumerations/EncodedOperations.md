@@ -6,7 +6,7 @@
 
 # Enumeration: EncodedOperations
 
-Defined in: [src/enumerations/EncodedOperations.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L5)
+Defined in: [src/enumerations/EncodedOperations.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L5)
 
 An enum representing the available operations and their binary codes.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **ADC**: `"0000001"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L7)
+Defined in: [src/enumerations/EncodedOperations.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L7)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:7](https://github.com/Program
 
 > **ADD**: `"0000000"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L6)
+Defined in: [src/enumerations/EncodedOperations.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L6)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:6](https://github.com/Program
 
 > **AND**: `"0011101"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:35](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L35)
+Defined in: [src/enumerations/EncodedOperations.ts:35](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L35)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:35](https://github.com/Progra
 
 > **CALL**: `"0100001"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:39](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L39)
+Defined in: [src/enumerations/EncodedOperations.ts:39](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L39)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:39](https://github.com/Progra
 
 > **CLC**: `"0010110"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:28](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L28)
+Defined in: [src/enumerations/EncodedOperations.ts:28](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L28)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:28](https://github.com/Progra
 
 > **CLI**: `"0011001"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:31](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L31)
+Defined in: [src/enumerations/EncodedOperations.ts:31](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L31)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:31](https://github.com/Progra
 
 > **CMC**: `"0010111"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L29)
+Defined in: [src/enumerations/EncodedOperations.ts:29](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L29)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:29](https://github.com/Progra
 
 > **CMP**: `"0000111"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L13)
+Defined in: [src/enumerations/EncodedOperations.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L13)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:13](https://github.com/Progra
 
 > **DIV**: `"0000101"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L11)
+Defined in: [src/enumerations/EncodedOperations.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L11)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:11](https://github.com/Progra
 
 > **INT**: `"0011011"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L33)
+Defined in: [src/enumerations/EncodedOperations.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L33)
 
 ***
 
@@ -100,7 +100,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:33](https://github.com/Progra
 
 > **IRET**: `"0011100"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:34](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L34)
+Defined in: [src/enumerations/EncodedOperations.ts:34](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L34)
 
 ***
 
@@ -108,7 +108,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:34](https://github.com/Progra
 
 > **JE**: `"0001011"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L17)
+Defined in: [src/enumerations/EncodedOperations.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L17)
 
 ***
 
@@ -116,7 +116,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:17](https://github.com/Progra
 
 > **JG**: `"0001110"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:20](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L20)
+Defined in: [src/enumerations/EncodedOperations.ts:20](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L20)
 
 ***
 
@@ -124,7 +124,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:20](https://github.com/Progra
 
 > **JGE**: `"0001111"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L21)
+Defined in: [src/enumerations/EncodedOperations.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L21)
 
 ***
 
@@ -132,7 +132,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:21](https://github.com/Progra
 
 > **JL**: `"0010000"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L22)
+Defined in: [src/enumerations/EncodedOperations.ts:22](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L22)
 
 ***
 
@@ -140,7 +140,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:22](https://github.com/Progra
 
 > **JLE**: `"0010001"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L23)
+Defined in: [src/enumerations/EncodedOperations.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L23)
 
 ***
 
@@ -148,7 +148,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:23](https://github.com/Progra
 
 > **JMP**: `"0001001"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L15)
+Defined in: [src/enumerations/EncodedOperations.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L15)
 
 ***
 
@@ -156,7 +156,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:15](https://github.com/Progra
 
 > **JNE**: `"0001101"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L19)
+Defined in: [src/enumerations/EncodedOperations.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L19)
 
 ***
 
@@ -164,7 +164,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:19](https://github.com/Progra
 
 > **JNZ**: `"0001100"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L18)
+Defined in: [src/enumerations/EncodedOperations.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L18)
 
 ***
 
@@ -172,7 +172,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:18](https://github.com/Progra
 
 > **JZ**: `"0001010"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:16](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L16)
+Defined in: [src/enumerations/EncodedOperations.ts:16](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L16)
 
 ***
 
@@ -180,7 +180,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:16](https://github.com/Progra
 
 > **LEA**: `"0010011"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L25)
+Defined in: [src/enumerations/EncodedOperations.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L25)
 
 ***
 
@@ -188,7 +188,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:25](https://github.com/Progra
 
 > **MOV**: `"0010010"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L24)
+Defined in: [src/enumerations/EncodedOperations.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L24)
 
 ***
 
@@ -196,7 +196,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:24](https://github.com/Progra
 
 > **MUL**: `"0000100"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L10)
+Defined in: [src/enumerations/EncodedOperations.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L10)
 
 ***
 
@@ -204,7 +204,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:10](https://github.com/Progra
 
 > **NEG**: `"0000110"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L12)
+Defined in: [src/enumerations/EncodedOperations.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L12)
 
 ***
 
@@ -212,7 +212,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:12](https://github.com/Progra
 
 > **NOP**: `"1111111"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L45)
+Defined in: [src/enumerations/EncodedOperations.ts:45](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L45)
 
 ***
 
@@ -220,7 +220,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:45](https://github.com/Progra
 
 > **NOT**: `"0100000"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L38)
+Defined in: [src/enumerations/EncodedOperations.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L38)
 
 ***
 
@@ -228,7 +228,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:38](https://github.com/Progra
 
 > **OR**: `"0011110"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:36](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L36)
+Defined in: [src/enumerations/EncodedOperations.ts:36](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L36)
 
 ***
 
@@ -236,7 +236,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:36](https://github.com/Progra
 
 > **POP**: `"0100011"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:41](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L41)
+Defined in: [src/enumerations/EncodedOperations.ts:41](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L41)
 
 ***
 
@@ -244,7 +244,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:41](https://github.com/Progra
 
 > **POPF**: `"0010100"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:26](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L26)
+Defined in: [src/enumerations/EncodedOperations.ts:26](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L26)
 
 ***
 
@@ -252,7 +252,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:26](https://github.com/Progra
 
 > **PUSH**: `"0100100"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:42](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L42)
+Defined in: [src/enumerations/EncodedOperations.ts:42](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L42)
 
 ***
 
@@ -260,7 +260,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:42](https://github.com/Progra
 
 > **PUSHF**: `"0010101"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:27](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L27)
+Defined in: [src/enumerations/EncodedOperations.ts:27](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L27)
 
 ***
 
@@ -268,7 +268,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:27](https://github.com/Progra
 
 > **RET**: `"0100010"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:40](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L40)
+Defined in: [src/enumerations/EncodedOperations.ts:40](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L40)
 
 ***
 
@@ -276,7 +276,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:40](https://github.com/Progra
 
 > **SBB**: `"0000011"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L9)
+Defined in: [src/enumerations/EncodedOperations.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L9)
 
 ***
 
@@ -284,7 +284,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:9](https://github.com/Program
 
 > **STC**: `"0011000"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L30)
+Defined in: [src/enumerations/EncodedOperations.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L30)
 
 ***
 
@@ -292,7 +292,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:30](https://github.com/Progra
 
 > **STI**: `"0011010"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L32)
+Defined in: [src/enumerations/EncodedOperations.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L32)
 
 ***
 
@@ -300,7 +300,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:32](https://github.com/Progra
 
 > **SUB**: `"0000010"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L8)
+Defined in: [src/enumerations/EncodedOperations.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L8)
 
 ***
 
@@ -308,7 +308,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:8](https://github.com/Program
 
 > **SYSENTER**: `"0100101"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L43)
+Defined in: [src/enumerations/EncodedOperations.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L43)
 
 ***
 
@@ -316,7 +316,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:43](https://github.com/Progra
 
 > **SYSEXIT**: `"0100110"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L44)
+Defined in: [src/enumerations/EncodedOperations.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L44)
 
 ***
 
@@ -324,7 +324,7 @@ Defined in: [src/enumerations/EncodedOperations.ts:44](https://github.com/Progra
 
 > **TEST**: `"0001000"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:14](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L14)
+Defined in: [src/enumerations/EncodedOperations.ts:14](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L14)
 
 ***
 
@@ -332,4 +332,4 @@ Defined in: [src/enumerations/EncodedOperations.ts:14](https://github.com/Progra
 
 > **XOR**: `"0011111"`
 
-Defined in: [src/enumerations/EncodedOperations.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedOperations.ts#L37)
+Defined in: [src/enumerations/EncodedOperations.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/enumerations/EncodedOperations.ts#L37)

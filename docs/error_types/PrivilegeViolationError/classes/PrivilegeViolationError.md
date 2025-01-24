@@ -6,7 +6,7 @@
 
 # Class: PrivilegeViolationError
 
-Defined in: [src/error\_types/PrivilegeViolationError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/PrivilegeViolationError.ts#L5)
+Defined in: [src/error\_types/PrivilegeViolationError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/PrivilegeViolationError.ts#L5)
 
 Error which gets thrown whenever a process tries something, which exceeds its access rights.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new PrivilegeViolationError**(`description`): [`PrivilegeViolationError`](PrivilegeViolationError.md)
 
-Defined in: [src/error\_types/PrivilegeViolationError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/PrivilegeViolationError.ts#L10)
+Defined in: [src/error\_types/PrivilegeViolationError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/error_types/PrivilegeViolationError.ts#L10)
 
 Constructs a new instance with the given message.
 

@@ -6,7 +6,7 @@
 
 # Class: TranslationLookasideBuffer
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L4)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L4)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:4](ht
 
 > **new TranslationLookasideBuffer**(`capacity`): [`TranslationLookasideBuffer`](TranslationLookasideBuffer.md)
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L8)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L8)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:8](ht
 
 > **get** **data**(): \[`number`, \[[`VirtualAddress`](../../../../binary_types/VirtualAddress/classes/VirtualAddress.md), [`PageTableEntry`](../../../../binary_types/PageTableEntry/classes/PageTableEntry.md)\]\][]
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L25)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L25)
 
 ##### Returns
 
@@ -46,7 +46,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:25](h
 
 > **get**(`virtualAddress`): `undefined` \| [`PageTableEntry`](../../../../binary_types/PageTableEntry/classes/PageTableEntry.md)
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:61](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L61)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:61](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L61)
 
 #### Parameters
 
@@ -64,7 +64,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:61](h
 
 > **has**(`virtualAddress`): `boolean`
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:51](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L51)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:51](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L51)
 
 #### Parameters
 
@@ -82,7 +82,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:51](h
 
 > **insert**(`item`): `void`
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L13)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L13)
 
 #### Parameters
 
@@ -100,7 +100,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:13](h
 
 > **isEmpty**(): `boolean`
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:47](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L47)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:47](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L47)
 
 #### Returns
 
@@ -112,7 +112,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:47](h
 
 > **peek**(): `undefined` \| \[`number`, \[[`VirtualAddress`](../../../../binary_types/VirtualAddress/classes/VirtualAddress.md), [`PageTableEntry`](../../../../binary_types/PageTableEntry/classes/PageTableEntry.md)\]\]
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L33)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:33](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L33)
 
 #### Returns
 
@@ -124,7 +124,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:33](h
 
 > **pop**(): `undefined` \| \[`number`, \[[`VirtualAddress`](../../../../binary_types/VirtualAddress/classes/VirtualAddress.md), [`PageTableEntry`](../../../../binary_types/PageTableEntry/classes/PageTableEntry.md)\]\]
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:39](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L39)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:39](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L39)
 
 #### Returns
 
@@ -136,7 +136,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:39](h
 
 > **size**(): `number`
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L43)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:43](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L43)
 
 #### Returns
 
@@ -148,7 +148,7 @@ Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:43](h
 
 > **toString**(): `string`
 
-Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:73](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/TranslationLookasideBuffer.ts#L73)
+Defined in: [src/simulator/functional\_units/TranslationLookasideBuffer.ts:73](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/TranslationLookasideBuffer.ts#L73)
 
 #### Returns
 

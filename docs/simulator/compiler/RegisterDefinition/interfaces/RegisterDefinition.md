@@ -6,7 +6,7 @@
 
 # Interface: RegisterDefinition
 
-Defined in: [src/simulator/compiler/RegisterDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/RegisterDefinition.ts#L1)
+Defined in: [src/simulator/compiler/RegisterDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/compiler/RegisterDefinition.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/compiler/RegisterDefinition.ts:1](https://github.com/
 
 > **aliases**: `string`[]
 
-Defined in: [src/simulator/compiler/RegisterDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/RegisterDefinition.ts#L3)
+Defined in: [src/simulator/compiler/RegisterDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/compiler/RegisterDefinition.ts#L3)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/simulator/compiler/RegisterDefinition.ts:3](https://github.com/
 
 > **code**: `string`
 
-Defined in: [src/simulator/compiler/RegisterDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/RegisterDefinition.ts#L4)
+Defined in: [src/simulator/compiler/RegisterDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/compiler/RegisterDefinition.ts#L4)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/simulator/compiler/RegisterDefinition.ts:4](https://github.com/
 
 > **name**: `string`
 
-Defined in: [src/simulator/compiler/RegisterDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/RegisterDefinition.ts#L2)
+Defined in: [src/simulator/compiler/RegisterDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/compiler/RegisterDefinition.ts#L2)

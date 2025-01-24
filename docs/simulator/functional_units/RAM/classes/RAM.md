@@ -6,7 +6,7 @@
 
 # Class: RAM
 
-Defined in: [src/simulator/functional\_units/RAM.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L7)
+Defined in: [src/simulator/functional\_units/RAM.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L7)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/functional\_units/RAM.ts:7](https://github.com/Progra
 
 > **new RAM**(`capacity`): [`RAM`](RAM.md)
 
-Defined in: [src/simulator/functional\_units/RAM.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L17)
+Defined in: [src/simulator/functional\_units/RAM.ts:17](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L17)
 
 This method constructs an instance of the RAM class.
 
@@ -36,7 +36,7 @@ The max. capacity of this instance of the RAM class.
 
 > `readonly` **capacity**: `number`
 
-Defined in: [src/simulator/functional\_units/RAM.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L8)
+Defined in: [src/simulator/functional\_units/RAM.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L8)
 
 ## Accessors
 
@@ -46,7 +46,7 @@ Defined in: [src/simulator/functional\_units/RAM.ts:8](https://github.com/Progra
 
 > **get** **cells**(): `Map`\<`string`, [`Byte`](../../../../binary_types/Byte/classes/Byte.md)\>
 
-Defined in: [src/simulator/functional\_units/RAM.ts:146](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L146)
+Defined in: [src/simulator/functional\_units/RAM.ts:146](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L146)
 
 A public accessable getter for the memory cells.
 This method will be used by the GUI in order to
@@ -64,7 +64,7 @@ The current content of this RAM instance.
 
 > **clearByte**(`physicalAddress`): `void`
 
-Defined in: [src/simulator/functional\_units/RAM.ts:118](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L118)
+Defined in: [src/simulator/functional\_units/RAM.ts:118](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L118)
 
 This method clears all bits at the specified location and removes the entry with the given physical memory
 address from the cells map. Both is done only if there is an entry in cells map.
@@ -91,7 +91,7 @@ AddressOutOfRangeError - If the physical memory address is out of range.
 
 > **readByteFrom**(`physicalAddress`): [`Byte`](../../../../binary_types/Byte/classes/Byte.md)
 
-Defined in: [src/simulator/functional\_units/RAM.ts:100](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L100)
+Defined in: [src/simulator/functional\_units/RAM.ts:100](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L100)
 
 This method tries to read a byte from the specified memory address.
 Returns a binary zero for address not conatined in the
@@ -121,7 +121,7 @@ AddressOutOfRangeError - If the physical memory address is out of range.
 
 > **readDoublewordFrom**(`physicalAddress`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/functional\_units/RAM.ts:78](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L78)
+Defined in: [src/simulator/functional\_units/RAM.ts:78](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L78)
 
 This method reads doubleword sized data from the main memory starting at the specified physical memory address.
 
@@ -149,7 +149,7 @@ AddressOutOfRangeError - If the physical memory address is out of range.
 
 > **writeByteTo**(`physicalAddress`, `data`): `void`
 
-Defined in: [src/simulator/functional\_units/RAM.ts:59](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L59)
+Defined in: [src/simulator/functional\_units/RAM.ts:59](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L59)
 
 This method writes a specified byte of data to the specified address in
 in the main memory. Throws an error, if the data exeeds a byte.
@@ -182,7 +182,7 @@ AddressOutOfRangeError - If the physical memory address is out of range.
 
 > **writeDoublewordTo**(`physicalAddress`, `doubleword`): `void`
 
-Defined in: [src/simulator/functional\_units/RAM.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/functional_units/RAM.ts#L30)
+Defined in: [src/simulator/functional\_units/RAM.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/1018f35141b4ad3f48781b12aa9e5f0ba9cc7301/src/simulator/functional_units/RAM.ts#L30)
 
 This methods writes a doubleword (32-bit- or 4-byte-) value to memory to the specified memory address.
 
