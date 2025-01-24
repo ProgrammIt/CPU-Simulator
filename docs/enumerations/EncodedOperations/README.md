@@ -1,0 +1,11 @@
+[**ihme-core-x1-simulator**](../../README.md)
+
+***
+
+[ihme-core-x1-simulator](../../modules.md) / enumerations/EncodedOperations
+
+# enumerations/EncodedOperations
+
+## Enumerations
+
+- [EncodedOperations](enumerations/EncodedOperations.md)

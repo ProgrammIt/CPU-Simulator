@@ -3,5 +3,25 @@
     "entryPoints": [
         "./src/main.ts"
     ],
-    "out": "docs/developers/modules"
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "out": "./docs/developers/modules",
+    "highlightLanguages": [
+        "bash",
+        "console",
+        "css",
+        "html",
+        "javascript",
+        "json",
+        "jsonc",
+        "json5",
+        "tsx",
+        "typescript"
+    ],
+    "githubPages": false,
+    "cleanOutputDir": true,
+    "theme": "default",
+    "darkHighlightTheme": "dark-plus",
+    "lightHighlightTheme": "light-plus"
 }
