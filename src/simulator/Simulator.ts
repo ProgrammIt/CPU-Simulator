@@ -151,8 +151,8 @@ export class Simulator {
         // Enable real mode and disable memory virtualization.
         this.core.mmu.disableMemoryVirtualization();
         // Compile and write interrupt handlers.
-        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/mount_page_frame.asm", "utf-8"));
-        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync("./assets/programs/os/interrupt_handlers/unmount_page_frame.asm", "utf-8"));
+        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync("./assembly/os/interrupt_handler/mount_page_frame.asm", "utf-8"));
+        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync("./assembly/os/interrupt_handler/unmount_page_frame.asm", "utf-8"));
         // -> TODO: Compile other interrupt handlers
         // Load interrupt handlers into kernel space.
         const baseAddressesInterruptHandlers: Array<PhysicalAddress> = this.loadInterruptHandlers(
