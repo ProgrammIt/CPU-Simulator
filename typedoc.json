@@ -6,7 +6,7 @@
     "plugin": [
         "typedoc-plugin-markdown"
     ],
-    "out": "./docs/developers/modules",
+    "out": "./docs/developers",
     "highlightLanguages": [
         "bash",
         "console",
