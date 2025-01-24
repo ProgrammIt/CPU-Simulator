@@ -8,7 +8,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "docs": "typedoc --exclude \"**/?(*.)+(spec|test).+(ts|tsx|js)\" --entryPointStrategy Expand src"
+    "docs": "typedoc --entryPointStrategy Expand src"
   },
   "jest": {
     "roots": [

@@ -19,9 +19,9 @@
         "tsx",
         "typescript"
     ],
-    "githubPages": false,
-    "cleanOutputDir": true,
+    "cleanOutputDir": false,
     "theme": "default",
     "darkHighlightTheme": "dark-plus",
-    "lightHighlightTheme": "light-plus"
+    "lightHighlightTheme": "light-plus",
+    "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"]
 }
