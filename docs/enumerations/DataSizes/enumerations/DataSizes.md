@@ -6,7 +6,7 @@
 
 # Enumeration: DataSizes
 
-Defined in: [src/enumerations/DataSizes.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/DataSizes.ts#L1)
+Defined in: [src/enumerations/DataSizes.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/DataSizes.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [src/enumerations/DataSizes.ts:1](https://github.com/ProgrammIt/CPU-
 
 > **BYTE**: `8`
 
-Defined in: [src/enumerations/DataSizes.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/DataSizes.ts#L2)
+Defined in: [src/enumerations/DataSizes.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/DataSizes.ts#L2)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/enumerations/DataSizes.ts:2](https://github.com/ProgrammIt/CPU-
 
 > **DOUBLEWORD**: `32`
 
-Defined in: [src/enumerations/DataSizes.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/DataSizes.ts#L4)
+Defined in: [src/enumerations/DataSizes.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/DataSizes.ts#L4)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/enumerations/DataSizes.ts:4](https://github.com/ProgrammIt/CPU-
 
 > **QUADWORD**: `64`
 
-Defined in: [src/enumerations/DataSizes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/DataSizes.ts#L5)
+Defined in: [src/enumerations/DataSizes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/DataSizes.ts#L5)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/enumerations/DataSizes.ts:5](https://github.com/ProgrammIt/CPU-
 
 > **WORD**: `16`
 
-Defined in: [src/enumerations/DataSizes.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/DataSizes.ts#L3)
+Defined in: [src/enumerations/DataSizes.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/DataSizes.ts#L3)

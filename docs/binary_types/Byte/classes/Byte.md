@@ -6,7 +6,7 @@
 
 # Class: Byte
 
-Defined in: [src/binary\_types/Byte.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L9)
+Defined in: [src/binary\_types/Byte.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L9)
 
 This class represents a byte sized binary value.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new Byte**(`value`): [`Byte`](Byte.md)
 
-Defined in: [src/binary\_types/Byte.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L19)
+Defined in: [src/binary\_types/Byte.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L19)
 
 Instantiates a new object.
 
@@ -50,7 +50,7 @@ The initial value of the byte.
 
 > `protected` **\_value**: [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L12)
+Defined in: [src/binary\_types/BinaryValue.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L12)
 
 An array of bits, representing a binary value.
 
@@ -64,7 +64,7 @@ An array of bits, representing a binary value.
 
 > `readonly` `static` **MAX\_NEGATIVE\_NUMBER\_DEC**: `number` = `-128`
 
-Defined in: [src/binary\_types/Byte.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L11)
+Defined in: [src/binary\_types/Byte.ts:11](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L11)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/binary\_types/Byte.ts:11](https://github.com/ProgrammIt/CPU-Sim
 
 > `readonly` `static` **MAX\_POSITIVE\_NUMBER\_DEC**: `number` = `127`
 
-Defined in: [src/binary\_types/Byte.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L10)
+Defined in: [src/binary\_types/Byte.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L10)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [src/binary\_types/Byte.ts:10](https://github.com/ProgrammIt/CPU-Sim
 
 > `readonly` `static` **NUMBER\_OF\_BITS\_DEC**: `number` = `8`
 
-Defined in: [src/binary\_types/Byte.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L12)
+Defined in: [src/binary\_types/Byte.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L12)
 
 ## Accessors
 
@@ -90,7 +90,7 @@ Defined in: [src/binary\_types/Byte.ts:12](https://github.com/ProgrammIt/CPU-Sim
 
 > **get** **value**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/Byte.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L32)
+Defined in: [src/binary\_types/Byte.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L32)
 
 Accessor for reading the binary value.
 
@@ -102,7 +102,7 @@ Accessor for reading the binary value.
 
 > **set** **value**(`newValue`): `void`
 
-Defined in: [src/binary\_types/Byte.ts:41](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L41)
+Defined in: [src/binary\_types/Byte.ts:41](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L41)
 
 Accessor for setting the binary value.
 
@@ -128,7 +128,7 @@ The new value.
 
 > **equal**(`byte`): `boolean`
 
-Defined in: [src/binary\_types/Byte.ts:54](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L54)
+Defined in: [src/binary\_types/Byte.ts:54](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L54)
 
 For comparison, both binary values are converted to strings.
 Conversion presarves the order of items, which is important for the comparison.
@@ -153,7 +153,7 @@ True, when both binary values are identical, false otherwise.
 
 > **getLeastSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L44)
+Defined in: [src/binary\_types/BinaryValue.ts:44](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L44)
 
 This method returns the least significant bit of this value.
 
@@ -173,7 +173,7 @@ The least significant bit.
 
 > **getLeastSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L84)
+Defined in: [src/binary\_types/BinaryValue.ts:84](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L84)
 
 This method returns the last bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -198,7 +198,7 @@ The number of bits returned depends on the argument passed.
 
 > **getLeastSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L60)
+Defined in: [src/binary\_types/BinaryValue.ts:60](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L60)
 
 This method returns the least significant byte of this value.
 
@@ -218,7 +218,7 @@ The least significant byte.
 
 > **getMostSignificantBit**(): [`Bit`](../../Bit/type-aliases/Bit.md)
 
-Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L52)
+Defined in: [src/binary\_types/BinaryValue.ts:52](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L52)
 
 This method returns the most significant bit of this value.
 
@@ -238,7 +238,7 @@ The most significant bit.
 
 > **getMostSignificantBits**(`nbrOfBits`): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L97)
+Defined in: [src/binary\_types/BinaryValue.ts:97](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L97)
 
 This method returns the first bits of the binary value.
 The number of bits returned depends on the argument passed.
@@ -263,7 +263,7 @@ The number of bits returned depends on the argument passed.
 
 > **getMostSignificantByte**(): [`Bit`](../../Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/BinaryValue.ts#L71)
+Defined in: [src/binary\_types/BinaryValue.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/BinaryValue.ts#L71)
 
 This method returns the least significant byte of this value.
 
@@ -283,7 +283,7 @@ The least significant byte.
 
 > **toString**(): `string`
 
-Defined in: [src/binary\_types/Byte.ts:62](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L62)
+Defined in: [src/binary\_types/Byte.ts:62](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L62)
 
 Converts the binary value into a string representation.
 
@@ -297,7 +297,7 @@ Converts the binary value into a string representation.
 
 > `static` **fromInteger**(`integer`): [`Byte`](Byte.md)
 
-Defined in: [src/binary\_types/Byte.ts:77](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/Byte.ts#L77)
+Defined in: [src/binary\_types/Byte.ts:77](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/binary_types/Byte.ts#L77)
 
 This method creates an instance from the given number. Throws an error, if the given number is not an integer.
 It uses the second parameter as an indicator whether to convert the integer value into a signed or unsigned binary value.

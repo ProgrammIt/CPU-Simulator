@@ -6,7 +6,7 @@
 
 # Class: CPUCore
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L38)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:38](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L38)
 
 This class represents a CPU core which is capable of executing instructions.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new CPUCore**(`mainMemory`, `processingWidth`): [`CPUCore`](CPUCore.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:176](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L176)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:176](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L176)
 
 Constructs an instance of a CPU core.
 
@@ -48,7 +48,7 @@ The maximum number of bits that can be processed in one cycle. Defaults to 32 bi
 
 > `readonly` **alu**: [`ArithmeticLogicUnit`](../../ArithmeticLogicUnit/classes/ArithmeticLogicUnit.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:142](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L142)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:142](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L142)
 
 An exeuction unit which is capable of performing logical and arithmetical operations.
 
@@ -58,7 +58,7 @@ An exeuction unit which is capable of performing logical and arithmetical operat
 
 > `readonly` **eax**: [`GeneralPurposeRegister`](../../../functional_units/GeneralPurposeRegister/classes/GeneralPurposeRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:65](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L65)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:65](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L65)
 
 First general purpose register: can be used for storing all kinds of "datatypes".
 
@@ -68,7 +68,7 @@ First general purpose register: can be used for storing all kinds of "datatypes"
 
 > `readonly` **ebx**: [`GeneralPurposeRegister`](../../../functional_units/GeneralPurposeRegister/classes/GeneralPurposeRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L71)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:71](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L71)
 
 Second general purpose register: can be used for storing all kinds of "datatypes".
 
@@ -78,7 +78,7 @@ Second general purpose register: can be used for storing all kinds of "datatypes
 
 > `readonly` **edx**: [`GeneralPurposeRegister`](../../../functional_units/GeneralPurposeRegister/classes/GeneralPurposeRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:77](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L77)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:77](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L77)
 
 Third general purpose register: can be used for storing all kinds of "datatypes".
 
@@ -88,7 +88,7 @@ Third general purpose register: can be used for storing all kinds of "datatypes"
 
 > `readonly` **eflags**: [`EFLAGS`](../../../functional_units/EFLAGS/classes/EFLAGS.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L89)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:89](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L89)
 
 Status register: stores some important status information.
 
@@ -98,7 +98,7 @@ Status register: stores some important status information.
 
 > `readonly` **eip**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:83](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L83)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:83](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L83)
 
 Instruction pointer: stores the virtual/physical address of the currently executed instruction.
 
@@ -108,7 +108,7 @@ Instruction pointer: stores the virtual/physical address of the currently execut
 
 > `readonly` **eir**: [`InstructionRegister`](../../../functional_units/InstructionRegister/classes/InstructionRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:95](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L95)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:95](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L95)
 
 Instruction register: contains the currently executed instruction.
 
@@ -118,7 +118,7 @@ Instruction register: contains the currently executed instruction.
 
 > `readonly` **esp**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:113](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L113)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:113](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L113)
 
 Stack Pointer: contains the currently lowes address of the stack. Always points to its end.
 
@@ -128,7 +128,7 @@ Stack Pointer: contains the currently lowes address of the stack. Always points 
 
 > **gptp**: `null` \| [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:124](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L124)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:124](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L124)
 
 Guest Page Table Pointer: contains the start address of a structure containing the Page Table of the guest OS.
 
@@ -138,7 +138,7 @@ Guest Page Table Pointer: contains the start address of a structure containing t
 
 > `readonly` **itp**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:119](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L119)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:119](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L119)
 
 Interrupt Table Pointer: containts the start address of a structure containing start addresses of interrupt handlers.
 
@@ -148,7 +148,7 @@ Interrupt Table Pointer: containts the start address of a structure containing s
 
 > `readonly` **mmu**: [`MemoryManagementUnit`](../../MemoryManagementUnit/classes/MemoryManagementUnit.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:136](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L136)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:136](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L136)
 
 An execution unit which converts virtual memory address to phyiscal memory address if memory virtualization is enbaled.
 
@@ -158,7 +158,7 @@ An execution unit which converts virtual memory address to phyiscal memory addre
 
 > `readonly` **nptp**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:101](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L101)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:101](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L101)
 
 Nested Page Table Pointer: contains the start address of a structure containing the Page Table of the host OS.
 
@@ -168,7 +168,7 @@ Nested Page Table Pointer: contains the start address of a structure containing 
 
 > `readonly` **ptp**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:130](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L130)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:130](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L130)
 
 Page Table Pointer: contains the tart address of a structure containing the Page Table of the OS, when virtualization is disabled.
 
@@ -178,7 +178,7 @@ Page Table Pointer: contains the tart address of a structure containing the Page
 
 > `readonly` **vmtpr**: [`PointerRegister`](../../../functional_units/PointerRegister/classes/PointerRegister.md)
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:107](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L107)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:107](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L107)
 
 Virtual Machine Pointer: containts the start address of a structure containing an Virtual Machine Control Block (VMCB).
 
@@ -188,7 +188,7 @@ Virtual Machine Pointer: containts the start address of a structure containing a
 
 > **cycle**(): `boolean`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:230](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L230)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:230](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L230)
 
 This method performs a single instruction cycle.
 
@@ -204,7 +204,7 @@ True, if the cycle was performed normally and false, if the cycle could not be p
 
 > **disableVirtualization**(): `void`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:212](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L212)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:212](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L212)
 
 This method disables virtualization for this core.
 It disables the GPTP and enables the PTP register.
@@ -219,7 +219,7 @@ It disables the GPTP and enables the PTP register.
 
 > **enableVirtualization**(): `void`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:202](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L202)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:202](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L202)
 
 This method enables virtualization for this core.
 It disables the PTP and enables the GPTP register.
@@ -234,7 +234,7 @@ It disables the PTP and enables the GPTP register.
 
 > **int**(`target`): `void`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:2043](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L2043)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:2043](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L2043)
 
 This method triggers a software interrupt by calling an interrupt handler. The operating system stores the 
 interrupt handlers in a list located in a restricted area of the main memory. This erea is only accessable in kernel mode. 
@@ -267,7 +267,7 @@ If the ESP reached the lowest possible address (top) of the STACK segment.
 
 > **iret**(): `void`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:2088](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L2088)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:2088](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L2088)
 
 This method returns from an interrupt handler triggered by a software interrupt. It reads the return address from the STACK
 and transfers control back to the interrupted process. Additionally, the EFLAGS gets restored from the STACK, the interrupt flag
@@ -287,7 +287,7 @@ If the CPU is not in kernel mode when this mehtod is called.
 
 > **virtualizationEnabled**(): `boolean`
 
-Defined in: [src/simulator/execution\_units/CPUCore.ts:222](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/CPUCore.ts#L222)
+Defined in: [src/simulator/execution\_units/CPUCore.ts:222](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/execution_units/CPUCore.ts#L222)
 
 This method checks whether virtualization is enabled for this core.
 

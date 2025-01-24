@@ -6,7 +6,7 @@
 
 # Enumeration: EncodedAddressingModes
 
-Defined in: [src/enumerations/EncodedAdressingModes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedAdressingModes.ts#L5)
+Defined in: [src/enumerations/EncodedAdressingModes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedAdressingModes.ts#L5)
 
 An enum representing the available addressing modes for operands and their binary codes.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **DIRECT**: `"10"`
 
-Defined in: [src/enumerations/EncodedAdressingModes.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedAdressingModes.ts#L6)
+Defined in: [src/enumerations/EncodedAdressingModes.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedAdressingModes.ts#L6)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [src/enumerations/EncodedAdressingModes.ts:6](https://github.com/Pro
 
 > **INDIRECT**: `"11"`
 
-Defined in: [src/enumerations/EncodedAdressingModes.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedAdressingModes.ts#L7)
+Defined in: [src/enumerations/EncodedAdressingModes.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/enumerations/EncodedAdressingModes.ts#L7)

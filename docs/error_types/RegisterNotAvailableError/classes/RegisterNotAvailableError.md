@@ -6,7 +6,7 @@
 
 # Class: RegisterNotAvailableError
 
-Defined in: [src/error\_types/RegisterNotAvailableError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/RegisterNotAvailableError.ts#L5)
+Defined in: [src/error\_types/RegisterNotAvailableError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/RegisterNotAvailableError.ts#L5)
 
 Error which gets thrown whenever a process tries to read or write an unavailable register.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new RegisterNotAvailableError**(`description`): [`RegisterNotAvailableError`](RegisterNotAvailableError.md)
 
-Defined in: [src/error\_types/RegisterNotAvailableError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/RegisterNotAvailableError.ts#L10)
+Defined in: [src/error\_types/RegisterNotAvailableError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/error_types/RegisterNotAvailableError.ts#L10)
 
 Constructs a new instance with the given message.
 

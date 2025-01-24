@@ -6,7 +6,7 @@
 
 # Interface: InstructionDefinition
 
-Defined in: [src/simulator/compiler/OperationDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperationDefinition.ts#L1)
+Defined in: [src/simulator/compiler/OperationDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperationDefinition.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/compiler/OperationDefinition.ts:1](https://github.com
 
 > **mnemonic**: `string`
 
-Defined in: [src/simulator/compiler/OperationDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperationDefinition.ts#L2)
+Defined in: [src/simulator/compiler/OperationDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperationDefinition.ts#L2)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/simulator/compiler/OperationDefinition.ts:2](https://github.com
 
 > **opcode**: `string`
 
-Defined in: [src/simulator/compiler/OperationDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperationDefinition.ts#L3)
+Defined in: [src/simulator/compiler/OperationDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperationDefinition.ts#L3)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/simulator/compiler/OperationDefinition.ts:3](https://github.com
 
 > **regexes**: \[\{ `name`: `string`; `regex`: `string`; \}\]
 
-Defined in: [src/simulator/compiler/OperationDefinition.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperationDefinition.ts#L5)
+Defined in: [src/simulator/compiler/OperationDefinition.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperationDefinition.ts#L5)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/simulator/compiler/OperationDefinition.ts:5](https://github.com
 
 > **type**: `string`
 
-Defined in: [src/simulator/compiler/OperationDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperationDefinition.ts#L4)
+Defined in: [src/simulator/compiler/OperationDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperationDefinition.ts#L4)

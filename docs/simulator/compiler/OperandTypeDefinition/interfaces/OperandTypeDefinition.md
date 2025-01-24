@@ -6,7 +6,7 @@
 
 # Interface: OperandTypeDefinition
 
-Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperandTypeDefinition.ts#L1)
+Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperandTypeDefinition.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:1](https://github.c
 
 > **code**: `string`
 
-Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperandTypeDefinition.ts#L3)
+Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:3](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperandTypeDefinition.ts#L3)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:3](https://github.c
 
 > **name**: `string`
 
-Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperandTypeDefinition.ts#L2)
+Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperandTypeDefinition.ts#L2)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:2](https://github.c
 
 > **regexes**: `null` \| \[\{ `name`: `string`; `regex`: `string`; \}\]
 
-Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/OperandTypeDefinition.ts#L4)
+Defined in: [src/simulator/compiler/OperandTypeDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/96764be0553f95d688bfe5600c9ae9aea8701845/src/simulator/compiler/OperandTypeDefinition.ts#L4)
