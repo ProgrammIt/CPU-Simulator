@@ -180,7 +180,7 @@ app.whenReady().then(() => {
 		webPreferences: {
       		preload: path.join(__dirname, 'preload.js')
     	},
-		icon: "./assets/img/icons/icon.png"
+		icon: "./assets/img/icons/app/icon.png"
   	});
 
 	const simulator = Simulator.getInstance(Math.pow(2, 32));    
