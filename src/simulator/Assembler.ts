@@ -17,7 +17,7 @@ export class Assembler {
 	 * @param processingWidth The processing width of the computer system the assembler is used for.
 	 * @param pathToLanguageDefinition The path to the language definition file of the assembly language used by this assembler.
 	 */
-  	public constructor(processingWidth: DataSizes, pathToLanguageDefinition: string = "./assets/settings/language_definition.json") {
+  	public constructor(processingWidth: DataSizes, pathToLanguageDefinition: string = "./settings/language_definition.json") {
 		this.processingWidth = processingWidth;
 		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
 		this.translations = new Map<string, DoubleWord[]>();
