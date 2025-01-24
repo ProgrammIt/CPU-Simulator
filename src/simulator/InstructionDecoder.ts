@@ -1,5 +1,5 @@
 import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
-import { Bit } from "../types/Bit";
+import { Bit } from "../binary_types/Bit";
 import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
 import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 import { EncodedOperations } from "../enumerations/EncodedOperations";

@@ -1,18 +1,18 @@
 import { Assembler } from "./Assembler";
 import { CPUCore } from "./execution_units/CPUCore";
 import { RAM } from "./functional_units/RAM";
-import { DoubleWord } from "../types/DoubleWord";
-import { PhysicalAddress } from "../types/PhysicalAddress";
-import { VirtualAddress } from "../types/VirtualAddress";
-import { Bit } from "../types/Bit";
+import { DoubleWord } from "../binary_types/DoubleWord";
+import { PhysicalAddress } from "../binary_types/PhysicalAddress";
+import { VirtualAddress } from "../binary_types/VirtualAddress";
+import { Bit } from "../binary_types/Bit";
 import { MemoryManagementUnit } from "./execution_units/MemoryManagementUnit";
 import { DataSizes } from "../enumerations/DataSizes";
 import { PageFaultError } from "../error_types/PageFaultError";
 import { readFileSync } from "fs";
-import { PageTableEntry } from "../types/PageTableEntry";
-import { InstructionOperand } from "../types/InstructionOperand";
+import { PageTableEntry } from "../binary_types/PageTableEntry";
+import { InstructionOperand } from "../binary_types/InstructionOperand";
 import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
-import { AddressSpace } from "../types/AddressSpace";
+import { AddressSpace } from "../binary_types/AddressSpace";
 import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 
 /**

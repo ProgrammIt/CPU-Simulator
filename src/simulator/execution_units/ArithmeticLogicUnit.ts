@@ -1,9 +1,9 @@
-import { BinaryValue } from "../../types/BinaryValue";
-import { Bit } from "../../types/Bit";
+import { BinaryValue } from "../../binary_types/BinaryValue";
+import { Bit } from "../../binary_types/Bit";
 import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../types/DoubleWord";
+import { DoubleWord } from "../../binary_types/DoubleWord";
 import { DivisionByZeroError } from "../../error_types/DivisionByZeroError";
-import { QuadWord } from "../../types/QuadWord";
+import { QuadWord } from "../../binary_types/QuadWord";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
 /**

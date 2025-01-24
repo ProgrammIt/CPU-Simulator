@@ -1,8 +1,8 @@
-import { Bit } from "../../types/Bit";
-import { Byte } from "../../types/Byte";
-import { DoubleWord } from "../../types/DoubleWord";
+import { Bit } from "../../binary_types/Bit";
+import { Byte } from "../../binary_types/Byte";
+import { DoubleWord } from "../../binary_types/DoubleWord";
 import { AddressOutOfRangeError } from "../../error_types/AddressOutOfRangeError";
-import { PhysicalAddress } from "../../types/PhysicalAddress";
+import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
 
 export class RAM {
     public readonly capacity: number;

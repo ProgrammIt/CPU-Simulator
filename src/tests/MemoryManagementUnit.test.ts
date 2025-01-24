@@ -3,9 +3,9 @@ import { MemoryManagementUnit } from "../simulator/execution_units/MemoryManagem
 import { EFLAGS } from "../simulator/functional_units/EFLAGS";
 import { PointerRegister } from "../simulator/functional_units/PointerRegister";
 import { RAM } from "../simulator/functional_units/RAM";
-import { Byte } from "../types/Byte";
-import { DoubleWord } from "../types/DoubleWord";
-import { VirtualAddress } from "../types/VirtualAddress";
+import { Byte } from "../binary_types/Byte";
+import { DoubleWord } from "../binary_types/DoubleWord";
+import { VirtualAddress } from "../binary_types/VirtualAddress";
 
 describe("Read from and write to main memory using MMU as proxy", () => {
     const mainMemory = new RAM(Math.pow(2, 32));

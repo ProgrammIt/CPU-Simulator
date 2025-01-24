@@ -1,6 +1,6 @@
 import { ArithmeticLogicUnit } from "./simulator/execution_units/ArithmeticLogicUnit";
 import { EFLAGS } from "./simulator/functional_units/EFLAGS";
-import { DoubleWord } from "./types/DoubleWord";
+import { DoubleWord } from "./binary_types/DoubleWord";
 
 /**
  * This method converts a negative binary value to its decimal representation.

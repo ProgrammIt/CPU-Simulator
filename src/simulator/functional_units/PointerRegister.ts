@@ -1,4 +1,4 @@
-import { Address } from "../../types/Address";
+import { Address } from "../../binary_types/Address";
 import { DataSizes } from "../../enumerations/DataSizes";
 import { Register } from "./Register";
 

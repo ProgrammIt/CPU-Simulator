@@ -1,5 +1,5 @@
-import { Bit } from "../../types/Bit";
-import { Byte } from "../../types/Byte";
+import { Bit } from "../../binary_types/Bit";
+import { Byte } from "../../binary_types/Byte";
 import { DataSizes } from "../../enumerations/DataSizes";
 import { Register } from "./Register";
 

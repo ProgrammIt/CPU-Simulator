@@ -1,5 +1,5 @@
-import { PageTableEntry } from "../../types/PageTableEntry";
-import { VirtualAddress } from "../../types/VirtualAddress";
+import { PageTableEntry } from "../../binary_types/PageTableEntry";
+import { VirtualAddress } from "../../binary_types/VirtualAddress";
 
 export class TranslationLookasideBuffer {
     private _data: [number, [VirtualAddress, PageTableEntry]][];

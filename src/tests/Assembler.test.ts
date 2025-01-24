@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { Assembler } from '../simulator/Assembler';
-import { DoubleWord } from '../types/DoubleWord';
+import { DoubleWord } from '../binary_types/DoubleWord';
 
 describe('Encode instructions', () => {
     const assembler = new Assembler(32);

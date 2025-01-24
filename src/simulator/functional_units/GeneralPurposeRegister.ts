@@ -1,5 +1,5 @@
 import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../types/DoubleWord";
+import { DoubleWord } from "../../binary_types/DoubleWord";
 import { Register } from "./Register";
 
 /**
