@@ -3,5 +3,7 @@
     "entryPoints": [
         "./src/main.ts"
     ],
-    "out": "docs"
+    "out": "docs",
+    "githubPages": false,
+    "cleanOutputDir": false
 }
