@@ -1,4 +1,7 @@
+# Ignore node_modules directory containing dependencies
 node_modules/
-dist/
-.vscode/
+# Ignore dist directory containing the production build
 out/
+# Ignore IDE specific configuration files
+.vscode/
+.idea/
