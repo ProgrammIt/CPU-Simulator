@@ -6,7 +6,7 @@
 
 # Class: AddressOutOfRangeError
 
-Defined in: [src/error\_types/AddressOutOfRangeError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/AddressOutOfRangeError.ts#L5)
+Defined in: [src/error\_types/AddressOutOfRangeError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/AddressOutOfRangeError.ts#L5)
 
 Error which gets thrown whenever a given physical memory address is out of the allowed range.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new AddressOutOfRangeError**(`description`): [`AddressOutOfRangeError`](AddressOutOfRangeError.md)
 
-Defined in: [src/error\_types/AddressOutOfRangeError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/AddressOutOfRangeError.ts#L10)
+Defined in: [src/error\_types/AddressOutOfRangeError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/AddressOutOfRangeError.ts#L10)
 
 Constructs a new instance with the given message.
 

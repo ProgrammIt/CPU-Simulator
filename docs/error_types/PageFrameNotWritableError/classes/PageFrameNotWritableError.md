@@ -6,7 +6,7 @@
 
 # Class: PageFrameNotWritableError
 
-Defined in: [src/error\_types/PageFrameNotWritableError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFrameNotWritableError.ts#L5)
+Defined in: [src/error\_types/PageFrameNotWritableError.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFrameNotWritableError.ts#L5)
 
 Error which gets thrown whenever a process tries to write a page frame markes as read-only.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new PageFrameNotWritableError**(`description`): [`PageFrameNotWritableError`](PageFrameNotWritableError.md)
 
-Defined in: [src/error\_types/PageFrameNotWritableError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFrameNotWritableError.ts#L10)
+Defined in: [src/error\_types/PageFrameNotWritableError.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFrameNotWritableError.ts#L10)
 
 Constructs a new instance with the given message.
 

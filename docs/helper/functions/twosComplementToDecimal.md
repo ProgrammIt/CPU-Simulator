@@ -8,7 +8,7 @@
 
 > **twosComplementToDecimal**(`doubleword`): `number`
 
-Defined in: [src/helper.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/helper.ts#L10)
+Defined in: [src/helper.ts:10](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/helper.ts#L10)
 
 This method converts a negative binary value to its decimal representation.
 

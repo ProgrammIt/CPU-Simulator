@@ -6,7 +6,7 @@
 
 # Class: DecodedInstruction
 
-Defined in: [src/binary\_types/DecodedInstruction.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/binary_types/DecodedInstruction.ts#L9)
+Defined in: [src/binary\_types/DecodedInstruction.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/DecodedInstruction.ts#L9)
 
 This class represents a decoded (non-binary) instruction, ready for execution.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new DecodedInstruction**(`type`, `operation`): [`DecodedInstruction`](DecodedInstruction.md)
 
-Defined in: [src/binary\_types/DecodedInstruction.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/binary_types/DecodedInstruction.ts#L30)
+Defined in: [src/binary\_types/DecodedInstruction.ts:30](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/DecodedInstruction.ts#L30)
 
 Constructs a new instance from the given arguments.
 
@@ -48,7 +48,7 @@ The instructions operation.
 
 > **operands**: `undefined` \| \[[`InstructionOperand`](../../InstructionOperand/classes/InstructionOperand.md), `undefined` \| [`InstructionOperand`](../../InstructionOperand/classes/InstructionOperand.md)\]
 
-Defined in: [src/binary\_types/DecodedInstruction.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/binary_types/DecodedInstruction.ts#L23)
+Defined in: [src/binary\_types/DecodedInstruction.ts:23](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/DecodedInstruction.ts#L23)
 
 A list of the operations operands or undefined, if no operand is present.
 
@@ -58,7 +58,7 @@ A list of the operations operands or undefined, if no operand is present.
 
 > **operation**: [`EncodedOperations`](../../../enumerations/EncodedOperations/enumerations/EncodedOperations.md)
 
-Defined in: [src/binary\_types/DecodedInstruction.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/binary_types/DecodedInstruction.ts#L18)
+Defined in: [src/binary\_types/DecodedInstruction.ts:18](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/DecodedInstruction.ts#L18)
 
 The instructions operation.
 
@@ -68,6 +68,6 @@ The instructions operation.
 
 > **type**: [`EncodedInstructionTypes`](../../../enumerations/EncodedInstructionTypes/enumerations/EncodedInstructionTypes.md)
 
-Defined in: [src/binary\_types/DecodedInstruction.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/binary_types/DecodedInstruction.ts#L13)
+Defined in: [src/binary\_types/DecodedInstruction.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/binary_types/DecodedInstruction.ts#L13)
 
 The instructions type.

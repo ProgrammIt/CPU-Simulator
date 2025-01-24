@@ -6,7 +6,7 @@
 
 # Enumeration: EncodedInstructionTypes
 
-Defined in: [src/enumerations/EncodedInstructionTypes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/enumerations/EncodedInstructionTypes.ts#L5)
+Defined in: [src/enumerations/EncodedInstructionTypes.ts:5](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedInstructionTypes.ts#L5)
 
 An enum representing the available instruction types and their binary codes.
 
@@ -20,7 +20,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **I**: `"110"`
 
-Defined in: [src/enumerations/EncodedInstructionTypes.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/enumerations/EncodedInstructionTypes.ts#L7)
+Defined in: [src/enumerations/EncodedInstructionTypes.ts:7](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedInstructionTypes.ts#L7)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/enumerations/EncodedInstructionTypes.ts:7](https://github.com/P
 
 > **J**: `"111"`
 
-Defined in: [src/enumerations/EncodedInstructionTypes.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/enumerations/EncodedInstructionTypes.ts#L8)
+Defined in: [src/enumerations/EncodedInstructionTypes.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedInstructionTypes.ts#L8)
 
 ***
 
@@ -36,4 +36,4 @@ Defined in: [src/enumerations/EncodedInstructionTypes.ts:8](https://github.com/P
 
 > **R**: `"100"`
 
-Defined in: [src/enumerations/EncodedInstructionTypes.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/enumerations/EncodedInstructionTypes.ts#L6)
+Defined in: [src/enumerations/EncodedInstructionTypes.ts:6](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/enumerations/EncodedInstructionTypes.ts#L6)

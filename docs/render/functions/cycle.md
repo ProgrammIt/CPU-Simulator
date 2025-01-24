@@ -8,7 +8,7 @@
 
 > **cycle**(): `Promise`\<`void`\>
 
-Defined in: [src/render.ts:1453](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/render.ts#L1453)
+Defined in: [src/render.ts:1453](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/render.ts#L1453)
 
 ## Returns
 

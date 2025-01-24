@@ -6,7 +6,7 @@
 
 # Class: GeneralPurposeRegister
 
-Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/GeneralPurposeRegister.ts#L9)
+Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/GeneralPurposeRegister.ts#L9)
 
 This class represents a general purpose register.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new GeneralPurposeRegister**(`name`): [`GeneralPurposeRegister`](GeneralPurposeRegister.md)
 
-Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/GeneralPurposeRegister.ts#L15)
+Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/GeneralPurposeRegister.ts#L15)
 
 This method constructs an instance.
 
@@ -50,7 +50,7 @@ The name of the register.
 
 > `protected` **\_content**: [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/functional\_units/Register.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/Register.ts#L9)
+Defined in: [src/simulator/functional\_units/Register.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/Register.ts#L9)
 
 The registers content.
 
@@ -64,7 +64,7 @@ The registers content.
 
 > `readonly` **name**: `string`
 
-Defined in: [src/simulator/functional\_units/Register.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/Register.ts#L15)
+Defined in: [src/simulator/functional\_units/Register.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/Register.ts#L15)
 
 The name of the register.
 
@@ -80,7 +80,7 @@ The name of the register.
 
 > **get** **content**(): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/GeneralPurposeRegister.ts#L24)
+Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/GeneralPurposeRegister.ts#L24)
 
 Accessor for retrieving a copy of the current registers content.
 
@@ -94,7 +94,7 @@ A copy of the current registers content.
 
 > **set** **content**(`newValue`): `void`
 
-Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/functional_units/GeneralPurposeRegister.ts#L32)
+Defined in: [src/simulator/functional\_units/GeneralPurposeRegister.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/functional_units/GeneralPurposeRegister.ts#L32)
 
 Accessor for setting the current registers content to a new value.
 

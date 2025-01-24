@@ -6,7 +6,7 @@
 
 # Class: ArithmeticLogicUnit
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L12)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:12](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L12)
 
 ## Author
 
@@ -18,7 +18,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new ArithmeticLogicUnit**(`eflags`): [`ArithmeticLogicUnit`](ArithmeticLogicUnit.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L24)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:24](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L24)
 
 Constructs a new instance from the given arguments.
 
@@ -40,7 +40,7 @@ The EFLAGS register of the CPU core this ALU is associated with.
 
 > **adc**(`firstSummand`, `secondSummand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:282](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L282)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:282](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L282)
 
 This method adds two given binary numbers while taking the carry into account.
 
@@ -72,7 +72,7 @@ The sum of both operands/summands.
 
 > **add**(`firstSummand`, `secondSummand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:240](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L240)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:240](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L240)
 
 This method adds two given binary numbers without taking the carry into account.
 
@@ -104,7 +104,7 @@ The sum of both operands/summands.
 
 > **and**(`firstOperand`, `secondOperand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:140](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L140)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:140](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L140)
 
 This method performs an bit-wise, logical AND operation on two given binary values, 
 according to the following table.
@@ -145,7 +145,7 @@ The resulting binary value.
 
 > **cmp**(`firstOperand`, `secondOperand`): `void`
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:507](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L507)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:507](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L507)
 
 This method compares both given binary values, by performing a subtraction.
 
@@ -173,7 +173,7 @@ In contrast to SUB, this operation does not effect the second operands value.
 
 > **div**(`dividend`, `divisor`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:461](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L461)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:461](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L461)
 
 This method divides both the given binary, doubleword sized values.
 
@@ -205,7 +205,7 @@ The resulting quotient.
 
 > **leftShift**\<`T`\>(`operand`): [`Bit`](../../../../binary_types/Bit/type-aliases/Bit.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:409](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L409)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:409](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L409)
 
 This method performs an arithmetic shift on the given binary value one bit to the left.
 
@@ -233,7 +233,7 @@ The bit left shifted.
 
 > **mul**(`multiplier`, `multiplicand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:430](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L430)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:430](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L430)
 
 This method multiplies both the given binary, doubleword sized values using Booths mulitplication algorithm, 
 according to <https://medium.com/@jetnipit54/booth-algorithm-e6b8a6c5b8d>.
@@ -266,7 +266,7 @@ The resulting product.
 
 > **neg**(`operand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:227](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L227)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:227](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L227)
 
 This method computes the two's complement of the given binary value.
 
@@ -293,7 +293,7 @@ The two's complement.
 
 > **not**(`operand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:115](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L115)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:115](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L115)
 
 This method performs the logical NOT operation bit-wise on a doubleword sized binary value.
 All its bits will be inverted: 1 becomes 0 and vice versa.The result corresponds 
@@ -321,7 +321,7 @@ The inverted binary value.
 
 > **or**(`firstOperand`, `secondOperand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:171](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L171)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:171](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L171)
 
 This method performs an bit-wise, logical OR operation on two given binary values, 
 according to the following table.
@@ -362,7 +362,7 @@ The resulting binary value.
 
 > **rightShift**\<`T`\>(`operand`): [`Bit`](../../../../binary_types/Bit/type-aliases/Bit.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:392](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L392)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:392](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L392)
 
 This method performs an arithmetic shift on the given binary value one bit to the right.
 
@@ -390,7 +390,7 @@ The bit right shifted.
 
 > **sbb**(`minuend`, `subtrahend`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:347](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L347)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:347](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L347)
 
 This method subtracts two given binary numbers without taking the carry into account.
 
@@ -422,7 +422,7 @@ The difference of the first operand (minuend) and the second operand (subtrahend
 
 > **signExtend**\<`T`\>(`operand`, `maxLength`): `void`
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:373](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L373)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:373](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L373)
 
 This method sign extends a given binary value to the specified length.
 
@@ -454,7 +454,7 @@ The lenght to sign extend the operand to.
 
 > **sub**(`minuend`, `subtrahend`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:323](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L323)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:323](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L323)
 
 This method subtracts two given binary numbers without taking the carry into account.
 
@@ -486,7 +486,7 @@ The difference of the first operand (minuend) and the second operand (subtrahend
 
 > **test**(`firstOperand`, `secondOperand`): `void`
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:521](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L521)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:521](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L521)
 
 This method compares both given binary values, by performing a logical AND operation.
 
@@ -514,7 +514,7 @@ In contrast to AND, this operation does not effect the second operands value.
 
 > **xor**(`firstOperand`, `secondOperand`): [`DoubleWord`](../../../../binary_types/DoubleWord/classes/DoubleWord.md)
 
-Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:202](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/execution_units/ArithmeticLogicUnit.ts#L202)
+Defined in: [src/simulator/execution\_units/ArithmeticLogicUnit.ts:202](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/execution_units/ArithmeticLogicUnit.ts#L202)
 
 This method performs an bit-wise, logical XOR operation on two given binary values, 
 according to the following table.

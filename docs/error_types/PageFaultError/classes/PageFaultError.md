@@ -6,7 +6,7 @@
 
 # Class: PageFaultError
 
-Defined in: [src/error\_types/PageFaultError.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFaultError.ts#L8)
+Defined in: [src/error\_types/PageFaultError.ts:8](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFaultError.ts#L8)
 
 Error which gets thrown whenever a page is currently not associated with a page frame.
 
@@ -24,7 +24,7 @@ Erik Burmester <erik.burmester@nextbeam.net>
 
 > **new PageFaultError**(`description`, `flags`, `addressOfPageTableEntry`): [`PageFaultError`](PageFaultError.md)
 
-Defined in: [src/error\_types/PageFaultError.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFaultError.ts#L25)
+Defined in: [src/error\_types/PageFaultError.ts:25](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFaultError.ts#L25)
 
 Constructs a new instance with the given message.
 
@@ -58,7 +58,7 @@ A short text describing the error and its cause.
 
 > `readonly` **addressOfPageTableEntry**: [`PhysicalAddress`](../../../binary_types/PhysicalAddress/classes/PhysicalAddress.md)
 
-Defined in: [src/error\_types/PageFaultError.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFaultError.ts#L19)
+Defined in: [src/error\_types/PageFaultError.ts:19](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFaultError.ts#L19)
 
 This field stores the page table entrys pyhsical address which
 is currently not associated with a page.
@@ -69,7 +69,7 @@ is currently not associated with a page.
 
 > `readonly` **flags**: [`Bit`](../../../binary_types/Bit/type-aliases/Bit.md)[]
 
-Defined in: [src/error\_types/PageFaultError.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/error_types/PageFaultError.ts#L13)
+Defined in: [src/error\_types/PageFaultError.ts:13](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/error_types/PageFaultError.ts#L13)
 
 This field sotres the flag bits associated with the page for
 which this error was thrown.

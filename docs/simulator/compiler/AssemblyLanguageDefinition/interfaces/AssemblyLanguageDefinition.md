@@ -6,7 +6,7 @@
 
 # Interface: AssemblyLanguageDefinition
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L1)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:1](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:1](https://git
 
 > **addressable\_registers**: `object`[]
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L15)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:15](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L15)
 
 #### aliases
 
@@ -34,7 +34,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:15](https://gi
 
 > **addressModes**: `object`[]
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:27](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L27)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:27](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L27)
 
 #### code
 
@@ -50,7 +50,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:27](https://gi
 
 > **comment\_format**: `string`
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L2)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:2](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L2)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:2](https://git
 
 > **instruction\_types**: `object`[]
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L32)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:32](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L32)
 
 #### code
 
@@ -74,7 +74,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:32](https://gi
 
 > **instructions**: `object`[]
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L37)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:37](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L37)
 
 #### address\_modes
 
@@ -110,7 +110,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:37](https://gi
 
 > **label\_formats**: `object`
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L4)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:4](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L4)
 
 #### declaration
 
@@ -126,7 +126,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:4](https://git
 
 > **number\_formats**: `object`
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L9)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:9](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L9)
 
 #### binary
 
@@ -146,7 +146,7 @@ Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:9](https://git
 
 > **operand\_types**: `object`[]
 
-Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/3f9c46c26c2e1cba2638010869a3cab9b9c737f9/src/simulator/compiler/AssemblyLanguageDefinition.ts#L21)
+Defined in: [src/simulator/compiler/AssemblyLanguageDefinition.ts:21](https://github.com/ProgrammIt/CPU-Simulator/blob/7552359f9aa6207ad192c9a5fcb9c9063dd40c2c/src/simulator/compiler/AssemblyLanguageDefinition.ts#L21)
 
 #### code
 
