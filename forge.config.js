@@ -7,6 +7,18 @@ module.exports = {
     icon: 'assets/img/icons/app/icon'
   },
   rebuildConfig: {},
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'ProgrammIt',
+          name: 'CPU-Simulator'
+        },
+        prerelease: true
+      }
+    }
+  ],
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
