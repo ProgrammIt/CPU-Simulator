@@ -1,4 +1,4 @@
-export interface InstructionDefinition {
+export default interface InstructionDefinition {
 	mnemonic: string;
 	opcode: string;
 	type: string;

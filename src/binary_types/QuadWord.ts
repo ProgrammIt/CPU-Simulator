@@ -1,8 +1,8 @@
-import { BinaryValue } from "./BinaryValue";
-import { Bit } from "./Bit";
+import BinaryValue from "./BinaryValue";
+import Bit from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
-export class QuadWord extends BinaryValue {
+export default class QuadWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: bigint = 9_223_372_036_854_775_807n;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: bigint = -9_223_372_036_854_775_808n;
 	public static readonly NUMBER_OF_BITS_DEC: number = 64;

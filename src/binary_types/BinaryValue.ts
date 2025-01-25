@@ -1,11 +1,11 @@
-import { Bit } from "./Bit";
+import Bit from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
 /**
  * This class represents a generic binary value.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class BinaryValue {
+export default class BinaryValue {
     /**
      * An array of bits, representing a binary value.
      */

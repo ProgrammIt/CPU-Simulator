@@ -1,4 +1,4 @@
-export interface AssemblyLanguageDefinition {
+export default interface AssemblyLanguageDefinition {
     comment_format: string;
     
     label_formats: {

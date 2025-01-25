@@ -1,5 +1,5 @@
 import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
-import { Bit } from "../binary_types/Bit";
+import Bit from "../binary_types/Bit";
 import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
 import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 import { EncodedOperations } from "../enumerations/EncodedOperations";
@@ -9,7 +9,7 @@ import { EncodedOperations } from "../enumerations/EncodedOperations";
  * It offers an interface for decoding different parts of an instruction.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class InstructionDecoder {
+export default class InstructionDecoder {
     /**
      * This method decodes the type of an instructions operand.
      * @param encodedOperandType 

@@ -1,6 +1,6 @@
-import { GeneralPurposeRegister } from "../simulator/functional_units/GeneralPurposeRegister";
-import { Bit } from "../binary_types/Bit";
-import { DoubleWord } from "../binary_types/DoubleWord";
+import GeneralPurposeRegister from "../simulator/functional_units/GeneralPurposeRegister";
+import Bit from "../binary_types/Bit";
+import DoubleWord from "../binary_types/DoubleWord";
 
 describe("Read and write from or to main memory", () => {
     const eax: GeneralPurposeRegister = new GeneralPurposeRegister("EAX");

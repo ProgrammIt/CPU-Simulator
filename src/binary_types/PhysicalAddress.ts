@@ -1,11 +1,11 @@
-import { Address } from "./Address";
-import { Bit } from "./Bit";
+import Address from "./Address";
+import Bit from "./Bit";
 
 /**
  * This class represents a physical memory address.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class PhysicalAddress extends Address {
+export default class PhysicalAddress extends Address {
 	/**
 	 * Constructs a new instance.
 	 */

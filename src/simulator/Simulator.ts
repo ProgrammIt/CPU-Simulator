@@ -1,24 +1,24 @@
-import { Assembler } from "./Assembler";
-import { CPUCore } from "./execution_units/CPUCore";
-import { RAM } from "./functional_units/RAM";
-import { DoubleWord } from "../binary_types/DoubleWord";
-import { PhysicalAddress } from "../binary_types/PhysicalAddress";
-import { VirtualAddress } from "../binary_types/VirtualAddress";
-import { Bit } from "../binary_types/Bit";
-import { MemoryManagementUnit } from "./execution_units/MemoryManagementUnit";
+import Assembler from "./Assembler";
+import CPUCore from "./execution_units/CPUCore";
+import RAM from "./functional_units/RAM";
+import DoubleWord from "../binary_types/DoubleWord";
+import PhysicalAddress from "../binary_types/PhysicalAddress";
+import VirtualAddress from "../binary_types/VirtualAddress";
+import Bit from "../binary_types/Bit";
+import MemoryManagementUnit from "./execution_units/MemoryManagementUnit";
 import { DataSizes } from "../enumerations/DataSizes";
-import { PageFaultError } from "../error_types/PageFaultError";
+import PageFaultError from "../error_types/PageFaultError";
 import { readFileSync } from "fs";
-import { PageTableEntry } from "../binary_types/PageTableEntry";
-import { InstructionOperand } from "../binary_types/InstructionOperand";
+import PageTableEntry from "../binary_types/PageTableEntry";
+import InstructionOperand from "../binary_types/InstructionOperand";
 import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
-import { AddressSpace } from "../binary_types/AddressSpace";
+import AddressSpace from "../binary_types/AddressSpace";
 import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
  */
-export class Simulator {
+export default class Simulator {
     public readonly core: CPUCore;
     public readonly mainMemory: RAM;
     private static _instance: Simulator | null = null;

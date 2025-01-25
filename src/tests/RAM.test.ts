@@ -1,8 +1,8 @@
 import {describe, expect, test} from '@jest/globals';
-import { RAM } from '../simulator/functional_units/RAM';
-import { Byte } from '../binary_types/Byte';
-import { DoubleWord } from '../binary_types/DoubleWord';
-import { PhysicalAddress } from '../binary_types/PhysicalAddress';
+import RAM from '../simulator/functional_units/RAM';
+import Byte from '../binary_types/Byte';
+import DoubleWord from '../binary_types/DoubleWord';
+import PhysicalAddress from '../binary_types/PhysicalAddress';
 
 describe("Read and write from or to main memory", () => {
     const mainMemory: RAM = new RAM(Math.pow(2, 32));

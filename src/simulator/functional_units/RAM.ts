@@ -1,10 +1,10 @@
-import { Bit } from "../../binary_types/Bit";
-import { Byte } from "../../binary_types/Byte";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { AddressOutOfRangeError } from "../../error_types/AddressOutOfRangeError";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
+import Bit from "../../binary_types/Bit";
+import Byte from "../../binary_types/Byte";
+import DoubleWord from "../../binary_types/DoubleWord";
+import AddressOutOfRangeError from "../../error_types/AddressOutOfRangeError";
+import PhysicalAddress from "../../binary_types/PhysicalAddress";
 
-export class RAM {
+export default class RAM {
     public readonly capacity: number;
     private readonly _cells: Map<string, Byte>;
     private readonly _highAddressDec: number;

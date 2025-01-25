@@ -1,10 +1,10 @@
-import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
-import { TranslationLookasideBuffer } from "../simulator/functional_units/TranslationLookasideBuffer";
-import { Bit } from "../binary_types/Bit";
-import { PageTableEntry } from "../binary_types/PageTableEntry";
-import { PhysicalAddress } from "../binary_types/PhysicalAddress";
-import { VirtualAddress } from "../binary_types/VirtualAddress";
+import ArithmeticLogicUnit from "../simulator/execution_units/ArithmeticLogicUnit";
+import EFLAGS from "../simulator/functional_units/EFLAGS";
+import TranslationLookasideBuffer from "../simulator/functional_units/TranslationLookasideBuffer";
+import Bit from "../binary_types/Bit";
+import PageTableEntry from "../binary_types/PageTableEntry";
+import VirtualAddress from "../binary_types/VirtualAddress";
+import PhysicalAddress from "../binary_types/PhysicalAddress";
 
 describe("Test TLB", () => {
     const translationLookasideBuffer: TranslationLookasideBuffer = new TranslationLookasideBuffer(2);

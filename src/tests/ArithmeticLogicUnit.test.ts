@@ -1,6 +1,6 @@
-import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
-import { DoubleWord } from "../binary_types/DoubleWord";
+import ArithmeticLogicUnit from "../simulator/execution_units/ArithmeticLogicUnit";
+import EFLAGS from "../simulator/functional_units/EFLAGS";
+import DoubleWord from "../binary_types/DoubleWord";
 
 describe("Test ALU", () => {
     const flags: EFLAGS = new EFLAGS();

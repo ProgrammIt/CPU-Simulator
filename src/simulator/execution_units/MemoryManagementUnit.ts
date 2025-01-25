@@ -1,26 +1,26 @@
-import { Bit } from "../../binary_types/Bit";
-import { Byte } from "../../binary_types/Byte";
+import Bit from "../../binary_types/Bit";
+import Byte from "../../binary_types/Byte";
 import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { PageFaultError } from "../../error_types/PageFaultError";
-import { PageFrameNotExecutableError } from "../../error_types/PageFrameNotExecutableError";
-import { PageFrameNotWritableError } from "../../error_types/PageFrameNotWritableError";
-import { PrivilegeViolationError } from "../../error_types/PrivilegeViolationError";
-import { PageTableEntry } from "../../binary_types/PageTableEntry";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
-import { VirtualAddress } from "../../binary_types/VirtualAddress";
-import { EFLAGS } from "../functional_units/EFLAGS";
-import { PointerRegister } from "../functional_units/PointerRegister";
-import { RAM } from "../functional_units/RAM";
-import { TranslationLookasideBuffer } from "../functional_units/TranslationLookasideBuffer";
-import { ArithmeticLogicUnit } from "./ArithmeticLogicUnit";
+import DoubleWord from "../../binary_types/DoubleWord";
+import PageFaultError from "../../error_types/PageFaultError";
+import PageFrameNotExecutableError from "../../error_types/PageFrameNotExecutableError";
+import PageFrameNotWritableError from "../../error_types/PageFrameNotWritableError";
+import PrivilegeViolationError from "../../error_types/PrivilegeViolationError";
+import PageTableEntry from "../../binary_types/PageTableEntry";
+import PhysicalAddress from "../../binary_types/PhysicalAddress";
+import VirtualAddress from "../../binary_types/VirtualAddress";
+import EFLAGS from "../functional_units/EFLAGS";
+import PointerRegister from "../functional_units/PointerRegister";
+import RAM from "../functional_units/RAM";
+import TranslationLookasideBuffer from "../functional_units/TranslationLookasideBuffer";
+import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
 
 /**
  * This class represents a Memory Management Unit (MMU). This specialized execution unit is responsible
  * for translating virtual memory addresses into physical memory addresses.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class MemoryManagementUnit {
+export default class MemoryManagementUnit {
     /**
      * This class member stores the number of bits used for the offset in pages and page frames.
      * @readonly

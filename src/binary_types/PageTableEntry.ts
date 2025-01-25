@@ -1,11 +1,11 @@
-import { Bit } from "./Bit";
-import { DoubleWord } from "./DoubleWord";
+import Bit from "./Bit";
+import DoubleWord from "./DoubleWord";
 
 /**
  * This class represents a page table entry.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class PageTableEntry {
+export default class PageTableEntry {
     /**
      * The number of bits used for the flags.
      */

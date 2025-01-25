@@ -1,5 +1,5 @@
-import { Simulator } from "../simulator/Simulator";
-import { DoubleWord } from "../binary_types/DoubleWord";
+import Simulator from "../simulator/Simulator";
+import DoubleWord from "../binary_types/DoubleWord";
 
 describe('Test Simulator', () => {
     const simulator: Simulator = Simulator.getInstance(Math.pow(2, 32));

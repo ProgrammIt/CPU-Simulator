@@ -1,11 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent, Menu, shell } from "electron";
 import path from 'path';
-import { Simulator } from "./simulator/Simulator";
-import { DoubleWord } from "./binary_types/DoubleWord";
+import Simulator from "./simulator/Simulator";
+import DoubleWord from "./binary_types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
 import { NumberSystems } from "./enumerations/NumberSystems";
-import { PhysicalAddress } from "./binary_types/PhysicalAddress";
-import { Byte } from "./binary_types/Byte";
+import PhysicalAddress from "./binary_types/PhysicalAddress";
+import Byte from "./binary_types/Byte";
 
 const createWindow = (win: BrowserWindow, simulator: Simulator) => {
 	const menu = Menu.buildFromTemplate([

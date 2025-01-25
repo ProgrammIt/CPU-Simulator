@@ -1,13 +1,13 @@
 import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { Instruction } from "../../binary_types/Instruction";
-import { Register } from "./Register";
+import DoubleWord from "../../binary_types/DoubleWord";
+import Instruction from "../../binary_types/Instruction";
+import Register from "./Register";
 
 /**
  * This class represents the instruction register (EIR).
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class InstructionRegister extends Register<Instruction> {
+export default class InstructionRegister extends Register<Instruction> {
     /**
      * Constructs a new instance.
      * @constructor

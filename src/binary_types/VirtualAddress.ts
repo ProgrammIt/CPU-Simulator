@@ -1,11 +1,11 @@
-import { Address } from "./Address";
-import { Bit } from "./Bit";
+import Address from "./Address";
+import Bit from "./Bit";
 
 /**
  * This class represents a virtual memory address.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class VirtualAddress extends Address {
+export default class VirtualAddress extends Address {
 	/**
 	 * Constructs a new instance.
 	 */

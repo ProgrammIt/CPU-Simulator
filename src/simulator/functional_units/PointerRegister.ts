@@ -1,13 +1,13 @@
-import { Address } from "../../binary_types/Address";
+import Address from "../../binary_types/Address";
 import { DataSizes } from "../../enumerations/DataSizes";
-import { Register } from "./Register";
+import Register from "./Register";
 
 /**
  * This class represents a special tpye of register,
  * which can hold a single address.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class PointerRegister extends Register<Address> {
+export default class PointerRegister extends Register<Address> {
     /**
      * Constructs a new instance.
      * @constructor

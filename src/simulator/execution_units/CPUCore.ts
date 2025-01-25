@@ -1,30 +1,30 @@
-import { EFLAGS } from "../functional_units/EFLAGS";
-import { RAM } from "../functional_units/RAM";
-import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
-import { MemoryManagementUnit } from "./MemoryManagementUnit";
-import { InstructionDecoder } from "./../InstructionDecoder";
+import EFLAGS from "../functional_units/EFLAGS";
+import RAM from "../functional_units/RAM";
+import GeneralPurposeRegister from "../functional_units/GeneralPurposeRegister";
+import MemoryManagementUnit from "./MemoryManagementUnit";
+import InstructionDecoder from "./../InstructionDecoder";
 import { EncodedAddressingModes} from "../../enumerations/EncodedAdressingModes";
 import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { VirtualAddress } from "../../binary_types/VirtualAddress";
-import { Bit } from "../../binary_types/Bit";
-import { ArithmeticLogicUnit } from "./ArithmeticLogicUnit";
-import { InstructionRegister } from "../functional_units/InstructionRegister";
-import { PointerRegister } from "../functional_units/PointerRegister";
-import { Instruction } from "../../binary_types/Instruction";
-import { InstructionOperand } from "../../binary_types/InstructionOperand";
-import { DecodedInstruction } from "../../binary_types/DecodedInstruction";
-import { Address } from "../../binary_types/Address";
-import { Byte } from "../../binary_types/Byte";
-import { MissingOperandError } from "../../error_types/MissingOperandError";
-import { UnsupportedOperandTypeError } from "../../error_types/UnsupportedOperandTypeError";
-import { Register } from "../functional_units/Register";
-import { RegisterNotWritableInUserModeError } from "../../error_types/RegisterNotWritableInUserModeError";
-import { RegisterNotAvailableError } from "../../error_types/RegisterNotAvailableError";
-import { UnknownRegisterError } from "../../error_types/UnknownRegisterError";
-import { PrivilegeViolationError } from "../../error_types/PrivilegeViolationError";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
-import { PageFaultError } from "../../error_types/PageFaultError";
+import DoubleWord from "../../binary_types/DoubleWord";
+import VirtualAddress from "../../binary_types/VirtualAddress";
+import Bit from "../../binary_types/Bit";
+import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
+import InstructionRegister from "../functional_units/InstructionRegister";
+import PointerRegister from "../functional_units/PointerRegister";
+import Instruction from "../../binary_types/Instruction";
+import InstructionOperand from "../../binary_types/InstructionOperand";
+import DecodedInstruction from "../../binary_types/DecodedInstruction";
+import Address from "../../binary_types/Address";
+import Byte from "../../binary_types/Byte";
+import MissingOperandError from "../../error_types/MissingOperandError";
+import UnsupportedOperandTypeError from "../../error_types/UnsupportedOperandTypeError";
+import Register from "../functional_units/Register";
+import RegisterNotWritableInUserModeError from "../../error_types/RegisterNotWritableInUserModeError";
+import RegisterNotAvailableError from "../../error_types/RegisterNotAvailableError";
+import UnknownRegisterError from "../../error_types/UnknownRegisterError";
+import PrivilegeViolationError from "../../error_types/PrivilegeViolationError";
+import PhysicalAddress from "../../binary_types/PhysicalAddress";
+import PageFaultError from "../../error_types/PageFaultError";
 import { EncodedReadableRegisters } from "../../enumerations/EncodedReadableRegisters";
 import { EncodedWritableRegisters } from "../../enumerations/EncodedWritableRegisters";
 import { EncodedOperations } from "../../enumerations/EncodedOperations";
@@ -35,7 +35,7 @@ import { EncodedOperandTypes } from "../../enumerations/EncodedOperandTypes";
  * This class represents a CPU core which is capable of executing instructions.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class CPUCore {
+export default class CPUCore {
     /**
      * An error message template that is used when operands are missing.
      * @readonly

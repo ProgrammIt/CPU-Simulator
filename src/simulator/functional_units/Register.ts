@@ -2,7 +2,7 @@
  * This class represents a generic register.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export abstract class Register<T> {
+export default abstract class Register<T> {
     /**
      * The registers content.
      */

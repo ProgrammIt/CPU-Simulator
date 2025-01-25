@@ -1,12 +1,12 @@
 import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
 import { EncodedOperations } from "../enumerations/EncodedOperations";
-import { InstructionOperand } from "./InstructionOperand";
+import InstructionOperand from "./InstructionOperand";
 
 /**
  * This class represents a decoded (non-binary) instruction, ready for execution.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class DecodedInstruction {
+export default class DecodedInstruction {
 	/**
 	 * The instructions type.
 	 */

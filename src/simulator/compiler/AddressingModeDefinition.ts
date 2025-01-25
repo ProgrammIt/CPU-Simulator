@@ -1,4 +1,4 @@
-export interface AddressingModeDefinition {
+export default interface AddressingModeDefinition {
     name: string;
     code: string;
 }

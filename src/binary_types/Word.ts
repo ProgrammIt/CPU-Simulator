@@ -1,7 +1,7 @@
-import { Bit } from "./Bit";
+import Bit from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
-export class Word {
+export default class Word {
 	protected static readonly MAX_POSITIVE_NUMBER_DEC: number = 32_767;
 	protected static readonly MAX_NEGATIVE_NUMBER_DEC: number = -32_768;
 	public static readonly NUMBER_OF_BITS_DEC: number = 16;
