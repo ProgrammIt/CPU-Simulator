@@ -1,11 +1,11 @@
-import Bit from "../binary_types/Bit";
-import PhysicalAddress from "../binary_types/PhysicalAddress";
+import { Bit } from "../binary_types/Bit";
+import { PhysicalAddress } from "../binary_types/PhysicalAddress";
 
 /**
  * Error which gets thrown whenever a page is currently not associated with a page frame.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class PageFaultError extends Error {
+export class PageFaultError extends Error {
 	/**
      * This field sotres the flag bits associated with the page for
      * which this error was thrown.

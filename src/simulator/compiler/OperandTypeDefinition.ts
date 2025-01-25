@@ -1,4 +1,4 @@
-export default interface OperandTypeDefinition {
+export interface OperandTypeDefinition {
     name: string;
     code: string;
     regexes: [

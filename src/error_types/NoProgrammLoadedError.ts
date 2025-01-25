@@ -3,7 +3,7 @@
  * assembly programm but forgot to load one into the simulator beforehand.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class NoProgrammLoadedError extends Error {
+export class NoProgrammLoadedError extends Error {
 	/**
 	 * Constructs a new instance with the given message.
 	 * @param description A short text describing the error and its cause.

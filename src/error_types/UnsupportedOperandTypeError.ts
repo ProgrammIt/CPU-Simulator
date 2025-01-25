@@ -2,7 +2,7 @@
  * Error which gets thrown whenever the type of an instructions operand is unsupported.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class UnsupportedOperandTypeError extends Error {
+export class UnsupportedOperandTypeError extends Error {
     /**
 	 * Constructs a new instance with the given message.
 	 * @param description A short text describing the error and its cause.

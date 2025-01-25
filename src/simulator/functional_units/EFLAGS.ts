@@ -1,13 +1,13 @@
-import Bit from "../../binary_types/Bit";
-import Byte from "../../binary_types/Byte";
+import { Bit } from "../../binary_types/Bit";
+import { Byte } from "../../binary_types/Byte";
 import { DataSizes } from "../../enumerations/DataSizes";
-import Register from "./Register";
+import { Register } from "./Register";
 
 /**
  * This class represents the status register of a CPU core.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class EFLAGS extends Register<Byte> {
+export class EFLAGS extends Register<Byte> {
     // Positions of the flag bits in the status register from MSB (starting at index 0) to LSB.
     private static POS_CPL_MSB_BIT: number = 0;
     private static POS_CPL_LSB_BIT: number = 1;

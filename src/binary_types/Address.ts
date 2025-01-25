@@ -1,12 +1,12 @@
-import Bit from "./Bit";
+import { Bit } from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
-import DoubleWord from "./DoubleWord";
+import { DoubleWord } from "./DoubleWord";
 
 /**
  * This class represents a generic doubleword sized binary memory address.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class Address extends DoubleWord {
+export class Address extends DoubleWord {
 	public static readonly MAX_NUMBER_UNSIGNED_DEC: number = 4_294_967_295;
 
 	/**

@@ -1,4 +1,4 @@
-export default interface RegisterDefinition {
+export interface RegisterDefinition {
 	name: string;
 	aliases: string[];
 	code: string;

@@ -1,4 +1,4 @@
-import Byte from "../binary_types/Byte";
+import { Byte } from "../binary_types/Byte";
 
 describe("Test instantiation of a byte", () => {
 

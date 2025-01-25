@@ -1,10 +1,10 @@
-import Address from "./Address";
+import { Address } from "./Address";
 
 /**
  * This class represents an address space or a range of addresses.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class AddressSpace<T extends Address> {
+export class AddressSpace<T extends Address> {
     /**
      * This member stores the upper boundry of the address space.
      * @readonly

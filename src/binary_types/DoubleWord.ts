@@ -1,9 +1,9 @@
 import { twosComplementToDecimal } from "../helper";
-import BinaryValue from "./BinaryValue";
-import Bit from "./Bit";
+import { BinaryValue } from "./BinaryValue";
+import { Bit } from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
-export default class DoubleWord extends BinaryValue {
+export class DoubleWord extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -2_147_483_648;
 	public static readonly NUMBER_OF_BITS_DEC: number = 32;

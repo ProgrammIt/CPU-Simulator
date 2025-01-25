@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
-import UnrecognizedInstructionError from "../error_types/UnrecognizedInstructionError";
-import Bit from "../binary_types/Bit";
-import AssemblyLanguageDefinition from "./compiler/AssemblyLanguageDefinition";
+import { UnrecognizedInstructionError } from "../error_types/UnrecognizedInstructionError";
+import { Bit } from "../binary_types/Bit";
+import { AssemblyLanguageDefinition } from "./compiler/AssemblyLanguageDefinition";
 import { DataSizes } from "../enumerations/DataSizes";
-import DoubleWord from "../binary_types/DoubleWord";
-import VirtualAddress from "../binary_types/VirtualAddress";
+import { DoubleWord } from "../binary_types/DoubleWord";
+import { VirtualAddress } from "../binary_types/VirtualAddress";
 
-export default class Assembler {
+export class Assembler {
   	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
   	public readonly languageDefinition: AssemblyLanguageDefinition;
 	public readonly translations: Map<string, DoubleWord[]>;

@@ -1,12 +1,12 @@
-import BinaryValue from "./BinaryValue";
-import Bit from "./Bit";
+import { BinaryValue } from "./BinaryValue";
+import { Bit } from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
 /**
  * This class represents a byte sized binary value.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class Byte extends BinaryValue {
+export class Byte extends BinaryValue {
 	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 127;
 	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -128;
 	public static readonly NUMBER_OF_BITS_DEC: number = 8;

@@ -1,15 +1,15 @@
-import BinaryValue from "../../binary_types/BinaryValue";
-import Bit from "../../binary_types/Bit";
+import { BinaryValue } from "../../binary_types/BinaryValue";
+import { Bit } from "../../binary_types/Bit";
 import { DataSizes } from "../../enumerations/DataSizes";
-import DoubleWord from "../../binary_types/DoubleWord";
-import DivisionByZeroError from "../../error_types/DivisionByZeroError";
-import QuadWord from "../../binary_types/QuadWord";
-import EFLAGS from "../functional_units/EFLAGS";
+import { DoubleWord } from "../../binary_types/DoubleWord";
+import { DivisionByZeroError } from "../../error_types/DivisionByZeroError";
+import { QuadWord } from "../../binary_types/QuadWord";
+import { EFLAGS } from "../functional_units/EFLAGS";
 
 /**
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class ArithmeticLogicUnit {
+export class ArithmeticLogicUnit {
     /**
      * A refference to the CPU cores EFLAGS register, this ALU is associated with.
      * @readonly

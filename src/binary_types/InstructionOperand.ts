@@ -1,5 +1,5 @@
 import { EncodedAddressingModes as AddressingMode } from "../enumerations/EncodedAdressingModes";
-import DoubleWord from "./DoubleWord";
+import { DoubleWord } from "./DoubleWord";
 import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 
 // Operand types: Immediate, Register, Memory address
@@ -9,7 +9,7 @@ import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
  * A class representing a decoded (non-binary) operand of an instruction.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class InstructionOperand {
+export class InstructionOperand {
 	/**
 	 * The operands addressing mode. Can be either direct or indirect. Indirect mode is only valid for registers.
 	 * @readonly

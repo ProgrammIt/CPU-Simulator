@@ -2,7 +2,7 @@
  * Error which gets thrown whenever a process tries to execute a non-executable page frames content.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class PageFrameNotExecutableError extends Error {
+export class PageFrameNotExecutableError extends Error {
 	/**
 	 * Constructs a new instance with the given message.
 	 * @param description A short text describing the error and its cause.

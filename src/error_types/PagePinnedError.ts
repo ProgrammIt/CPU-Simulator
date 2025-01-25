@@ -3,7 +3,7 @@
  * to a background memory.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class PagePinnedError extends Error {
+export class PagePinnedError extends Error {
 	/**
 	 * Constructs a new instance with the given message.
 	 * @param description A short text describing the error and its cause.

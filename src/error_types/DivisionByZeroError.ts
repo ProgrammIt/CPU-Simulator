@@ -2,7 +2,7 @@
  * Error which gets thrown whenever a process tries to divide an integer by binary zero.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export default class DivisionByZeroError extends Error {
+export class DivisionByZeroError extends Error {
     /**
 	 * Constructs a new instance with the given message.
 	 * @param description A short text describing the error and its cause.
