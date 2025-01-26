@@ -1,13 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, shell } from "electron";
 import path from 'path';
-import { Simulator } from "./simulator/Simulator";
+import { SimulationController } from "./simulator/Simulator";
 import { DoubleWord } from "./binary_types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
 import { NumberSystems } from "./enumerations/NumberSystems";
 import { PhysicalAddress } from "./binary_types/PhysicalAddress";
 import { Byte } from "./binary_types/Byte";
 
-const createWindow = (win: BrowserWindow, simulator: Simulator) => {
+const createWindow = (win: BrowserWindow, simulator: SimulationController) => {
 	const menu = Menu.buildFromTemplate([
 		{
 			label: "App",
@@ -183,7 +183,7 @@ app.whenReady().then(() => {
 		icon: "./assets/img/icons/app/icon.png"
   	});
 
-	const simulator = Simulator.getInstance(Math.pow(2, 32));    
+	const simulator = SimulationController.getInstance(Math.pow(2, 32));    
 	
 	createWindow(win, simulator);
 

@@ -18,10 +18,10 @@ import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
  */
-export class Simulator {
+export class SimulationController {
     public readonly core: CPUCore;
     public readonly mainMemory: RAM;
-    private static _instance: Simulator | null = null;
+    private static _instance: SimulationController | null = null;
     private _assembler: Assembler;
     private _programmLoaded: boolean;
 
@@ -45,7 +45,7 @@ export class Simulator {
     private static readonly KERNEL_SPACE:  AddressSpace<PhysicalAddress> = 
         new AddressSpace<PhysicalAddress>(
             PhysicalAddress.fromInteger(3_221_225_471), 
-            PhysicalAddress.fromInteger(Simulator.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC)
+            PhysicalAddress.fromInteger(SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC)
         );
 
     /**
@@ -133,12 +133,12 @@ export class Simulator {
      * @param capacityOfMainMemory 
      * @returns 
      */
-    public static getInstance(capacityOfMainMemory: number): Simulator {
-        if (Simulator._instance === null) {
-            Simulator._instance = new Simulator(capacityOfMainMemory);
-            Simulator._instance.bootKernel();
+    public static getInstance(capacityOfMainMemory: number): SimulationController {
+        if (SimulationController._instance === null) {
+            SimulationController._instance = new SimulationController(capacityOfMainMemory);
+            SimulationController._instance.bootKernel();
         }
-        return Simulator._instance;
+        return SimulationController._instance;
     }
 
     /**
@@ -156,7 +156,7 @@ export class Simulator {
         // -> TODO: Compile other interrupt handlers
         // Load interrupt handlers into kernel space.
         const baseAddressesInterruptHandlers: Array<PhysicalAddress> = this.loadInterruptHandlers(
-            PhysicalAddress.fromInteger(Simulator.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC),
+            PhysicalAddress.fromInteger(SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC),
             [
                 compiledIRH1,
                 compiledIRH2
@@ -286,7 +286,7 @@ export class Simulator {
          * the consumed memory needs to be subtracted from the number of available physical addresses.
          */
         const numberPhysicalAddressesPerPageFrameDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
-        const availablePhysicalAddressesDec: number = (Math.pow(2, DataSizes.DOUBLEWORD) - Simulator.KERNEL_SPACE.size);
+        const availablePhysicalAddressesDec: number = (Math.pow(2, DataSizes.DOUBLEWORD) - SimulationController.KERNEL_SPACE.size);
         const numberOfAvailablePageFrames: number = Math.floor(availablePhysicalAddressesDec/numberPhysicalAddressesPerPageFrameDec);
         // Create a local variable, which represents the physical address of the next list entry to write a page frames base address to.
         var addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
@@ -333,7 +333,7 @@ export class Simulator {
          */
         const numberPhysicalAddressesPerPageFrameDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
         const numberTotalAvailablePhysicalAddressesDec: number = Math.pow(2, DataSizes.DOUBLEWORD); // TODO: Use variable!
-        const numberOfAvailablePageFrames: number = Math.floor((numberTotalAvailablePhysicalAddressesDec - Simulator.KERNEL_SPACE.size)/numberPhysicalAddressesPerPageFrameDec);
+        const numberOfAvailablePageFrames: number = Math.floor((numberTotalAvailablePhysicalAddressesDec - SimulationController.KERNEL_SPACE.size)/numberPhysicalAddressesPerPageFrameDec);
         // Create a local variable, which represents the physical address of the next list entry to write a page frames base address to.
         var addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
         // Loop, until all available page frames have been added to the list.
@@ -439,7 +439,7 @@ export class Simulator {
         const pageTable: Array<PageTableEntry> = new Array<PageTableEntry>();
         var physicalAddressOfCurrentPageFrameDec: number = 0;
         var physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);  
-        while (physicalAddressOfCurrentPageFrameDec < Simulator.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC - 1) {
+        while (physicalAddressOfCurrentPageFrameDec < SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC - 1) {
             let pageTableEntry: PageTableEntry;
             let presentFlag: boolean = false;
             let writableFlag: boolean = false;
@@ -447,7 +447,7 @@ export class Simulator {
             let accessableOnlyInKernelModeFlag: boolean = false;
             let changedFlag: boolean = false;
             let pinnedFlag: boolean = true;
-            if (Simulator.KERNEL_SPACE.inRange(physicalAddressOfCurrentPageFrame)) {
+            if (SimulationController.KERNEL_SPACE.inRange(physicalAddressOfCurrentPageFrame)) {
                 /**
                  * This is the part of the virtual address space, where the kernel space is mapped to.
                  * The kernel space can only be accessed in kernel mode and is read-only. Some parts of
@@ -533,7 +533,7 @@ export class Simulator {
             }
             pageTable.push(pageTableEntry);
             physicalAddressOfCurrentPageFrameDec += addressesPerPageFrameDec;
-            if (physicalAddressOfCurrentPageFrameDec > Simulator.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
+            if (physicalAddressOfCurrentPageFrameDec > SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
                 break;
             }
             physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);

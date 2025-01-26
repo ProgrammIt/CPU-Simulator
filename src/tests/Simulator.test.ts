@@ -1,8 +1,8 @@
-import { Simulator } from "../simulator/Simulator";
+import { SimulationController } from "../simulator/Simulator";
 import { DoubleWord } from "../binary_types/DoubleWord";
 
 describe('Test Simulator', () => {
-    const simulator: Simulator = Simulator.getInstance(Math.pow(2, 32));
+    const simulator: SimulationController = SimulationController.getInstance(Math.pow(2, 32));
     simulator.bootProcess("./assembly/examples/loop.asm");
     
     test('Test if PTP register points to a valid page table entry', () => {
