@@ -1,4 +1,4 @@
-import { SimulationController } from "../simulator/Simulator";
+import { SimulationController } from "../simulator/SimulationController";
 import { DoubleWord } from "../binary_types/DoubleWord";
 
 describe('Test Simulator', () => {

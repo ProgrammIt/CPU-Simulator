@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, shell } from "electron";
 import path from 'path';
-import { SimulationController } from "./simulator/Simulator";
+import { SimulationController } from "./simulator/SimulationController";
 import { DoubleWord } from "./binary_types/DoubleWord";
 import { twosComplementToDecimal } from "./helper";
 import { NumberSystems } from "./enumerations/NumberSystems";
