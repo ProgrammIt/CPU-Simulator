@@ -282,7 +282,7 @@ app.whenReady().then(() => {
 		return result;
 	});
 
-	ipcMain.handle("readEDX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
+	ipcMain.handle("readECX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
 		const content: DoubleWord = simulator.core.edx.content;
 		var result: string = twosComplementToDecimal(content).toString(basis);
 		var result: string;

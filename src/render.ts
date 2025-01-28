@@ -67,15 +67,15 @@ class Renderer {
     public dataRepresentationEBX: NumberSystem;
 
     /**
-     * This field stores a reference to the HTMLElement representing the EDX register.
+     * This field stores a reference to the HTMLElement representing the ECX register.
      * @readonly
      */
-    private readonly _edx: HTMLElement | null;
+    private readonly _ecx: HTMLElement | null;
 
     /**
-     * This field stores the currently selected representation of the data for the EDX register.
+     * This field stores the currently selected representation of the data for the ECX register.
      */
-    public dataRepresentationEDX: NumberSystem;
+    public dataRepresentationECX: NumberSystem;
 
     /**
      * This field stores a reference to the HTMLElement representing the EIP register.
@@ -486,10 +486,10 @@ class Renderer {
     }
 
     /**
-     * This callback is used as the change listeners logic for the GUI element, which visualizes the EDX register.
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the ECX register.
      * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
      */
-    private readonly onChangeListenerEDX: EventListenerOrEventListenerObject = (event: Event): void => {
+    private readonly onChangeListenerECX: EventListenerOrEventListenerObject = (event: Event): void => {
         const target: HTMLSelectElement = event.target as HTMLSelectElement;
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
@@ -499,14 +499,14 @@ class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationEDX = NumberSystem.DEC;
-                this.readEDX(10);
+                this.dataRepresentationECX = NumberSystem.DEC;
+                this.readECX(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationEDX = NumberSystem.HEX;
-                this.readEDX(16);
+                this.dataRepresentationECX = NumberSystem.HEX;
+                this.readECX(16);
             } else {
-                this.dataRepresentationEDX = NumberSystem.BIN;
-                this.readEDX(2);
+                this.dataRepresentationECX = NumberSystem.BIN;
+                this.readECX(2);
             }
         }
         return;
@@ -751,8 +751,8 @@ class Renderer {
         this.dataRepresentationEAX = NumberSystem.BIN;
         this._ebx = document.getElementById("ebx");
         this.dataRepresentationEBX = NumberSystem.BIN;
-        this._edx = document.getElementById("edx");
-        this.dataRepresentationEDX = NumberSystem.BIN;
+        this._ecx = document.getElementById("edx");
+        this.dataRepresentationECX = NumberSystem.BIN;
         this._eflags = document.getElementById("eflags");
         this._eip = document.getElementById("eip");
         this.dataRepresentationEIP = NumberSystem.BIN;
@@ -812,7 +812,7 @@ class Renderer {
                     eventListener = this.onChangeListenerEBX;
                     break;
                 case "edx":
-                    eventListener = this.onChangeListenerEDX;
+                    eventListener = this.onChangeListenerECX;
                     break;
                 case "vmptr":
                     eventListener = this.onChangeListenerVMPTR;
@@ -1192,12 +1192,12 @@ class Renderer {
     }
 
     /**
-     * This method reads the content of the EDX register.
+     * This method reads the content of the ECX register.
      */
-    public async readEDX(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readEDX(radix);
-        if (this._edx !== null) {
-            this._edx.children.namedItem("register-content")!.textContent = content;
+    public async readECX(radix: NumberSystem): Promise<void> {
+        const content: string = await this._window.simulator.readECX(radix);
+        if (this._ecx !== null) {
+            this._ecx.children.namedItem("register-content")!.textContent = content;
         }
         return;
     }
@@ -1373,7 +1373,7 @@ class Renderer {
         // await this.reloadPageTableView();
         await renderer.readEAX(renderer.dataRepresentationEAX);
         await renderer.readEBX(renderer.dataRepresentationEBX);
-        await renderer.readEDX(renderer.dataRepresentationEDX);
+        await renderer.readECX(renderer.dataRepresentationECX);
         await renderer.readEFLAGS();
         await renderer.readEIP(renderer.dataRepresentationEIP);
         // TODO: Hide until a new place for the GUI element, representing the EIR register, is found.
@@ -1402,7 +1402,7 @@ window.simulator.onLoadedAssemblyProgram(async (filePath: string[]) => {
     // await renderer.createPageTableView();
     await renderer.readEAX(renderer.dataRepresentationEAX);
     await renderer.readEBX(renderer.dataRepresentationEBX);
-    await renderer.readEDX(renderer.dataRepresentationEDX);
+    await renderer.readECX(renderer.dataRepresentationECX);
     await renderer.readEFLAGS();
     await renderer.readEIP(renderer.dataRepresentationEIP);
     // TODO: Hide until a new place for the GUI element, representing the EIR register, is found.

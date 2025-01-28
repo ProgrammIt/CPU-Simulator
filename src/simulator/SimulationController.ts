@@ -573,7 +573,7 @@ export class SimulationController {
                 this.core.eax.content = error.addressOfPageTableEntry;
                 // Load physical base address of list with available page frames into EBX register.
                 this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
-                // Load phyiscal base address of list with used page frames into EDX register.
+                // Load phyiscal base address of list with used page frames into ECX register.
                 this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                 // Call interrupt handler.
                 this.core.int(new InstructionOperand(
@@ -629,7 +629,7 @@ export class SimulationController {
                     this.core.eax.content = error.addressOfPageTableEntry;
                     // Load physical base address of list with available page frames into EBX register.
                     this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
-                    // Load phyiscal base address of list with used page frames into EDX register.
+                    // Load phyiscal base address of list with used page frames into ECX register.
                     this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                     // Call interrupt handler.
                     this.core.int(new InstructionOperand(

@@ -25,7 +25,7 @@ contextBridge.exposeInMainWorld("simulator", {
 	nextCycle: () => ipcRenderer.invoke("nextCycle"),
 	readEAX: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readEAX", radix),
 	readEBX: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readEBX", radix),
-	readEDX: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readEDX", radix),
+	readECX: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readECX", radix),
 	readEIP: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readEIP", radix),
 	readEFLAGS: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readEFLAGS", radix),
 	readEIR: (asInstruction: boolean): Promise<string> => ipcRenderer.invoke("readEIR", asInstruction),

@@ -177,7 +177,7 @@ export class CPUCore {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
-        this.edx = new GeneralPurposeRegister("EDX");
+        this.edx = new GeneralPurposeRegister("ECX");
         this.eip = new PointerRegister("EIP");
         this.eflags = new EFLAGS();
         this.eir = new InstructionRegister();
@@ -2334,7 +2334,7 @@ export class CPUCore {
             case EncodedReadableRegisters.EBX:
                 register = this.ebx;
                 break;
-            case EncodedReadableRegisters.EDX:
+            case EncodedReadableRegisters.ECX:
                 register = this.edx;
                 break;
             case EncodedReadableRegisters.EIP:
@@ -2385,7 +2385,7 @@ export class CPUCore {
             case EncodedWritableRegisters.EBX:
                 register = this.ebx;
                 break;
-            case EncodedWritableRegisters.EDX:
+            case EncodedWritableRegisters.ECX:
                 register = this.edx;
                 break;
             case EncodedWritableRegisters.EIP:
