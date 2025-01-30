@@ -24,7 +24,17 @@ export class Address extends DoubleWord {
 			0, 0, 0, 0
 		)
 	) {
-		super(value);
+		super(new Array<Bit>(
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		));
+		this.value = value;
 	}
 
 	/**

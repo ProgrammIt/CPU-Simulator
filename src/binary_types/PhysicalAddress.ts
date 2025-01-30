@@ -21,6 +21,16 @@ export class PhysicalAddress extends Address {
 			0, 0, 0, 0
 		)
 	) {
-		super(value.slice());
+		super(new Array<Bit>(
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		));
+		this.value = value;
 	}
 }
