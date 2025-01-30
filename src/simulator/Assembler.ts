@@ -35,7 +35,7 @@ export class Assembler {
 		fileContents.split(Assembler.NEW_LINE_REGEX).forEach((line, lineNo) => {
 			var lineWithoutComment: string = line.trim().replace(commentRegex, "");
 			if (lineWithoutComment.length !== 0) {
-				// Store line of code in map regardless whether its an empty line or not.
+				// Store line of code in map.
 				lines.set(lineNo, lineWithoutComment);
 			}
 			
