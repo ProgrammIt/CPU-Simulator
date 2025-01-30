@@ -10,15 +10,13 @@ export class Assembler {
   	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
   	public readonly languageDefinition: AssemblyLanguageDefinition;
 	public readonly translations: Map<string, DoubleWord[]>;
-	public readonly processingWidth: DataSizes;
 
 	/**
 	 * Constructs a new assembler object with the given processing width.
 	 * @param processingWidth The processing width of the computer system the assembler is used for.
 	 * @param pathToLanguageDefinition The path to the language definition file of the assembly language used by this assembler.
 	 */
-  	public constructor(processingWidth: DataSizes, pathToLanguageDefinition: string = "./settings/language_definition.json") {
-		this.processingWidth = processingWidth;
+  	public constructor(pathToLanguageDefinition: string = "./settings/language_definition.json") {
 		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
 		this.translations = new Map<string, DoubleWord[]>();
   	}
@@ -355,11 +353,11 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeBinaryValue(operand: string, line: number): DoubleWord {
-		if (operand.length > this.processingWidth) {
-			throw Error(`In line ${line + 1}: Binary immediate consists of more than ${this.processingWidth} bits.`);
+		if (operand.length > DataSizes.DOUBLEWORD) {
+			throw Error(`In line ${line + 1}: Binary immediate consists of more than ${DataSizes.DOUBLEWORD} bits.`);
 		}
 		// Sign extend binary value.
-		operand = operand.padStart(this.processingWidth, operand.charAt(0));
+		operand = operand.padStart(DataSizes.DOUBLEWORD, operand.charAt(0));
 		const binaryValue: DoubleWord = new DoubleWord();
 		operand.split("").map((bit, index) => {
 			binaryValue.value[index] = (bit === "0") ? 0 : 1;
@@ -411,11 +409,11 @@ export class Assembler {
 	 * @throws An error if the given operands binary memory address is invalid.
 	 */
 	private encodeBinaryAddress(operand: string, line: number): VirtualAddress {
-		if (operand.length > this.processingWidth) {
-			throw Error(`In line ${line + 1}: Binary memory address consists of more than ${this.processingWidth} bits.`);
+		if (operand.length > DataSizes.DOUBLEWORD) {
+			throw Error(`In line ${line + 1}: Binary memory address consists of more than ${DataSizes.DOUBLEWORD} bits.`);
 		}
 		// Extend binary address with zeros if necessary.
-		operand = operand.padStart(this.processingWidth, "0");
+		operand = operand.padStart(DataSizes.DOUBLEWORD, "0");
 		return VirtualAddress.fromInteger(parseInt(operand, 2));
 	}
 
@@ -487,7 +485,7 @@ export class Assembler {
 		register = register.replace("%", "").toLowerCase().trim();
 		for (const reg of this.languageDefinition.addressable_registers) {
 			if (register === reg.name.toLowerCase()) {
-				const tmp: string = reg.code.padStart(this.processingWidth, "0");
+				const tmp: string = reg.code.padStart(DataSizes.DOUBLEWORD, "0");
 				const encodedRegister: DoubleWord = new DoubleWord();
 				tmp.split("").forEach((bit, index) => {
 					encodedRegister.value[index] = (bit === "0") ? 0 : 1;

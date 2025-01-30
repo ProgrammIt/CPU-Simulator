@@ -106,7 +106,7 @@ export class SimulationController {
     private constructor(capacityOfMainMemory: number, processingWidth: DataSizes = DataSizes.DOUBLEWORD) {
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.core = new CPUCore(this.mainMemory, processingWidth);
-        this._assembler = new Assembler(processingWidth);
+        this._assembler = new Assembler();
         this._programmLoaded = false;
         this._physicalAddressSpaceListOfAvailablePageFrames =  undefined;
         this._physicalAddressSpaceListOfUsedPageFrames = undefined;
