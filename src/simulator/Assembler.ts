@@ -52,7 +52,7 @@ export class Assembler {
 		// Locate jump labels and put them into the list of lines to delete.
 		var lineNumbersMarkedForDeletion: number[] = [];
 		for (let [lineNo, line] of lines.entries()) {	
-			if (line.match(this.languageDefinition.label_formats.declaration)) {
+			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
 				lineNumbersMarkedForDeletion.push(lineNo);
 			}
 		}
@@ -193,16 +193,16 @@ export class Assembler {
 		 * later, because the keys in the map do not have to be consecutive, as blank lines 
 		 * have been removed from the original source text.
 		 */
-		var virtualAddressOfInstructionFollowingLabel: number = 0;
+		var programLocationCounter: number = 0;
 		for (let [lineNo, line] of lines.entries()) {
-			if (line.match(/\.[\S]+:/gim)) {
+			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
 				let jumpLabel = line.replace(/\.|:/gim, "");
 				jumpLabels.set(
 					jumpLabel, 
-					VirtualAddress.fromInteger(virtualAddressOfInstructionFollowingLabel).toString()
+					VirtualAddress.fromInteger(programLocationCounter).toString()
 				);
 			} else {
-				virtualAddressOfInstructionFollowingLabel += 12;
+				programLocationCounter += 12;
 			}
 		}
 		return jumpLabels;
