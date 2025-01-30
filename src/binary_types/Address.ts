@@ -48,20 +48,6 @@ export class Address extends DoubleWord {
 	}
 
 	/**
-	 * Converts the binary value into a string representation.
-	 * @returns The string representation of the binary value.
-	 */
-	public toString(groupBytes: boolean = false): string {
-		var result: string = "";
-		if (groupBytes) {
-			result = `${this.value[0]}${this.value[1]}${this._value[2]}${this._value[3]}${this.value[4]}${this.value[5]}${this._value[6]}${this._value[7]} ${this.value[8]}${this.value[9]}${this._value[10]}${this._value[11]}${this.value[12]}${this.value[13]}${this._value[14]}${this._value[15]} ${this.value[16]}${this.value[17]}${this._value[18]}${this._value[19]}${this.value[20]}${this.value[21]}${this._value[22]}${this._value[23]} ${this.value[24]}${this.value[25]}${this._value[26]}${this._value[27]}${this.value[28]}${this.value[29]}${this._value[30]}${this._value[31]}`;
-		} else {
-			result = this._value.join("");
-		}
-		return result;
-	}
-
-	/**
 	 * This method creates an instance from the given number.
 	 * Throws an error, if the given number is not an integer.
 	 * @param integer The number to initialize the new instances value with.
