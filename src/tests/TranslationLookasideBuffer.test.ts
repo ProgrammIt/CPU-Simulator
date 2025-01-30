@@ -22,7 +22,7 @@ describe("Test TLB", () => {
     const pageTableEntry2: PageTableEntry = new PageTableEntry(pageFlagBits2, pageFrameNbr2);
 
     const virtualAddress3: VirtualAddress = VirtualAddress.fromInteger(300);
-    const pageFrameNbr3: Array<Bit> = PhysicalAddress.fromInteger(10).getMostSignificantBits(24);
+    const pageFrameNbr3: Array<Bit> = PhysicalAddress.fromInteger(10).getMostSignificantBits(20);
     const pageFlagBits3: Array<Bit> = new Array<Bit>(1,0,1,0, 1,0,0,0, 0,0,0,0);
     const pageTableEntry3: PageTableEntry = new PageTableEntry(pageFlagBits3, pageFrameNbr3);
     
