@@ -31,20 +31,15 @@ export class Assembler {
 	private preprocess(fileContents: string): Map<number, string> {
 		var lines: Map<number, string> = new Map();
 		// Split file contents into lines of code, remove comments and mark empty lines for deletion
-		var linesMarkedForDeletion: number[] = [];
 		const commentRegex = new RegExp(this.languageDefinition.comment_format, "gim");
 		fileContents.split(Assembler.NEW_LINE_REGEX).forEach((line, lineNo) => {
 			var lineWithoutComment: string = line.trim().replace(commentRegex, "");
-			if (lineWithoutComment.length === 0) {
-				linesMarkedForDeletion.push(lineNo);
+			if (lineWithoutComment.length !== 0) {
+				// Store line of code in map regardless whether its an empty line or not.
+				lines.set(lineNo, lineWithoutComment);
 			}
-			// Store line of code in map regardless whether its an empty line or not.
-			lines.set(lineNo, lineWithoutComment);
+			
 		});
-		// Delete empty lines.
-		for (let lineNo of linesMarkedForDeletion) {
-			lines.delete(lineNo);
-		}
 		return lines;
 	}
 
