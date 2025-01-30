@@ -332,6 +332,8 @@ export class MemoryManagementUnit {
             contentOfPageTableEntry.value.slice(0, MemoryManagementUnit.NUMBER_FLAG_BITS),
             contentOfPageTableEntry.value.slice(-MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
         );
+        // Enter user mode.
+        this._flags.enterUserMode();
         return pageTableEntry;
     }
 }
