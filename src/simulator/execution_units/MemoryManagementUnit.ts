@@ -316,11 +316,6 @@ export class MemoryManagementUnit {
      * @returns The page table entry.
      */
     private searchPageTable(virtualAddress: VirtualAddress): PageTableEntry {
-        // Check if kernel mode was activated before this method was called.
-        var wasInKernelMode: boolean = false;
-        if (this._flags.isInKernelMode()) {
-            wasInKernelMode = true;
-        }
         // Enter kernel mode in order to be able to search the page table.
         this._flags.enterKernelMode();
         // Create a physical address from the given virtual address, by removing the offset and right pad zero bits.
@@ -336,11 +331,7 @@ export class MemoryManagementUnit {
         const pageTableEntry: PageTableEntry = new PageTableEntry(
             contentOfPageTableEntry.value.slice(0, MemoryManagementUnit.NUMBER_FLAG_BITS),
             contentOfPageTableEntry.value.slice(-MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
-        );        
-        if (!wasInKernelMode) {
-            // Exit kernel mode.
-            this._flags.enterUserMode();
-        }
+        );
         return pageTableEntry;
     }
 }
