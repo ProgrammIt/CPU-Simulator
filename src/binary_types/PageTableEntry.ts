@@ -33,6 +33,12 @@ export class PageTableEntry {
      * @constructor
      */
     public constructor(flagBits: Array<Bit>, frameNbr: Array<Bit>) {
+        if (flagBits.length !== PageTableEntry.NUMBER_OF_BITS_FOR_FLAGS_DEC) {
+            throw new Error(`The number of flag bits must be exactly ${PageTableEntry.NUMBER_OF_BITS_FOR_FLAGS_DEC}: ${flagBits.length} given.`);
+        }
+        if (frameNbr.length !== PageTableEntry.NUMBER_OF_BITS_FOR_PAGE_FRAME_NUMBER_DEC) {
+            throw new Error(`The number of bits for the page frame number must be exactly ${PageTableEntry.NUMBER_OF_BITS_FOR_PAGE_FRAME_NUMBER_DEC}: ${frameNbr.length} given.`);
+        }
         this.flagBits = flagBits;
         this.frameNbr = frameNbr;
     }
