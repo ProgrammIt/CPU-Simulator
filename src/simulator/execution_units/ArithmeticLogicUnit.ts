@@ -461,6 +461,8 @@ export class ArithmeticLogicUnit {
     public div(dividend: DoubleWord, divisor: DoubleWord): DoubleWord {
         var quotient: DoubleWord = new DoubleWord();
         var flipQuotientSign: boolean = false;
+        // Save the current flags.
+        const oldFlags: Bit[] = this._eflags.content.value.slice();
         this.checkForZero(divisor);
         if (this._eflags.zero === 1) {
             throw new DivisionByZeroError("Dividing by zero is not permittet.");
@@ -492,6 +494,8 @@ export class ArithmeticLogicUnit {
         if (flipQuotientSign) {
             quotient = this.neg(quotient);
         }
+        // Restore the old flags.
+        this._eflags.content.value = oldFlags;
         return quotient;
     }
 
