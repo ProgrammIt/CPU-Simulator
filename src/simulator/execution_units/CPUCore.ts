@@ -2158,7 +2158,7 @@ export class CPUCore {
             new InstructionOperand(
                 EncodedAddressingModes.DIRECT, 
                 EncodedOperandTypes.MEMORY_ADDRESS, 
-                target.value)
+                systemSubroutineAddress)
         );
         return;
     }
