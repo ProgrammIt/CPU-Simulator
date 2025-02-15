@@ -1,6 +1,8 @@
 import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
 import { EFLAGS } from "../simulator/functional_units/EFLAGS";
 import { DoubleWord } from "../binary_types/DoubleWord";
+import { Byte } from "../binary_types/Byte";
+import { Bit } from "../binary_types/Bit";
 
 describe("Test ALU", () => {
     const flags: EFLAGS = new EFLAGS();
@@ -205,16 +207,48 @@ describe("Test ALU", () => {
         expect(testDoubleword.toString()).toEqual("111111111111111111111111110000000");
     });
 
-    test("Right shift doubleword one bit", () => {
+    test("Perform logical right shift on doubleword", () => {
         const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        alu.rightShift<DoubleWord>(testDoubleword1);
-        expect(testDoubleword1.toString()).toEqual("11111111111111111111111111000000");
+        alu.logicalRightShift<DoubleWord>(testDoubleword1);
+        expect(testDoubleword1.toString()).toEqual("01111111111111111111111111000000");
+        // 11111111111111111111111110000000
+        // 01111111111111111111111111000000
     });
 
-    test("Left shift doubleword one bit", () => {
+    test("Perform arithmetic right shift on doubleword", () => {
         const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        alu.leftShift<DoubleWord>(testDoubleword1);
+        alu.arithmeticRightShift<DoubleWord>(testDoubleword1);
+        expect(testDoubleword1.toString()).toEqual("11111111111111111111111111000000");
+        // 11111111111111111111111110000000
+        // 11111111111111111111111111000000
+    });
+
+    test("Perform arithmetic right shift on doubleword and check shifted bit", () => {
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const shiftedBit: Bit = alu.arithmeticRightShift<DoubleWord>(testDoubleword1);
+        expect(shiftedBit.toString()).toEqual("0");
+    });
+
+    test("Perform arithmetic right shift on byte and check shifted bit", () => {
+        const testByte: Byte = new Byte([1, 0, 0, 0, 0, 0, 1, 1]);
+        const shiftedBit: Bit = alu.logicalLeftShift<Byte>(testByte);
+        expect(shiftedBit.toString()).toEqual("1");
+    });
+
+    test("Perform logical left shift on doubleword", () => {
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        alu.logicalLeftShift<DoubleWord>(testDoubleword1);
         expect(testDoubleword1.toString()).toEqual("11111111111111111111111100000000");
+        // 11111111111111111111111110000000
+        // 11111111111111111111111100000000
+    });
+
+    test("Left shift byte one bit", () => {
+        const testByte: Byte = new Byte([1, 0, 0, 0, 0, 0, 1, 1]);
+        alu.logicalLeftShift<Byte>(testByte);
+        expect(testByte.toString()).toEqual("00000110");
+        // 10000011
+        // 00000110
     });
 
     test("Perform MUL on binary representation of decimal 128 and binary representation of decimal 255", () => {
