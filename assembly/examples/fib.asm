@@ -1,3 +1,5 @@
+; Author: Jannik Rosendahl <jannik.rosendahl@stud.hs-hannover.de>
+
 ; calculates the n'th fibonacci number with 2 < n
 
 ; a = 0
