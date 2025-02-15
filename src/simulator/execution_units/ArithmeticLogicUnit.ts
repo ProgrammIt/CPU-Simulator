@@ -389,16 +389,35 @@ export class ArithmeticLogicUnit {
      * @param operand The operand to perform a right shift on.
      * @returns The bit right shifted.
      */
-    public rightShift<T extends BinaryValue>(operand: T): Bit {
-        const copy: QuadWord = new QuadWord(operand.value.slice());
-        for (let index = 0; index < copy.value.length - 1; ++index) {
-            const bitToShift: Bit = copy.value[index];
-            if (index === 0) {
-                operand.value[index] = bitToShift;
-            }
-            operand.value[index + 1] = bitToShift;
+    public logicalRightShift<T extends BinaryValue>(operand: T): Bit {
+        // 1011 COPY
+        // 0101 RESULT
+        const copy: Array<Bit> = operand.value.slice();
+        const removedBit: Bit = copy[copy.length - 1];
+        var bitToShift: Bit = 0;
+        for (let index = 0; index < copy.length; ++index) {
+            operand.value[index] = bitToShift;
+            bitToShift = copy[index];
         }
-        return copy.value[copy.value.length - 1];
+        return removedBit;
+    }
+
+    /**
+     * This method performs an arithmetic shift on the given binary value one bit to the right.
+     * @param operand The operand to perform a right shift on.
+     * @returns The bit right shifted.
+     */
+    public arithmeticRightShift<T extends BinaryValue>(operand: T): Bit {
+        // 1011 COPY
+        // 1101 RESULT
+        const copy: Array<Bit> = operand.value.slice();
+        const removedBit: Bit = copy[copy.length - 1];
+        var bitToShift: Bit = copy[0];
+        for (let index = 0; index < copy.length; ++index) {
+            operand.value[index] = bitToShift;
+            bitToShift = copy[index];
+        }
+        return removedBit;
     }
 
     /**
@@ -406,16 +425,17 @@ export class ArithmeticLogicUnit {
      * @param operand The operand to perform a right shift on.
      * @returns The bit left shifted.
      */
-    public leftShift<T extends BinaryValue>(operand: T): Bit {
+    public logicalLeftShift<T extends BinaryValue>(operand: T): Bit {
+        // 1011 COPY
+        // 0110 RESULT
         const copy: Array<Bit> = operand.value.slice();
-        for (let index = copy.length - 1; index > 0; --index) {
-            const bitToShift: Bit = copy[index];
-            if (index === 0) {
-                operand.value[index] = 0;
-            }
-            operand.value[index - 1] = bitToShift;
+        const removedBit: Bit = copy[0];
+        var bitToShift: Bit = 0;
+        for (let index = copy.length - 1; index >= 0; --index) {
+            operand.value[index] = bitToShift;
+            bitToShift = copy[index];
         }
-        return copy[0];
+        return removedBit;
     }
 
     /**
@@ -441,7 +461,7 @@ export class ArithmeticLogicUnit {
                 a = this.add(a, m);
             }
             tmp.value = a.value.slice().concat(q.value.slice()).concat(q_1);
-            this.rightShift<BinaryValue>(tmp);
+            this.arithmeticRightShift<BinaryValue>(tmp);
             a.value = tmp.value.slice(0, DataSizes.DOUBLEWORD);
             q.value = tmp.value.slice(DataSizes.DOUBLEWORD, 64);
             q_1 = tmp.value[tmp.value.length - 1];
