@@ -19,5 +19,10 @@
     "theme": "default",
     "darkHighlightTheme": "dark-plus",
     "lightHighlightTheme": "light-plus",
-    "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"]
+    "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
+    "cleanOutputDir": false,
+    "plugin": [
+        "typedoc-material-theme"
+    ],
+    "themeColor": "#cb9820",
 }
