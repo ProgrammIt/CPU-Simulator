@@ -463,7 +463,7 @@ export class ArithmeticLogicUnit {
             tmp.value = a.value.slice().concat(q.value.slice()).concat(q_1);
             this.arithmeticRightShift<BinaryValue>(tmp);
             a.value = tmp.value.slice(0, DataSizes.DOUBLEWORD);
-            q.value = tmp.value.slice(DataSizes.DOUBLEWORD, 64);
+            q.value = tmp.value.slice(DataSizes.DOUBLEWORD, DataSizes.QUADWORD);
             q_1 = tmp.value[tmp.value.length - 1];
             --cnt;
         }
