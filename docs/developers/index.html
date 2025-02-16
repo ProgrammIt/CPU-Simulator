@@ -1,3 +1,438 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="."><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ihme-core-x1-simulator</title><meta name="description" content="Documentation for ihme-core-x1-simulator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script><script async src="assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search"><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">ihme-core-x1-simulator</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>ihme-core-x1-simulator</h1></div><div class="tsd-panel tsd-typography"><a id="cpu-simulator" class="tsd-anchor"></a><h1 class="tsd-anchor-link">CPU-Simulator<a href="#cpu-simulator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1><p>A simple, graphical CPU simulator for teaching students the concepts and internal process of modern CPUs and virtualization.
-Take a look at our <a href="https://programmit.github.io/CPU-Simulator/">website</a>!</p>
-</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#cpu-simulator"><span>CPU-<wbr/>Simulator</span></a></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">ihme-core-x1-simulator</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
+<!DOCTYPE html>
+<html class="default" lang="en" data-base=".">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <title>ihme-core-x1-simulator</title>
+    <meta name="description" content="Documentation for ihme-core-x1-simulator" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/highlight.css" />
+    <script defer src="assets/main.js"></script>
+    <script async src="assets/icons.js" id="tsd-icons-script"></script>
+    <script async src="assets/search.js" id="tsd-search-script"></script>
+    <script async src="assets/navigation.js" id="tsd-nav-script"></script>
+    <script async src="assets/hierarchy.js" id="tsd-hierarchy-script"></script>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: #f6be46;
+                --md-sys-color-on-primary: #412d00;
+                --md-sys-color-primary-container: #5d4200;
+                --md-sys-color-on-primary-container: #ffdea3;
+                --md-sys-color-secondary: #d9c4a0;
+                --md-sys-color-on-secondary: #3b2f15;
+                --md-sys-color-secondary-container: #53452a;
+                --md-sys-color-on-secondary-container: #f6e0bb;
+                --md-sys-color-tertiary: #b2cfa8;
+                --md-sys-color-on-tertiary: #1e361a;
+                --md-sys-color-tertiary-container: #344d2f;
+                --md-sys-color-on-tertiary-container: #cdebc2;
+                --md-sys-color-error: #ffb4ab;
+                --md-sys-color-on-error: #690005;
+                --md-sys-color-error-container: #93000a;
+                --md-sys-color-on-error-container: #ffb4ab;
+                --md-sys-color-background: #1e1b16;
+                --md-sys-color-on-background: #e9e1d9;
+                --md-sys-color-surface: #1e1b16;
+                --md-sys-color-on-surface: #e9e1d9;
+                --md-sys-color-surface-variant: #4e4639;
+                --md-sys-color-on-surface-variant: #d1c5b4;
+                --md-sys-color-outline: #9a8f80;
+                --md-sys-color-outline-variant: #4e4639;
+                --md-sys-color-shadow: #000000;
+                --md-sys-color-scrim: #000000;
+                --md-sys-color-inverse-surface: #e9e1d9;
+                --md-sys-color-inverse-on-surface: #34302a;
+                --md-sys-color-inverse-primary: #7a5900;
+                --md-sys-color-surface-dim: #16130e;
+                --md-sys-color-surface-bright: #3d3933;
+                --md-sys-color-surface-container-lowest: #110e09;
+                --md-sys-color-surface-container-low: #1e1b16;
+                --md-sys-color-surface-container: #221f1a;
+                --md-sys-color-surface-container-high: #2d2924;
+                --md-sys-color-surface-container-highest: #38342e
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --md-sys-color-primary: #f6be46;
+            --md-sys-color-on-primary: #412d00;
+            --md-sys-color-primary-container: #5d4200;
+            --md-sys-color-on-primary-container: #ffdea3;
+            --md-sys-color-secondary: #d9c4a0;
+            --md-sys-color-on-secondary: #3b2f15;
+            --md-sys-color-secondary-container: #53452a;
+            --md-sys-color-on-secondary-container: #f6e0bb;
+            --md-sys-color-tertiary: #b2cfa8;
+            --md-sys-color-on-tertiary: #1e361a;
+            --md-sys-color-tertiary-container: #344d2f;
+            --md-sys-color-on-tertiary-container: #cdebc2;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-error-container: #93000a;
+            --md-sys-color-on-error-container: #ffb4ab;
+            --md-sys-color-background: #1e1b16;
+            --md-sys-color-on-background: #e9e1d9;
+            --md-sys-color-surface: #1e1b16;
+            --md-sys-color-on-surface: #e9e1d9;
+            --md-sys-color-surface-variant: #4e4639;
+            --md-sys-color-on-surface-variant: #d1c5b4;
+            --md-sys-color-outline: #9a8f80;
+            --md-sys-color-outline-variant: #4e4639;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #e9e1d9;
+            --md-sys-color-inverse-on-surface: #34302a;
+            --md-sys-color-inverse-primary: #7a5900;
+            --md-sys-color-surface-dim: #16130e;
+            --md-sys-color-surface-bright: #3d3933;
+            --md-sys-color-surface-container-lowest: #110e09;
+            --md-sys-color-surface-container-low: #1e1b16;
+            --md-sys-color-surface-container: #221f1a;
+            --md-sys-color-surface-container-high: #2d2924;
+            --md-sys-color-surface-container-highest: #38342e
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --md-sys-color-primary: #7a5900;
+                --md-sys-color-on-primary: #ffffff;
+                --md-sys-color-primary-container: #ffdea3;
+                --md-sys-color-on-primary-container: #261900;
+                --md-sys-color-secondary: #6c5c3f;
+                --md-sys-color-on-secondary: #ffffff;
+                --md-sys-color-secondary-container: #f6e0bb;
+                --md-sys-color-on-secondary-container: #251a04;
+                --md-sys-color-tertiary: #4b6545;
+                --md-sys-color-on-tertiary: #ffffff;
+                --md-sys-color-tertiary-container: #cdebc2;
+                --md-sys-color-on-tertiary-container: #092007;
+                --md-sys-color-error: #ba1a1a;
+                --md-sys-color-on-error: #ffffff;
+                --md-sys-color-error-container: #ffdad6;
+                --md-sys-color-on-error-container: #410002;
+                --md-sys-color-background: #fffbff;
+                --md-sys-color-on-background: #1e1b16;
+                --md-sys-color-surface: #fffbff;
+                --md-sys-color-on-surface: #1e1b16;
+                --md-sys-color-surface-variant: #ede1cf;
+                --md-sys-color-on-surface-variant: #4e4639;
+                --md-sys-color-outline: #7f7667;
+                --md-sys-color-outline-variant: #d1c5b4;
+                --md-sys-color-shadow: #000000;
+                --md-sys-color-scrim: #000000;
+                --md-sys-color-inverse-surface: #34302a;
+                --md-sys-color-inverse-on-surface: #f8efe7;
+                --md-sys-color-inverse-primary: #f6be46;
+                --md-sys-color-surface-dim: #e1d9d0;
+                --md-sys-color-surface-bright: #fff8f2;
+                --md-sys-color-surface-container-lowest: #ffffff;
+                --md-sys-color-surface-container-low: #fbf2e9;
+                --md-sys-color-surface-container: #f5ede4;
+                --md-sys-color-surface-container-high: #efe7de;
+                --md-sys-color-surface-container-highest: #e9e1d9
+            }
+        }
+
+        :root[data-theme="light"] {
+            --md-sys-color-primary: #7a5900;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #ffdea3;
+            --md-sys-color-on-primary-container: #261900;
+            --md-sys-color-secondary: #6c5c3f;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-secondary-container: #f6e0bb;
+            --md-sys-color-on-secondary-container: #251a04;
+            --md-sys-color-tertiary: #4b6545;
+            --md-sys-color-on-tertiary: #ffffff;
+            --md-sys-color-tertiary-container: #cdebc2;
+            --md-sys-color-on-tertiary-container: #092007;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-error-container: #ffdad6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #fffbff;
+            --md-sys-color-on-background: #1e1b16;
+            --md-sys-color-surface: #fffbff;
+            --md-sys-color-on-surface: #1e1b16;
+            --md-sys-color-surface-variant: #ede1cf;
+            --md-sys-color-on-surface-variant: #4e4639;
+            --md-sys-color-outline: #7f7667;
+            --md-sys-color-outline-variant: #d1c5b4;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #34302a;
+            --md-sys-color-inverse-on-surface: #f8efe7;
+            --md-sys-color-inverse-primary: #f6be46;
+            --md-sys-color-surface-dim: #e1d9d0;
+            --md-sys-color-surface-bright: #fff8f2;
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #fbf2e9;
+            --md-sys-color-surface-container: #f5ede4;
+            --md-sys-color-surface-container-high: #efe7de;
+            --md-sys-color-surface-container-highest: #e9e1d9
+        }
+    </style>
+    <link rel="stylesheet" href="assets/material-style.css" />
+</head>
+
+<body>
+    <script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"; document.body.style.display = "none"; setTimeout(() => app ? app.showPage() : document.body.style.removeProperty("display"), 500)</script>
+    <header class="tsd-page-toolbar">
+        <div class="tsd-toolbar-contents container">
+            <div class="table-cell" id="tsd-search">
+                <div class="field"><label for="tsd-search-field"
+                        class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16"
+                            viewBox="0 0 16 16" fill="none">
+                            <use href="assets/icons.svg#icon-search"></use>
+                        </svg></label><input type="text" id="tsd-search-field" aria-label="Search" /></div>
+                <div class="field">
+                    <div id="tsd-toolbar-links"></div>
+                </div>
+                <ul class="results">
+                    <li class="state loading">Preparing search index...</li>
+                    <li class="state failure">The search index is not available</li>
+                </ul><a href="index.html" class="title">ihme-core-x1-simulator</a>
+            </div>
+            <div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption"
+                    data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <use href="assets/icons.svg#icon-menu"></use>
+                    </svg></a></div>
+        </div>
+    </header>
+    <div class="container container-main">
+        <div class="col-content">
+            <div class="tsd-page-title">
+                <h1>ihme-core-x1-simulator</h1>
+            </div>
+            <div class="tsd-panel tsd-typography"><a id="cpu-simulator" class="tsd-anchor"></a>
+                <h1 class="tsd-anchor-link">CPU-Simulator<a href="#cpu-simulator" aria-label="Permalink"
+                        class="tsd-anchor-icon"><svg viewBox="0 0 24 24">
+                            <use href="assets/icons.svg#icon-anchor"></use>
+                        </svg></a></h1>
+                <p>
+                    A simple, graphical CPU simulator for teaching students the concepts and internal process of modern
+                    CPUs and virtualization.
+                </p>
+                <section>
+                    <h2>Setup an Developement Environment</h2>
+                    <p>
+                        In order to setup a developement environment you need to intsall <i>Node.js</i>,
+                        a code editor like <i>Visual Studio Code</i> and the version control system <i>Git</i>.
+                        Please make sure to install the latest version of both <i>Node.js</i> and <i>Git</i> on your system.
+                    </p>
+                    <p>
+                        If you are not sure in which order you should
+                        install the software mentioned above, you can follow this step-by-step
+                        guide:
+                    </p>
+                    <p>
+                        We will start, by installing the version control system <i>Git</i>.
+                        In order to install the version control system <i>Git</i>, please refer to the installation
+                        instructions for your operating system found on the offical
+                        <a href="https://git-scm.com/">website</a>.
+                        After downloading the latest installer, please
+                        follow the instructions of the wizard. Using the
+                        default settings is recommended for inexperienced users.
+                        If you are new to <i>Git</i>, feel free to take a look at the offical beginners
+                        <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">handbook</a>.
+                    </p>
+                    <p></p>
+                    After installing <i>Git</i>, we will continue the setup process by downloading <i>Node.js</i>
+                    from the official<a href="https://nodejs.org/en/">website</a>.
+                    Detailed installation instructions can be found in the documentation section there.
+                    For managing the projects dependencies the package manager <i>npm</i> is used. There are some
+                    other package managers as well, like <i>yarn</i>, so you need to choose the installer,
+                    that installs <i>npm</i> alongside <i>Node.js</i>. After downloading the installer, please
+                    follow the instructions of the wizard.
+                    <p></p>
+                    <p>
+                        Lastly, you need to install a code editor of
+                        your choice. If you are new to software developement, feel free
+                        to use Microsoft's <i>Visual Studion Code</i>, as it is a versatlie, free and open-source code editor.
+                        You can download the latest version from the official <a href="https://code.visualstudio.com/">website</a>.
+                        After downloading the installer, please follow
+                        the instructions of the wizard. Using the default settings is
+                        recommended for inexperienced users.
+                    </p>
+                    <p>
+                        If you decided to use <i>Visual Studio Code</i>, you can install some extensions, to enhance your developement
+                        experience. Some recommended extensions are:
+                
+                    </p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    Extension
+                                </th>
+                                <th>
+                                    Description
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <i>mikestead.dotenv</i>
+                                </td>
+                                <td>
+                                    This extension adds syntax highlighting for <i>.env</i> files.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>dbaeumer.vscode-eslint</i>
+                                </td>
+                                <td>
+                                    This extension adds linting support for JavaScript files.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>mhutchie.git-graph</i>
+                                </td>
+                                <td>
+                                    This extension visualizes the commit history of this project.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>orta.vscode-jest</i>
+                                </td>
+                                <td>
+                                    This extension adds support for the Jest testing framework.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>christian-kohler.npm-intellisense</i>
+                                </td>
+                                <td>
+                                    This extension autocompletes npm modules in import statements.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>jock.svg</i>
+                                </td>
+                                <td>
+                                    This extension adds support for displaying SVG files in <i>Visual Studio Code</i>.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i>editorconfig.editorconfig</i>
+                                </td>
+                                <td>
+                                    This extension adds support for the <i>.editorconfig</i> file, which
+                                    is used to configure <i>Visual Studio Code</i>.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                
+                    In order to install the proposed extensions,
+                    head over to the extensions tab on the left side. The extensions
+                    tab can be opened by clicking on the icon which
+                    consists out of four squares. After clicking on the icon, you
+                    can search for the extensions names and install
+                    them.
+                    <p></p>
+                </section>
+            </div>
+        </div>
+        <div class="col-sidebar">
+            <div class="page-menu">
+                <div class="tsd-navigation settings">
+                    <details class="tsd-accordion">
+                        <summary class="tsd-accordion-summary">
+                            <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <use href="assets/icons.svg#icon-chevronDown"></use>
+                                </svg>Settings</h3>
+                        </summary>
+                        <div class="tsd-accordion-details">
+                            <div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+                                <ul id="tsd-filter-options">
+                                    <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox"
+                                                id="tsd-filter-protected" name="protected" /><svg width="32" height="32"
+                                                viewBox="0 0 32 32" aria-hidden="true">
+                                                <rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1"
+                                                    rx="6" fill="none"></rect>
+                                                <path class="tsd-checkbox-checkmark"
+                                                    d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none"
+                                                    stroke-width="3.5" stroke-linejoin="round" fill="none"></path>
+                                            </svg><span>Protected</span></label></li>
+                                    <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox"
+                                                id="tsd-filter-inherited" name="inherited" checked /><svg width="32"
+                                                height="32" viewBox="0 0 32 32" aria-hidden="true">
+                                                <rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1"
+                                                    rx="6" fill="none"></rect>
+                                                <path class="tsd-checkbox-checkmark"
+                                                    d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none"
+                                                    stroke-width="3.5" stroke-linejoin="round" fill="none"></path>
+                                            </svg><span>Inherited</span></label></li>
+                                    <li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox"
+                                                id="tsd-filter-external" name="external" /><svg width="32" height="32"
+                                                viewBox="0 0 32 32" aria-hidden="true">
+                                                <rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1"
+                                                    rx="6" fill="none"></rect>
+                                                <path class="tsd-checkbox-checkmark"
+                                                    d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none"
+                                                    stroke-width="3.5" stroke-linejoin="round" fill="none"></path>
+                                            </svg><span>External</span></label></li>
+                                </ul>
+                            </div>
+                            <div class="tsd-theme-toggle"><label class="settings-label"
+                                    for="tsd-theme">Theme</label><select id="tsd-theme">
+                                    <option value="os">OS</option>
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                </select></div>
+                        </div>
+                    </details>
+                </div>
+                <details open class="tsd-accordion tsd-page-navigation">
+                    <summary class="tsd-accordion-summary">
+                        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <use href="assets/icons.svg#icon-chevronDown"></use>
+                            </svg>On This Page</h3>
+                    </summary>
+                    <div class="tsd-accordion-details"><a href="#cpu-simulator"><span>CPU-<wbr/>Simulator</span></a>
+                    </div>
+                </details>
+            </div>
+            <div class="site-menu">
+                <nav class="tsd-navigation"><a href="modules.html">ihme-core-x1-simulator</a>
+                    <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+                        <li>Loading...</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+    </footer>
+    <div class="overlay"></div>
+    <script>
+        try {
+            const generateLinkElement = document.querySelector(".tsd-generator a");
+            const link = document.createElement("a");
+            Object.assign(link, {
+                href: "https://github.com/dmnsgn/typedoc-material-theme",
+                target: "_blank",
+                rel: "noreferrer",
+                innerText: "typedoc-material-theme."
+            });
+            generateLinkElement.insertAdjacentElement("afterend", link);
+            generateLinkElement.insertAdjacentText("afterend", " with ");
+        } catch (error) {
+
+        }
+    </script>
+</body>
+
+</html>
