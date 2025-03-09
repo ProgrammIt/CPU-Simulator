@@ -7,6 +7,15 @@ import { NumberSystems } from "./enumerations/NumberSystems";
 import { PhysicalAddress } from "./binary_types/PhysicalAddress";
 import { Byte } from "./binary_types/Byte";
 
+/**
+ * @document docs/static/README.md
+ */
+
+/**
+ * This method creates the main window of the application.
+ * @param win An instance of the BrowserWindow class.
+ * @param simulator The controller of the simulation.
+ */
 const createWindow = (win: BrowserWindow, simulator: SimulationController) => {
 	const menu = Menu.buildFromTemplate([
 		{
