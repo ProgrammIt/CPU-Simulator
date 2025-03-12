@@ -1,7 +1,7 @@
 /**
  * This enumeration is a duplicate of the one, that can be
  * found in src/types/types.ts. This is intended, as imports
- * are problemativ to use in frontend. Maybe there is a solution.
+ * are problematic to use in frontend. Maybe there is a solution.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 enum NumberSystem {
@@ -23,7 +23,7 @@ class Renderer {
 
     /**
      * This class member stores the number of bits representing the page frame number.
-     * The page frame number can be extracted from a phyiscal memory address by removing the offset bits from the right.
+     * The page frame number can be extracted from a physical memory address by removing the offset bits from the right.
      * @readonly
      */
     public static readonly NUMBER_BITS_PAGE_FRAME_ADDRESS: number = 20;
