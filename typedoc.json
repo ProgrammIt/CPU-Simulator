@@ -1,6 +1,14 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "out": "./docs/",
+    "outputs": [
+        {
+            "name": "html",
+            "path": "./docs/html"
+        },
+    ],
+    "projectDocuments": [
+        "docs/static/*.md"
+    ],
     "basePath": "./",
     "hostedBaseUrl": "https://programmit.github.io/CPU-Simulator/",
     "entryPoints": ["./src/"],
