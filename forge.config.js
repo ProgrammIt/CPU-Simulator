@@ -4,23 +4,8 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: 'assets/img/icons/app/icon'
   },
   rebuildConfig: {},
-  publishers: [
-    {
-      name: '@electron-forge/publisher-github',
-      config: {
-        repository: {
-          owner: 'ProgrammIt',
-          name: 'CPU-Simulator'
-        },
-        prerelease: true,
-        draft: true,
-        // authToken: env.GITHUB_TOKEN
-      }
-    }
-  ],
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
