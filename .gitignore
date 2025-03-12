@@ -1,7 +1,10 @@
 # Ignore node_modules directory containing dependencies
 node_modules/
 # Ignore dist directory containing the production build
-out/
+dist/
 # Ignore IDE specific configuration files
 .vscode/
 .idea/
+.env
+# Ignore the build output
+out/
