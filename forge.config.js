@@ -11,7 +11,7 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         // The ICO file to use as the icon for the generated Setup.exe
-        setupIcon: '/assets/icons/app/icon.ico'
+        setupIcon: './assets/img/icons/app/icon.ico'
       },
     },
     {
@@ -22,7 +22,7 @@ module.exports = {
       name: '@electron-forge/maker-deb',
       config: {
         options: {
-          icon: '/assets/icons/app/icon.png'
+          icon: './assets/img/icons/app/icon.png'
         }
       },
     },
