@@ -7,6 +7,10 @@ import { NumberSystems } from "./enumerations/NumberSystems";
 import { PhysicalAddress } from "./binary_types/PhysicalAddress";
 import { Byte } from "./binary_types/Byte";
 
+if (require('electron-squirrel-startup')) {
+	app.quit();
+}
+
 /**
  * This method creates the main window of the application.
  * @param win An instance of the BrowserWindow class.
@@ -176,6 +180,8 @@ const createWindow = (win: BrowserWindow, simulator: SimulationController) => {
 	Menu.setApplicationMenu(menu);
   	win.loadFile("./src/index.html");
 };
+
+app.setAppUserModelId("de.hs-hannover.IhmeCoreX1Simulator.IhmeCoreX1Simulator");
 
 app.whenReady().then(() => {
 	const win = new BrowserWindow({
