@@ -4,32 +4,67 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
+    icon: './assets/img/icons/app/icon'
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        // The ICO file to use as the icon for the generated Setup.exe
-        setupIcon: './assets/img/icons/app/icon.ico'
+        asar: true,
+        dir: 'dist',
+        setupIcon: './assets/img/icons/app/icon.ico',
+        // certificateFile: './cert.pfx',
+        // certificatePassword: process.env.CERTIFICATE_PASSWORD,
+        appDirectory: '/tmp/build/Ihme-Core X1 Simulator-win32-x64',
+        setupExe: 'Ihme-Core X1 Simulator-Setup.exe',
+        setupMsi: 'Ihme-Core X1 Simulator-Setup.msi',
+        noMsi: false,
+        overwrite: true,
+        prune: true,
+        platforms: ['win32'],
+        iconURL: 'https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/img/icons/app/icon.ico',
       },
     },
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
+      platforms: ['darwin', 'win32'],
     },
     {
       name: '@electron-forge/maker-deb',
       config: {
         options: {
-          icon: './assets/img/icons/app/icon.png'
+          icon: './assets/img/icons/app/icon.png',
+          maintainer: 'Erik Burmester',
+          homepage: 'https://programmit.github.io/CPU-Simulator/',
+          genericName: 'CPU Simulator',
+          categories: ['Education', 'Computer Science', 'Simulation'],
         }
       },
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        options: {
+          icon: './assets/img/icons/app/icon.png',
+          maintainer: 'Erik Burmester',
+          homepage: 'https://programmit.github.io/CPU-Simulator/',
+          genericName: 'CPU Simulator',
+          categories: ['Education', 'Computer Science', 'Simulation'],
+          license: 'MIT',
+        }
+      },
     },
+    {
+      name: '@electron-forge/maker-dmg',
+      config: {
+        options: {
+          icon: './assets/img/icons/app/icon@2x.icns',
+          iconSize: 1024,
+
+        }
+      }
+    }
   ],
   plugins: [
     {
