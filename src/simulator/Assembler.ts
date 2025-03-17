@@ -7,8 +7,8 @@ import { DoubleWord } from "../binary_types/DoubleWord";
 import { VirtualAddress } from "../binary_types/VirtualAddress";
 
 export class Assembler {
-  	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
-  	public readonly languageDefinition: AssemblyLanguageDefinition;
+	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
+	public readonly languageDefinition: AssemblyLanguageDefinition;
 	public readonly translations: Map<string, DoubleWord[]>;
 
 	/**
@@ -16,10 +16,10 @@ export class Assembler {
 	 * @param processingWidth The processing width of the computer system the assembler is used for.
 	 * @param pathToLanguageDefinition The path to the language definition file of the assembly language used by this assembler.
 	 */
-  	public constructor(pathToLanguageDefinition: string = "./settings/language_definition.json") {
+	public constructor(pathToLanguageDefinition: string) {
 		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
 		this.translations = new Map<string, DoubleWord[]>();
-  	}
+	}
 
 	/**
 	 * This method preprocesses the file contents of a computer program written in assembly language.
@@ -29,11 +29,11 @@ export class Assembler {
 	 * @returns A map, which maps line numbers to strings representing the original programs lines of code.
 	 */
 	private preprocess(fileContents: string): Map<number, string> {
-		var lines: Map<number, string> = new Map();
+		const lines: Map<number, string> = new Map();
 		// Split file contents into lines of code, remove comments and mark empty lines for deletion
 		const commentRegex = new RegExp(this.languageDefinition.comment_format, "gim");
 		fileContents.split(Assembler.NEW_LINE_REGEX).forEach((line, lineNo) => {
-			var lineWithoutComment: string = line.trim().replace(commentRegex, "");
+			const lineWithoutComment: string = line.trim().replace(commentRegex, "");
 			if (lineWithoutComment.length !== 0) {
 				// Store line of code in map.
 				lines.set(lineNo, lineWithoutComment);
@@ -50,14 +50,14 @@ export class Assembler {
 	 */
 	private removeJumpLabels(lines: Map<number, string>): Map<number, string> {
 		// Locate jump labels and put them into the list of lines to delete.
-		var lineNumbersMarkedForDeletion: number[] = [];
-		for (let [lineNo, line] of lines.entries()) {	
+		const lineNumbersMarkedForDeletion: number[] = [];
+		for (const [lineNo, line] of lines.entries()) {	
 			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
 				lineNumbersMarkedForDeletion.push(lineNo);
 			}
 		}
 		// Remove jump labels from the list of lines.
-		for (let lineNo of lineNumbersMarkedForDeletion) {
+		for (const lineNo of lineNumbersMarkedForDeletion) {
 			lines.delete(lineNo);
 		}
 		return lines;
@@ -69,20 +69,20 @@ export class Assembler {
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
 	private encode(lines: Map<number, string>): DoubleWord[] {
-		var lineEncoded: boolean = false;
-		var encodedInstructions: DoubleWord[] = [];
-		var jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
+		let lineEncoded = false;
+		const encodedInstructions: DoubleWord[] = [];
+		const jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
 
 		// Remove jump labels as they will not be encoded.
 		lines = this.removeJumpLabels(lines);
 		
 		// Iterate lines of code.
-		for (let [lineNo, line] of lines.entries()) {
+		for (const [lineNo, line] of lines.entries()) {
 			
 			lineEncoded = false;
 			
 			// For every line of code, search for a contained instruction.
-			for (let instruction of this.languageDefinition.instructions) {
+			for (const instruction of this.languageDefinition.instructions) {
 				const illegalCombosOfOperandTypes: {__SOURCE__: string, __TARGET__: string}[] | undefined 
 					= instruction.illegal_combinations_of_operand_types;
 				
@@ -93,8 +93,8 @@ export class Assembler {
 					 * The instruction expects two operands. Iterate over all possible combinations of operand types
 					 * and check if the resulting regex matches the current line of code.
 					 */
-					for (let operand1TypeString of operand1.allowed_types) {
-						for (let operand2TypeString of operand2.allowed_types) {
+					for (const operand1TypeString of operand1.allowed_types) {
+						for (const operand2TypeString of operand2.allowed_types) {
 							const regexInstructionString: string = instruction.regex;
 							// Create a combination of operand types.
 							const typeCombination: { __SOURCE__: string, __TARGET__: string } 
@@ -110,7 +110,7 @@ export class Assembler {
 							const operand2TypeDefinition: {name: string; code: string; regex: string;}
 								= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
 							// Create a regex for the current combination of operand types.
-							const regexInstruction: RegExp = new RegExp(
+							const regexInstruction = new RegExp(
 								regexInstructionString
 									.replace(operand1.name, operand1TypeDefinition.regex)
 									.replace(operand2.name, operand2TypeDefinition.regex), 
@@ -137,13 +137,13 @@ export class Assembler {
 					/**
 					 * This instruction expects only one operand. Iterate over all possible types of the operand.
 					 */
-					for (let operandTypeString of operand.allowed_types) {
+					for (const operandTypeString of operand.allowed_types) {
 						const regexInstructionString: string = instruction.regex;
 						// Locate the operand type of the first operand in the language definition.
 						const operandTypeDefinition: {name: string; code: string; regex: string;}
 							= this.languageDefinition.operand_types.find((current) => current.name === operandTypeString)!;
 						// Create a regex for the current operand type.
-						const regexInstruction: RegExp = new RegExp(
+						const regexInstruction = new RegExp(
 							regexInstructionString.replace(operand.name, operandTypeDefinition.regex), 
 							"gim"
 						);
@@ -161,7 +161,7 @@ export class Assembler {
 					}
 				} else {
 					// Instruction has no operands.
-					const regexInstruction: RegExp = new RegExp(instruction.regex, "gim");
+					const regexInstruction = new RegExp(instruction.regex, "gim");
 					const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 					if (regexMatchArrayInstruction !== null) {
 						// Instruction found. Encode it.
@@ -187,16 +187,16 @@ export class Assembler {
 	 * @returns A map of jump labels and their associated (virtual) memory address.
 	 */
 	private locateJumpLabels(lines: Map<number, string>) : Map<string, string> {
-		var jumpLabels: Map<string, string> = new Map();
+		const jumpLabels: Map<string, string> = new Map();
 		/**
 		 * Use this variable in order to count the instructions, that need to be encoded
 		 * later, because the keys in the map do not have to be consecutive, as blank lines 
 		 * have been removed from the original source text.
 		 */
-		var programLocationCounter: number = 0;
-		for (let [lineNo, line] of lines.entries()) {
+		let programLocationCounter = 0;
+		for (const [lineNo, line] of lines.entries()) {
 			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
-				let jumpLabel = line.replace(/\.|:/gim, "");
+				const jumpLabel = line.replace(/\.|:/gim, "");
 				jumpLabels.set(
 					jumpLabel, 
 					VirtualAddress.fromInteger(programLocationCounter).toString()
@@ -217,19 +217,19 @@ export class Assembler {
 	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
 	 */
 	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): DoubleWord[] {
-		var encodedInstruction: DoubleWord = new DoubleWord();
-		var addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
-		var typeOperand1: Array<Bit> = new Array<Bit>(7);
-		var addressingModeOperand2: Array<Bit> = new Array<Bit>(2);
-		var typeOperand2: Array<Bit> = new Array<Bit>(7);
-		var encodedOperandValue1: DoubleWord = new DoubleWord();
-		var encodedOperandValue2: DoubleWord = new DoubleWord();
-		var instructionType: Array<Bit> = new Array<Bit>(3);
-		var opcode: Array<Bit> = new Array<Bit>(7);
-		var instructionMnemonic: string = regexMatchArrayInstruction[1];
+		const encodedInstruction: DoubleWord = new DoubleWord();
+		let addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
+		let typeOperand1: Array<Bit> = new Array<Bit>(7);
+		let addressingModeOperand2: Array<Bit> = new Array<Bit>(2);
+		let typeOperand2: Array<Bit> = new Array<Bit>(7);
+		let encodedOperandValue1: DoubleWord = new DoubleWord();
+		let encodedOperandValue2: DoubleWord = new DoubleWord();
+		let instructionType: Array<Bit> = new Array<Bit>(3);
+		const opcode: Array<Bit> = new Array<Bit>(7);
+		const instructionMnemonic: string = regexMatchArrayInstruction[1];
 		const delimeter: Array<Bit> = new Array<Bit>(1, 1);
 
-		for (let instruction of this.languageDefinition.instructions) {
+		for (const instruction of this.languageDefinition.instructions) {
 			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
 				instructionType = this.encodeInstructionType(instruction.type, line);
 				instruction.opcode.split("").forEach((bit, index) => {
@@ -305,7 +305,7 @@ export class Assembler {
 	 * @returns The binary encoded operand
 	 */
 	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): DoubleWord {
-		var operand32BitEncoded: DoubleWord;
+		let operand32BitEncoded: DoubleWord;
 		if (operand.length === 0) {
 			operand32BitEncoded = new DoubleWord();
 		} else if (jumpLabels.has(operand)) {
@@ -367,7 +367,7 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeHexadecimalValue(operand: string, line: number): DoubleWord {
-		let operandDec: number = 0;
+		let operandDec = 0;
 		if (operand.startsWith("-")) {
 			// Negative hex value.
 			operandDec = (parseInt(operand.replace("-", ""), 16) * -1);
@@ -385,7 +385,7 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeDecimalValue(operand: string, line: number): DoubleWord {
-		let operandDec: number = 0;
+		let operandDec = 0;
 		if (operand.startsWith("-")) {
 			// Negative dec value.
 			operandDec = (parseInt(operand.replace("-", ""), 10) * -1);
@@ -420,7 +420,7 @@ export class Assembler {
 	 * @throws An error if the given operands hexadecimal memory address is invalid.
 	 */
 	private encodeHexadecimalAddress(operand: string, line: number): VirtualAddress {
-		var virtualAddress: VirtualAddress;
+		let virtualAddress: VirtualAddress;
 		try {
 			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 16));
 		} catch (error) {
@@ -437,7 +437,7 @@ export class Assembler {
 	 * @throws An error if the given operands decimal memory address is invalid.
 	 */
 	private encodeDecimalAddress(operand: string, line: number): VirtualAddress {
-		var virtualAddress: VirtualAddress;
+		let virtualAddress: VirtualAddress;
 		try {
 			virtualAddress = VirtualAddress.fromInteger(parseInt(operand, 10));
 		} catch (error) {
@@ -453,7 +453,7 @@ export class Assembler {
 	 * @returns The binary encoded operands type.
 	 */
 	private encodeOperandType(operand: string, line: number): Array<Bit> {
-		var encodedType: Array<Bit> = new Array<Bit>(7);
+		let encodedType: Array<Bit> = new Array<Bit>(7);
 		if (operand.length === 0) {
 			encodedType = new Array<Bit>(7).fill(0);
 		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
@@ -498,7 +498,7 @@ export class Assembler {
 	 * @returns A string of zeros and ones representing the instructions type.
 	 */
 	private encodeInstructionType(type: string, line: number): Array<Bit> {
-		var encodedType: Array<Bit> = new Array<Bit>(3).fill(0);
+		let encodedType: Array<Bit> = new Array<Bit>(3).fill(0);
 		switch (type.toUpperCase()) {
 		case "R":
 			encodedType = new Array<Bit>(1, 0, 0);

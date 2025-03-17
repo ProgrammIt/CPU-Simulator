@@ -84,6 +84,11 @@ export class SimulationController {
     private _virtualAddressSpaceCodeSegment: AddressSpace<VirtualAddress> | undefined;
 
     /**
+     * This field stores the path to the assembly files.
+     */
+    private _pathToAssemblyFiles: string;
+
+    /**
      * This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
      */
     public autoScrollForVirtualRAMEnabled: boolean;
@@ -101,12 +106,14 @@ export class SimulationController {
     /**
      * Creates a new instance.
      * @param capacityOfMainMemory The initial capacity of the main memory. This value can not be modified after the simulator started.
+     * @param pathToLanguageDefinition The path to the language definition file.
+     * @param pathToAssemblyFiles The path to the assembly files.
      * @param [processingWidth=DataSizes.DOUBLEWORD] The processing width of the simulated CPU.
      */
-    private constructor(capacityOfMainMemory: number, processingWidth: DataSizes = DataSizes.DOUBLEWORD) {
+    private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToAssemblyFiles: string, processingWidth: DataSizes = DataSizes.DOUBLEWORD) {
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.core = new CPUCore(this.mainMemory, processingWidth);
-        this._assembler = new Assembler();
+        this._assembler = new Assembler(pathToLanguageDefinition);
         this._programmLoaded = false;
         this._physicalAddressSpaceListOfAvailablePageFrames =  undefined;
         this._physicalAddressSpaceListOfUsedPageFrames = undefined;
@@ -118,6 +125,7 @@ export class SimulationController {
         this.autoScrollForPageTableEnabled = true;
         this.autoScrollForPhysicalRAMEnabled = true;
         this.autoScrollForVirtualRAMEnabled = true;
+        this._pathToAssemblyFiles = pathToAssemblyFiles;
     }
 
     /**
@@ -130,12 +138,14 @@ export class SimulationController {
 
     /**
      * This method can be used to retrieve an initialized instance of the simulator.
-     * @param capacityOfMainMemory 
+     * @param capacityOfMainMemory
+     * @param pathToLanguageDefinition
+     * @param pathToAssemblyFiles
      * @returns 
      */
-    public static getInstance(capacityOfMainMemory: number): SimulationController {
+    public static getInstance(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToAssemblyFiles: string): SimulationController {
         if (SimulationController._instance === null) {
-            SimulationController._instance = new SimulationController(capacityOfMainMemory);
+            SimulationController._instance = new SimulationController(capacityOfMainMemory, pathToLanguageDefinition, pathToAssemblyFiles);
             SimulationController._instance.bootKernel();
         }
         return SimulationController._instance;
@@ -151,8 +161,8 @@ export class SimulationController {
         // Enable real mode and disable memory virtualization.
         this.core.mmu.disableMemoryVirtualization();
         // Compile and write interrupt handlers.
-        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync("./assembly/os/interrupt_handler/mount_page_frame.asm", "utf-8"));
-        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync("./assembly/os/interrupt_handler/unmount_page_frame.asm", "utf-8"));
+        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}/os/interrupt_handler/mount_page_frame.asm`, "utf-8"));
+        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}/os/interrupt_handler/unmount_page_frame.asm`, "utf-8"));
         // -> TODO: Compile other interrupt handlers
         // Load interrupt handlers into kernel space.
         const baseAddressesInterruptHandlers: Array<PhysicalAddress> = this.loadInterruptHandlers(
@@ -207,7 +217,7 @@ export class SimulationController {
      */
     private loadInterruptHandlers(highestPhysicalAddress: PhysicalAddress, compiledInterruptHandlers: Array<Array<DoubleWord>>): Array<PhysicalAddress> {
         const baseAddresses: Array<PhysicalAddress> = new Array<PhysicalAddress>();
-        var currentPhysicalAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
+        let currentPhysicalAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         // Load the given interrupt handlers to kernel space.
         for (const compiledInterruptHandler of compiledInterruptHandlers) {
             baseAddresses.push(this.loadInterruptHandler(PhysicalAddress.fromInteger(currentPhysicalAddressDec), compiledInterruptHandler));
@@ -228,7 +238,7 @@ export class SimulationController {
      */
     private loadInterruptHandler(highestPhysicalAddress: PhysicalAddress, compiledIRH: DoubleWord[]): PhysicalAddress {
         // Load compiled interrupt handler into the main memory.
-        var currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
+        let currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
         for (const binaryValue of compiledIRH) {
             const physicalAddress: PhysicalAddress = PhysicalAddress.fromInteger(currentAddressDec);
             this.mainMemory.writeDoublewordTo(physicalAddress, binaryValue);
@@ -244,7 +254,7 @@ export class SimulationController {
      * @returns The physical base address of the interrupt table, which is the lowest physical address of the interrupt table.
      */
     private initializeInterruptTable(highestPhysicalAddress: PhysicalAddress, baseAddressesInterruptHandlers: DoubleWord[]): PhysicalAddress {
-        var currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
+        let currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         for (const physicalBaseAddress of Array.from(baseAddressesInterruptHandlers).reverse()) {
             currentAddressDec -= 4;
             // Write physical address of interrupt handler into main memory.
@@ -289,9 +299,9 @@ export class SimulationController {
         const availablePhysicalAddressesDec: number = (Math.pow(2, DataSizes.DOUBLEWORD) - SimulationController.KERNEL_SPACE.size);
         const numberOfAvailablePageFrames: number = Math.floor(availablePhysicalAddressesDec/numberPhysicalAddressesPerPageFrameDec);
         // Create a local variable, which represents the physical address of the next list entry to write a page frames base address to.
-        var addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
+        let addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         // Create a local variable, which represents the physical base address of the page frame.
-        var pageFrameBaseAddressDec: number = numberPhysicalAddressesPerPageFrameDec * (numberOfAvailablePageFrames - 1);
+        let pageFrameBaseAddressDec: number = numberPhysicalAddressesPerPageFrameDec * (numberOfAvailablePageFrames - 1);
         // Loop, until all available page frames have been added to the list.
         for (let i = numberOfAvailablePageFrames - 1; i >= 0; --i) {
             // Increment the physical address of the lists entry to create the next one during the next loop cycle.
@@ -335,7 +345,7 @@ export class SimulationController {
         const numberTotalAvailablePhysicalAddressesDec: number = Math.pow(2, DataSizes.DOUBLEWORD); // TODO: Use variable!
         const numberOfAvailablePageFrames: number = Math.floor((numberTotalAvailablePhysicalAddressesDec - SimulationController.KERNEL_SPACE.size)/numberPhysicalAddressesPerPageFrameDec);
         // Create a local variable, which represents the physical address of the next list entry to write a page frames base address to.
-        var addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
+        let addressOfListEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
         // Loop, until all available page frames have been added to the list.
         for (let i = numberOfAvailablePageFrames - 1; i >= 0; --i) {
             // Add page frame base address to the list of availabe page frames.
@@ -437,16 +447,16 @@ export class SimulationController {
          * space needs to be write protected.
          */
         const pageTable: Array<PageTableEntry> = new Array<PageTableEntry>();
-        var physicalAddressOfCurrentPageFrameDec: number = 0;
-        var physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);  
+        let physicalAddressOfCurrentPageFrameDec = 0;
+        let physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);  
         while (physicalAddressOfCurrentPageFrameDec < SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC - 1) {
             let pageTableEntry: PageTableEntry;
-            let presentFlag: boolean = false;
-            let writableFlag: boolean = false;
-            let executableFlag: boolean = false;
-            let accessableOnlyInKernelModeFlag: boolean = false;
-            let changedFlag: boolean = false;
-            let pinnedFlag: boolean = true;
+            let presentFlag = false;
+            let writableFlag = false;
+            let executableFlag = false;
+            let accessableOnlyInKernelModeFlag = false;
+            let changedFlag = false;
+            let pinnedFlag = true;
             if (SimulationController.KERNEL_SPACE.inRange(physicalAddressOfCurrentPageFrame)) {
                 /**
                  * This is the part of the virtual address space, where the kernel space is mapped to.
@@ -539,7 +549,7 @@ export class SimulationController {
             physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);
         }
         // TODO: Testen!
-        var physicalAddressOfCurrentPageTableEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
+        let physicalAddressOfCurrentPageTableEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         for (const entry of Array.from(pageTable).reverse()) {
             physicalAddressOfCurrentPageTableEntryDec -= 4;
             this.mainMemory.writeDoublewordTo(
@@ -561,7 +571,7 @@ export class SimulationController {
      * @returns True, if the cycle was performed normally and false, if the cycle could not be performed because the programm has ended.
      */
     public cycle(): boolean {
-        var resultOfCycle: boolean = false;
+        let resultOfCycle = false;
         try {
             resultOfCycle = this.core.cycle();
         } catch(error) {
@@ -611,11 +621,11 @@ export class SimulationController {
      * @throws — {PageFrameNotExecutableError} If the page frame associated with this page is not executable.
      * @throws — {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      */
-    public loadProgramm(compiledProgram: Array<DoubleWord>, virtualBaseAddressDec: number = 0): void {
+    public loadProgramm(compiledProgram: Array<DoubleWord>, virtualBaseAddressDec = 0): void {
         // Enter kernel mode in order to ignore the write-protection for the CODE segment.
         this.core.eflags.enterKernelMode();
         // Load compiled programm into main memory.
-        var currentAddressDec: number = virtualBaseAddressDec;
+        let currentAddressDec: number = virtualBaseAddressDec;
         for (const binaryValue of compiledProgram) {
             const virtualAddress: VirtualAddress = VirtualAddress.fromInteger(currentAddressDec);
             try {
