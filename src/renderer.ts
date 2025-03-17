@@ -26,6 +26,8 @@
  * ```
  */
 
+import './index.css';
+
 /**
  * This enumeration is a duplicate of the one, that can be
  * found in src/types/types.ts. This is intended, as imports
