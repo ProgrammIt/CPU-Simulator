@@ -7,9 +7,14 @@ import { NumberSystems } from './enumerations/NumberSystems';
 declare global {
 	interface Window {
 		mainMemory: any,
-		simulator: any
+		simulator: any,
+		electron: any
 	}
 }
+
+contextBridge.exposeInMainWorld('electron', {
+	getPreloadPath: () => ipcRenderer.sendSync('get-preload-path')
+});
 
 contextBridge.exposeInMainWorld("mainMemory", {
 	readRangeFromPhysicalMemory: (fromPhysicalAddressHexString: string, toPhysicalAddressHexString: string): Promise<Map<string, string>> => 
