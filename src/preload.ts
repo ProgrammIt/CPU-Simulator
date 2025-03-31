@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcRenderer } from 'electron';
-import { NumberSystems } from './enumerations/NumberSystems';
+import { NumberSystems } from './types/enumerations/NumberSystems';
 
 declare global {
 	interface Window {
