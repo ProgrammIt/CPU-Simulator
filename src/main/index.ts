@@ -202,8 +202,8 @@ const createWindow = (): void => {
 	let pathToLanguageDefinition: string;
 	let pathToAssembly: string;
 	if (app.isPackaged) {
-		pathToLanguageDefinition = path.resolve(__dirname, "settings/language_definition.json");
-		pathToAssembly = path.resolve(__dirname, "assembly/");
+		pathToLanguageDefinition = `${process.resourcesPath}/settings/language_definition.json`;
+		pathToAssembly = `${process.resourcesPath}/assembly/`;
 	} else {
 		pathToLanguageDefinition = "./settings/language_definition.json";
 		pathToAssembly = "./assembly/";
