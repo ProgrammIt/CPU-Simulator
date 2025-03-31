@@ -1,14 +1,14 @@
-import { Bit } from "../../binary_types/Bit";
-import { Byte } from "../../binary_types/Byte";
-import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { PageFaultError } from "../../error_types/PageFaultError";
-import { PageFrameNotExecutableError } from "../../error_types/PageFrameNotExecutableError";
-import { PageFrameNotWritableError } from "../../error_types/PageFrameNotWritableError";
-import { PrivilegeViolationError } from "../../error_types/PrivilegeViolationError";
-import { PageTableEntry } from "../../binary_types/PageTableEntry";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
-import { VirtualAddress } from "../../binary_types/VirtualAddress";
+import { Bit } from "../../../types/binary/Bit";
+import { Byte } from "../../../types/binary/Byte";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
+import { PageFaultError } from "../../../types/errors/PageFaultError";
+import { PageFrameNotExecutableError } from "../../../types/errors/PageFrameNotExecutableError";
+import { PageFrameNotWritableError } from "../../../types/errors/PageFrameNotWritableError";
+import { PrivilegeViolationError } from "../../../types/errors/PrivilegeViolationError";
+import { PageTableEntry } from "../../../types/binary/PageTableEntry";
+import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
+import { VirtualAddress } from "../../../types/binary/VirtualAddress";
 import { EFLAGS } from "../functional_units/EFLAGS";
 import { PointerRegister } from "../functional_units/PointerRegister";
 import { RAM } from "../functional_units/RAM";
@@ -229,12 +229,12 @@ export class MemoryManagementUnit {
         const numberOfCellsToClear : number = length/DataSizes.BYTE;
         for (let i = 0; i < numberOfCellsToClear; ++i) {
             // Create virtual memory address from 
-            let currentVirtualAddress: VirtualAddress = VirtualAddress.fromInteger(startVirtualAddress + i);
+            const currentVirtualAddress: VirtualAddress = VirtualAddress.fromInteger(startVirtualAddress + i);
             /**
              * Translate virtual memory address to physical memory address.
              * As this method attempts to clear all bits at the specified address, the corresponding parameter is set to true.
              */
-            let physicalAddress: PhysicalAddress | null = this.translate(currentVirtualAddress, true, false);
+            const physicalAddress: PhysicalAddress | null = this.translate(currentVirtualAddress, true, false);
             // Clear all bits at the resulting physical memory address.
             this._mainMemory.clearByte(physicalAddress);
         }
@@ -257,7 +257,7 @@ export class MemoryManagementUnit {
         if (!this._memoryVirtualizationEnabled) {
             return virtualAddress;
         }
-        var pageTableEntry: PageTableEntry;
+        let pageTableEntry: PageTableEntry;
         if (this._tlb.has(virtualAddress)) {
             pageTableEntry = this._tlb.get(virtualAddress)!;
         } else {
@@ -297,7 +297,7 @@ export class MemoryManagementUnit {
         }
         // Page frame is present and operation is permitted.
         // Create a valid physical memory address from the page frame number and the offset extracted from the given virtual memory address.
-        var physicalAddress: PhysicalAddress = new PhysicalAddress(
+        const physicalAddress: PhysicalAddress = new PhysicalAddress(
             pageTableEntry.frameNbr.concat(virtualAddress.getLeastSignificantBits(MemoryManagementUnit.NUMBER_BITS_OFFSET))
         );
         // Update or insert the physical memory address into the Translation Lookaside Buffer.

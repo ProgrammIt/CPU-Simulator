@@ -1,9 +1,8 @@
-import { BinaryValue } from "../../binary_types/BinaryValue";
-import { Bit } from "../../binary_types/Bit";
-import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { DivisionByZeroError } from "../../error_types/DivisionByZeroError";
-import { QuadWord } from "../../binary_types/QuadWord";
+import { BinaryValue } from "../../../types/binary/BinaryValue";
+import { Bit } from "../../../types/binary/Bit";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
+import { DivisionByZeroError } from "../../../types/errors/DivisionByZeroError";
 import { EFLAGS } from "../functional_units/EFLAGS";
 
 /**
@@ -47,7 +46,7 @@ export class ArithmeticLogicUnit {
      * @returns
      */
     private checkForParity(operand: DoubleWord) {
-        var noSetBits: number = 0;
+        let noSetBits = 0;
         operand.value.slice(-DataSizes.BYTE).forEach(bit => {
             if (bit === 1) {
                 ++noSetBits
@@ -239,7 +238,7 @@ export class ArithmeticLogicUnit {
      */
     public add(firstSummand: DoubleWord, secondSummand: DoubleWord): DoubleWord {
         const result: DoubleWord = new DoubleWord();
-        var carry: Array<Bit> = [0];
+        const carry: Array<Bit> = [0];
 
         for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
@@ -281,7 +280,7 @@ export class ArithmeticLogicUnit {
      */
     public adc(firstSummand: DoubleWord, secondSummand: DoubleWord): DoubleWord {
         const result: DoubleWord = new DoubleWord();
-        var carry: Array<Bit> = (this._eflags.carry === 1) ? [1] : [0];
+        const carry: Array<Bit> = (this._eflags.carry === 1) ? [1] : [0];
         for (let index = DataSizes.DOUBLEWORD - 1; index >= 0; --index) {
             const bitFirstOperand: Bit = firstSummand.value[index];
             const bitSecondOperand: Bit = secondSummand.value[index];
@@ -345,7 +344,7 @@ export class ArithmeticLogicUnit {
      * @returns The difference of the first operand (minuend) and the second operand (subtrahend).
      */
     public sbb(minuend: DoubleWord, subtrahend: DoubleWord): DoubleWord {
-        var carryFlag: Bit = this._eflags.carry;
+        const carryFlag: Bit = this._eflags.carry;
         if (subtrahend.value[0] === 1) {
             /**
              * - -(x) <=> + (x)
@@ -394,7 +393,7 @@ export class ArithmeticLogicUnit {
         // 0101 RESULT
         const copy: Array<Bit> = operand.value.slice();
         const removedBit: Bit = copy[copy.length - 1];
-        var bitToShift: Bit = 0;
+        let bitToShift: Bit = 0;
         for (let index = 0; index < copy.length; ++index) {
             operand.value[index] = bitToShift;
             bitToShift = copy[index];
@@ -412,7 +411,7 @@ export class ArithmeticLogicUnit {
         // 1101 RESULT
         const copy: Array<Bit> = operand.value.slice();
         const removedBit: Bit = copy[copy.length - 1];
-        var bitToShift: Bit = copy[0];
+        let bitToShift: Bit = copy[0];
         for (let index = 0; index < copy.length; ++index) {
             operand.value[index] = bitToShift;
             bitToShift = copy[index];
@@ -430,7 +429,7 @@ export class ArithmeticLogicUnit {
         // 0110 RESULT
         const copy: Array<Bit> = operand.value.slice();
         const removedBit: Bit = copy[0];
-        var bitToShift: Bit = 0;
+        let bitToShift: Bit = 0;
         for (let index = copy.length - 1; index >= 0; --index) {
             operand.value[index] = bitToShift;
             bitToShift = copy[index];
@@ -448,12 +447,12 @@ export class ArithmeticLogicUnit {
      * @returns The resulting product.
      */
     public mul(multiplier: DoubleWord, multiplicand: DoubleWord): DoubleWord {
-        var a: DoubleWord = new DoubleWord();
-        var q_1: Bit = 0;
-        var q: DoubleWord = new DoubleWord(multiplicand.value.slice());
-        var cnt: number = a.value.length;
-        var m: DoubleWord = new DoubleWord(multiplier.value.slice());
-        var tmp: BinaryValue = new BinaryValue(new Array<Bit>((a.value.length * 2) + 1).fill(0));
+        let a: DoubleWord = new DoubleWord();
+        let q_1: Bit = 0;
+        const q: DoubleWord = new DoubleWord(multiplicand.value.slice());
+        let cnt: number = a.value.length;
+        const m: DoubleWord = new DoubleWord(multiplier.value.slice());
+        const tmp: BinaryValue = new BinaryValue(new Array<Bit>((a.value.length * 2) + 1).fill(0));
         while (cnt >= 0) {
             if (q.value[q.value.length - 1] === 1 && q_1 === 0) {
                 a = this.sub(a, m);
@@ -479,8 +478,8 @@ export class ArithmeticLogicUnit {
      * @returns The resulting quotient.
      */
     public div(dividend: DoubleWord, divisor: DoubleWord): DoubleWord {
-        var quotient: DoubleWord = new DoubleWord();
-        var flipQuotientSign: boolean = false;
+        let quotient: DoubleWord = new DoubleWord();
+        let flipQuotientSign = false;
         // Save the current flags.
         const oldFlags: Bit[] = this._eflags.content.value.slice();
         this.checkForZero(divisor);
@@ -544,7 +543,7 @@ export class ArithmeticLogicUnit {
      */
     public test(firstOperand: DoubleWord, secondOperand: DoubleWord) {
         // Create a copy of the second operand.
-        var copy: DoubleWord = new DoubleWord(secondOperand.value.slice());
+        const copy: DoubleWord = new DoubleWord(secondOperand.value.slice());
         this.and(firstOperand, copy);
     }
 }

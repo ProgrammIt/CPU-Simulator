@@ -3,33 +3,32 @@ import { RAM } from "../functional_units/RAM";
 import { GeneralPurposeRegister } from "../functional_units/GeneralPurposeRegister";
 import { MemoryManagementUnit } from "./MemoryManagementUnit";
 import { InstructionDecoder } from "./../InstructionDecoder";
-import { EncodedAddressingModes} from "../../enumerations/EncodedAdressingModes";
-import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { VirtualAddress } from "../../binary_types/VirtualAddress";
-import { Bit } from "../../binary_types/Bit";
+import { EncodedAddressingModes} from "../../../types/enumerations/EncodedAdressingModes";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
+import { VirtualAddress } from "../../../types/binary/VirtualAddress";
+import { Bit } from "../../../types/binary/Bit";
 import { ArithmeticLogicUnit } from "./ArithmeticLogicUnit";
 import { InstructionRegister } from "../functional_units/InstructionRegister";
 import { PointerRegister } from "../functional_units/PointerRegister";
-import { Instruction } from "../../binary_types/Instruction";
-import { InstructionOperand } from "../../binary_types/InstructionOperand";
-import { DecodedInstruction } from "../../binary_types/DecodedInstruction";
-import { Address } from "../../binary_types/Address";
-import { Byte } from "../../binary_types/Byte";
-import { MissingOperandError } from "../../error_types/MissingOperandError";
-import { UnsupportedOperandTypeError } from "../../error_types/UnsupportedOperandTypeError";
+import { Instruction } from "../../../types/binary/Instruction";
+import { InstructionOperand } from "../../../types/binary/InstructionOperand";
+import { DecodedInstruction } from "../../../types/binary/DecodedInstruction";
+import { Address } from "../../../types/binary/Address";
+import { Byte } from "../../../types/binary/Byte";
+import { MissingOperandError } from "../../../types/errors/MissingOperandError";
+import { UnsupportedOperandTypeError } from "../../../types/errors/UnsupportedOperandTypeError";
 import { Register } from "../functional_units/Register";
-import { RegisterNotWritableInUserModeError } from "../../error_types/RegisterNotWritableInUserModeError";
-import { RegisterNotAvailableError } from "../../error_types/RegisterNotAvailableError";
-import { UnknownRegisterError } from "../../error_types/UnknownRegisterError";
-import { PrivilegeViolationError } from "../../error_types/PrivilegeViolationError";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
-import { PageFaultError } from "../../error_types/PageFaultError";
-import { EncodedReadableRegisters } from "../../enumerations/EncodedReadableRegisters";
-import { EncodedWritableRegisters } from "../../enumerations/EncodedWritableRegisters";
-import { EncodedOperations } from "../../enumerations/EncodedOperations";
-import { EncodedInstructionTypes } from "../../enumerations/EncodedInstructionTypes";
-import { EncodedOperandTypes } from "../../enumerations/EncodedOperandTypes";
+import { RegisterNotWritableInUserModeError } from "../../../types/errors/RegisterNotWritableInUserModeError";
+import { RegisterNotAvailableError } from "../../../types/errors/RegisterNotAvailableError";
+import { UnknownRegisterError } from "../../../types/errors/UnknownRegisterError";
+import { PrivilegeViolationError } from "../../../types/errors/PrivilegeViolationError";
+import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
+import { EncodedReadableRegisters } from "../../../types/enumerations/EncodedReadableRegisters";
+import { EncodedWritableRegisters } from "../../../types/enumerations/EncodedWritableRegisters";
+import { EncodedOperations } from "../../../types/enumerations/EncodedOperations";
+import { EncodedInstructionTypes } from "../../../types/enumerations/EncodedInstructionTypes";
+import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandTypes";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.
@@ -292,8 +291,8 @@ export class CPUCore {
         // Retrieve current instruction pointer and convert its binary value to a decimal value.
         const addressOfCurrentInstructionDec: number = parseInt(this.eip.content.toString(), 2);
         // Define variables for decoded operands.
-        var decodedSecondOperand: InstructionOperand | undefined = undefined;
-        var decodedFirstOperand: InstructionOperand | undefined = undefined;
+        let decodedSecondOperand: InstructionOperand | undefined = undefined;
+        let decodedFirstOperand: InstructionOperand | undefined = undefined;
         // Decode second operands value if present.
         if (decodedTypeSecondOperand !== EncodedOperandTypes.NO) {            
             /**
@@ -356,7 +355,7 @@ export class CPUCore {
             throw new Error("No instruction is currently ready to be executed.");
         }
         const operation: EncodedOperations = this._decodedInstruction.operation;
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         switch (operation) {
             case EncodedOperations.NOT:
                 this.not(
@@ -560,7 +559,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -572,8 +571,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -619,7 +618,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -631,8 +630,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.        
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -678,7 +677,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -690,8 +689,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.        
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -737,7 +736,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -749,8 +748,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -796,7 +795,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -808,8 +807,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -855,7 +854,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -867,8 +866,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -917,7 +916,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -926,7 +925,7 @@ export class CPUCore {
             );
         }
         // Define variable to write the operands value to.
-        var value: DoubleWord;
+        let value: DoubleWord;
         // Read the binary value from the location defined by the operand.
         if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             value = this.mmu.readDoublewordFrom(target.value, true);
@@ -964,7 +963,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -976,8 +975,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -1023,7 +1022,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1035,8 +1034,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -1082,7 +1081,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1094,8 +1093,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -1140,7 +1139,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1149,7 +1148,7 @@ export class CPUCore {
             );
         } 
         // Define variable to write the operands value to.
-        var operandsValue: DoubleWord;
+        let operandsValue: DoubleWord;
         // Read the binary value from the location defined by the operand.
         if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             operandsValue = this.mmu.readDoublewordFrom(target.value, true);
@@ -1187,7 +1186,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1199,8 +1198,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -1241,7 +1240,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1253,8 +1252,8 @@ export class CPUCore {
             );
         }
         // Define variables to write the operands values to.
-        var firstOperandsValue: DoubleWord;
-        var secondOperandsValue: DoubleWord;
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             firstOperandsValue = source.value;
@@ -1298,7 +1297,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1325,7 +1324,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jz(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1336,7 +1335,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1366,7 +1365,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private je(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // This operation is an alias for the JZ operation.
         try {
             jumpPerformed = this.jz(target);
@@ -1391,7 +1390,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jnz(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1402,7 +1401,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1432,7 +1431,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jne(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // This operation is an alias for the JNZ operation.
         try {
             jumpPerformed = this.jnz(target);
@@ -1457,7 +1456,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jg(target: InstructionOperand): boolean {
-        var jumpPerformed = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1468,7 +1467,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1502,7 +1501,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jge(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1513,7 +1512,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1543,7 +1542,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jl(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1554,7 +1553,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1584,7 +1583,7 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jle(target: InstructionOperand): boolean {
-        var jumpPerformed: boolean = false;
+        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -1595,7 +1594,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1647,7 +1646,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1659,7 +1658,7 @@ export class CPUCore {
             );
         }
         // Define variable to write the operands value to.
-        var valueToMove: DoubleWord;
+        let valueToMove: DoubleWord;
         // Read the binary value from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.IMMEDIATE) {
             valueToMove = source.value;
@@ -1709,7 +1708,7 @@ export class CPUCore {
         // Check if exactly two operands are present.
         if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1721,7 +1720,7 @@ export class CPUCore {
             );
         }
         // Define variable to write the (virtual) memory address to.
-        var address: Address = new Address();
+        let address: Address = new Address();
         // Read the (virtual) memory address from the location defined by the first operand.
         if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             address = source.value;
@@ -1878,7 +1877,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1927,7 +1926,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (source.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (source.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -1938,7 +1937,7 @@ export class CPUCore {
         // Allocate one doubleword (4 byte) on STACK by decrementing ESP.
         this.esp.content = PhysicalAddress.fromInteger(parseInt(this.esp.content.toString(), 2) - 4);
         // Create a variable to store the value to write on STACK.
-        var value: DoubleWord;
+        let value: DoubleWord;
         // Depending on the operand type, the value is read from the main memory or a register.
         if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             // Read the binary value from the (virtual) memory address defined by the given operand.
@@ -1978,7 +1977,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -2044,7 +2043,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -2124,7 +2123,7 @@ export class CPUCore {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
-            let nbrMissingOperands: number = 0;
+            let nbrMissingOperands = 0;
             if (target.type === EncodedOperandTypes.NO) {
                 ++nbrMissingOperands;
             }
@@ -2140,7 +2139,7 @@ export class CPUCore {
             );    
         }
         // Create a variable to store the (virtual) address of the systems subroutine.
-        var systemSubroutineAddress: DoubleWord;
+        let systemSubroutineAddress: DoubleWord;
         // Read the physical address of the systems subroutine from the operand.
         if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             systemSubroutineAddress = target.value;
@@ -2191,7 +2190,9 @@ export class CPUCore {
     /**
      * This method does nothing.
      */
-    private nop(): void {}
+    private nop(): void {
+        return;
+    }
 
     /**
      * This method writes a given doubleword sized binary value to the register defined by the given operand.
@@ -2280,7 +2281,7 @@ export class CPUCore {
      * @returns The binary value red from the register or the referenced (virtual) memory address.
      */
     private readRegister(operand: InstructionOperand): DoubleWord {
-        var doubleword: DoubleWord;
+        let doubleword: DoubleWord;
         // Depending on the addressing mode, the value is read from the register directly or from the referenced (virtual) memory address.
         if (operand.addressingMode === EncodedAddressingModes.INDIRECT) {
             doubleword = this.readRegisterIndirect(operand);
@@ -2326,7 +2327,7 @@ export class CPUCore {
      * @returns The decoded register.
      */
     private decodeReadableRegister(operand: InstructionOperand): Register<DoubleWord> {
-        var register: Register<DoubleWord>;
+        let register: Register<DoubleWord>;
         switch (operand.value.toString()) {
             case EncodedReadableRegisters.EAX:
                 register = this.eax;
@@ -2377,7 +2378,7 @@ export class CPUCore {
      * @returns The decoded register.
      */
     private decodeWritableRegister(operand: InstructionOperand): Register<DoubleWord> {
-        var register: Register<DoubleWord>;
+        let register: Register<DoubleWord>;
         switch (operand.value.toString()) {
             case EncodedWritableRegisters.EAX:
                 register = this.eax;
