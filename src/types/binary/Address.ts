@@ -86,4 +86,4 @@ export class Address extends DoubleWord {
 
 		return address;
 	}
-};
+}

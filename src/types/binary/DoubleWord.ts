@@ -1,4 +1,4 @@
-import { twosComplementToDecimal } from "../helper";
+import { twosComplementToDecimal } from "../../helper";
 import { BinaryValue } from "./BinaryValue";
 import { Bit } from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
@@ -124,8 +124,8 @@ export class DoubleWord extends BinaryValue {
 	 * @param [groupBytes=false] If set to true, the string representation of the binary value is grouped into bytes.
 	 * @returns The string representation of the binary value.
 	 */
-	public toString(groupBytes: boolean = false): string {
-		var result: string = "";
+	public toString(groupBytes = false): string {
+		let result = "";
 		if (groupBytes) {
 			result = `${this.value[0]}${this.value[1]}${this._value[2]}${this._value[3]}${this.value[4]}${this.value[5]}${this._value[6]}${this._value[7]} ${this.value[8]}${this.value[9]}${this._value[10]}${this._value[11]}${this.value[12]}${this.value[13]}${this._value[14]}${this._value[15]} ${this.value[16]}${this.value[17]}${this._value[18]}${this._value[19]}${this.value[20]}${this.value[21]}${this._value[22]}${this._value[23]} ${this.value[24]}${this.value[25]}${this._value[26]}${this._value[27]}${this.value[28]}${this.value[29]}${this._value[30]}${this._value[31]}`;
 		} else {
@@ -149,10 +149,10 @@ export class DoubleWord extends BinaryValue {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.DOUBLEWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 
-		var doubleword: DoubleWord = new DoubleWord();
+		const doubleword: DoubleWord = new DoubleWord();
 
 		// A bit shift converts the given number to a signed 32-bit value.
-		var binaryNumber: string = (integer < 0) ? 
+		const binaryNumber: string = (integer < 0) ? 
 			(integer >>> 0).toString(2) : 
 			integer.toString(2).padStart(DataSizes.DOUBLEWORD, "0");
 
