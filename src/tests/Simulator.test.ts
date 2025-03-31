@@ -1,5 +1,5 @@
-import { SimulationController } from "../simulator/SimulationController";
-import { DoubleWord } from "../binary_types/DoubleWord";
+import { SimulationController } from "../main/simulator/SimulationController";
+import { DoubleWord } from "../types/binary/DoubleWord";
 
 describe('Test Simulator', () => {
     const simulator: SimulationController = SimulationController.getInstance(

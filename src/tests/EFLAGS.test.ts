@@ -1,4 +1,4 @@
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
+import { EFLAGS } from "../main/simulator/functional_units/EFLAGS";
 
 describe("Set and clear flag bits in the EFLAGS register", () => {
     const eflags: EFLAGS = new EFLAGS();
