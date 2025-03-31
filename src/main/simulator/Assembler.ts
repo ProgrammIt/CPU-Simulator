@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
-import { UnrecognizedInstructionError } from "../error_types/UnrecognizedInstructionError";
-import { Bit } from "../binary_types/Bit";
+import { UnrecognizedInstructionError } from "../../types/errors/UnrecognizedInstructionError";
+import { Bit } from "../../types/binary/Bit";
 import { AssemblyLanguageDefinition } from "./compiler/AssemblyLanguageDefinition";
-import { DataSizes } from "../enumerations/DataSizes";
-import { DoubleWord } from "../binary_types/DoubleWord";
-import { VirtualAddress } from "../binary_types/VirtualAddress";
+import { DataSizes } from "../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../types/binary/DoubleWord";
+import { VirtualAddress } from "../../types/binary/VirtualAddress";
 
 export class Assembler {
 	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;

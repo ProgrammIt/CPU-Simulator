@@ -1,8 +1,8 @@
-import { EncodedAddressingModes } from "../enumerations/EncodedAdressingModes";
-import { Bit } from "../binary_types/Bit";
-import { EncodedInstructionTypes } from "../enumerations/EncodedInstructionTypes";
-import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
-import { EncodedOperations } from "../enumerations/EncodedOperations";
+import { EncodedAddressingModes } from "../../types/enumerations/EncodedAdressingModes";
+import { Bit } from "../../types/binary/Bit";
+import { EncodedInstructionTypes } from "../../types/enumerations/EncodedInstructionTypes";
+import { EncodedOperandTypes } from "../../types/enumerations/EncodedOperandTypes";
+import { EncodedOperations } from "../../types/enumerations/EncodedOperations";
 
 /**
  * This class is dedicated to decoding a binary instruction.
@@ -16,7 +16,7 @@ export class InstructionDecoder {
      * @returns 
      */
     public static decodeOperandType(encodedOperandType: Array<Bit>): EncodedOperandTypes {
-        var decodedOperandType: EncodedOperandTypes;
+        let decodedOperandType: EncodedOperandTypes;
         switch (encodedOperandType.join("")) {
             case EncodedOperandTypes.IMMEDIATE:
                 decodedOperandType = EncodedOperandTypes.IMMEDIATE;
@@ -43,7 +43,7 @@ export class InstructionDecoder {
      * @returns 
      */
     public static decodeAddressingMode(encodedAddressingMode: Array<Bit>): EncodedAddressingModes {
-        var decodedAddressingMode: EncodedAddressingModes;
+        let decodedAddressingMode: EncodedAddressingModes;
         switch (encodedAddressingMode.join("")) {
             case EncodedAddressingModes.DIRECT:
                 decodedAddressingMode = EncodedAddressingModes.DIRECT;
@@ -64,7 +64,7 @@ export class InstructionDecoder {
      * @returns A decoded representation of the type.
      */
     public static decodeInstructionType(encodedInstructionType: Array<Bit>): EncodedInstructionTypes {
-        var decodedInstructionType: EncodedInstructionTypes;
+        let decodedInstructionType: EncodedInstructionTypes;
         if (encodedInstructionType.join("") === EncodedInstructionTypes.I) {
             decodedInstructionType = EncodedInstructionTypes.I;
         } else if (encodedInstructionType.join("") === EncodedInstructionTypes.J) {
@@ -81,7 +81,7 @@ export class InstructionDecoder {
      * @returns A decoded representation of the operation.
      */
     public static decodeIOperation(encodedOperation: Array<Bit>): EncodedOperations {
-        var decodedITypeOperation: EncodedOperations;
+        let decodedITypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
             case EncodedOperations.MOV:
                 decodedITypeOperation = EncodedOperations.MOV;
@@ -114,7 +114,7 @@ export class InstructionDecoder {
      * @returns A decoded representation of the operation.
      */
     public static decodeJOperation(encodedOperation: Array<Bit>): EncodedOperations {
-        var decodedJTypeOperation: EncodedOperations;
+        let decodedJTypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
             case EncodedOperations.JMP:
                 decodedJTypeOperation = EncodedOperations.JMP;
@@ -142,9 +142,6 @@ export class InstructionDecoder {
                 break;
             case EncodedOperations.JLE:
                 decodedJTypeOperation = EncodedOperations.JLE;
-                break;
-            case EncodedOperations.JZ:
-                decodedJTypeOperation = EncodedOperations.JZ;
                 break;
             case EncodedOperations.INT:
                 decodedJTypeOperation = EncodedOperations.INT;
@@ -177,7 +174,7 @@ export class InstructionDecoder {
      * @returns A decoded representation of the operation.
      */
     public static decodeROperation(encodedOperation: Array<Bit>): EncodedOperations {
-        var decodedRTypeOperation: EncodedOperations;
+        let decodedRTypeOperation: EncodedOperations;
         switch (encodedOperation.join("")) {
             case EncodedOperations.ADD:
                 decodedRTypeOperation = EncodedOperations.ADD;
