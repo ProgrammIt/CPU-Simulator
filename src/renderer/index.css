@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: "BDO Grotesk";
-  src: url("./../assets/fonts/BDOGrotesk-VF.woff2") format("woff2");
+  src: url("./../../assets/fonts/BDOGrotesk-VF.woff2") format("woff2");
 }
 
 * {
@@ -249,7 +249,7 @@ td {
   border: 2px solid var(--pumpkin);
 }
 
-.next-cycle {
+#next_cycle {
   height: 1.5rem;
   width: 1.5rem;
   height: auto;
