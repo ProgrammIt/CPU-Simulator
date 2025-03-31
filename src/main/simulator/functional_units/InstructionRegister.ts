@@ -1,6 +1,6 @@
-import { DataSizes } from "../../enumerations/DataSizes";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { Instruction } from "../../binary_types/Instruction";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
+import { Instruction } from "../../../types/binary/Instruction";
 import { Register } from "./Register";
 
 /**

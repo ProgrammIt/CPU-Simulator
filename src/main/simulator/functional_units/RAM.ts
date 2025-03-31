@@ -1,8 +1,8 @@
-import { Bit } from "../../binary_types/Bit";
-import { Byte } from "../../binary_types/Byte";
-import { DoubleWord } from "../../binary_types/DoubleWord";
-import { AddressOutOfRangeError } from "../../error_types/AddressOutOfRangeError";
-import { PhysicalAddress } from "../../binary_types/PhysicalAddress";
+import { Bit } from "../../../types/binary/Bit";
+import { Byte } from "../../../types/binary/Byte";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
+import { AddressOutOfRangeError } from "../../../types/errors/AddressOutOfRangeError";
+import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 
 export class RAM {
     public readonly capacity: number;
@@ -62,7 +62,7 @@ export class RAM {
             this.clearByte(physicalAddress);
             return;
         }
-        const physicalAddressHex: string = 
+        const physicalAddressHex = 
             `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
         // Write byte to "memory".
         this._cells.set(physicalAddressHex, data);
@@ -79,10 +79,10 @@ export class RAM {
         this.validatePhysicalAddress(physicalAddress);
         const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
         const doubleword = new DoubleWord();
-        var firstByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec));
-        var secondByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 1));
-        var thirdByte: Byte =  this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 2));
-        var fourthByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 3));
+        const firstByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec));
+        const secondByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 1));
+        const thirdByte: Byte =  this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 2));
+        const fourthByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 3));
         doubleword.value = new Array<Bit>().concat(
             firstByte.value, secondByte.value, thirdByte.value, fourthByte.value
         );
@@ -99,8 +99,8 @@ export class RAM {
      */
     public readByteFrom(physicalAddress: PhysicalAddress): Byte {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex: string = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
-        var result: Byte;
+        const physicalAddressHex = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
+        let result: Byte;
         if (this._cells.has(physicalAddressHex)) {
             result = this._cells.get(physicalAddressHex)!;
         } else {
@@ -117,7 +117,7 @@ export class RAM {
      */
     public clearByte(physicalAddress: PhysicalAddress): void {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHexString: string = `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
+        const physicalAddressHexString = `0x${parseInt(physicalAddress.toString(), 2).toString(16).toUpperCase()}`;
         if (this._cells.has(physicalAddressHexString)) {
             this._cells.delete(physicalAddressHexString);
         }
@@ -130,7 +130,7 @@ export class RAM {
      * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      */
     private validatePhysicalAddress(physicalAddress: PhysicalAddress): void {
-        var physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
+        const physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
         if (physicalAddressDec > this._highAddressDec || physicalAddressDec < this._lowAddressDec) {
             throw new AddressOutOfRangeError(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
         }

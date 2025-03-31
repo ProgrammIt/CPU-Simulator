@@ -1,6 +1,6 @@
-import { Bit } from "../../binary_types/Bit";
-import { Byte } from "../../binary_types/Byte";
-import { DataSizes } from "../../enumerations/DataSizes";
+import { Bit } from "../../../types/binary/Bit";
+import { Byte } from "../../../types/binary/Byte";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
 import { Register } from "./Register";
 
 /**
@@ -9,14 +9,14 @@ import { Register } from "./Register";
  */
 export class EFLAGS extends Register<Byte> {
     // Positions of the flag bits in the status register from MSB (starting at index 0) to LSB.
-    private static POS_CPL_MSB_BIT: number = 0;
-    private static POS_CPL_LSB_BIT: number = 1;
-    private static POS_INTERRUPT_BIT: number = 2;
-    private static POS_OVERFLOW_BIT: number = 3;
-    private static POS_SIGNED_BIT: number = 4;
-    private static POS_ZERO_BIT: number = 5;
-    private static POS_CARRY_BIT: number = 6;
-    private static POS_PARITY_BIT: number = 7;
+    private static POS_CPL_MSB_BIT = 0;
+    private static POS_CPL_LSB_BIT = 1;
+    private static POS_INTERRUPT_BIT = 2;
+    private static POS_OVERFLOW_BIT = 3;
+    private static POS_SIGNED_BIT = 4;
+    private static POS_ZERO_BIT = 5;
+    private static POS_CARRY_BIT = 6;
+    private static POS_PARITY_BIT = 7;
 
     public constructor() {
         super("EFLAGS", new Byte([1, 1, 0, 0, 0, 0, 0, 0]));

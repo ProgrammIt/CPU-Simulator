@@ -1,5 +1,6 @@
-import { PageTableEntry } from "../../binary_types/PageTableEntry";
-import { VirtualAddress } from "../../binary_types/VirtualAddress";
+import { PageTableEntry } from "../../../types/binary/PageTableEntry";
+import { VirtualAddress } from "../../../types/binary/VirtualAddress";
+
 
 export class TranslationLookasideBuffer {
     private _data: [number, [VirtualAddress, PageTableEntry]][];
@@ -49,7 +50,7 @@ export class TranslationLookasideBuffer {
     }
 
     public has(virtualAddress: VirtualAddress): boolean {
-        var includes: boolean = false;
+        let includes = false;
         for (let i = 0; i < this._data.length; ++i) {
             if (this._data[i][1][0].equal(virtualAddress)) {
                 includes = true;
@@ -59,7 +60,7 @@ export class TranslationLookasideBuffer {
     }
 
     public get(virtualAddress: VirtualAddress): PageTableEntry | undefined {
-        var pageTableEntry: PageTableEntry | undefined = undefined;
+        let pageTableEntry: PageTableEntry | undefined = undefined;
         for (let i = 0; i < this._data.length; ++i) {
             if (this._data[i][1][0].equal(virtualAddress)) {
                 pageTableEntry = this._data[i][1][1];

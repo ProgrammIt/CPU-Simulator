@@ -1,19 +1,19 @@
-import { Address } from "../../binary_types/Address";
-import { DataSizes } from "../../enumerations/DataSizes";
+import { DataSizes } from "../../../types/enumerations/DataSizes";
+import { DoubleWord } from "../../../types/binary/DoubleWord";
 import { Register } from "./Register";
 
 /**
- * This class represents a special tpye of register,
- * which can hold a single address.
+ * This class represents a general purpose register.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export class PointerRegister extends Register<Address> {
+export class GeneralPurposeRegister extends Register<DoubleWord> {
     /**
-     * Constructs a new instance.
+     * This method constructs an instance.
+     * @param name The name of the register.
      * @constructor
      */
     public constructor(name: string) {
-        super(name, new Address());
+        super(name.toUpperCase(), new DoubleWord());
     }
 
     /**
@@ -21,19 +21,18 @@ export class PointerRegister extends Register<Address> {
      * @override
      * @returns A copy of the current registers content.
      */
-    public get content(): Address {
-        return new Address(this._content.value);
+    public get content(): DoubleWord {
+        return new DoubleWord(this._content.value);
     }
 
     /**
      * Accessor for setting the current registers content to a new value.
-     * @override
      * @param newValue The new value.
      */
-    public set content(newValue: Address) {
+    public set content(newValue: DoubleWord) {
         if (newValue.value.length !== DataSizes.DOUBLEWORD) {
 			throw new Error(`A new value must have exactly ${DataSizes.DOUBLEWORD} bits: ${newValue.value.length} given.`);
 		}
-        this._content = new Address(newValue.value);
+        this._content = new DoubleWord(newValue.value);
     }
 }
