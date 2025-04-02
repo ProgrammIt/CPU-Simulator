@@ -1,0 +1,73 @@
+name: Publish CPU-Simulator
+run-name: Publish CPU-Simulator
+on: 
+  push:
+    branches: [ main ]
+jobs:
+  make:
+    name: Make CPU-Simulator
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ./scripts
+    steps:
+      - name: Update package cache
+        run: apt update -y
+
+      - name: Install mono
+        run: ./setup-mono.sh
+        shell: bash
+
+      - name: Install wine
+        run: ./setup-wine.sh
+        shell: bash
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Load environment variables
+        run: npm run electron-forge make
+
+  publish:
+    name: Publish CPU-Simulator to GitHub Releases
+    needs: make
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: "Ihme-Core Simulator-v${{ env.VERSION }}"
+          body_path: ./CHANGELOG.md
+          draft: true
+          prerelease: false
+          repo: ${{ github.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Windows artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_content_type: application/exe
+
+      - name: Upload Linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_content_type: application/exe
