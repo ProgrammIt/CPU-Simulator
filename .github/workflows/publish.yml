@@ -1,15 +1,46 @@
 name: Publish CPU-Simulator
 run-name: Publish CPU-Simulator
-on: 
+on:
   push:
     branches: [ main ]
 jobs:
-  publish:
-    name: Publish CPU-Simulator
-    runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: .
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: Find version of simulator
+        id: version
+        run: |
+          echo "VERSION=$(node -e "console.log(require('${{ github.workspace }}/package.json').version);")" >> $GITHUB_ENV
+          echo "VERSION=${{ github.env.VERSION }}"
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.env.VERSION }}
+          release_name: "Ihme-Core Simulator-v${{ github.env.VERSION }}"
+          body_path: ./CHANGELOG.md
+          draft: true
+          prerelease: false
+          repo: ${{ github.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save upload URL
+        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
+
+  build_and_upload_linux:
+    name:  Build and upload artifacts for Linux
+    runs-on: ubuntu-20.04
+    needs: create_release
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,47 +59,66 @@ jobs:
       - name: Install nodejs
         run: sudo apt install -y nodejs npm
 
-      - name: Find version of simulator
-        id: version
-        run: |
-          echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> $GITHUB_ENV
-          echo "VERSION=${{ github.env.VERSION }}"
-
       - name: Install dependencies
         run: npm install
 
       - name: Build
         run: npm run make
       
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          tag_name: ${{ github.env.VERSION }}
-          release_name: "Ihme-Core Simulator-v${{ github.env.VERSION }}"
-          body_path: ./CHANGELOG.md
-          draft: true
-          prerelease: false
-          repo: ${{ github.repository.name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Upload Windows artifact
+      - name: Upload artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
-          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          upload_url: ${{ github.env.upload_url }}
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup
+          asset_name: Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup
+          asset_content_type: application/x-executable
+
+  build_and_upload_windows:
+    name: Build and upload artifacts for Windows
+    runs-on: windows-latest
+    needs: create_release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run make
+
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.env.upload_url }}
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup.exe
+          asset_name: Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup.exe
           asset_content_type: application/exe
 
-      - name: Upload Linux artifact
+  build_and_upload_mac:
+    name: Build and upload artifacts for macOS
+    runs-on: macos-latest
+    needs: create_release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run make
+
+      - name: Upload artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
-          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
-          asset_content_type: application/exe
+          upload_url: ${{ github.env.upload_url }}
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup.app.zip
+          asset_name: Ihme-Core X1 Simulator-${{ github.env.VERSION }} Setup.app.zip
+          asset_content_type: application/zip
