@@ -11,6 +11,9 @@ jobs:
       run:
         working-directory: .
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Update package cache
         run: sudo apt update -y
 
@@ -21,9 +24,6 @@ jobs:
       - name: Install wine
         run: scripts/setup-wine.sh
         shell: bash
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm install
