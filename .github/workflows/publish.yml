@@ -18,11 +18,11 @@ jobs:
         run: sudo apt update -y
 
       - name: Install mono
-        run: scripts/setup-mono.sh
+        run: sudo bash scripts/setup-mono.sh
         shell: bash
 
       - name: Install wine
-        run: scripts/setup-wine.sh
+        run: sudo bash scripts/setup-wine.sh
         shell: bash
 
       - name: Install dependencies
