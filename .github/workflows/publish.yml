@@ -4,13 +4,20 @@ on:
   push:
     branches: [ main ]
 jobs:
-  make:
-    name: Build CPU-Simulator
+  publish:
+    name: Publish CPU-Simulator
     runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: .
     steps:
+      - name: Read .env file
+        id: dotenv
+        uses: falti/dotenv-action@v1.1.4
+        with:
+          path: .env
+          export-variables: true
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -31,23 +38,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Load environment variables
-        run: npm run electron-forge make
-
-  publish:
-    name: Publish CPU-Simulator to GitHub Releases
-    needs: make
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - name: Build
+        run: npm run make
+      
       - name: Create GitHub Release
         uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: "Ihme-Core Simulator-v${{ env.VERSION }}"
+          tag_name: ${{ steps.dotenv.outputs.version }}
+          release_name: "Ihme-Core Simulator-v${{ steps.dotenv.outputs.version }}"
           body_path: ./CHANGELOG.md
           draft: true
           prerelease: false
