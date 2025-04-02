@@ -1,8 +1,8 @@
 import {describe, expect, test} from '@jest/globals';
-import { RAM } from '../simulator/functional_units/RAM';
-import { Byte } from '../binary_types/Byte';
-import { DoubleWord } from '../binary_types/DoubleWord';
-import { PhysicalAddress } from '../binary_types/PhysicalAddress';
+import { RAM } from '../main/simulator/functional_units/RAM';
+import { Byte } from '../types/binary/Byte';
+import { DoubleWord } from '../types/binary/DoubleWord';
+import { PhysicalAddress } from '../types/binary/PhysicalAddress';
 
 describe("Read and write from or to main memory", () => {
     const mainMemory: RAM = new RAM(Math.pow(2, 32));
@@ -26,7 +26,7 @@ describe("Read and write from or to main memory", () => {
 
     test("Write doubleword to main memory", () => {
         mainMemory.cells.clear();
-        var doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        const doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), doubleword);
         expect(mainMemory.cells).toEqual(new Map<string, Byte>([
             ["0x0", new Byte([1,1,0,1,1,0,0,1])],
@@ -71,7 +71,7 @@ describe("Read and write from or to main memory", () => {
 
     test("Read doubleword from partially unused memory address", () => {
         mainMemory.cells.clear();
-        var doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
+        const doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), doubleword);
         const result: DoubleWord = mainMemory.readDoublewordFrom(PhysicalAddress.fromInteger(parseInt("0x3", 16)));
         const expectedDoubleword: DoubleWord = new DoubleWord([0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);

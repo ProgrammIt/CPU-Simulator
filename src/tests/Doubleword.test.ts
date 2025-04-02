@@ -1,4 +1,4 @@
-import { DoubleWord } from "../binary_types/DoubleWord";
+import { DoubleWord } from "../types/binary/DoubleWord";
 
 describe("Create doubleword from decimal integer values", () => {
     test("Create doubleword from decimal -6", () => {

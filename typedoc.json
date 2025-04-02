@@ -1,9 +1,18 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": [
-        "./src/main.ts"
+    "outputs": [
+        {
+            "name": "html",
+            "path": "./docs/html"
+        },
     ],
-    "out": "./docs/developers",
+    "projectDocuments": [
+        "docs/static/*.md"
+    ],
+    "basePath": "./",
+    "hostedBaseUrl": "https://programmit.github.io/CPU-Simulator/",
+    "entryPoints": ["./src/"],
+    "entryPointStrategy": "expand",
     "highlightLanguages": [
         "bash",
         "console",
@@ -16,8 +25,38 @@
         "tsx",
         "typescript"
     ],
+    "headings": {
+        "document": true,
+        "readme": false
+    },
+    "sort": [
+        "static-first",
+        "alphabetical"
+    ],
     "theme": "default",
     "darkHighlightTheme": "dark-plus",
     "lightHighlightTheme": "light-plus",
-    "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"]
+    "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
+    "favicon": "./assets/img/icons/favicon.ico",
+    "lang": "en",
+    "name": "CPU Simulator",
+    "hideGenerator": true,
+    "searchInDocuments": true,
+    "searchInComments": true,
+    "navigationLinks": {
+        "GitHub": "https://github.com/ProgrammIt/CPU-Simulator/"
+    },
+    "plugin": [
+        "typedoc-material-theme"
+    ],
+    "themeColor": "#cb9820",
+    "customFooterHtml": "University of Hannover for Applied Sciences and Arts - 2025",
+    "visibilityFilters": {
+        "protected": true,
+        "private": true,
+        "inherited": true,
+        "external": true,
+        "@alpha": false,
+        "@beta": false
+    }
 }
