@@ -14,13 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read .env file
-        id: dotenv
-        uses: falti/dotenv-action@v1.1.4
-        with:
-          path: .env
-          export-variables: true
-
       - name: Update package cache
         run: sudo apt update -y
 
@@ -35,6 +28,12 @@ jobs:
       - name: Install nodejs
         run: sudo apt install -y nodejs npm
 
+      - name: Find version of simulator
+        id: version
+        run: |
+          echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> $GITHUB_ENV
+          echo "VERSION=${{ github.env.VERSION }}"
+
       - name: Install dependencies
         run: npm install
 
@@ -45,8 +44,8 @@ jobs:
         uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: ${{ steps.dotenv.outputs.version }}
-          release_name: "Ihme-Core Simulator-v${{ steps.dotenv.outputs.version }}"
+          tag_name: ${{ github.env.VERSION }}
+          release_name: "Ihme-Core Simulator-v${{ github.env.VERSION }}"
           body_path: ./CHANGELOG.md
           draft: true
           prerelease: false
