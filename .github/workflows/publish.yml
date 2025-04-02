@@ -11,15 +11,15 @@ jobs:
       run:
         working-directory: .
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Read .env file
         id: dotenv
         uses: falti/dotenv-action@v1.1.4
         with:
           path: .env
           export-variables: true
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Update package cache
         run: sudo apt update -y
