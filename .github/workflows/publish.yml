@@ -19,7 +19,7 @@ jobs:
         id: version
         run: |
           echo "VERSION=$(node -e "console.log(require('${{ github.workspace }}/package.json').version);")" >> $GITHUB_ENV
-          echo "$VERSION"
+          echo $VERSION
 
       - name: Create GitHub release
         uses: actions/create-release@v1
