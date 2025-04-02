@@ -25,7 +25,7 @@ jobs:
         uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: ${{ github.env.VERSION }}
+          tag_name: "${{ github.env.VERSION }}"
           release_name: "Ihme-Core Simulator-v${{ github.env.VERSION }}"
           body_path: ./CHANGELOG.md
           draft: true
