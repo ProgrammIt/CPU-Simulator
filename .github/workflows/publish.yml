@@ -62,8 +62,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: List repository contents
+        run: ls ${{ github.workspace }}
+
       - name: Build
-        run: npm run make
+        run: npm --prefix ${{ github.workspace }} run make
       
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
@@ -71,7 +74,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
+          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
           asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
           asset_content_type: application/x-executable
 
@@ -86,8 +89,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: List repository contents
+        run: ls ${{ github.workspace }}
+
       - name: Build
-        run: npm run make
+        run: npm --prefix ${{ github.workspace }} run make
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
@@ -95,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
           asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
           asset_content_type: application/exe
 
@@ -119,6 +125,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
+          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
           asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
           asset_content_type: application/zip
