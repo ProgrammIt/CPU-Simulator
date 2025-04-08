@@ -63,7 +63,10 @@ jobs:
         run: npx tsc
 
       - name: Build
-        run: npm --prefix ${{ github.workspace }} run make
+        run: npm run make
+
+      - name: List results in output directory
+        run: ls -LR ./out
       
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
@@ -86,14 +89,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Transpile TypeScript
-        run: npx tsc
-
-      - name: List repository contents
-        run: ls ${{ github.workspace }}
-
       - name: Build
-        run: npm --prefix ${{ github.workspace }} run make
+        run: npm run make
+
+      - name: List results in output directory
+        run: ls -LR ./out
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
@@ -101,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator Setup
+          asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator Setup.exe
           asset_name: "Ihme-Core Simulator Setup.exe"
           asset_content_type: application/exe
 
@@ -116,11 +116,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Transpile TypeScript
-        run: npx tsc
-
       - name: Build
         run: npm run make
+
+      - name: List results in output directory
+        run: ls -LR ./out
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
