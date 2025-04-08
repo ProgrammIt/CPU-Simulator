@@ -1,6 +1,6 @@
 {
-  "name": "ihme-core-x1-simulator",
-  "productName": "Ihme-Core X1 Simulator",
+  "name": "ihme-core-simulator",
+  "productName": "Ihme-Core Simulator",
   "version": "1.0.0",
   "description": "A simple graphical simulator for teaching students the basics of computer architecture and virtualization.",
   "main": ".webpack/main",
