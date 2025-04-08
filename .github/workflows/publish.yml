@@ -3,6 +3,9 @@ run-name: Publish CPU-Simulator
 on:
   push:
     branches: [ main ]
+env:
+    UPLOAD_URL:
+    VERSION:
 jobs:
   create_release:
     name: Create GitHub Release
@@ -97,10 +100,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator Setup.exe
-          asset_name: "Ihme-Core Simulator Setup.exe"
-          asset_content_type: application/exe
+            upload_url: ${{ env.UPLOAD_URL }}
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator Setup.exe
+            asset_name: "Ihme-Core Simulator Setup.exe"
+            asset_content_type: application/exe
 
   build_and_upload_mac:
     name: Build and upload artifacts for macOS
