@@ -38,7 +38,7 @@ const config: ForgeConfig = {
         mimeType: ["text/x-asm"],
         name: "ihme-core-simulator",
         genericName: "Simulator",
-        productName: "Ihme-Core Simulator"
+        productName: "Ihme-Core.Simulator"
       }
     }, ["linux"]), 
     new MakerDeb({
@@ -49,7 +49,7 @@ const config: ForgeConfig = {
         mimeType: ["text/x-asm"],
         name: "ihme-core-simulator",
         genericName: "Simulator",
-        productName: "Ihme-Core Simulator"
+        productName: "Ihme-Core.Simulator"
       }
     }, ["linux"])
   ],
