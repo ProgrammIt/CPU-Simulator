@@ -3,13 +3,13 @@ run-name: Publish CPU-Simulator
 on:
   push:
     branches: [ main ]
-env:
-    UPLOAD_URL: ""
-    VERSION: ""
 jobs:
   create_release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    outputs:
+      UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+      VERSION: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,10 +19,7 @@ jobs:
 
       - name: Find version of simulator
         id: version
-        run: echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> "$GITHUB_ENV"
-          
-      - name: Echo version
-        run: echo $VERSION
+        run: echo "::set-output name=VERSION::$(node -e "console.log(require('./package.json').version);")
 
       - name: Create GitHub release
         uses: actions/create-release@v1
@@ -36,9 +33,6 @@ jobs:
           repo: ${{ github.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Save upload URL
-        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> "$GITHUB_ENV"
 
   build_and_upload_linux:
     name:  Build and upload artifacts for Linux
@@ -76,7 +70,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
           asset_path: ./out/make/Ihme-Core Simulator Setup
           asset_name: "Ihme-Core Simulator Setup"
           asset_content_type: application/x-executable
@@ -100,7 +94,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            upload_url: ${{ env.UPLOAD_URL }}
+            upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
             asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator Setup.exe
             asset_name: "Ihme-Core Simulator Setup.exe"
             asset_content_type: application/exe
@@ -124,7 +118,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
           asset_path: ./out/make/Ihme-Core X1 Simulator Setup.app.zip
           asset_name: "Ihme-Core X1 Simulator Setup.app.zip"
           asset_content_type: application/zip
