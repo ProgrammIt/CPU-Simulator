@@ -74,8 +74,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
-          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
+          asset_name: "Ihme-Core X1 Simulator-${{ env.VERSION }} Setup"
           asset_content_type: application/x-executable
 
   build_and_upload_windows:
@@ -104,8 +104,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
-          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
+          asset_name: "Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe"
           asset_content_type: application/exe
 
   build_and_upload_mac:
@@ -131,6 +131,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ${{ github.workspace }}/out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
-          asset_name: Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
+          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip
+          asset_name: "Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.app.zip"
           asset_content_type: application/zip
