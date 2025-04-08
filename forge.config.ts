@@ -21,9 +21,11 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       iconUrl: "https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/icons/app/icon.ico",
-      exe: "Ihme-Core Simulator",
       copyright: "Copyright © 2025 nextbeam",
-      noMsi: false
+      noMsi: false,
+      setupExe: "Ihme-Core Simulator Setup.exe",
+      setupMsi: "Ihme-Core Simulator Setup.msi",
+      setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
     new MakerZIP({}, ["darwin"]), 
     new MakerRpm({
@@ -34,7 +36,8 @@ const config: ForgeConfig = {
         categories: ["Education"],
         mimeType: ["text/x-asm"],
         name: "ihme-core-simulator",
-        genericName: "Simulator"
+        genericName: "Simulator",
+        productName: "Ihme-Core Simulator"
       }
     }, ["linux"]), 
     new MakerDeb({
@@ -44,7 +47,8 @@ const config: ForgeConfig = {
         categories: ["Education"],
         mimeType: ["text/x-asm"],
         name: "ihme-core-simulator",
-        genericName: "Simulator"
+        genericName: "Simulator",
+        productName: "Ihme-Core Simulator"
       }
     }, ["linux"])
   ],
