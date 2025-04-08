@@ -39,7 +39,7 @@ jobs:
 
   build_and_upload_linux:
     name:  Build and upload artifacts for Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: create_release
     steps:
       - name: Checkout code
