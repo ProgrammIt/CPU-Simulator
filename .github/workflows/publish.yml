@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
 env:
-    UPLOAD_URL:
-    VERSION:
+    UPLOAD_URL: ""
+    VERSION: ""
 jobs:
   create_release:
     name: Create GitHub Release
