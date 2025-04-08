@@ -67,6 +67,15 @@ jobs:
 
       - name: Build
         run: npm --prefix ${{ github.workspace }} run make
+
+      - name: Set name of executable
+        id: exec_name
+        run: echo "EXEC_NAME=Ihme-Core X1 Simulator-$(node -e "console.log(require('./package.json').version);") Setup" >> "$GITHUB_ENV"
+      
+      - name: Set path to executable
+        id: exec_path
+        run: echo "EXEC_PATH=./out/make/linux/x64/Ihme-Core X1 Simulator-$(node -e "console.log(require('./package.json').version);") Setup" >> "$GITHUB_ENV"
+      
       
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
@@ -75,7 +84,7 @@ jobs:
         with:
           upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup
-          asset_name: "Ihme-Core X1 Simulator-${{ env.VERSION }} Setup"
+          asset_name: ${{ env.EXEC_NAME }}
           asset_content_type: application/x-executable
 
   build_and_upload_windows:
@@ -98,14 +107,22 @@ jobs:
       - name: Build
         run: npm --prefix ${{ github.workspace }} run make
 
+      - name: Set name of executable
+        id: exec_name
+        run: echo "EXEC_NAME=Ihme-Core X1 Simulator-$(node -e "console.log(require('./package.json').version);") Setup" >> "$GITHUB_ENV"
+      
+      - name: Set path to executable
+        id: exec_path
+        run: echo "EXEC_PATH=./out/make/squirrel.windows/x64/Ihme-Core X1 Simulator-$(node -e "console.log(require('./package.json').version);") Setup" >> "$GITHUB_ENV"
+
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./out/make/Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe
-          asset_name: "Ihme-Core X1 Simulator-${{ env.VERSION }} Setup.exe"
+          asset_path: ${{ env.EXEC_PATH }}
+          asset_name: ${{ env.EXEC_NAME }}
           asset_content_type: application/exe
 
   build_and_upload_mac:
