@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Save upload URL
-        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
+        run: echo "UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> "$GITHUB_ENV"
 
   build_and_upload_linux:
     name:  Build and upload artifacts for Linux
