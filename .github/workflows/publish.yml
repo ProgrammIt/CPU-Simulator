@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
-      VERSION: ${{ steps.version.outputs.version }}
+      VERSION: ${{ steps.version.outputs.VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,14 +19,14 @@ jobs:
 
       - name: Find version of simulator
         id: version
-        run: echo "VERSION=$(node -e "console.log(require('./package.json').version);")"
+        run: echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
         uses: actions/create-release@v1
         id: create_release
         with:
-          tag_name: "$VERSION"
-          release_name: "Ihme-Core Simulator-v${{ env.VERSION }}"
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          release_name: "Ihme-Core Simulator-v${{ steps.version.outputs.VERSION }}"
           body_path: ./CHANGELOG.md
           draft: true
           prerelease: false
