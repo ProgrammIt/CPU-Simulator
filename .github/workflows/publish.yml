@@ -57,8 +57,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/make/rpm/x64/ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}.x86_64.rpm
-          asset_name: "ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}.x86_64.rpm"
+          asset_path: ./out/make/rpm/x64/ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}-1.x86_64.rpm
+          asset_name: "ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}-1.x86_64.rpm"
           asset_content_type: application/x-executable
 
       - name: Upload deb artifact
