@@ -14,9 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List files in the repository
-        run: ls ${{ github.workspace }}
-
       - name: Find version of simulator
         id: version
         run: echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> "$GITHUB_OUTPUT"
@@ -45,19 +42,8 @@ jobs:
       - name: Update package cache
         run: sudo apt update -y && sudo apt install fakeroot dpkg rpm -y
 
-      - name: Install mono
-        run: sudo bash scripts/setup-mono.sh
-        shell: bash
-
-      - name: Install wine
-        run: sudo bash scripts/setup-wine.sh
-        shell: bash
-
       - name: Install dependencies
         run: npm install
-
-      - name: Transpile TypeScript
-        run: npx tsc
 
       - name: Build
         run: npm run make

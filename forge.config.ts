@@ -35,10 +35,7 @@ const config: ForgeConfig = {
         homepage: "https://programmit.github.io/CPU-Simulator/",
         license: "MIT License",
         categories: ["Education"],
-        mimeType: ["text/x-asm"],
-        name: "ihme-core-simulator",
-        genericName: "Simulator",
-        productName: "Ihme-Core.Simulator"
+        mimeType: ["text/x-asm"]
       }
     }, ["linux"]), 
     new MakerDeb({
@@ -46,10 +43,7 @@ const config: ForgeConfig = {
         icon: "./assets/icons/app/icon_256x256.png",
         homepage: "https://programmit.github.io/CPU-Simulator/",
         categories: ["Education"],
-        mimeType: ["text/x-asm"],
-        name: "ihme-core-simulator",
-        genericName: "Simulator",
-        productName: "Ihme-Core.Simulator"
+        mimeType: ["text/x-asm"]
       }
     }, ["linux"])
   ],
