@@ -51,14 +51,24 @@ jobs:
       - name: List results in output directory
         run: ls -R ./out
       
-      - name: Upload artifact
+      - name: Upload rpm artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/Ihme-Core Simulator-linux-x64/ihme-core simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
-          asset_name: "ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}"
+          asset_path: ./out/make/rpm/x64/ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}.x86_64.rpm
+          asset_name: "ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}.x86_64.rpm"
+          asset_content_type: application/x-executable
+
+      - name: Upload deb artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+          asset_path: ./out/make/deb/x64/ihme-core-simulator_${{ needs.create_release.outputs.VERSION }}_amd64.deb
+          asset_name: ihme-core-simulator_${{ needs.create_release.outputs.VERSION }}_amd64.deb
           asset_content_type: application/x-executable
 
   build_and_upload_windows:
