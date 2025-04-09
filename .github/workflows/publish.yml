@@ -57,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/Ihme-Core Simulator-linux-x64/ihme-core-simulator
+          asset_path: ./out/Ihme-Core Simulator-linux-x64/ihme-core-simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
           asset_name: "ihme-core-simulator"
           asset_content_type: application/x-executable
 
@@ -81,8 +81,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core-Simulator-Setup.exe
-            asset_name: "Ihme-Core-Simulator.Setup.exe"
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core-Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
+            asset_name: "Ihme-Core-Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe"
             asset_content_type: application/exe
 
   build_and_upload_mac:
@@ -105,6 +105,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/make/ihme-core-simulator.app.zip
+          asset_path: ./out/make/darwin/x64/Ihme-Core-Simulator-${{ needs.create_release.outputs.VERSION }} Setup.app.zip
           asset_name: "Ihme-Core.Simulator.Setup.app.zip"
           asset_content_type: application/zip
