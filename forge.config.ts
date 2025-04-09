@@ -23,6 +23,7 @@ const config: ForgeConfig = {
     new MakerSquirrel({
       iconUrl: "https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/icons/app/icon.ico",
       copyright: "Copyright © 2025 nextbeam",
+      noMsi: false,
       setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
     new MakerZIP({}, ["darwin"]), 

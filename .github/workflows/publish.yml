@@ -85,7 +85,7 @@ jobs:
       - name: Build
         run: npm run make
 
-      - name: Upload artifact
+      - name: Upload exe artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,6 +93,16 @@ jobs:
             upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
             asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
             asset_name: "Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe"
+            asset_content_type: application/octet-stream
+
+      - name: Upload msi artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.msi
+            asset_name: Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.msi
             asset_content_type: application/exe
 
   build_and_upload_mac:
@@ -118,6 +128,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/make/darwin/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.app.zip
-          asset_name: "Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.app.zip"
+          asset_path: ./out/make/zip/darwin/arm64/Ihme-Core Simulator-darwin-arm64-${{ needs.create_release.outputs.VERSION }}.zip
+          asset_name: Ihme-Core Simulator-darwin-arm64-${{ needs.create_release.outputs.VERSION }}.zip
           asset_content_type: application/zip
