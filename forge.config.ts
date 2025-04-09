@@ -16,15 +16,13 @@ const config: ForgeConfig = {
     asar: true,
     icon: "./assets/icons/app/icon",
     extraResource: ["./assembly/", "./settings/"],
+    executableName: "ihme-core-simulator"
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
       iconUrl: "https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/icons/app/icon.ico",
       copyright: "Copyright © 2025 nextbeam",
-      noMsi: false,
-      setupExe: "Ihme-Core-Simulator-Setup.exe",
-      setupMsi: "Ihme-Core-Simulator-Setup.msi",
       setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
     new MakerZIP({}, ["darwin"]), 
