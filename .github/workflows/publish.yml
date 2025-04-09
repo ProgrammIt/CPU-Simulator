@@ -57,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/make/ihme-core-simulator
+          asset_path: ./out/Ihme-Core Simulator-linux-x64/ihme-core-simulator
           asset_name: "ihme-core-simulator"
           asset_content_type: application/x-executable
 
