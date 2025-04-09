@@ -93,7 +93,7 @@ jobs:
             upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
             asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
             asset_name: "Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe"
-            asset_content_type: application/octet-stream
+            asset_content_type: application/exe
 
       - name: Upload msi artifact
         uses: actions/upload-release-asset@v1
@@ -101,9 +101,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.msi
-            asset_name: Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.msi
-            asset_content_type: application/exe
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core SimulatorSetup.msi
+            asset_name: Ihme-Core SimulatorSetup.msi
+            asset_content_type: application/octet-stream
 
   build_and_upload_mac:
     name: Build and upload artifacts for macOS
