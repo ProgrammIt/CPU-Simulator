@@ -18,4 +18,4 @@ The graphical user interface (GUI) displays the current state of the CPU, includ
 
 # Installation
 
-There are distributables for the operating systems Linux, macOS and Windows. For Windows, there are `.msi` and `.exe` installers. For Debian-based Linux distributions there is an `.deb` package, while for RedHat-based Linux distributions there is an `.rpm` package. For macOS systems choose the `.app.zip` installer.
+There are distributables for the operating systems Linux, macOS and Windows. For Windows, there are `.msi` and `.exe` installers. For Debian-based Linux distributions there is an `.deb` package, while for RedHat-based Linux distributions there is an `.rpm` package. For macOS systems choose the `.zip` installer.
