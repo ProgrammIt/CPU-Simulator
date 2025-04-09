@@ -16,7 +16,6 @@ const config: ForgeConfig = {
     asar: true,
     icon: "./assets/icons/app/icon",
     extraResource: ["./assembly/", "./settings/"],
-    executableName: "Ihme-Core.Simulator",
   },
   rebuildConfig: {},
   makers: [
@@ -24,8 +23,8 @@ const config: ForgeConfig = {
       iconUrl: "https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/icons/app/icon.ico",
       copyright: "Copyright © 2025 nextbeam",
       noMsi: false,
-      setupExe: "Ihme-Core.Simulator.Setup.exe",
-      setupMsi: "Ihme-Core.Simulator.Setup.msi",
+      setupExe: "Ihme-Core-Simulator-Setup.exe",
+      setupMsi: "Ihme-Core-Simulator-Setup.msi",
       setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
     new MakerZIP({}, ["darwin"]), 
