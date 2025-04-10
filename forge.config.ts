@@ -22,7 +22,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       iconUrl: "https://raw.githubusercontent.com/ProgrammIt/CPU-Simulator/refs/heads/main/assets/icons/app/icon.ico",
-      copyright: "Copyright © 2025 nextbeam",
+      copyright: "Copyright © 2025 University of Hannover for Applied Sciences and Arts",
       noMsi: false,
       setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
