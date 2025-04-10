@@ -37,7 +37,7 @@
     "darkHighlightTheme": "dark-plus",
     "lightHighlightTheme": "light-plus",
     "exclude": ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
-    "favicon": "./assets/img/icons/favicon.ico",
+    "favicon": "./assets/icons/web/favicon.ico",
     "lang": "en",
     "name": "CPU Simulator",
     "hideGenerator": true,
