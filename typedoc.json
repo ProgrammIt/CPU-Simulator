@@ -10,7 +10,7 @@
         "docs/static/*.md"
     ],
     "basePath": "./",
-    "hostedBaseUrl": "https://programmit.github.io/CPU-Simulator/",
+    "hostedBaseUrl": "https://programmit.github.io/CPU-Simulator/html",
     "entryPoints": ["./src/"],
     "entryPointStrategy": "expand",
     "highlightLanguages": [
@@ -44,7 +44,7 @@
     "searchInDocuments": true,
     "searchInComments": true,
     "navigationLinks": {
-        "GitHub": "https://github.com/ProgrammIt/CPU-Simulator/"
+        "GitHub": "https://github.com/ProgrammIt/CPU-Simulator/html"
     },
     "plugin": [
         "typedoc-material-theme"
