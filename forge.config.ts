@@ -30,7 +30,7 @@ const config: ForgeConfig = {
     // new MakerZIP({}, ["darwin"]),
     new MakerDMG({
       format: 'UDZO',
-      icon: "./assets/icons/app/icon",
+      icon: "./assets/icons/app/icon@1x.icns",
       overwrite: true
     }, ["darwin"]),
     new MakerRpm({
