@@ -25,7 +25,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.VERSION }}
           release_name: "Ihme-Core Simulator v${{ steps.version.outputs.VERSION }}"
           body_path: ./CHANGELOG.md
-          draft: true
+          draft: false
           prerelease: false
           repo: ${{ github.repository.name }}
         env:
