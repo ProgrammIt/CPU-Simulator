@@ -128,6 +128,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
-          asset_path: ./out/make/zip/darwin/arm64/Ihme-Core Simulator-darwin-arm64-${{ needs.create_release.outputs.VERSION }}.zip
-          asset_name: Ihme-Core Simulator-darwin-arm64-${{ needs.create_release.outputs.VERSION }}.zip
+          asset_path: ./out/make/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }}-arm64.dmg
+          asset_name: Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }}-arm64.dmg
           asset_content_type: application/zip
