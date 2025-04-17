@@ -2,6 +2,7 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
@@ -26,7 +27,12 @@ const config: ForgeConfig = {
       noMsi: false,
       setupIcon: "./assets/icons/app/icon.ico"
     }, ["win32"]), 
-    new MakerZIP({}, ["darwin"]), 
+    // new MakerZIP({}, ["darwin"]),
+    new MakerDMG({
+      format: 'UDZO',
+      icon: "./assets/icons/app/icon",
+      overwrite: true
+    }, ["darwin"]),
     new MakerRpm({
       options: {
         icon: "./assets/icons/app/icon_256x256.png",
