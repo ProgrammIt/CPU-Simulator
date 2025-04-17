@@ -119,8 +119,8 @@ jobs:
       - name: Build
         run: npm run make
 
-      - name: List results in output directory
-        run: ls -R ./out
+      # - name: List results in output directory
+      #   run: ls -R ./out
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1
