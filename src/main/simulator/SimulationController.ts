@@ -575,6 +575,7 @@ export class SimulationController {
         try {
             resultOfCycle = this.core.cycle();
         } catch(error) {
+            console.log(error)
             if (error instanceof PageFaultError) {
                 /**
                  * Load the address of the page table entry into the EAX tab for 

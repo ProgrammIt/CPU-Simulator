@@ -101,6 +101,9 @@ export class InstructionDecoder {
             case EncodedOperations.PUSH:
                 decodedITypeOperation = EncodedOperations.PUSH;
                 break;
+            case EncodedOperations.DEV:
+                decodedITypeOperation = EncodedOperations.DEV;
+                break;
             default:
                 throw Error("Unrecognized I-type instruction.");
                 break;

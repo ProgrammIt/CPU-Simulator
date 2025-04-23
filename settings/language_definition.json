@@ -959,6 +959,40 @@
             "opcode" : "1111111",
             "type" : "R",
             "regex" : "(NOP)"
+        },
+        {
+            "mnemonic" : "DEV",
+            "opcode" : "0100111",
+            "type" : "I",
+            "regex" : "(DEV)[ ]+(__COMMAND__)[ ]*,[ ]*(__DATA__)",
+            "operands" : [
+                {
+                    "name" : "__COMMAND__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                },
+                {
+                    "name" : "__DATA__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY",
+                        "IMMEDIATE_DECIMAL",
+                        "IMMEDIATE_HEXADECIMAL",
+                        "IMMEDIATE_BINARY"
+                    ]
+                }
+            ]
         }
     ]
 }

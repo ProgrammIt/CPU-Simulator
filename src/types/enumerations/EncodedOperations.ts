@@ -42,5 +42,6 @@ export const enum EncodedOperations {
 	PUSH = "0100100",
 	SYSENTER = "0100101",
 	SYSEXIT = "0100110",
+	DEV = "0100111",
 	NOP = "1111111"
 }

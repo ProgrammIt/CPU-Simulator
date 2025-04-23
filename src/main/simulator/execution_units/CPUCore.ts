@@ -29,6 +29,9 @@ import { EncodedWritableRegisters } from "../../../types/enumerations/EncodedWri
 import { EncodedOperations } from "../../../types/enumerations/EncodedOperations";
 import { EncodedInstructionTypes } from "../../../types/enumerations/EncodedInstructionTypes";
 import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandTypes";
+import { devCommandNameByValue, DevCommands } from "../../../types/enumerations/DevOperationCommands";
+import { BadOperandError } from "../../../types/errors/BadOperandError";
+import { NotImplementedError } from "../../../types/errors/NotImplementedError";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.
@@ -519,6 +522,12 @@ export class CPUCore {
             case EncodedOperations.SYSEXIT:
                 this.sysexit();
                 break;
+            case EncodedOperations.DEV:
+                this.dev(
+                    this._decodedInstruction.operands![0],
+                    this._decodedInstruction.operands![1]!
+                );
+                break;
             default:
                 throw new Error("Unrecognized operation found.");
                 break;
@@ -534,6 +543,120 @@ export class CPUCore {
         }
         return;
     }
+
+    /*
+     * -------------------- DEV / IO --------------------
+     */
+
+    /**
+     * DEV instruction handles communication with the filesystem, console, and process API.
+     * DEV COMMAND DATA
+     * DEV operand_1                             operand_2
+     *     12345678 12345678 12345678 12345678   12345678 12345678 12345678 12345678
+     *     .........reserved......... command.   ...............data................
+     * 
+     * 
+     * command:
+     * 00000000 - io_seek (fd=op2, offset=eax)
+     * 00000001 - io_close (fd=op2)
+     * 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
+     * 00000011 - io_write_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_written=eax
+     * 00000100 - file_create (filename_ptr=op2) -> success=eax
+     * 00000101 - file_delete (filename_ptr=op2) -> success=eax
+     * 00000110 - file_open (filename_ptr=op2) -> fd=eax
+     * 00000111 - file_stat (filename_ptr=op2) -> file_length=eax
+     * 00001000 - console_print_number(number=op2)
+     * 00001001 - console_read_number() -> number=eax, error=ebx
+     * 00001010 - process_create(filename_ptr=op2) -> process_id=eax
+     * 00001011 - process_exit ()
+     * 00001100 - process_yield ()
+     * 
+     * 
+     * file descriptor (fd):
+     * 0            -> Konsole
+     * 1 und größer -> Wird vom Dateisystem für Dateien vergeben
+
+     * @param command 
+     * @param data Depending on the command.
+     * @throws {UnsupportedOperandTypeError}
+     * @throws {MissingOperandError} If one of the operands is missing.
+     */
+    private dev(command: InstructionOperand, data: InstructionOperand): void {
+        // Check whether CPU is in kernel mode.
+        if (!this.eflags.isInKernelMode()) {
+            // CPU is not in kernel mode.
+            throw new PrivilegeViolationError("DEV can only be called when CPU is in kernel mode.");
+        }
+        // TODO check for correct operand types 
+
+        // Check if exactly two operands are present.
+        if (command.type === EncodedOperandTypes.NO || data.type === EncodedOperandTypes.NO) {
+            const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
+            let nbrMissingOperands = 0;
+            if (command.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            if (data.type === EncodedOperandTypes.NO) {
+                ++nbrMissingOperands;
+            }
+            throw new MissingOperandError(
+                msg.replace("__NBR_REQUIRED__", "two operands").replace("__NBR_FOUND__", `${nbrMissingOperands} operand(s) found`)
+            );
+        }
+
+        // Define variables to write the operands values to.
+        let firstOperandsValue: DoubleWord;
+        let secondOperandsValue: DoubleWord;
+
+        const command_str: string = command.value.getLeastSignificantByte().toString()
+
+        switch (command_str) {
+            case DevCommands.IO_SEEK:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.IO_CLOSE:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.IO_READ_BUFFER:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.IO_WRITE_BUFFER:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.FILE_CREATE:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.FILE_DELETE:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
+                
+                break;
+            case DevCommands.FILE_STAT:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.CONSOLE_PRINT_NUMBER:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.CONSOLE_READ_NUMBER:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.PROCESS_CREATE:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.PROCESS_EXIT:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            case DevCommands.PROCESS_YIELD:
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                break;
+            default:
+                throw new BadOperandError("Unknown first operand " + command_str + " for DEV instruction.");
+        }
+
+        return;
+    }
+
 
     /*
      * -------------------- Arithmetic operations --------------------
