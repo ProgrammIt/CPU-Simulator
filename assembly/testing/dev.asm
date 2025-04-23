@@ -1,3 +1,14 @@
 NOP
-PUSH $0x61616161        ; push "aaaa" on the stack as filename 
-DEV $0b00000110, %esp   ; 00000110 - file_open (filename_ptr=op2) -> fd=eax 
+
+; filename
+PUSH $100 $97        ; "a"
+PUSH $101 $98        ; "b"
+PUSH $102 $99        ; "c"
+PUSH $103 $0         ; null-terminated
+
+; get file handle into eax
+DEV $0b00000110, $400   ; 00000110 - file_open (filename_ptr=op2) -> fd=eax 
+
+
+
+NOP
