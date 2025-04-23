@@ -2039,13 +2039,7 @@ export class CPUCore {
         //     // ESP reached lowest address (top) of STACK segment.
         //     throw new StackOverflowError("Could not perform PUSH operation. STACK pointer reached top of the STACK.");
         // }
-        // Check if the source operand is of type IMMEDIATE.
-        if (source.type === EncodedOperandTypes.IMMEDIATE) {
-            const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
-            throw new UnsupportedOperandTypeError(
-                msg.replace("__OPERAND_TYPE__", "IMMEDIATE").replace("__INSTRUCTION__", "PUSH")
-            );
-        }
+
         // Check if exactly one operand is present.
         if (source.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
@@ -2065,9 +2059,12 @@ export class CPUCore {
         if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
             // Read the binary value from the (virtual) memory address defined by the given operand.
             value = this.mmu.readDoublewordFrom(source.value, false);            
-        } else {
+        } else if (source.type === EncodedOperandTypes.REGISTER) {
             // Read the binary value from the register defined by the given operand.
             value = this.readRegister(source);
+        } else {
+            // Use the immediate value
+            value = source.value;
         }
         // Write the value to the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, value, false);
