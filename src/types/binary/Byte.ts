@@ -99,4 +99,10 @@ export class Byte extends BinaryValue {
 
 		return byte;
 	}
+
+	public toUnsignedNumber(): number {
+		let binaryString = this._value.join("");
+		let decimalNumber = parseInt(binaryString, 2);
+		return decimalNumber;
+	}
 }

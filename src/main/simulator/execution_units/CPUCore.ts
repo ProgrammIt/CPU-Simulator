@@ -32,6 +32,7 @@ import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandT
 import { devCommandNameByValue, DevCommands } from "../../../types/enumerations/DevOperationCommands";
 import { BadOperandError } from "../../../types/errors/BadOperandError";
 import { NotImplementedError } from "../../../types/errors/NotImplementedError";
+import { Filesystem } from "../os/Filesystem";
 
 /**
  * This class represents a CPU core which is capable of executing instructions.
@@ -167,6 +168,8 @@ export class CPUCore {
      *  The binary encoded type of the currently executed instruction.
      */
     private _decodedInstruction: DecodedInstruction | null;
+    
+    public readonly fs: Filesystem;
 
     /**
      * Constructs an instance of a CPU core.
@@ -193,6 +196,7 @@ export class CPUCore {
         this.alu = new ArithmeticLogicUnit(this.eflags);
         // TODO: Adopt MMU to be able to use different processing widths.
         this.mmu = new MemoryManagementUnit(mainMemory, this.ptp, this.alu, this.eflags);
+        this.fs = new Filesystem();
         this._decodedInstruction = null;
         this._processingWidth = processingWidth;
     }
@@ -561,7 +565,7 @@ export class CPUCore {
      * 00000001 - io_close (fd=op2)
      * 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
      * 00000011 - io_write_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_written=eax
-     * 00000100 - file_create (filename_ptr=op2) -> success=eax
+     * 00000100 - file_create (filename_ptr=op2)
      * 00000101 - file_delete (filename_ptr=op2) -> success=eax
      * 00000110 - file_open (filename_ptr=op2) -> fd=eax
      * 00000111 - file_stat (filename_ptr=op2) -> file_length=eax
@@ -604,54 +608,55 @@ export class CPUCore {
             );
         }
 
-        // Define variables to write the operands values to.
-        let firstOperandsValue: DoubleWord;
-        let secondOperandsValue: DoubleWord;
-
-        const command_str: string = command.value.getLeastSignificantByte().toString()
-
-        switch (command_str) {
+        const command_nr: number = parseInt(command.value.getLeastSignificantByte().join(''), 2);
+        let filename: string;
+        switch (command_nr) {
             case DevCommands.IO_SEEK:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.IO_CLOSE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.IO_READ_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.IO_WRITE_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
-            case DevCommands.FILE_CREATE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.FILE_CREATE: //00000100 - file_create (filename_ptr=op2)
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
+                this.fs.createFile(filename);
                 break;
             case DevCommands.FILE_DELETE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
-                
+                // load the filename from the given address
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
+                let fd: number = this.fs.openFile(filename);
+                this.eax.content = DoubleWord.fromInteger(fd);
                 break;
-            case DevCommands.FILE_STAT:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.FILE_STAT: //00000111 - file_stat (filename_ptr=op2) -> file_length=eax
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
+                this.eax.content = DoubleWord.fromInteger(this.fs.stat(filename));
                 break;
             case DevCommands.CONSOLE_PRINT_NUMBER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.CONSOLE_READ_NUMBER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_CREATE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_EXIT:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_YIELD:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_str) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
             default:
-                throw new BadOperandError("Unknown first operand " + command_str + " for DEV instruction.");
+                throw new BadOperandError("Unknown first operand " + command_nr + " for DEV instruction.");
         }
 
         return;
@@ -2311,6 +2316,8 @@ export class CPUCore {
      * This method does nothing.
      */
     private nop(): void {
+        this.mmu.disableMemoryVirtualization(); // TODO remove (testing only)
+        this.eflags.enterKernelMode() // TODO remove
         return;
     }
 
@@ -2535,5 +2542,21 @@ export class CPUCore {
                 break;
         }
         return register;
+    }
+
+    /**
+     * Read a buffer from memory until the first zero byte and return it as ASCII string
+     * @param address The start of the buffer.
+     * @returns ASCII string of the content
+     */
+    private loadZeroTerminatedASCIIStringFromMemory(address: DoubleWord): string {
+        let str: string = "";
+        let currentByte: Byte = this.mmu.readByteFrom(address)
+        while (currentByte != new Byte()) { // read until null byte
+            str += String.fromCharCode(currentByte.toUnsignedNumber());
+            address = DoubleWord.fromInteger(parseInt(address.value.toString(), 2) + 1) // address++
+            currentByte = this.mmu.readByteFrom(address)
+        }
+        return str
     }
 }
