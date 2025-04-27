@@ -2,6 +2,10 @@
 
 This is the first release of the **Ihme-Core CPU-Simulator**. This document summarizes the key features and functionalities of the simulator. For more information please head over to the documentation.
 
+# Release Notes
+
+* Correction of an error that prevented the STACK from being written to and read from.
+
 # Key features
 
 ## Simulation
