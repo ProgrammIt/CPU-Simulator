@@ -277,7 +277,7 @@ export class MemoryManagementUnit {
         }
         // Check if the page frame is accessable only in kernel mode.
         if (pageTableEntry.isAccessableOnlyInKernelMode() && !this._flags.isInKernelMode()) {
-            throw new PrivilegeViolationError("Process tries to access a page frame, which is accessable only in kernel mode.");
+            throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
         }
         // Check if the page frames contents are executable.
         if (attemptsToExecute && !pageTableEntry.isExecutable()) {
@@ -306,6 +306,26 @@ export class MemoryManagementUnit {
     }
 
     /**
+     * This method computes the physical address of the page table entry, which is associated with the given virtual address.
+     * The page table entry is located at a specific physical address, which is calculated by adding the page number to the page tables base address.
+     * @param virtualAddress The virtual address to compute the physical address of the page table entry for.
+     * @returns The physical address of the page table entry.
+     */
+    private calcPhysicalAddressOfPageTableEntry(virtualAddress: VirtualAddress): PhysicalAddress {
+        // Extract the page number from the given virtual address, which represents the index in the page table where the entry is located.
+        const pageNbr: Array<Bit> = virtualAddress.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS);
+        const pageNbrDec: number = parseInt(pageNbr.toString(), 2) * 4;
+        // Read the page table base address from the page table pointer register and convert it to a decimal value.
+        const pageTableBaseAddressDec: number = parseInt(this._ptp.content.toString(), 2);
+        /* 
+         * Add the result to the physical page table base address to get the address of the page table entry.
+         * Because every page table entry is 4 bytes long, the page number needs to be multiplied by 4 before 
+         * adding it to the page tables base address.
+         */
+        return PhysicalAddress.fromInteger(pageTableBaseAddressDec + pageNbrDec);
+    }
+
+    /**
      * This method searches the page table for a specific entry. To do this, the page number and an offset are 
      * extracted from the given virtual address. The page number is filled with zero bits on the right. The offset 
      * is discarded as part of this method. The padded page number is added to the physical base address of the 
@@ -319,13 +339,8 @@ export class MemoryManagementUnit {
         const wasInKernelMode: boolean = this._flags.isInKernelMode();
         // Enter kernel mode in order to be able to search the page table.
         this._flags.enterKernelMode();
-        // Create a physical address from the given virtual address, by removing the offset and right pad zero bits.
-        const pageNbr: PhysicalAddress = new PhysicalAddress(
-            virtualAddress.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS).concat(new Array<Bit>(MemoryManagementUnit.NUMBER_BITS_OFFSET).fill(0))
-        );
-        // Add the result to the physical page table base address to get the address of the page table entry.
-        const addressOfPageTableEntry: PhysicalAddress = 
-            PhysicalAddress.fromInteger(parseInt(this._ptp.content.toString(), 2) + parseInt(pageNbr.toString(), 2));
+        // Compute the physical address, where the page table resides in the page table.
+        const addressOfPageTableEntry: PhysicalAddress = this.calcPhysicalAddressOfPageTableEntry(virtualAddress);
         // Read page table entry from memory.
         const contentOfPageTableEntry: DoubleWord = this._mainMemory.readDoublewordFrom(addressOfPageTableEntry);
         // Create object from this content.

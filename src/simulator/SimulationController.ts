@@ -394,24 +394,21 @@ export class SimulationController {
             VirtualAddress.fromInteger(numberAddressesNeededForCompiledProgram - 1)
         );
         // Calculate some important values.
-        const addressesPerPageFrameDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
-        const totalAvailablePhysicalAddressesDec: number = Math.pow(2, DataSizes.DOUBLEWORD);
-        const totalNumberOfPageFramesDec: number = totalAvailablePhysicalAddressesDec/addressesPerPageFrameDec;
-        // Calculate the base address of the page table.
-        const physicalBaseAddressPageTableDec: number = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddressToDecimal() - totalNumberOfPageFramesDec;
+        const pageFrameSizeBytesDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
+        const pageSizeBytesDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
         /*
          * In order to map the kernel space into the virtual address space of a process 
          * a page table needs to be created that maps high virtual memory addresses to 
          * the kernel space. The page table itself is written to the kernel space.
          */
         this.initializePageTable(
-            PhysicalAddress.fromInteger(physicalBaseAddressPageTableDec), 
-            totalNumberOfPageFramesDec, 
-            addressesPerPageFrameDec
+            this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress,
+            pageSizeBytesDec,
+            pageFrameSizeBytesDec
         );
         // Disable real mode and enable memory virtualization. Safetyguard.
         this.core.mmu.enableMemoryVirtualization();
-        this.core.esp.content = VirtualAddress.fromInteger(parseInt(this.core.ptp.content.toString(), 2) - 1);
+        this.core.esp.content = VirtualAddress.fromInteger(parseInt(this.core.ptp.content.toString(), 2) - 4);
         // Disable kernel mode.
         this.core.eflags.enterUserMode();
         // Load compiled program into virtual address space starting at the lowest possible address.
@@ -422,32 +419,48 @@ export class SimulationController {
     /**
      * This method initializes the page table for a process.
      * @param highestPhysicalAddress The highest physical address of the page table.
-     * @param totalNumberOfPageFramesDec The total number of page frames.
-     * @param addressesPerPageFrameDec The number of addresses per page frame.
+     * @param pageSizeBytesDec The size (in bytes) or number of addresses per page.
+     * @param pageFrameSizeBytesDec The size (in bytes) or number of addresses per page frame.
      */
-    private initializePageTable(highestPhysicalAddress: PhysicalAddress, totalNumberOfPageFramesDec: number, addressesPerPageFrameDec: number): void {
-        /**
+    private initializePageTable(highestPhysicalAddress: PhysicalAddress, pageSizeBytesDec: number, pageFrameSizeBytesDec: number): void {
+        /*
          * Create the page table entries.
          * The page table is not shared between processes. The table is unique to a process. 
          * Each table is located and maintained in kernel space. To read the table, a process 
          * needs access to it. Since the process has its own virtual address space, the kernel 
          * space should be mapped to this virtual space. To achieve this, the page table must 
          * contain entries that map the highest virtual memory addresses to the kernel space. 
-         * The kernel space is located at the highest physical memory address. The mapped kernel
+         * The kernel space is located at the highest 1 GiB in physical memory. The mapped kernel
          * space needs to be write protected.
          */
+        /*
+         * There are three kind of addresses, we need to consider:
+         * 1. The physical address of the page table entry, we want to create.
+         * 2. The virtual address of the page, we want to create an entry in the page table for.
+         * 3. The physical address of the page frame, we want to associate to a page.
+         */
         const pageTable: Array<PageTableEntry> = new Array<PageTableEntry>();
-        var physicalAddressOfCurrentPageFrameDec: number = 0;
-        var physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);  
-        while (physicalAddressOfCurrentPageFrameDec < SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC - 1) {
+        let virtualAddressOfCurrentPage: VirtualAddress = VirtualAddress.fromInteger(0);
+        let physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(0);
+        // Calculate the total number of pages.
+        const totalNumberOfPages: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS);
+        let numberOfPagesCreated = 0;
+        // Create the page table entries.
+        while (numberOfPagesCreated < totalNumberOfPages) {
+            if (numberOfPagesCreated > 0) {
+                const physicalAddressOfCurrentPageFrameDec: number = parseInt(physicalAddressOfCurrentPageFrame.toString(), 2);
+                physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec + pageFrameSizeBytesDec);
+                const virtualAddressOfCurrentPageDec: number = parseInt(virtualAddressOfCurrentPage.toString(), 2);
+                virtualAddressOfCurrentPage = VirtualAddress.fromInteger(virtualAddressOfCurrentPageDec + pageSizeBytesDec);
+            }
             let pageTableEntry: PageTableEntry;
-            let presentFlag: boolean = false;
-            let writableFlag: boolean = false;
-            let executableFlag: boolean = false;
-            let accessableOnlyInKernelModeFlag: boolean = false;
-            let changedFlag: boolean = false;
-            let pinnedFlag: boolean = true;
-            if (SimulationController.KERNEL_SPACE.inRange(physicalAddressOfCurrentPageFrame)) {
+            let presentFlag = false;
+            let writableFlag = false;
+            let executableFlag = false;
+            let accessibleOnlyInKernelModeFlag = false;
+            let changedFlag = false;
+            let pinnedFlag = true;
+            if (SimulationController.KERNEL_SPACE.inRange(virtualAddressOfCurrentPage)) {
                 /**
                  * This is the part of the virtual address space, where the kernel space is mapped to.
                  * The kernel space can only be accessed in kernel mode and is read-only. Some parts of
@@ -455,20 +468,20 @@ export class SimulationController {
                  */
                 presentFlag = true;
                 if (
-                    this._physicalAddressSpaceForInterruptHandlers!.inRange(physicalAddressOfCurrentPageFrame)
+                    this._physicalAddressSpaceForInterruptHandlers!.inRange(virtualAddressOfCurrentPage)
                     // -> TODO: If there are system functions, the following code needs to be commented out.
                     // || this._physicalAddressSpaceForSystemFunctions.inRange(virtualAddressOfCurrentPage)
                 ) {
                     writableFlag = false;
                     executableFlag = true;
-                } else if (this._physicalAddressSpaceForInterruptTable!.inRange(physicalAddressOfCurrentPageFrame)) {
+                } else if (this._physicalAddressSpaceForInterruptTable!.inRange(virtualAddressOfCurrentPage)) {
                     writableFlag = false;
                     executableFlag = false;
                 } else {
                     writableFlag = true;
                     executableFlag = false;
-                } 
-                accessableOnlyInKernelModeFlag = true;
+                }
+                accessibleOnlyInKernelModeFlag = true;
                 changedFlag = false;
                 pinnedFlag = true;
                 pageTableEntry = new PageTableEntry(
@@ -476,13 +489,13 @@ export class SimulationController {
                         presentFlag, 
                         writableFlag, 
                         executableFlag, 
-                        accessableOnlyInKernelModeFlag, 
+                        accessibleOnlyInKernelModeFlag, 
                         changedFlag, 
                         pinnedFlag
                     ),
                     physicalAddressOfCurrentPageFrame.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                 );
-            } else if (this._virtualAddressSpaceCodeSegment!.inRange(physicalAddressOfCurrentPageFrame)) {
+            } else if (this._virtualAddressSpaceCodeSegment!.inRange(virtualAddressOfCurrentPage)) {
                 /**
                  * This is the part of the virtual address space, where the CODE segment resides.
                  * All binary values in here are treated as instructions. Instructions can be
@@ -491,7 +504,7 @@ export class SimulationController {
                 presentFlag = true;
                 writableFlag = false;
                 executableFlag = true;
-                accessableOnlyInKernelModeFlag = false;
+                accessibleOnlyInKernelModeFlag = false;
                 changedFlag = false;
                 pinnedFlag = true;
                 pageTableEntry = new PageTableEntry(
@@ -499,11 +512,10 @@ export class SimulationController {
                         presentFlag, 
                         writableFlag, 
                         executableFlag, 
-                        accessableOnlyInKernelModeFlag, 
+                        accessibleOnlyInKernelModeFlag, 
                         changedFlag, 
                         pinnedFlag
                     ),
-                    // new PhysicalAddress().getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                     physicalAddressOfCurrentPageFrame.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                 );
             } else {
@@ -515,7 +527,7 @@ export class SimulationController {
                 presentFlag = true;
                 writableFlag = true;
                 executableFlag = false;
-                accessableOnlyInKernelModeFlag = false;
+                accessibleOnlyInKernelModeFlag = false;
                 changedFlag = false;
                 pinnedFlag = true;
                 pageTableEntry = new PageTableEntry(
@@ -523,23 +535,17 @@ export class SimulationController {
                         presentFlag, 
                         writableFlag, 
                         executableFlag, 
-                        accessableOnlyInKernelModeFlag, 
+                        accessibleOnlyInKernelModeFlag, 
                         changedFlag, 
                         pinnedFlag
                     ),
-                    // new PhysicalAddress().getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                     physicalAddressOfCurrentPageFrame.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_FRAME_ADDRESS)
                 );
             }
             pageTable.push(pageTableEntry);
-            physicalAddressOfCurrentPageFrameDec += addressesPerPageFrameDec;
-            if (physicalAddressOfCurrentPageFrameDec > SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
-                break;
-            }
-            physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec);
+            ++numberOfPagesCreated;
         }
-        // TODO: Testen!
-        var physicalAddressOfCurrentPageTableEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
+        let physicalAddressOfCurrentPageTableEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         for (const entry of Array.from(pageTable).reverse()) {
             physicalAddressOfCurrentPageTableEntryDec -= 4;
             this.mainMemory.writeDoublewordTo(

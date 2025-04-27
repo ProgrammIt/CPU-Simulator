@@ -177,7 +177,7 @@ export class PageTableEntry {
      */
     public isPinned(): boolean {
         return this.flagBits[4] === 1;
-    };
+    }
 
     /**
      * This method sets the changed flag of the page table entry.
