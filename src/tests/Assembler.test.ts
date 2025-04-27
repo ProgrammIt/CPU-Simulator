@@ -1,13 +1,13 @@
 import { readFileSync } from 'fs';
-import { Assembler } from '../simulator/Assembler';
-import { DoubleWord } from '../binary_types/DoubleWord';
+import { Assembler } from '../main/simulator/Assembler';
+import { DoubleWord } from '../types/binary/DoubleWord';
 
 describe('Encode instructions', () => {
-    const assembler = new Assembler();
+    const assembler = new Assembler("./settings/language_definition.json");
     
     test('Encode instruction "ADD $1, %eax"', () => {
-        let result: DoubleWord[] = assembler.compile("ADD $1, %eax");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("ADD $1, %eax");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -16,8 +16,8 @@ describe('Encode instructions', () => {
     });
 
     test('Encode instruction "MOV $0x64, %eax"', () => {
-        let result: DoubleWord[] = assembler.compile("MOV $0x64, %eax");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("MOV $0x64, %eax");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -26,8 +26,8 @@ describe('Encode instructions', () => {
     });
 
     test('Encode instruction "NOP"', () => {
-        let result: DoubleWord[] = assembler.compile("NOP");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("NOP");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -36,8 +36,8 @@ describe('Encode instructions', () => {
     });
 
     test('Encode instruction "ADD" with negative decimal immediate', () => {
-        let result: DoubleWord[] = assembler.compile("ADD $-10, %eax");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("ADD $-10, %eax");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -46,8 +46,8 @@ describe('Encode instructions', () => {
     });
 
     test('Encode instruction "ADD" with negative hexadecimal immediate', () => {
-        let result: DoubleWord[] = assembler.compile("ADD $-0x10, %eax");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("ADD $-0x10, %eax");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -56,8 +56,8 @@ describe('Encode instructions', () => {
     });
 
     test('Encode instruction "ADD" with negative binary immediate', () => {
-        let result: DoubleWord[] = assembler.compile("ADD $0b10, %eax");
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile("ADD $0b10, %eax");
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
@@ -66,8 +66,8 @@ describe('Encode instructions', () => {
     });
 
     test("Encode assembly programs", () => {        
-        let result: DoubleWord[] = assembler.compile(readFileSync("./assembly/examples/loop.asm", "utf8"));
-        let expectedOutput: DoubleWord[] = [
+        const result: DoubleWord[] = assembler.compile(readFileSync("./assembly/examples/loop.asm", "utf8"));
+        const expectedOutput: DoubleWord[] = [
             new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]),
             new DoubleWord([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),

@@ -1,8 +1,8 @@
-import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
-import { DoubleWord } from "../binary_types/DoubleWord";
-import { Byte } from "../binary_types/Byte";
-import { Bit } from "../binary_types/Bit";
+import { Bit } from "../types/binary/Bit";
+import { Byte } from "../types/binary/Byte";
+import { DoubleWord } from "../types/binary/DoubleWord";
+import { ArithmeticLogicUnit } from "../main/simulator/execution_units/ArithmeticLogicUnit";
+import { EFLAGS } from "../main/simulator/functional_units/EFLAGS";
 
 describe("Test ALU", () => {
     const flags: EFLAGS = new EFLAGS();
@@ -15,122 +15,122 @@ describe("Test ALU", () => {
     });
 
     test("Perform logical NOT on binary 0b01111111111111111111111110000000", () => {
-        var testDoubleword: DoubleWord = DoubleWord.fromInteger(2147483520);
+        const testDoubleword: DoubleWord = DoubleWord.fromInteger(2147483520);
         expect(alu.not(testDoubleword).toString())
             .toEqual("10000000000000000000000001111111");
     });
 
     test("Perform logical AND on binary representation of decimal 255 and binary representation of decimal 0", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
         expect(alu.and(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000000000000");
     });
 
     test("Perform logical AND on binary representation of decimal 255 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.and(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000011111111");
     });
 
     test("Perform logical AND on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.and(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000010000000");
     });
 
     test("Perform logical OR on binary representation of decimal 255 and binary representation of decimal 0", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
         expect(alu.or(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000011111111");
     });
 
     test("Perform logical OR on binary representation of decimal 255 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.or(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000011111111");
     });
 
     test("Perform logical OR on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.or(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000011111111");
     });
 
     test("Perform logical OR on binary representation of decimal 255 and binary representation of decimal 0", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
         expect(alu.xor(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000011111111");
     });
 
     test("Perform logical OR on binary representation of decimal 255 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.xor(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000000000000");
     });
 
     test("Perform logical OR on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.xor(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000001111111");
     });
 
     test("Perform ADD on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.add(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000101111111");
     });
 
     test("Perform ADD on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.add(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111110000001");
     });
 
     test("Perform ADD on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.add(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111010000001");
     });
 
     test("Perform ADC on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         flags.clearCarry();
         expect(alu.adc(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000101111111");
     });
 
     test("Perform ADC on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         flags.clearCarry();
         expect(alu.adc(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111110000001");
     });
 
     test("Perform ADC on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         flags.setCarry();
         expect(alu.adc(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111110000010");
     });
 
     test("Perform ADC on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         flags.clearCarry();
         expect(alu.adc(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111010000001");
@@ -157,45 +157,45 @@ describe("Test ALU", () => {
     // });
 
     test("Perform SUB on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.sub(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000001111111");
     });
 
     test("Perform SUB on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.sub(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000101111111");
     });
 
     test("Perform SUB on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.sub(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111110000001");
     });
 
     test("Perform SBB on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         flags.clearCarry();
         expect(alu.sbb(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000001111111");
     });
 
     test("Perform SBB on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         flags.clearCarry();
         expect(alu.sbb(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000101111111");
     });
 
     test("Perform SBB on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         flags.clearCarry();
         expect(alu.sbb(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111110000001");
@@ -252,78 +252,78 @@ describe("Test ALU", () => {
     });
 
     test("Perform MUL on binary representation of decimal 128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000111111110000000");
     });
 
     test("Perform MUL on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-256);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-256);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111000000000000000");
     });
 
     test("Perform MUL on binary representation of decimal 2147483647 and binary representation of decimal -1", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(2147483647);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-1);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(2147483647);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-1);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("10000000000000000000000000000001");
     });
 
     test("Perform MUL on binary representation of decimal -2147483647 and binary representation of decimal 0", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-2147483648);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-2147483648);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(0);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000000000000");
     });
 
     test("Perform MUL on binary representation of decimal -128 and binary representation of decimal 255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(255);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111000000010000000");
     });
 
     test("Perform MUL on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.mul(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000111111110000000");
     });
 
     test("Perform DIV on binary representation of decimal -128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.div(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000000000000");
     });
 
     test("Perform DIV on binary representation of decimal 128 and binary representation of decimal -255", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-255);
         expect(alu.div(testDoubleword1, testDoubleword2).toString())
             .toEqual("00000000000000000000000000000000");
     });
 
     test("Perform DIV on binary representation of decimal 256 and binary representation of decimal -128", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(256);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(-128);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(256);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(-128);
         expect(alu.div(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111111111110");
     });
 
     test("Perform DIV on binary representation of decimal -256 and binary representation of decimal 128", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-256);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-256);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(128);
         expect(alu.div(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111111111110");
     });
 
     test("Perform DIV on binary representation of decimal -256 and binary representation of decimal 128", () => {
-        var testDoubleword1: DoubleWord = DoubleWord.fromInteger(-2001);
-        var testDoubleword2: DoubleWord = DoubleWord.fromInteger(128);
+        const testDoubleword1: DoubleWord = DoubleWord.fromInteger(-2001);
+        const testDoubleword2: DoubleWord = DoubleWord.fromInteger(128);
         expect(alu.div(testDoubleword1, testDoubleword2).toString())
             .toEqual("11111111111111111111111111110001");
     });

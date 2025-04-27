@@ -1,0 +1,133 @@
+name: Publish CPU-Simulator
+run-name: Publish CPU-Simulator
+on:
+  push:
+    branches: [ main ]
+jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    outputs:
+      UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+      VERSION: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Find version of simulator
+        id: version
+        run: echo "VERSION=$(node -e "console.log(require('./package.json').version);")" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          release_name: "Ihme-Core Simulator v${{ steps.version.outputs.VERSION }}"
+          body_path: ./CHANGELOG.md
+          draft: false
+          prerelease: false
+          repo: ${{ github.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_and_upload_linux:
+    name:  Build and upload artifacts for Linux
+    runs-on: ubuntu-latest
+    needs: create_release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update package cache
+        run: sudo apt update -y && sudo apt install fakeroot dpkg rpm -y
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run make
+
+      # - name: List results in output directory
+      #   run: ls -R ./out
+      
+      - name: Upload rpm artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+          asset_path: ./out/make/rpm/x64/ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}-1.x86_64.rpm
+          asset_name: "ihme-core-simulator-${{ needs.create_release.outputs.VERSION }}-1.x86_64.rpm"
+          asset_content_type: application/x-executable
+
+      - name: Upload deb artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+          asset_path: ./out/make/deb/x64/ihme-core-simulator_${{ needs.create_release.outputs.VERSION }}_amd64.deb
+          asset_name: ihme-core-simulator_${{ needs.create_release.outputs.VERSION }}_amd64.deb
+          asset_content_type: application/x-executable
+
+  build_and_upload_windows:
+    name: Build and upload artifacts for Windows
+    runs-on: windows-latest
+    needs: create_release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run make
+
+      - name: Upload exe artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe
+            asset_name: "Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }} Setup.exe"
+            asset_content_type: application/exe
+
+      - name: Upload msi artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+            asset_path: ./out/make/squirrel.windows/x64/Ihme-Core SimulatorSetup.msi
+            asset_name: Ihme-Core SimulatorSetup.msi
+            asset_content_type: application/octet-stream
+
+  build_and_upload_mac:
+    name: Build and upload artifacts for macOS
+    runs-on: macos-latest
+    needs: create_release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run make
+
+      # - name: List results in output directory
+      #   run: ls -R ./out
+
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.UPLOAD_URL }}
+          asset_path: ./out/make/Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }}-arm64.dmg
+          asset_name: Ihme-Core Simulator-${{ needs.create_release.outputs.VERSION }}-arm64.dmg
+          asset_content_type: application/zip

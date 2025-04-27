@@ -1,15 +1,11 @@
-import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
-import { EFLAGS } from "../simulator/functional_units/EFLAGS";
-import { TranslationLookasideBuffer } from "../simulator/functional_units/TranslationLookasideBuffer";
-import { Bit } from "../binary_types/Bit";
-import { PageTableEntry } from "../binary_types/PageTableEntry";
-import { PhysicalAddress } from "../binary_types/PhysicalAddress";
-import { VirtualAddress } from "../binary_types/VirtualAddress";
+import { TranslationLookasideBuffer } from "../main/simulator/functional_units/TranslationLookasideBuffer";
+import { Bit } from "../types/binary/Bit";
+import { PageTableEntry } from "../types/binary/PageTableEntry";
+import { PhysicalAddress } from "../types/binary/PhysicalAddress";
+import { VirtualAddress } from "../types/binary/VirtualAddress";
 
 describe("Test TLB", () => {
     const translationLookasideBuffer: TranslationLookasideBuffer = new TranslationLookasideBuffer(2);
-    const pageTableBaseAddress: PhysicalAddress = PhysicalAddress.fromInteger(10000);
-    const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(new EFLAGS());
 
     const virtualAddress1: VirtualAddress = VirtualAddress.fromInteger(100);
     const pageFrameNbr1: Array<Bit> = PhysicalAddress.fromInteger(1).getMostSignificantBits(20);
