@@ -2044,7 +2044,6 @@ export class CPUCore {
         //     // ESP reached lowest address (top) of STACK segment.
         //     throw new StackOverflowError("Could not perform PUSH operation. STACK pointer reached top of the STACK.");
         // }
-
         // Check if exactly one operand is present.
         if (source.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
@@ -2068,7 +2067,7 @@ export class CPUCore {
             // Read the binary value from the register defined by the given operand.
             value = this.readRegister(source);
         } else {
-            // Use the immediate value
+            // Read the binary value from the immediate operand.
             value = source.value;
         }
         // Write the value to the STACK.

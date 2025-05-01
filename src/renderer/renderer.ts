@@ -1365,7 +1365,7 @@ export class Renderer {
             alert("Programm finished execution.")
         }
         if (!this.programLoaded) {
-            alert("No programm is currently loaded!");
+            alert("No program is currently loaded!");
         }
         await this.reloadPhysicalRAMView();
         await this.reloadVirtualRAMView();
