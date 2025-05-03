@@ -561,7 +561,10 @@ export class CPUCore {
      * 
      * 
      * command:
-     * 00000000 - io_seek (fd=op2, offset=eax) -> success=eax
+     * 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
+     *      mode:   0 - Seek from current position
+     *              1 - Seek from start of file
+     *              2 - Seek from end of file
      * 00000001 - io_close (fd=op2)
      * 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
      * 00000011 - io_write_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_written=eax

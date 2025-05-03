@@ -1,11 +1,11 @@
-import { accessSync, constants, existsSync, openSync } from 'node:fs';
+import { accessSync, constants, existsSync, lstatSync, openSync, readSync, writeSync } from 'node:fs';
 import { FilesystemError } from '../../../types/errors/FilesystemError';
 
 class VirtualFileDescriptor {
     public filename: string;
     public virtual_fd: number;
     public real_fd: number;
-    public seekPosition: number = 0;
+    public seek_position: number = 0;
     constructor(filename: string, virtual_fd: number, real_fd: number) {
         this.filename = filename;
         this.virtual_fd = virtual_fd;
@@ -40,14 +40,20 @@ export class PassthroughFilesystem {
             // invalid fd
             return -1;
         }
-        if (this.fd_map.get(fd)!.seekPosition + offset < 0) {
-            // negative seek position
+        const vfd = this.fd_map.get(fd)!
+        if (this.file_stat(vfd.filename) < vfd.seek_position) {
+            // seek position out of bounds
             return -2;
         }
-        // node:fs doesnt support direct seek on file descriptors, but instead offset on write commands. Seek is emulated on each write command.
-        this.fd_map.get(fd)!.seekPosition += offset;
+        if (vfd.seek_position + offset < 0) {
+            // negative seek position
+            return -3;
+        }
+        // node:fs doesnt support seek() on file descriptors, but allows it on write commands. Seek is emulated on each write command.
+        vfd.seek_position += offset;
         return 0;
     }
+
     public io_close(fd: number) {
         // TODO maybe add return value indicating success/error if invalid fd is given
         if (!this.fd_map.has(fd)) {
@@ -56,31 +62,63 @@ export class PassthroughFilesystem {
         }
         this.fd_map.delete(fd);
     }
-    public io_read_buffer(fd: number, buffer: any, b_szie: any): number {
-        return 0; // return number of bytes read
+
+    public io_read_buffer(fd: number, size: number): [number, Uint8Array?] {
+        if (!this.fd_map.has(fd)) {
+            // invalid fd
+            return [-1, undefined];
+        }
+        const vfd = this.fd_map.get(fd)!
+        if (this.file_stat(vfd.filename) < vfd.seek_position) {
+            // invalid seek position
+            return [-2, undefined];
+        }
+        const buffer = new Uint8Array(size)
+        const bytes_read: number = readSync(vfd.real_fd, buffer, 0, size, vfd.seek_position)
+        return [bytes_read, buffer]
     }
-    public io_write_buffer(fd: number, buffer: any, b_szie: any): number {
-        // fs.writeSync(fd, buffer, offset[, length[, position]])
+
+    public io_write_buffer(fd: number, buffer: Uint8Array): number {
         if (!this.fd_map.has(fd)) {
             // invalid fd
             return -1;
         }
-        // TODO
-        return 0; // return number of bytes written
+        const vfd = this.fd_map.get(fd)!
+        if (this.file_stat(vfd.filename) < vfd.seek_position) {
+            // invalid seek position
+            return -2;
+        }
+        const bytes_written: number = writeSync(vfd.real_fd, buffer, 0, buffer.byteLength, vfd.seek_position);
+        vfd.seek_position += bytes_written;
+        return bytes_written;
     }
+
     public file_create(filename: string) {
 
     }
+    
     public file_delete(filename: string): number {
         return 0; // return success status
     }
+
     public file_open(filename: string): number {
         const real_fd = openSync(this.path + filename, "r+");
-        const fd = new VirtualFileDescriptor(filename, this.fd_counter++, real_fd);
-        this.fd_map.set(fd.virtual_fd, fd);
-        return fd.virtual_fd; // returns virtual file descriptor
+        const vfd = new VirtualFileDescriptor(filename, this.fd_counter++, real_fd);
+        this.fd_map.set(vfd.virtual_fd, vfd);
+        return vfd.virtual_fd; // returns virtual file descriptor
     }
+
     public file_stat(filename: string): number {
-        return 0; // return file length
+        const path = this.path + filename
+        if (!existsSync(path)) {
+            // file does not exist
+            return -1;
+        }
+        const stat = lstatSync(path)
+        if (!stat.isFile) {
+            // not a file
+            return -2;
+        }
+        return stat.size;
     }
 }
