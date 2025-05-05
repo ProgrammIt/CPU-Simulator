@@ -1,4 +1,4 @@
-import { accessSync, constants, existsSync, lstatSync, openSync, readSync, writeSync } from 'node:fs';
+import { accessSync, constants, existsSync, lstatSync, openSync, readSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
 import { FilesystemError } from '../../../types/errors/FilesystemError';
 
 class VirtualFileDescriptor {
@@ -63,22 +63,7 @@ export class PassthroughFilesystem {
         this.fd_map.delete(fd);
     }
 
-    public io_read_buffer(fd: number, size: number): [number, Uint8Array?] {
-        if (!this.fd_map.has(fd)) {
-            // invalid fd
-            return [-1, undefined];
-        }
-        const vfd = this.fd_map.get(fd)!
-        if (this.file_stat(vfd.filename) < vfd.seek_position) {
-            // invalid seek position
-            return [-2, undefined];
-        }
-        const buffer = new Uint8Array(size)
-        const bytes_read: number = readSync(vfd.real_fd, buffer, 0, size, vfd.seek_position)
-        return [bytes_read, buffer]
-    }
-
-    public io_write_buffer(fd: number, buffer: Uint8Array): number {
+    public io_read_buffer(fd: number, buffer: Uint8Array, size: number): number {
         if (!this.fd_map.has(fd)) {
             // invalid fd
             return -1;
@@ -88,21 +73,51 @@ export class PassthroughFilesystem {
             // invalid seek position
             return -2;
         }
-        const bytes_written: number = writeSync(vfd.real_fd, buffer, 0, buffer.byteLength, vfd.seek_position);
+        const bytes_read: number = readSync(vfd.real_fd, buffer, 0, size, vfd.seek_position)
+        return bytes_read
+    }
+
+    public io_write_buffer(fd: number, buffer: Uint8Array, size: number): number {
+        if (!this.fd_map.has(fd)) {
+            // invalid fd
+            return -1;
+        }
+        const vfd = this.fd_map.get(fd)!
+        if (this.file_stat(vfd.filename) < vfd.seek_position) {
+            // invalid seek position
+            return -2;
+        }
+        const bytes_written: number = writeSync(vfd.real_fd, buffer, 0, size, vfd.seek_position);
         vfd.seek_position += bytes_written;
         return bytes_written;
     }
 
     public file_create(filename: string) {
-
+        const path = this.path + filename
+        if (existsSync(path)) {
+            // file does already exist
+            return -1;
+        }
+        writeFileSync(path, "", {mode: 777, flag: "w+"})
+        return 0;
     }
-    
+
     public file_delete(filename: string): number {
-        return 0; // return success status
+        const path = this.path + filename
+        if (!existsSync(path)) {
+            // file does not exist
+            return -1;
+        }
+        unlinkSync(path)
+        return 0;
     }
 
     public file_open(filename: string): number {
-        const real_fd = openSync(this.path + filename, "r+");
+        if (this.file_stat(filename) < 0) {
+            return -1;
+        }
+        const path = this.path + filename
+        const real_fd = openSync(path, "r+", constants.O_RDWR);
         const vfd = new VirtualFileDescriptor(filename, this.fd_counter++, real_fd);
         this.fd_map.set(vfd.virtual_fd, vfd);
         return vfd.virtual_fd; // returns virtual file descriptor
@@ -115,7 +130,7 @@ export class PassthroughFilesystem {
             return -1;
         }
         const stat = lstatSync(path)
-        if (!stat.isFile) {
+        if (!stat.isFile || stat.isDirectory()) {
             // not a file
             return -2;
         }
