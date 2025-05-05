@@ -88,14 +88,14 @@ describe('PassthroughFilesystem', () => {
 
     describe('IO operations', () => {
         test('io_seek with invalid fd returns -1', () => {
-            expect(fs.io_seek(999, 0)).toBe(-1);
+            expect(fs.io_seek(999, 0, 0)).toBe(-1);
         });
 
         test('io_seek adjusts position correctly', () => {
             const filename = 'seek.txt';
             writeFileSync(join(tmp, filename), 'abcdef');
             const fd = fs.file_open(filename);
-            expect(fs.io_seek(fd, 3)).toBe(0);
+            expect(fs.io_seek(fd, 3, 0)).toBe(0);
             const buffer = new Uint8Array(3)
             const bytesRead = fs.io_read_buffer(fd, buffer, 3);
             expect(bytesRead).toBe(3);
@@ -107,7 +107,7 @@ describe('PassthroughFilesystem', () => {
             const filename = 'seek_negative.txt';
             writeFileSync(join(tmp, filename), 'abc');
             const fd = fs.file_open(filename);
-            expect(fs.io_seek(fd, -1)).toBe(-3);
+            expect(fs.io_seek(fd, -1, 0)).toBe(-3);
             fs.io_close(fd);
         });
 
@@ -126,7 +126,7 @@ describe('PassthroughFilesystem', () => {
             const filename = 'read_beyond.txt';
             writeFileSync(join(tmp, filename), 'abc');
             const fd = fs.file_open(filename);
-            fs.io_seek(fd, 4); // Seek beyond file size
+            fs.io_seek(fd, 4, 0); // Seek beyond file size
             const buffer = new Uint8Array(1)
             const result = fs.io_read_buffer(fd, buffer, 1);
             expect(result).toBe(-2);
@@ -148,7 +148,7 @@ describe('PassthroughFilesystem', () => {
             const filename = 'write_beyond.txt';
             writeFileSync(join(tmp, filename), 'abc');
             const fd = fs.file_open(filename);
-            fs.io_seek(fd, 4); // Seek beyond file size
+            fs.io_seek(fd, 4, 0); // Seek beyond file size
             expect(fs.io_write_buffer(fd, new Uint8Array([1]), 1)).toBe(-2);
             fs.io_close(fd);
         });
@@ -158,7 +158,7 @@ describe('PassthroughFilesystem', () => {
             writeFileSync(join(tmp, filename), '');
             const fd = fs.file_open(filename);
             fs.io_close(fd);
-            expect(fs.io_seek(fd, 0)).toBe(-1);
+            expect(fs.io_seek(fd, 0, 0)).toBe(-1);
         });
     });
 });

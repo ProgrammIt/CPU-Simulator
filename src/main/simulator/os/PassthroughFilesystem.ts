@@ -35,12 +35,32 @@ export class PassthroughFilesystem {
         this.path = path;
     }
 
-    public io_seek(fd: number, offset: number): number {
+    public io_seek(fd: number, offset: number, mode: number): number {
         if (!this.fd_map.has(fd)) {
             // invalid fd
             return -1;
         }
         const vfd = this.fd_map.get(fd)!
+
+        let new_seek_postion = 0;
+        switch (mode) {
+            case 0: // 0 - Seek from current position
+                new_seek_postion = vfd.seek_position + offset;
+                break;
+            case 1: // 1 - Seek from start of file
+                new_seek_postion = offset;
+                break;
+            case 2: // 2 - Seek from end of file
+                this.file_stat(vfd.filename)
+                // TODO error handling if file_stat fails due to race condition
+                new_seek_postion = this.file_stat(vfd.filename) - offset;
+                break;
+            default:
+                // unkown mode
+                return -4;
+                break;
+        }
+
         if (this.file_stat(vfd.filename) < vfd.seek_position) {
             // seek position out of bounds
             return -2;
