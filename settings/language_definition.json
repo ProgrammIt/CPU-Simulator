@@ -982,14 +982,7 @@
                 {
                     "name" : "__DATA__",
                     "allowed_types" : [
-                        "REGISTER_DIRECT",
-                        "REGISTER_INDIRECT",
-                        "MEMORY_ADDRESS_DECIMAL",
-                        "MEMORY_ADDRESS_HEXADECIMAL",
-                        "MEMORY_ADDRESS_BINARY",
-                        "IMMEDIATE_DECIMAL",
-                        "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY"
+                        "REGISTER_DIRECT"
                     ]
                 }
             ]

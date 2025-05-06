@@ -100,4 +100,14 @@ export class BinaryValue {
         }
         return this._value.slice(0, nbrOfBits);
     }
+
+    public toNumber(): number {
+		let sum: number = 0;
+		let i: number = 0;
+		for (let index = this.value.length -1; index >= 0; index--) {
+			sum += 2**i * this.value[index].valueOf();
+			i++;
+		}
+		return sum;
+	}
 }

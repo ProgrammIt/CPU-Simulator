@@ -162,4 +162,5 @@ export class DoubleWord extends BinaryValue {
 
 		return doubleword;
 	}
+
 }

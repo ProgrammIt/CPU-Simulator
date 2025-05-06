@@ -562,13 +562,13 @@ export class CPUCore {
      * 
      * 
      * command:
-     * 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
+     * 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
      *      mode:   0 - Seek from current position
      *              1 - Seek from start of file
      *              2 - Seek from end of file
      * 00000001 - io_close (fd=op2)
-     * 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
-     * 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
+     * 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
+     * 00000011 - io_write_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_written=eax
      * 00000100 - file_create (filename_ptr=op2)
      * 00000101 - file_delete (filename_ptr=op2) -> success=eax
      * 00000110 - file_open (filename_ptr=op2) -> fd=eax
@@ -615,14 +615,15 @@ export class CPUCore {
         const command_nr: number = parseInt(command.value.getLeastSignificantByte().join(''), 2);
         let filename: string;
         switch (command_nr) {
-            case DevCommands.IO_SEEK: //00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
-                // read parameters from stack
+            case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
+                const seek_result = this.fs.io_seek(data.value.toNumber(), this.eax.content.toNumber(), this.ebx.content.toNumber())
+                this.eax.content = DoubleWord.fromInteger(seek_result);
+                break;
                 
-                //this.fs.io_seek(data, )
-                break;
             case DevCommands.IO_CLOSE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                this.fs.io_close(data.value.toNumber())
                 break;
+                
             case DevCommands.IO_READ_BUFFER:
                 throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
                 break;
@@ -638,9 +639,9 @@ export class CPUCore {
                 break;
             case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
                 // // load the filename from the given address
-                // filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
-                // let fd: number = this.fs.openFile(filename);
-                // this.eax.content = DoubleWord.fromInteger(fd);
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
+                let fd: number = this.fs.file_open(filename);
+                this.eax.content = DoubleWord.fromInteger(fd);
                 break;
             case DevCommands.FILE_STAT: //00000111 - file_stat (filename_ptr=op2) -> file_length=eax
                 // filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
@@ -2322,7 +2323,7 @@ export class CPUCore {
      */
     private nop(): void {
         // this.mmu.disableMemoryVirtualization(); // TODO remove (testing only)
-        // this.eflags.enterKernelMode() // TODO remove
+        this.eflags.enterKernelMode() // TODO remove
         return;
     }
 
@@ -2557,9 +2558,9 @@ export class CPUCore {
     private loadZeroTerminatedASCIIStringFromMemory(address: DoubleWord): string {
         let str: string = "";
         let currentByte: Byte = this.mmu.readByteFrom(address)
-        while (currentByte != new Byte()) { // read until null byte
+        while (currentByte.toNumber() != 0) { // read until null byte
             str += String.fromCharCode(currentByte.toUnsignedNumber());
-            address = DoubleWord.fromInteger(parseInt(address.value.toString(), 2) + 1) // address++
+            address = DoubleWord.fromInteger(address.toNumber() + 1) // address++
             currentByte = this.mmu.readByteFrom(address)
         }
         return str
