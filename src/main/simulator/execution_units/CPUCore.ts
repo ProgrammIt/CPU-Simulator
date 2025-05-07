@@ -612,11 +612,40 @@ export class CPUCore {
             );
         }
 
-        const command_nr: number = parseInt(command.value.getLeastSignificantByte().join(''), 2);
+        let op1: number;
+        switch (command.type) {
+            case EncodedOperandTypes.IMMEDIATE:
+                op1 = command.value.toNumber();
+                break;
+            case EncodedOperandTypes.REGISTER:
+                op1 = this.readRegister(command).toNumber();
+                break;
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                op1 = this.mmu.readDoublewordFrom(command.value, false).toNumber();
+                break;
+            default:
+                throw new BadOperandError("Could not parse first DEV operand.");
+        }
+
+        let op2: number;
+        switch (data.type) {
+            case EncodedOperandTypes.IMMEDIATE:
+                op2 = data.value.toNumber();
+                break;
+            case EncodedOperandTypes.REGISTER:
+                op2 = this.readRegister(data).toNumber();
+                break;
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                op2 = this.mmu.readDoublewordFrom(data.value, false).toNumber();
+                break;
+            default:
+                throw new BadOperandError("Could not parse second DEV operand.");
+        }
+
         let filename: string;
-        switch (command_nr) {
+        switch (op1) {
             case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
-                const seek_result = this.fs.io_seek(data.value.toNumber(), this.eax.content.toNumber(), this.ebx.content.toNumber())
+                const seek_result = this.fs.io_seek(op2, this.eax.content.toNumber(), this.ebx.content.toNumber())
                 this.eax.content = DoubleWord.fromInteger(seek_result);
                 break;
                 
@@ -625,20 +654,20 @@ export class CPUCore {
                 break;
                 
             case DevCommands.IO_READ_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.IO_WRITE_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.FILE_CREATE: //00000100 - file_create (filename_ptr=op2)
                 // filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
                 // this.fs.createFile(filename);
                 // break;
             case DevCommands.FILE_DELETE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
-                // // load the filename from the given address
+                // load the filename from the given address
                 filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
                 let fd: number = this.fs.file_open(filename);
                 this.eax.content = DoubleWord.fromInteger(fd);
@@ -648,22 +677,22 @@ export class CPUCore {
                 // this.eax.content = DoubleWord.fromInteger(this.fs.stat(filename));
                 break;
             case DevCommands.CONSOLE_PRINT_NUMBER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.CONSOLE_READ_NUMBER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_CREATE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_EXIT:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             case DevCommands.PROCESS_YIELD:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(command_nr) + " is not yet implemented for the DEV instruction.");
+                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
                 break;
             default:
-                throw new BadOperandError("Unknown first operand " + command_nr + " for DEV instruction.");
+                throw new BadOperandError("Unknown first operand " + op1 + " for DEV instruction.");
         }
 
         return;
