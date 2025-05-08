@@ -5,7 +5,7 @@
         "usage" : "[a-zA-Z][a-zA-Z\\-_0-9]*"
     },
     "number_formats" : {
-        "decimal" : "-?[ ]*(?:0(?![0-9]+)|[1-9][0-9]*)",
+        "decimal" : "-?[ ]*(?:0(?![xb]|[0-9]+)|[1-9][0-9]*)",
         "hexadecimal" : "-?[ ]*0x(?:(0(?![0-9A-Fa-f]+))|([1-9A-Fa-f][0-9A-Fa-f]*))",
         "binary" : "-?[ ]*0b[01]+"
     },
@@ -73,12 +73,12 @@
         {
             "name" : "IMMEDIATE_DECIMAL",
             "code" : "1010000",
-            "regex" : "\\$-?(?:0(?![0-9]+)|[1-9][0-9]*)"
+            "regex" : "\\$-?[ ]*(?:0(?![xb]|[0-9]+)|[1-9][0-9]*)"
         },
         {
             "name" : "IMMEDIATE_HEXADECIMAL",
             "code" : "1010000",
-            "regex" : "\\$-?0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
+            "regex" : "\\$-?[ ]*0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
         },
         {
             "name" : "IMMEDIATE_BINARY",
@@ -907,7 +907,19 @@
             "mnemonic" : "POP",
             "opcode" : "0100011",
             "type" : "I",
-            "regex" : "(POP)"
+            "regex" : "(POP)[ ]+(__TARGET__)",
+            "operands" : [
+                {
+                    "name" : "__TARGET__",
+                    "allowed_types" : [
+                        "REGISTER_DIRECT",
+                        "REGISTER_INDIRECT",
+                        "MEMORY_ADDRESS_DECIMAL",
+                        "MEMORY_ADDRESS_HEXADECIMAL",
+                        "MEMORY_ADDRESS_BINARY"
+                    ]
+                }
+            ]
         },
         {
             "mnemonic" : "PUSH",
