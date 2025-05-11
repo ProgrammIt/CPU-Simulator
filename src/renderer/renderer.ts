@@ -1361,11 +1361,12 @@ export class Renderer {
      * Performs the next CPU cycle (fetch, decode, execute).
      */
     public async cycle(): Promise<void> {
-        if (!await this._window.simulator.nextCycle()) {
-            alert("Programm finished execution.")
-        }
         if (!this.programLoaded) {
             alert("No programm is currently loaded!");
+            return;
+        }
+        if (!await this._window.simulator.nextCycle()) {
+            alert("Programm finished execution.");
         }
         await this.reloadPhysicalRAMView();
         await this.reloadVirtualRAMView();
