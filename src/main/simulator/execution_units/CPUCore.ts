@@ -562,7 +562,7 @@ export class CPUCore {
      * 
      * 
      * command:
-     * 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
+     * 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
      *      mode:   0 - Seek from current position
      *              1 - Seek from start of file
      *              2 - Seek from end of file
@@ -644,8 +644,8 @@ export class CPUCore {
 
         let filename: string;
         switch (op1) {
-            case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
-                const seek_result = this.fs.io_seek(op2, this.eax.content.toNumber(), this.ebx.content.toNumber())
+            case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
+                const seek_result = this.fs.io_seek(op2, this.internal_pop().toNumber(), this.internal_pop().toNumber())
                 this.eax.content = DoubleWord.fromInteger(seek_result);
                 break;
                 
@@ -668,13 +668,13 @@ export class CPUCore {
                 break;
             case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
                 // load the filename from the given address
-                filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(DoubleWord.fromInteger(op2));
                 let fd: number = this.fs.file_open(filename);
                 this.eax.content = DoubleWord.fromInteger(fd);
                 break;
             case DevCommands.FILE_STAT: //00000111 - file_stat (filename_ptr=op2) -> file_length=eax
-                // filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
-                // this.eax.content = DoubleWord.fromInteger(this.fs.stat(filename));
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(DoubleWord.fromInteger(op2));
+                this.eax.content = DoubleWord.fromInteger(this.fs.file_stat(filename));
                 break;
             case DevCommands.CONSOLE_PRINT_NUMBER:
                 throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
@@ -2598,9 +2598,13 @@ export class CPUCore {
     /**
      * Pop a value from stack and return it for CPU-internal usage.
      * @returns 32 bit value from stack.
+     * @author Laurin Gehlenborg
      */
-    private internal_pop() {
-        const old_eax = this.eax.content.value;
-        //this.pop(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.REGISTER, ))
+    private internal_pop(): DoubleWord {
+        const oldEAX = this.eax.content.value;
+        this.pop(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.REGISTER, DoubleWord.fromInteger(0))) // 0 for EAX
+        const poppedValue = this.eax.content;
+        this.eax.content.value = oldEAX;
+        return poppedValue;
     }
 }
