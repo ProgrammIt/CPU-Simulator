@@ -1,0 +1,12 @@
+<div class='register widget' id='{{ id }}' data-representation='{{ data-representation }}'>
+    <div class='lg-text'>{{ title }}</div>
+    <div class='sm-text subtitle'>{{ description }}</div>
+    <div name='register-content' class='register-content' data-value=''>
+        {{ register-content }}
+    </div>
+    <select id='{{ id }}-select' name='register-select-representation' title='Switch for changing representation of content'>
+        <option selected value='BINARY'>Binary</option>
+        <option value='HEXADECIMAL'>Hexadecimal</option>
+        <option value='DECIMAL'>Decimal</option>
+    </select>
+</div>
