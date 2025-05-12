@@ -2,7 +2,9 @@
 NOP                     ; enter kernel mode
 
 ;0b
-PUSH $0b10010111100101111001011110010111          ; move filename "aaaa" onto stack
+MOV $0x70, %esp
+PUSH $0b01100001011000010110000101100001          ; move filename "aaaa" onto stack
+
 DEV $0b00000110, %esp   ; 00000110 - file_open (filename_ptr=op2) -> fd=eax
 
 MOV %eax, %ecx          ; ecx will keep the file descriptor

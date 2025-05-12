@@ -2583,6 +2583,7 @@ export class CPUCore {
      * Read a buffer from memory until the first zero byte and return it as ASCII string
      * @param address The start of the buffer.
      * @returns ASCII string of the content
+     * @author Laurin Gehlenborg
      */
     private loadZeroTerminatedASCIIStringFromMemory(address: VirtualAddress): string {
         let str: string = "";
