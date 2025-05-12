@@ -668,12 +668,12 @@ export class CPUCore {
                 break;
             case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
                 // load the filename from the given address
-                filename = this.loadZeroTerminatedASCIIStringFromMemory(DoubleWord.fromInteger(op2));
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
                 let fd: number = this.fs.file_open(filename);
                 this.eax.content = DoubleWord.fromInteger(fd);
                 break;
             case DevCommands.FILE_STAT: //00000111 - file_stat (filename_ptr=op2) -> file_length=eax
-                filename = this.loadZeroTerminatedASCIIStringFromMemory(DoubleWord.fromInteger(op2));
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
                 this.eax.content = DoubleWord.fromInteger(this.fs.file_stat(filename));
                 break;
             case DevCommands.CONSOLE_PRINT_NUMBER:
@@ -2584,12 +2584,12 @@ export class CPUCore {
      * @param address The start of the buffer.
      * @returns ASCII string of the content
      */
-    private loadZeroTerminatedASCIIStringFromMemory(address: DoubleWord): string {
+    private loadZeroTerminatedASCIIStringFromMemory(address: VirtualAddress): string {
         let str: string = "";
         let currentByte: Byte = this.mmu.readByteFrom(address)
         while (currentByte.toNumber() != 0) { // read until null byte
             str += String.fromCharCode(currentByte.toUnsignedNumber());
-            address = DoubleWord.fromInteger(address.toNumber() + 1) // address++
+            address = VirtualAddress.fromInteger(address.toNumber() + 1) // address++
             currentByte = this.mmu.readByteFrom(address)
         }
         return str
