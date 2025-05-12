@@ -31,5 +31,13 @@ export const rules: Required<ModuleOptions>['rules'] = [
   {
     test: /\.(gif|icns|ico|jpe?g|png|svg|otf|eot|woff|woff2|ttf)$/,
     type: 'asset/resource',
+  },
+  {
+    test: /\.html$/i,
+    loader: "html-loader",
+    options: {
+      // Disables attributes processing
+      sources: false,
+    },
   }
 ];
