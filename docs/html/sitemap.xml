@@ -1,571 +1,615 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://programmit.github.io/CPU-Simulator/html/modules.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<loc>https://programmit.github.io/CPU-Simulator/html/index.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
-		<loc>https://programmit.github.io/CPU-Simulator/html/index.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/hierarchy.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/documents/Developers.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_helper.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/functions/src_helper.twosComplementToDecimal.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_Assembler.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_Assembler.Assembler.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_compiler_AddressingModeDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_main_simulator_compiler_AddressingModeDefinition.AddressingModeDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_compiler_AssemblyLanguageDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_main_simulator_compiler_AssemblyLanguageDefinition.AssemblyLanguageDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_compiler_OperandTypeDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_main_simulator_compiler_OperandTypeDefinition.OperandTypeDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_compiler_OperationDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_main_simulator_compiler_OperationDefinition.InstructionDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_compiler_RegisterDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_main_simulator_compiler_RegisterDefinition.RegisterDefinition.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_execution_units_ArithmeticLogicUnit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_execution_units_ArithmeticLogicUnit.ArithmeticLogicUnit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_execution_units_CPUCore.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_execution_units_CPUCore.CPUCore.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_execution_units_MemoryManagementUnit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_execution_units_MemoryManagementUnit.MemoryManagementUnit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_EFLAGS.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_EFLAGS.EFLAGS.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_GeneralPurposeRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_GeneralPurposeRegister.GeneralPurposeRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_InstructionRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_InstructionRegister.InstructionRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_PointerRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_PointerRegister.PointerRegister.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_RAM.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_RAM.RAM.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_Register.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_Register.Register.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_functional_units_TranslationLookasideBuffer.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_functional_units_TranslationLookasideBuffer.TranslationLookasideBuffer.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_InstructionDecoder.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_InstructionDecoder.InstructionDecoder.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_main_simulator_SimulationController.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_main_simulator_SimulationController.SimulationController.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_preload.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_preload.Window.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
-		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_preload.Window-1.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<loc>https://programmit.github.io/CPU-Simulator/html/interfaces/src_preload.Window.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_renderer.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_renderer_Component.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_renderer_Component.Component.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_renderer_components_register.component.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_renderer_components_register.component.RegisterComponent.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_renderer_renderer.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_renderer_renderer.Renderer.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_renderer_RenderTree.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_renderer_RenderTree.RenderNode.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_renderer_RenderTree.RenderTree.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.gif.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.gif.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.htm.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.htm.default.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.html.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
+	</url>
+	<url>
+		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.html.default.html</loc>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.icns.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.icns.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.ico.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.ico.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.jpeg.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.jpeg.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.jpg.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.jpg.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.png.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.png.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types._.svg.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/variables/src_types._.svg.default.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_Address.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_Address.Address.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_AddressSpace.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_AddressSpace.AddressSpace.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_BinaryValue.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_BinaryValue.BinaryValue.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_Bit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/types/src_types_binary_Bit.Bit.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_Byte.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_Byte.Byte.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_DecodedInstruction.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_DecodedInstruction.DecodedInstruction.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_DoubleWord.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_DoubleWord.DoubleWord.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_Instruction.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_Instruction.Instruction.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_InstructionOperand.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_InstructionOperand.InstructionOperand.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_PageTableEntry.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_PageTableEntry.PageTableEntry.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_PhysicalAddress.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_PhysicalAddress.PhysicalAddress.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_QuadWord.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_QuadWord.QuadWord.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_VirtualAddress.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_VirtualAddress.VirtualAddress.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_binary_Word.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_binary_Word.Word.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_DataSizes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_DataSizes.DataSizes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedAdressingModes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedAdressingModes.EncodedAddressingModes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedInstructionTypes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedInstructionTypes.EncodedInstructionTypes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedOperandTypes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedOperandTypes.EncodedOperandTypes.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedOperations.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedOperations.EncodedOperations.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedReadableRegisters.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedReadableRegisters.EncodedReadableRegisters.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_EncodedWritableRegisters.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_EncodedWritableRegisters.EncodedWritableRegisters.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_enumerations_NumberSystems.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/enums/src_types_enumerations_NumberSystems.NumberSystems.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_AddressOutOfRangeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_AddressOutOfRangeError.AddressOutOfRangeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_DivisionByZeroError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_DivisionByZeroError.DivisionByZeroError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_MissingOperandError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_MissingOperandError.MissingOperandError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_NoProgrammLoadedError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_NoProgrammLoadedError.NoProgrammLoadedError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_OutOfMemoryError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_OutOfMemoryError.OutOfMemoryError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_PageFaultError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_PageFaultError.PageFaultError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_PageFrameNotExecutableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_PageFrameNotExecutableError.PageFrameNotExecutableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_PageFrameNotWritableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_PageFrameNotWritableError.PageFrameNotWritableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_PagePinnedError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_PagePinnedError.PagePinnedError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_PrivilegeViolationError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_PrivilegeViolationError.PrivilegeViolationError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_RegisterNotAvailableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_RegisterNotAvailableError.RegisterNotAvailableError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_RegisterNotWritableInUserModeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_RegisterNotWritableInUserModeError.RegisterNotWritableInUserModeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_StackOverflowError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_StackOverflowError.StackOverflowError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_StackUnderflowError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_StackUnderflowError.StackUnderflowError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_UnknownRegisterError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_UnknownRegisterError.UnknownRegisterError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_UnrecognizedInstructionError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_UnrecognizedInstructionError.UnrecognizedInstructionError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/modules/src_types_errors_UnsupportedOperandTypeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 	<url>
 		<loc>https://programmit.github.io/CPU-Simulator/html/classes/src_types_errors_UnsupportedOperandTypeError.UnsupportedOperandTypeError.html</loc>
-		<lastmod>2025-04-10T16:01:46.314Z</lastmod>
+		<lastmod>2025-05-12T10:27:57.357Z</lastmod>
 	</url>
 </urlset>
