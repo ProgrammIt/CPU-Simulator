@@ -567,8 +567,8 @@ export class CPUCore {
      *              1 - Seek from start of file
      *              2 - Seek from end of file
      * 00000001 - io_close (fd=op2)
-     * 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
-     * 00000011 - io_write_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_written=eax
+     * 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
+     * 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
      * 00000100 - file_create (filename_ptr=op2)
      * 00000101 - file_delete (filename_ptr=op2) -> success=eax
      * 00000110 - file_open (filename_ptr=op2) -> fd=eax
@@ -645,7 +645,9 @@ export class CPUCore {
         let filename: string;
         switch (op1) {
             case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
-                const seek_result = this.fs.io_seek(op2, this.internal_pop().toNumber(), this.internal_pop().toNumber())
+                const seekMode = this.internal_pop().toNumber();
+                const seekOffset = this.internal_pop().toNumber();
+                const seek_result = this.fs.io_seek(op2, seekOffset, seekMode);
                 this.eax.content = DoubleWord.fromInteger(seek_result);
                 break;
                 
@@ -653,26 +655,44 @@ export class CPUCore {
                 this.fs.io_close(data.value.toNumber())
                 break;
                 
-            case DevCommands.IO_READ_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.IO_READ_BUFFER: // 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
+                const bufferAddress = this.internal_pop().toNumber();
+                const bufferSize = this.internal_pop().toNumber();
+                const buffer = new Uint8Array(bufferSize);
+                const bytesRead = this.fs.io_read_buffer(op2, buffer, bufferSize);
+                this.eax.content = DoubleWord.fromInteger(bytesRead);
+                if (bytesRead > 0) {
+                    for (let index = 0; index < bytesRead; index++) {
+                        this.mmu.writeByteTo(VirtualAddress.fromInteger(bufferAddress + index), Byte.fromInteger(buffer[index]));
+                    }
+                }
                 break;
-            case DevCommands.IO_WRITE_BUFFER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.IO_WRITE_BUFFER: // 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
+                const writeBufferAddress = this.internal_pop().toNumber();
+                const writeBufferSize = this.internal_pop().toNumber();
+                const writeBuffer = new Uint8Array(writeBufferSize);
+                for (let index = 0; index < writeBufferSize; index++) {
+                    let byte = this.mmu.readByteFrom(VirtualAddress.fromInteger(writeBufferAddress + index))
+                    writeBuffer[index] = byte.toNumber();
+                }
+                const bytesWritten = this.fs.io_write_buffer(op2, writeBuffer, writeBufferSize);
+                this.eax.content = DoubleWord.fromInteger(bytesWritten);
                 break;
-            case DevCommands.FILE_CREATE: //00000100 - file_create (filename_ptr=op2)
-                // filename = this.loadZeroTerminatedASCIIStringFromMemory(data.value);
-                // this.fs.createFile(filename);
-                // break;
-            case DevCommands.FILE_DELETE:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.FILE_CREATE: // 00000100 - file_create (filename_ptr=op2)
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
+                this.fs.file_create(filename);
                 break;
-            case DevCommands.FILE_OPEN: //00000110 - file_open (filename_ptr=op2) -> fd=eax
+            case DevCommands.FILE_DELETE: // 00000101 file_delete (filename_ptr=op2) -> success=eax
+                filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
+                this.eax.content = DoubleWord.fromInteger(this.fs.file_delete(filename));
+                break;
+            case DevCommands.FILE_OPEN: // 00000110 - file_open (filename_ptr=op2) -> fd=eax
                 // load the filename from the given address
                 filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
                 let fd: number = this.fs.file_open(filename);
                 this.eax.content = DoubleWord.fromInteger(fd);
                 break;
-            case DevCommands.FILE_STAT: //00000111 - file_stat (filename_ptr=op2) -> file_length=eax
+            case DevCommands.FILE_STAT: // 00000111 - file_stat (filename_ptr=op2) -> file_length=eax
                 filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
                 this.eax.content = DoubleWord.fromInteger(this.fs.file_stat(filename));
                 break;
