@@ -5,9 +5,13 @@ category: Guides
 children:
 ---
 
-> 🚧! Under construction ! 🚧 This document is subject to changes. 
+> 🚧! Under construction ! 🚧 This document is subject to changes.
 
-# Set up a development environment
+# Documentation for Developers
+
+Welcome to the start page of the developer documentation! 👋
+
+## Setting up a development environment
 
 In this section, we will focus on setting up a development environment for the simulator. To be able to develop the application further, you need a current version of Node.js and npm. To check whether Node.js and npm are already installed, you can execute the commands `node --version` and `npm --version` in the console. If both applications are installed correctly, a version number should be displayed on the console.
 
@@ -30,22 +34,15 @@ First unzip the source code of the simulator into a directory of your choice and
 
 Afterwards, you need to execute the following command `npm install`. Before executing the command, please make sure that you are inside the directory containing the projects source code. That is it! Now you are free to go to start coding and build something amazing!
 
-# Dependencies
+## Managing dependencies
 
-Here is a list of the dependencies of the CPU simulator.
+### Adding (dev) dependencies
 
-* TypeScript
-* Electron
-* Jest
-* TypeDoc
-    * typedoc-plugin-markdown
-* Electron Forge
-    * 
+Whenever you need to add dependencies to the project, please keep both installation scripts `./scripts/install-dependencies.sh` and `./scripts/install-dependencies.ps1` updated and add the dependencies to these scripts too. These scripts will come in handy, if you ever find yourself in the need of reinstalling, updating or upgrading the dependencies.
 
-It could be necessary to remove all the (dev-)dependencies, listed in the file *package.json*. If you want to install all the required dependencies at once, you can use the following commands. Navigate to the root directory of the project and run the commands.
+### Updating or upgrading (dev) dependencies 
 
-```
-npm install --save-dev typescript electron jest typedoc @electron-forge/cli @types/jest ts-jest @electron-forge/maker-dmg @electron-forge/maker-deb @electron-forge/maker-rpm @electron-forge/maker-squirrel typedoc-plugin-markdown ts-node typedoc-material-theme @electron-forge/maker-dmg
+Updating or upgrading dependencies can be painful. In order to update or upgrade the (dev) dependencies for this project, it could be easier to remove all the dependencies than trying to update or upgrade packages manually. In this section, we will take a look on how to do so.
 
-npm exec --package=@electron-forge/cli -c "electron-forge import"
-```
+First you need to delete the `./node_modules` directory in the root directory `./` of this project. Afterwards, please delete the `package-lock.json` file in the root directory. Then, head over to the `.package.json` file and delete all entries listed in the `"devDependencies"` and `"dependencies"` section.
+In the last step, please run `./scripts/install-dependencies.ps1` or `./scripts/install-dependencies.sh`.
