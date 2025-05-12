@@ -13,6 +13,7 @@ npm install --save-dev @vercel/webpack-asset-relocator-loader@1.7.3
 npm install --save-dev copy-webpack-plugin
 npm install --save-dev css-loader
 npm install --save-dev ts-loader
+npm install --save-dev html-loader
 npm install --save-dev style-loader
 npm install --save-dev jest
 npm install --save-dev ts-jest
