@@ -16,7 +16,7 @@ DEV $0b00000000, %ebx   ; 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> s
 ; read 9 bytes from file "aaaa"
 PUSH $9     ; buffer length
 PUSH $0x400 ; 9 byte buffer at 0x400 
-DEV $0b0010, %ebx     ; 00000010 - io_read_buffer (fd=op2, buffer=eax, b_size=ebx) -> bytes_read=eax
+DEV $0b0010, %ebx     ; 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
 MOV %eax, %ebx ; bytes_read
 
 ; create file "bbbb"
