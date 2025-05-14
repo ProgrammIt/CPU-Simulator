@@ -1,5 +1,5 @@
 
-NOP                     ; enter kernel mode
+NOP                     ; enter kernel mode (patched NOP command)
 
 
 MOV $0x380, %esp    ; move stack low for easier viewing in the GUI
@@ -11,7 +11,7 @@ MOV %eax, %ebx          ; ebx for file descriptor of "aaaa"
 
 PUSH $6                 ; seek offset
 PUSH $0                 ; seek mode 0 (relative seek from current position) 
-DEV $0b00000000, %ebx   ; 00000000 - io_seek (fd=op2, offset=eax, mode=ebx) -> success=eax
+DEV $0b00000000, %ebx   ; 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
 
 ; read 9 bytes from file "aaaa"
 PUSH $9     ; buffer length

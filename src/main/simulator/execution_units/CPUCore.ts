@@ -567,8 +567,8 @@ export class CPUCore {
      *              1 - Seek from start of file
      *              2 - Seek from end of file
      * 00000001 - io_close (fd=op2)
-     * 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
-     * 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
+     * 00000010 - io_read_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_read=eax
+     * 00000011 - io_write_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_written=eax
      * 00000100 - file_create (filename_ptr=op2)
      * 00000101 - file_delete (filename_ptr=op2) -> success=eax
      * 00000110 - file_open (filename_ptr=op2) -> fd=eax
@@ -581,13 +581,16 @@ export class CPUCore {
      * 
      * 
      * file descriptor (fd):
-     * 0            -> Konsole
-     * 1 und größer -> Wird vom Dateisystem für Dateien vergeben
+     * fd = 0   -> console
+     * fd > 0   -> filesystem file descriptors
 
      * @param command 
-     * @param data Depending on the command.
+     * @param data Command-dependend
      * @throws {UnsupportedOperandTypeError}
      * @throws {MissingOperandError} If one of the operands is missing.
+     * @throws {PrivilegeViolationError} If called in user mode.
+     * @throws {BadOperandError} If command or data could not be interpreted correctly.
+     * @author Laurin Gehlenborg
      */
     private dev(command: InstructionOperand, data: InstructionOperand): void {
         // Check whether CPU is in kernel mode.
@@ -595,7 +598,6 @@ export class CPUCore {
             // CPU is not in kernel mode.
             throw new PrivilegeViolationError("DEV can only be called when CPU is in kernel mode.");
         }
-        // TODO check for correct operand types 
 
         // Check if exactly two operands are present.
         if (command.type === EncodedOperandTypes.NO || data.type === EncodedOperandTypes.NO) {
@@ -2371,8 +2373,6 @@ export class CPUCore {
      * This method does nothing.
      */
     private nop(): void {
-        // this.mmu.disableMemoryVirtualization(); // TODO remove (testing only)
-        this.eflags.enterKernelMode() // TODO remove
         return;
     }
 
@@ -2600,7 +2600,7 @@ export class CPUCore {
     }
 
     /**
-     * Read a buffer from memory until the first zero byte and return it as ASCII string
+     * Read a buffer bytewise from memory until the first zero byte and return it as ASCII string
      * @param address The start of the buffer.
      * @returns ASCII string of the content
      * @author Laurin Gehlenborg
