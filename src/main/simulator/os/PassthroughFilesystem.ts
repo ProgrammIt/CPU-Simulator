@@ -98,18 +98,26 @@ export class PassthroughFilesystem {
     }
 
     public io_write_buffer(fd: number, buffer: Uint8Array, size: number): number {
-        if (!this.fd_map.has(fd)) {
-            // invalid fd
-            return -1;
+        if (fd != 0) {
+           // fd=0 -> console output
+           if (!this.fd_map.has(fd)) {
+                // invalid fd
+                return -1;
+            }
+            const vfd = this.fd_map.get(fd)!
+            if (this.file_stat(vfd.filename) < vfd.seek_position) {
+                // invalid seek position
+                return -2;
+            }
+            const bytes_written: number = writeSync(vfd.real_fd, buffer, 0, size, vfd.seek_position);
+            vfd.seek_position += bytes_written;
+            return bytes_written;
+        } else {
+            console.log(buffer);
+            return buffer.length;
         }
-        const vfd = this.fd_map.get(fd)!
-        if (this.file_stat(vfd.filename) < vfd.seek_position) {
-            // invalid seek position
-            return -2;
-        }
-        const bytes_written: number = writeSync(vfd.real_fd, buffer, 0, size, vfd.seek_position);
-        vfd.seek_position += bytes_written;
-        return bytes_written;
+        
+        
     }
 
     public file_create(filename: string) {
