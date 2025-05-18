@@ -699,7 +699,7 @@ export class CPUCore {
                 this.eax.content = DoubleWord.fromInteger(this.fs.file_stat(filename));
                 break;
             case DevCommands.CONSOLE_PRINT_NUMBER:
-                console.log(this.internal_pop().toNumber())
+                console.log(op2);
                 break;
             case DevCommands.CONSOLE_READ_NUMBER:
                 throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
