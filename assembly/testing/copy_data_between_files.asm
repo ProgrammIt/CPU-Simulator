@@ -1,5 +1,5 @@
 
-NOP                     ; enter kernel mode (patched NOP command)
+NOP                     ; enter kernel mode (requires patched NOP command)
 
 
 MOV $0x380, %esp    ; move stack low for easier viewing in the GUI
