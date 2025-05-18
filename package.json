@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "start": "electron-forge start",
-    "profile": "ELECTRON_ARGS='--inspect=9229' electron-forge start",
+    "profile": "electron --inspect=9229 .webpack/main",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "lint": "eslint --ext .ts,.tsx .",
