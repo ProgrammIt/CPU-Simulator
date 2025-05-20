@@ -264,8 +264,8 @@ const registerHandlers = (simulator: SimulationController, win: BrowserWindow): 
 		return byte.toString();
 	});
 
-	ipcMain.handle("retrieveMainMemoryCells", async (): Promise<Map<string, string>> => {
-		const tmp: Map<string, string> = new Map<string, string>();
+	ipcMain.handle("retrieveMainMemoryCells", async (): Promise<Map<number, string>> => {
+		const tmp: Map<number, string> = new Map<number, string>();
 		simulator.mainMemory.cells.forEach((byte, address) => {
 			tmp.set(address, byte.toString());
 		});
