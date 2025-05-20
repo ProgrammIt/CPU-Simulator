@@ -9,7 +9,7 @@ describe("Read and write from or to main memory", () => {
 
     test("Clear byte", () => {
         mainMemory.clearByte(PhysicalAddress.fromInteger(parseInt("0x0", 16)));
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>());
+        expect(mainMemory.cells).toEqual(new Map<number, Byte>());
     });
     
     test("Write byte to main memory", () => {
@@ -17,10 +17,10 @@ describe("Read and write from or to main memory", () => {
         mainMemory.writeByteTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), new Byte([1,0,0,1,1,0,0,0]));
         mainMemory.writeByteTo(PhysicalAddress.fromInteger(parseInt("0xFFFFFFFF", 16)), new Byte([1,1,1,1,1,1,1,1]));
         mainMemory.writeByteTo(PhysicalAddress.fromInteger(parseInt("0x1000000", 16)), new Byte([1,0,0,1,0,0,0,1]));
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>([
-            ["0x0", new Byte([1,0,0,1,1,0,0,0])],
-            ["0xFFFFFFFF", new Byte([1,1,1,1,1,1,1,1])],
-            ["0x1000000", new Byte([1,0,0,1,0,0,0,1])]
+        expect(mainMemory.cells).toEqual(new Map<number, Byte>([
+            [parseInt("0x0", 16), new Byte([1,0,0,1,1,0,0,0])],
+            [parseInt("0xFFFFFFFF", 16), new Byte([1,1,1,1,1,1,1,1])],
+            [parseInt("0x1000000", 16), new Byte([1,0,0,1,0,0,0,1])]
         ]));
     });
 
@@ -28,11 +28,11 @@ describe("Read and write from or to main memory", () => {
         mainMemory.cells.clear();
         const doubleword = new DoubleWord([1,1,0,1,1,0,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0]);
         mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(parseInt("0x0", 16)), doubleword);
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>([
-            ["0x0", new Byte([1,1,0,1,1,0,0,1])],
-            ["0x1", new Byte([0,0,1,0,1,1,1,0])],
-            ["0x2", new Byte([1,0,1,0,0,0,0,1])],
-            ["0x3", new Byte([0,1,1,0,0,0,0,0])]
+        expect(mainMemory.cells).toEqual(new Map<number, Byte>([
+            [parseInt("0x0", 16), new Byte([1,1,0,1,1,0,0,1])],
+            [parseInt("0x1", 16), new Byte([0,0,1,0,1,1,1,0])],
+            [parseInt("0x2", 16), new Byte([1,0,1,0,0,0,0,1])],
+            [parseInt("0x3", 16), new Byte([0,1,1,0,0,0,0,0])]
         ]));
     });
 

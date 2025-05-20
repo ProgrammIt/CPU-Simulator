@@ -17,8 +17,8 @@ describe("Read from and write to main memory using MMU as proxy", () => {
         const virtualAddress = VirtualAddress.fromInteger(parseInt("0xFFFFFFFF", 16));
         mmu.writeByteTo(virtualAddress, Byte.fromInteger(-128));
 
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>([
-            ["0xFFFFFFFF", Byte.fromInteger(-128)]
+        expect(mainMemory.cells).toEqual(new Map<number, Byte>([
+            [parseInt("0xFFFFFFFF", 16), Byte.fromInteger(-128)]
         ]));
     });
 
@@ -30,11 +30,11 @@ describe("Read from and write to main memory using MMU as proxy", () => {
             DoubleWord.fromInteger(parseInt("01101100100101110101000010110000", 2)),
             false
         );
-        expect(mainMemory.cells).toEqual(new Map<string, Byte>([
-            ["0x1000000", new Byte([0, 1, 1, 0, 1, 1, 0, 0])],
-            ["0x1000001", new Byte([1, 0, 0, 1, 0, 1, 1, 1])],
-            ["0x1000002", new Byte([0, 1, 0, 1, 0, 0, 0, 0])],
-            ["0x1000003", new Byte([1, 0, 1, 1, 0, 0, 0, 0])]
+        expect(mainMemory.cells).toEqual(new Map<number, Byte>([
+            [parseInt("0x1000000", 16), new Byte([0, 1, 1, 0, 1, 1, 0, 0])],
+            [parseInt("0x1000001", 16), new Byte([1, 0, 0, 1, 0, 1, 1, 1])],
+            [parseInt("0x1000002", 16), new Byte([0, 1, 0, 1, 0, 0, 0, 0])],
+            [parseInt("0x1000003", 16), new Byte([1, 0, 1, 1, 0, 0, 0, 0])]
         ]));
     });
 

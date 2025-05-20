@@ -112,8 +112,4 @@ export class BinaryValue {
         return sum;
 	}
     
-    /**static fromInteger<T extends BinaryValue>(integer: number, signed: boolean, constructor: new (value: number) => T): T {
-        const bits = 
-        return new constructor(integer);
-    }*/
 }

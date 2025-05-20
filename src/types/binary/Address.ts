@@ -68,22 +68,22 @@ export class Address extends DoubleWord {
 		if (!Number.isInteger(integer)) {
 			throw new Error("Given number is not an integer.");
 		}
-
 		if (integer < 0) {
 			throw new Error("Minimal value for an address is a decimal zero, but the given integer is smaller than zero.");
 		}
-
 		if (integer > Address.MAX_NUMBER_UNSIGNED_DEC) {
 			throw new Error(`The given number cannot be expressed with ${DataSizes.DOUBLEWORD} bits.`);
 		}
 
 		const address: Address = new Address();
-		const binaryNumber = integer.toString(2).padStart(DataSizes.DOUBLEWORD, "0");
-
-		binaryNumber.split("").forEach((bit, index) => {
-			address._value[index] = (bit === "0") ? 0 : 1;
-		});
-
+		for (let bit = 0; bit < this.NUMBER_OF_BITS_DEC; bit++) {
+			const bitValue = Address.POWER_OF_N_LOOKUP_TABLE[this.NUMBER_OF_BITS_DEC - 1 - bit]
+			if (integer >= bitValue) {
+				address._value[bit] = 1;
+				integer -= bitValue
+			}
+		}
 		return address;
 	}
+	static POWER_OF_N_LOOKUP_TABLE: number[] = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432,67108864,134217728,268435456,536870912,1073741824,2147483648];
 }
