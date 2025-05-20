@@ -458,9 +458,9 @@ export class SimulationController {
         // Create the page table entries.
         while (numberOfPagesCreated < totalNumberOfPages) {
             if (numberOfPagesCreated > 0) {
-                const physicalAddressOfCurrentPageFrameDec: number = parseInt(physicalAddressOfCurrentPageFrame.toString(), 2);
+                const physicalAddressOfCurrentPageFrameDec: number = physicalAddressOfCurrentPageFrame.toUnsignedNumber();
                 physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec + pageFrameSizeBytesDec);
-                const virtualAddressOfCurrentPageDec: number = parseInt(virtualAddressOfCurrentPage.toString(), 2);
+                const virtualAddressOfCurrentPageDec: number = virtualAddressOfCurrentPage.toUnsignedNumber();
                 virtualAddressOfCurrentPage = VirtualAddress.fromInteger(virtualAddressOfCurrentPageDec + pageSizeBytesDec);
             }
             let pageTableEntry: PageTableEntry;
