@@ -224,7 +224,7 @@ export class MemoryManagementUnit {
      */
     public clearMemory(virtualAddress: VirtualAddress, length: DataSizes): void {
         // The first virtual memory address to translate and to clear all bits at.
-        const startVirtualAddress: number = parseInt(virtualAddress.toString(), 2);
+        const startVirtualAddress: number = virtualAddress.toUnsignedNumber();
         // Calculate the number of cells, which should get cleared.
         const numberOfCellsToClear : number = length/DataSizes.BYTE;
         for (let i = 0; i < numberOfCellsToClear; ++i) {
@@ -316,7 +316,7 @@ export class MemoryManagementUnit {
         const pageNbr: Array<Bit> = virtualAddress.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS);
         const pageNbrDec: number = parseInt(pageNbr.toString(), 2) * 4;
         // Read the page table base address from the page table pointer register and convert it to a decimal value.
-        const pageTableBaseAddressDec: number = parseInt(this._ptp.content.toString(), 2);
+        const pageTableBaseAddressDec: number = this._ptp.content.toUnsignedNumber();
         /* 
          * Add the result to the physical page table base address to get the address of the page table entry.
          * Because every page table entry is 4 bytes long, the page number needs to be multiplied by 4 before 

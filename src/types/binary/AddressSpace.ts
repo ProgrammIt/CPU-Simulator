@@ -33,9 +33,9 @@ export class AddressSpace<T extends Address> {
      * @returns True, if the given address is in range, false otherwise.
      */
     public inRange(address: T): boolean {
-        const upperBoundryDec: number = parseInt(this.highAddress.toString(), 2);
-        const lowerBoundryDec: number = parseInt(this.lowAddress.toString(), 2);
-        const addressDec: number = parseInt(address.toString(), 2);
+        const upperBoundryDec: number = this.highAddress.toUnsignedNumber();
+        const lowerBoundryDec: number = this.lowAddress.toUnsignedNumber();
+        const addressDec: number = address.toUnsignedNumber();
         return (lowerBoundryDec <= addressDec && addressDec <= upperBoundryDec);
     }
 
@@ -44,7 +44,7 @@ export class AddressSpace<T extends Address> {
      * @returns The decimal representation of the upper boundry.
      */
     public highAddressToDecimal(): number {
-        return parseInt(this.highAddress.toString(), 2);
+        return this.highAddress.toUnsignedNumber();
     }
 
     /**
@@ -52,7 +52,7 @@ export class AddressSpace<T extends Address> {
      * @returns The decimal representation of the upper boundry.
      */
     public lowAddressToDecimal(): number {
-        return parseInt(this.lowAddress.toString(), 2);
+        return this.lowAddress.toUnsignedNumber();
     }
 
     /**
