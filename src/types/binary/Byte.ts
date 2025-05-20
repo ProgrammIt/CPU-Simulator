@@ -56,7 +56,7 @@ export class Byte extends BinaryValue {
 	 * @returns True, when both binary values are identical, false otherwise.
 	 */
 	public equal(byte: Byte): boolean {
-		return byte._value.toString() === this._value.toString();
+		return byte.toUnsignedNumber() === this.toUnsignedNumber();
 	}
 
 	/**

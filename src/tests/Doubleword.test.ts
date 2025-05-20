@@ -42,16 +42,15 @@ describe("Create doubleword from decimal integer values", () => {
         expect(DoubleWord.fromInteger(100).isSmallerThan(DoubleWord.fromInteger(11))).toBe(false);
     });
 
-    test("Measure toNumber() and fromInteger() performance", () => {
+    test("Measure toNumber() performance", () => {
         const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(new EFLAGS())
-        const repetitions = 1000000;
-        const one = DoubleWord.fromInteger(1)
-        let dw = DoubleWord.fromInteger(0)
+        const repetitions = 100000;
+        //const one = DoubleWord.fromInteger(1)
+        let dword = DoubleWord.fromInteger(0)
         for (let i = 0; i < repetitions; i++) {
-            let num = dw.toUnsignedNumber();
-            //let num = parseInt(dw.value.join(""), 2);
-            dw = alu.add(dw, one)
+            expect(dword.toUnsignedNumber()).toBe(i)
+            dword = alu.add(dword, DoubleWord.fromInteger(1))
         }
-        expect(dw.toUnsignedNumber()).toBe(repetitions);
+        expect(dword.toUnsignedNumber()).toBe(repetitions);
     });
 });

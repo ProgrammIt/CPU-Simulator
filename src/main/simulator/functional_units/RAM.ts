@@ -58,7 +58,7 @@ export class RAM {
      */
     public writeByteTo(physicalAddress: PhysicalAddress, data: Byte) {
         this.validatePhysicalAddress(physicalAddress);
-        if (data.equal(new Byte())) {
+        if (data.toUnsignedNumber() === 0) {
             this.clearByte(physicalAddress);
             return;
         }
