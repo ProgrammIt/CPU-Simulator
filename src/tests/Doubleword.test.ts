@@ -1,3 +1,5 @@
+import { EFLAGS } from "../main/simulator/functional_units/EFLAGS";
+import { ArithmeticLogicUnit } from "../main/simulator/execution_units/ArithmeticLogicUnit";
 import { DoubleWord } from "../types/binary/DoubleWord";
 
 describe("Create doubleword from decimal integer values", () => {
@@ -38,5 +40,18 @@ describe("Create doubleword from decimal integer values", () => {
 
     test("Check wether (100)_10 is smaller than (11)_10", () => {
         expect(DoubleWord.fromInteger(100).isSmallerThan(DoubleWord.fromInteger(11))).toBe(false);
+    });
+
+    test("Measure toNumber() and fromInteger() performance", () => {
+        const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(new EFLAGS())
+        const repetitions = 1000000;
+        const one = DoubleWord.fromInteger(1)
+        let dw = DoubleWord.fromInteger(0)
+        for (let i = 0; i < repetitions; i++) {
+            let num = dw.toUnsignedNumber();
+            //let num = parseInt(dw.value.join(""), 2);
+            dw = alu.add(dw, one)
+        }
+        expect(dw.toUnsignedNumber()).toBe(repetitions);
     });
 });

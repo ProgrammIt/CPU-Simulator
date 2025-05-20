@@ -617,13 +617,13 @@ export class CPUCore {
         let op1: number;
         switch (command.type) {
             case EncodedOperandTypes.IMMEDIATE:
-                op1 = command.value.toNumber();
+                op1 = command.value.toUnsignedNumber();
                 break;
             case EncodedOperandTypes.REGISTER:
-                op1 = this.readRegister(command).toNumber();
+                op1 = this.readRegister(command).toUnsignedNumber();
                 break;
             case EncodedOperandTypes.MEMORY_ADDRESS:
-                op1 = this.mmu.readDoublewordFrom(command.value, false).toNumber();
+                op1 = this.mmu.readDoublewordFrom(command.value, false).toUnsignedNumber();
                 break;
             default:
                 throw new BadOperandError("Could not parse first DEV operand.");
@@ -632,13 +632,13 @@ export class CPUCore {
         let op2: number;
         switch (data.type) {
             case EncodedOperandTypes.IMMEDIATE:
-                op2 = data.value.toNumber();
+                op2 = data.value.toUnsignedNumber();
                 break;
             case EncodedOperandTypes.REGISTER:
-                op2 = this.readRegister(data).toNumber();
+                op2 = this.readRegister(data).toUnsignedNumber();
                 break;
             case EncodedOperandTypes.MEMORY_ADDRESS:
-                op2 = this.mmu.readDoublewordFrom(data.value, false).toNumber();
+                op2 = this.mmu.readDoublewordFrom(data.value, false).toUnsignedNumber();
                 break;
             default:
                 throw new BadOperandError("Could not parse second DEV operand.");
@@ -647,19 +647,19 @@ export class CPUCore {
         let filename: string;
         switch (op1) {
             case DevCommands.IO_SEEK: // 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
-                const seekMode = this.internal_pop().toNumber();
-                const seekOffset = this.internal_pop().toNumber();
+                const seekMode = this.internal_pop().toUnsignedNumber();
+                const seekOffset = this.internal_pop().toUnsignedNumber();
                 const seek_result = this.fs.io_seek(op2, seekOffset, seekMode);
                 this.eax.content = DoubleWord.fromInteger(seek_result);
                 break;
                 
             case DevCommands.IO_CLOSE:
-                this.fs.io_close(data.value.toNumber())
+                this.fs.io_close(data.value.toUnsignedNumber())
                 break;
                 
             case DevCommands.IO_READ_BUFFER: // 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
-                const bufferAddress = this.internal_pop().toNumber();
-                const bufferSize = this.internal_pop().toNumber();
+                const bufferAddress = this.internal_pop().toUnsignedNumber();
+                const bufferSize = this.internal_pop().toUnsignedNumber();
                 const buffer = new Uint8Array(bufferSize);
                 const bytesRead = this.fs.io_read_buffer(op2, buffer, bufferSize);
                 this.eax.content = DoubleWord.fromInteger(bytesRead);
@@ -670,12 +670,12 @@ export class CPUCore {
                 }
                 break;
             case DevCommands.IO_WRITE_BUFFER: // 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
-                const writeBufferAddress = this.internal_pop().toNumber();
-                const writeBufferSize = this.internal_pop().toNumber();
+                const writeBufferAddress = this.internal_pop().toUnsignedNumber();
+                const writeBufferSize = this.internal_pop().toUnsignedNumber();
                 const writeBuffer = new Uint8Array(writeBufferSize);
                 for (let index = 0; index < writeBufferSize; index++) {
                     let byte = this.mmu.readByteFrom(VirtualAddress.fromInteger(writeBufferAddress + index))
-                    writeBuffer[index] = byte.toNumber();
+                    writeBuffer[index] = byte.toUnsignedNumber();
                 }
                 const bytesWritten = this.fs.io_write_buffer(op2, writeBuffer, writeBufferSize);
                 this.eax.content = DoubleWord.fromInteger(bytesWritten);
@@ -2608,9 +2608,9 @@ export class CPUCore {
     private loadZeroTerminatedASCIIStringFromMemory(address: VirtualAddress): string {
         let str: string = "";
         let currentByte: Byte = this.mmu.readByteFrom(address)
-        while (currentByte.toNumber() != 0) { // read until null byte
+        while (currentByte.toUnsignedNumber() != 0) { // read until null byte
             str += String.fromCharCode(currentByte.toUnsignedNumber());
-            address = VirtualAddress.fromInteger(address.toNumber() + 1) // address++
+            address = VirtualAddress.fromInteger(address.toUnsignedNumber() + 1) // address++
             currentByte = this.mmu.readByteFrom(address)
         }
         return str

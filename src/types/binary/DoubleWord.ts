@@ -4,8 +4,8 @@ import { Bit } from "./Bit";
 import { DataSizes } from "../enumerations/DataSizes";
 
 export class DoubleWord extends BinaryValue {
-	public static readonly MAX_POSITIVE_NUMBER_DEC: number = 2_147_483_647;
-	public static readonly MAX_NEGATIVE_NUMBER_DEC: number = -2_147_483_648;
+	public static readonly MAXIMUM_NUMBER_DEC: number = 2_147_483_647;
+	public static readonly MINIMUM_NUMBER_DEC: number = -2_147_483_648;
 	public static readonly NUMBER_OF_BITS_DEC: number = 32;
 
 	/**
@@ -145,7 +145,7 @@ export class DoubleWord extends BinaryValue {
 			throw new Error("Given number is not an integer.");
 		}
 
-		if (integer < DoubleWord.MAX_NEGATIVE_NUMBER_DEC || integer > DoubleWord.MAX_POSITIVE_NUMBER_DEC) {
+		if (integer < DoubleWord.MINIMUM_NUMBER_DEC || integer > DoubleWord.MAXIMUM_NUMBER_DEC) {
 			throw new Error(`The given number cannot be expressed using ${DataSizes.DOUBLEWORD} bits, if the most significant bit should be treated as the sign bit.`);
 		}
 

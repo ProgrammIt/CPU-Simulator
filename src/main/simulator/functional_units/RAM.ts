@@ -29,7 +29,7 @@ export class RAM {
      */
     public writeDoublewordTo(physicalAddress: PhysicalAddress, doubleword: DoubleWord) {
         this.validatePhysicalAddress(physicalAddress);
-        const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
+        const startAddressDec: number = physicalAddress.toUnsignedNumber();
         // Bit 0 - 7
         const firstByte: Byte = new Byte(doubleword.value.slice(0, 8));
         // Bit 8 - 15
@@ -63,7 +63,7 @@ export class RAM {
             return;
         }
         const physicalAddressHex = 
-            `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
+            `0x${physicalAddress.toUnsignedNumber().toString(16).toUpperCase()}`;
         // Write byte to "memory".
         this._cells.set(physicalAddressHex, data);
         return;
@@ -77,7 +77,7 @@ export class RAM {
      */
     public readDoublewordFrom(physicalAddress: PhysicalAddress): DoubleWord {
         this.validatePhysicalAddress(physicalAddress);
-        const startAddressDec: number = parseInt(physicalAddress.value.join(""), 2);
+        const startAddressDec: number = physicalAddress.toUnsignedNumber();
         const doubleword = new DoubleWord();
         const firstByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec));
         const secondByte: Byte = this.readByteFrom(PhysicalAddress.fromInteger(startAddressDec + 1));
@@ -99,7 +99,7 @@ export class RAM {
      */
     public readByteFrom(physicalAddress: PhysicalAddress): Byte {
         this.validatePhysicalAddress(physicalAddress);
-        const physicalAddressHex = `0x${parseInt(physicalAddress.value.join(""), 2).toString(16).toUpperCase()}`;
+        const physicalAddressHex = `0x${physicalAddress.toUnsignedNumber().toString(16).toUpperCase()}`;
         let result: Byte;
         if (this._cells.has(physicalAddressHex)) {
             result = this._cells.get(physicalAddressHex)!;
@@ -130,7 +130,7 @@ export class RAM {
      * @throws AddressOutOfRangeError - If the physical memory address is out of range.
      */
     private validatePhysicalAddress(physicalAddress: PhysicalAddress): void {
-        const physicalAddressDec = parseInt(physicalAddress.value.join(""), 2);
+        const physicalAddressDec = physicalAddress.toUnsignedNumber();
         if (physicalAddressDec > this._highAddressDec || physicalAddressDec < this._lowAddressDec) {
             throw new AddressOutOfRangeError(`Memory address out of range [${this._lowAddressDec.toString(2)}, ${this._highAddressDec.toString(2)}].`)
         }
