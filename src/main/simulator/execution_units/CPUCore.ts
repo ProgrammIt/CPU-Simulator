@@ -698,11 +698,13 @@ export class CPUCore {
                 filename = this.loadZeroTerminatedASCIIStringFromMemory(VirtualAddress.fromInteger(op2));
                 this.eax.content = DoubleWord.fromInteger(this.fs.file_stat(filename));
                 break;
-            case DevCommands.CONSOLE_PRINT_NUMBER:
-                console.log(op2);
+            case DevCommands.CONSOLE_PRINT_NUMBER: // 00001000 - console_print_number(number=op2)
+                this.fs.console_print_number(op2);
                 break;
-            case DevCommands.CONSOLE_READ_NUMBER:
-                throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
+            case DevCommands.CONSOLE_READ_NUMBER: //  00001001 - console_read_number() -> number=eax, error=ebx
+                const [num, err] = this.fs.console_read_number();
+                this.eax.content = DoubleWord.fromInteger(num);
+                this.ebx.content = DoubleWord.fromInteger(err);
                 break;
             case DevCommands.PROCESS_CREATE:
                 throw new NotImplementedError("Operand " + devCommandNameByValue(op1) + " is not yet implemented for the DEV instruction.");
@@ -2373,6 +2375,7 @@ export class CPUCore {
      * This method does nothing.
      */
     private nop(): void {
+        this.eflags.enterKernelMode()
         return;
     }
 
