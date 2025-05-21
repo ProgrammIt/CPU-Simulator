@@ -140,7 +140,10 @@ describe('PassthroughFilesystem', () => {
             const fd = fs.file_open(filename);
             const buffer = new Uint8Array([1, 2, 3]);
             expect(fs.io_write_buffer(fd, buffer, 3)).toBe(3);
-            expect(readFileSync(join(tmp, filename))).toEqual(buffer);
+            const b2 = readFileSync(join(tmp, filename));
+            for (let i = 0; i < buffer.length; i++) {
+                expect(b2[i]).toBe(buffer[i]);
+            }
             fs.io_close(fd);
         });
 

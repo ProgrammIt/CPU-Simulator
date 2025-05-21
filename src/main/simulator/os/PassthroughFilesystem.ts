@@ -1,4 +1,4 @@
-import { accessSync, constants, existsSync, lstatSync, openSync, readSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
+import { accessSync, chmodSync, constants, existsSync, lstatSync, openSync, readSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
 import { FilesystemError } from '../../../types/errors/FilesystemError';
 
 class VirtualFileDescriptor {
@@ -126,7 +126,8 @@ export class PassthroughFilesystem {
             // file does already exist
             return -1;
         }
-        writeFileSync(path, "", {mode: 777, flag: "w+"})
+        writeFileSync(path, "", {mode: 0o777, flag: "w+"})
+        chmodSync(path, 0o777)
         return 0;
     }
 
@@ -148,7 +149,7 @@ export class PassthroughFilesystem {
         const real_fd = openSync(path, "r+", constants.O_RDWR);
         const vfd = new VirtualFileDescriptor(filename, this.fd_counter++, real_fd);
         this.fd_map.set(vfd.virtual_fd, vfd);
-        return vfd.virtual_fd; // returns virtual file descriptor
+        return vfd.virtual_fd;
     }
 
     public file_stat(filename: string): number {
