@@ -101,6 +101,12 @@ export class BinaryValue {
         return this._value.slice(0, nbrOfBits);
     }
     
+    /**
+     * Interpret the bits as unsigned integer and returns the corresponding JavaScript number.
+     * This is precise for any 32 bit value, but does NOT support 64 bit values due to JavaScript number internals.
+     * @returns Unsigned integer as JavaScript number
+     * @author Laurin Gehlenborg
+     */
     public toUnsignedNumber(): number {
 		const len = this._value.length;
         let sum = 0;
