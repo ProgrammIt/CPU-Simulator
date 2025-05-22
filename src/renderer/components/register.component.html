@@ -1,8 +1,8 @@
-<div class='register widget' id='{{ id }}' data-representation='{{ data-representation }}'>
-    <div class='lg-text'>{{ title }}</div>
-    <div class='sm-text subtitle'>{{ description }}</div>
-    <div name='register-content' class='register-content' data-value=''>
-        {{ register-content }}
+<div class='register widget' id='{{ id }}' data-representation='{{ representation }}'>
+    <div id="{{ id }}-title" class='lg-text'>{{ title }}</div>
+    <div id="{{ id }}-description" class='sm-text subtitle'>{{ description }}</div>
+    <div id="{{ id }}-content" name='register-content' class='register-content' data-value=''>
+        {{ content }}
     </div>
     <select id='{{ id }}-select' name='register-select-representation' title='Switch for changing representation of content'>
         <option selected value='BINARY'>Binary</option>
