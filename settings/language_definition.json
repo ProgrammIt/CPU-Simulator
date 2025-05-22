@@ -5,8 +5,8 @@
         "usage" : "[a-zA-Z][a-zA-Z\\-_0-9]*"
     },
     "number_formats" : {
-        "decimal" : "-?[ ]*(?:0(?![xb]|[0-9]+)|[1-9][0-9]*)",
-        "hexadecimal" : "-?[ ]*0x(?:(0(?![0-9A-Fa-f]+))|([1-9A-Fa-f][0-9A-Fa-f]*))",
+        "decimal" : "-?[ ]*(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+\\b",
+        "hexadecimal" : "-?[ ]*0x(?:0(?![0-9A-Fa-f]+)|(?:[1-9A-Fa-f][0-9A-Fa-f]*))",
         "binary" : "-?[ ]*0b[01]+"
     },
     "addressable_registers" : [
@@ -73,12 +73,12 @@
         {
             "name" : "IMMEDIATE_DECIMAL",
             "code" : "1010000",
-            "regex" : "\\$-?[ ]*(?:0(?![xb]|[0-9]+)|[1-9][0-9]*)"
+            "regex" : "\\$-?[ ]*(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+\\b"
         },
         {
             "name" : "IMMEDIATE_HEXADECIMAL",
             "code" : "1010000",
-            "regex" : "\\$-?[ ]*0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
+            "regex" : "\\$-?[ ]*0x(?:0(?![0-9A-Fa-f]+)|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
         },
         {
             "name" : "IMMEDIATE_BINARY",
@@ -88,12 +88,12 @@
         {
             "name" : "MEMORY_ADDRESS_HEXADECIMAL",
             "code" : "1110000",
-            "regex" : "@0x(?:(?:0(?![0-9A-Fa-f]+))|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
+            "regex" : "@[ ]*0x(?:0(?![0-9A-Fa-f]+)|(?:[1-9A-Fa-f][0-9A-Fa-f]*))"
         },
         {
             "name" : "MEMORY_ADDRESS_DECIMAL",
             "code" : "1110000",
-            "regex" : "@(?:0(?![0-9]+)|[1-9][0-9]*)"
+            "regex" : "@[ ]*(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+\\b"
         },
         {
             "name" : "MEMORY_ADDRESS_BINARY",

@@ -397,11 +397,11 @@ export class SimulationController {
          * assembler program to memory.
          */
         const numberAddressesNeededForCompiledProgram: number = 
-            (compiledProgram.length * DataSizes.DOUBLEWORD)/DataSizes.BYTE;
+            (compiledProgram.length * DataSizes.DOUBLEWORD)/DataSizes.BYTE - 1;
         // Set lowest and highest virtual memory address, which will be used for storing the compiled program.
         this._virtualAddressSpaceCodeSegment = new AddressSpace<VirtualAddress>(
             VirtualAddress.fromInteger(0),
-            VirtualAddress.fromInteger(numberAddressesNeededForCompiledProgram - 1)
+            VirtualAddress.fromInteger(numberAddressesNeededForCompiledProgram)
         );
         // Calculate some important values.
         const pageFrameSizeBytesDec: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_OFFSET);
@@ -453,11 +453,11 @@ export class SimulationController {
         let virtualAddressOfCurrentPage: VirtualAddress = VirtualAddress.fromInteger(0);
         let physicalAddressOfCurrentPageFrame: PhysicalAddress = PhysicalAddress.fromInteger(0);
         // Calculate the total number of pages.
-        const totalNumberOfPages: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS);
-        let numberOfPagesCreated = 0;
+        const totalNumberOfPageTableEntries: number = Math.pow(2, MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS); // 2^20
+        let numberOfPageTableEntriesCreated = 0;
         // Create the page table entries.
-        while (numberOfPagesCreated < totalNumberOfPages) {
-            if (numberOfPagesCreated > 0) {
+        while (numberOfPageTableEntriesCreated < totalNumberOfPageTableEntries) {
+            if (numberOfPageTableEntriesCreated > 0) {
                 const physicalAddressOfCurrentPageFrameDec: number = physicalAddressOfCurrentPageFrame.toUnsignedNumber();
                 physicalAddressOfCurrentPageFrame = PhysicalAddress.fromInteger(physicalAddressOfCurrentPageFrameDec + pageFrameSizeBytesDec);
                 const virtualAddressOfCurrentPageDec: number = virtualAddressOfCurrentPage.toUnsignedNumber();
@@ -553,7 +553,7 @@ export class SimulationController {
                 );
             }
             pageTable.push(pageTableEntry);
-            ++numberOfPagesCreated;
+            ++numberOfPageTableEntriesCreated;
         }
         let physicalAddressOfCurrentPageTableEntryDec: number = parseInt(highestPhysicalAddress.toString(), 2);
         for (const entry of Array.from(pageTable).reverse()) {
