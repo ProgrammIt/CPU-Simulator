@@ -313,7 +313,8 @@ export class MemoryManagementUnit {
      */
     private calcPhysicalAddressOfPageTableEntry(virtualAddress: VirtualAddress): PhysicalAddress {
         // Extract the page number from the given virtual address, which represents the index in the page table where the entry is located.
-        const pageNbr: Array<Bit> = virtualAddress.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS);
+        const pageNbr: DoubleWord = new DoubleWord(
+            new Array<Bit>(MemoryManagementUnit.NUMBER_BITS_OFFSET).fill(0).concat(virtualAddress.getMostSignificantBits(MemoryManagementUnit.NUMBER_BITS_PAGE_ADDRESS)));
         const pageNbrDec: number = parseInt(pageNbr.toString(), 2) * 4;
         // Read the page table base address from the page table pointer register and convert it to a decimal value.
         const pageTableBaseAddressDec: number = parseInt(this._ptp.content.toString(), 2);
