@@ -41,7 +41,9 @@ export class PassthroughFilesystem {
 
         // Init console input
         process.stdin.setEncoding('latin1');
-        process.stdin.setRawMode(false);
+        if (typeof process.stdin.setRawMode === 'function') {
+            process.stdin.setRawMode(false);
+        }
         if (PassthroughFilesystem.readline == null) {
             PassthroughFilesystem.readline = createInterface({
                 input: process.stdin,
