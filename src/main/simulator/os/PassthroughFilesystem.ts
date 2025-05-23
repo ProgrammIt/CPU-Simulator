@@ -40,21 +40,21 @@ export class PassthroughFilesystem {
         this.path = path;
 
         // Init console input
-        process.stdin.setEncoding('latin1');
-        if (typeof process.stdin.setRawMode === 'function') {
+        if (process.stdin.isTTY && typeof process.stdin.setRawMode === 'function') {
+            process.stdin.setEncoding('latin1');
             process.stdin.setRawMode(false);
-        }
-        if (PassthroughFilesystem.readline == null) {
-            PassthroughFilesystem.readline = createInterface({
-                input: process.stdin,
-                output: process.stdout,
-                terminal: true,
+            if (PassthroughFilesystem.readline == null) {
+                PassthroughFilesystem.readline = createInterface({
+                    input: process.stdin,
+                    output: process.stdout,
+                    terminal: true,
+                });
+            }
+            PassthroughFilesystem.readline.on('line', (input) => {
+                this.stdin_buffer.push(Buffer.from(input, 'latin1')); // interpret string as 8 bit characters
+                console.log("Input received: ", new TextDecoder('latin1').decode(this.stdin_buffer[this.stdin_buffer.length-1]))
             });
         }
-        PassthroughFilesystem.readline.on('line', (input) => {
-            this.stdin_buffer.push(Buffer.from(input, 'latin1')); // interpret string as 8 bit characters
-            console.log("Input received: ", new TextDecoder('latin1').decode(this.stdin_buffer[this.stdin_buffer.length-1]))
-        });
     }
 
     public io_seek(fd: number, offset: number, mode: number): number {
