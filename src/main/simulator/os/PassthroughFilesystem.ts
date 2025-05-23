@@ -40,7 +40,8 @@ export class PassthroughFilesystem {
         this.path = path;
 
         // Init console input
-        if (process.stdin.isTTY && typeof process.stdin.setRawMode === 'function') {
+        const isRunningInJest = process.env.JEST_WORKER_ID !== undefined;
+        if (process.stdin.isTTY && typeof process.stdin.setRawMode === 'function' && !isRunningInJest) {
             process.stdin.setEncoding('latin1');
             process.stdin.setRawMode(false);
             if (PassthroughFilesystem.readline == null) {
