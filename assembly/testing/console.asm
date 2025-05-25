@@ -2,16 +2,25 @@ NOP ; enter kernel mode (requires patched NOP instruction)
 
 MOV $0x100, %esp
 
-;; print 123
-;PUSH $123
-;DEV $0b01000, *%esp  ; 00001000 - console_print_number(number=op2)
-;
-;; print 'aaaa'
-;MOV $0, @0x108 ; null-termination
-;MOV $0b01100001011000010110000101100001, @0x104    ; "aaaa"
-;PUSH $4
-;PUSH $0x104
-;DEV $0b0011, $0     ; 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
+; print 123
+PUSH $123
+DEV $0b01000, *%esp  ; 00001000 - console_print_number(number=op2)
+
+; read number
+DEV $0b01001, $0     ; 00001001 - console_read_number() -> number=eax, error=ebx
+
+; print the number and error
+PUSH %eax
+PUSH %ebx
+DEV $0b01000, %eax  ; 00001000 - console_print_number(number=op2)
+DEV $0b01000, %ebx  ; 00001000 - console_print_number(number=op2)
+
+; print 'aaaa'
+MOV $0, @0x108 ; null-termination
+MOV $0b01100001011000010110000101100001, @0x104    ; "aaaa"
+PUSH $4
+PUSH $0x104
+DEV $0b0011, $0     ; 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
 
 ; read up to 100 bytes
 PUSH $100           ; buffer length
