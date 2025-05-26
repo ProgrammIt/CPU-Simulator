@@ -29,7 +29,7 @@ export class SimulationController {
      * This class member stores the highest available memory address of physical memory.
      * @readonly
      */
-    public static readonly HIGH_ADDRESS_PHYSICAL_MEMORY_DEC: number = 4_294_967_295;
+    public static readonly HIGH_ADDRESS_PHYSICAL_MEMORY_DEC: number = 0xFFFFFFFF; // 4_294_967_295
 
     /**
      * This class member stores the highest available memory address of physical memory.
@@ -44,7 +44,7 @@ export class SimulationController {
      */
     private static readonly KERNEL_SPACE:  AddressSpace<PhysicalAddress> = 
         new AddressSpace<PhysicalAddress>(
-            PhysicalAddress.fromInteger(3_221_225_471), 
+            PhysicalAddress.fromInteger(0xC0000000), // 3_221_225_472
             PhysicalAddress.fromInteger(SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC)
         );
 
