@@ -2249,6 +2249,12 @@ export class CPUCore {
                 msg.replace("__OPERAND_TYPE__", "REGISTER").replace("__INSTRUCTION__", "INT")
             );
         }
+
+        // Only allow INT for interrupt index 0 to 3
+        if (0 > target.value.toUnsignedNumber() || 3 < target.value.toUnsignedNumber()) {
+            throw new BadOperandError("Interrupt operand must be between 0 and 3.")
+        }
+
         // Switch to kernel mode.
         this.eflags.enterKernelMode();
         // Disable software interrupts by clearing the interrupt flag.
