@@ -68,10 +68,10 @@ export class Assembler {
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
-	private encode(lines: Map<number, string>): DoubleWord[] {
+	private encode(lines: Map<number, string>, baseOffset: number = 0): DoubleWord[] {
 		let lineEncoded = false;
 		const encodedInstructions: DoubleWord[] = [];
-		const jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
+		const jumpLabels: Map<string, string> = this.locateJumpLabels(lines, baseOffset);	
 
 		// Remove jump labels as they will not be encoded.
 		lines = this.removeJumpLabels(lines);
@@ -186,14 +186,14 @@ export class Assembler {
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
 	 * @returns A map of jump labels and their associated (virtual) memory address.
 	 */
-	private locateJumpLabels(lines: Map<number, string>) : Map<string, string> {
+	private locateJumpLabels(lines: Map<number, string>, baseOffset: number = 0) : Map<string, string> {
 		const jumpLabels: Map<string, string> = new Map();
 		/**
 		 * Use this variable in order to count the instructions, that need to be encoded
 		 * later, because the keys in the map do not have to be consecutive, as blank lines 
 		 * have been removed from the original source text.
 		 */
-		let programLocationCounter = 0;
+		let programLocationCounter = baseOffset;
 		for (const [lineNo, line] of lines.entries()) {
 			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
 				const jumpLabel = line.replace(/\.|:/gim, "");
@@ -520,10 +520,11 @@ export class Assembler {
 	 * The instructions will be encoded using the opcodes defined in the language definition.
 	 * The order in which the instructions appear in the input program is preserved during the compilation process.
 	 * @param s File contents of an .asm file containing a computer program written in assembly language.
+	 * @param baseOffset Base address where the program will be in memory. Needed to adjust static addresses in jump labels. Default is 0.
 	 * @returns An array of strings representing the binary encoded instructions of the given computer program.
 	 */
-	public compile(s: string): DoubleWord[] {
+	public compile(s: string, baseOffset: number = 0): DoubleWord[] {
 		const lines: Map<number, string> = this.preprocess(s);
-		return this.encode(lines);
+		return this.encode(lines, baseOffset);
 	}
 }
