@@ -59,6 +59,6 @@ export class AddressSpace<T extends Address> {
      * This accessor calculates and returns the size of this range.
      */
     public get size(): number {
-        return this.highAddressToDecimal() - this.lowAddressToDecimal();
+        return this.highAddressToDecimal() - this.lowAddressToDecimal() + 1;
     }
 }
