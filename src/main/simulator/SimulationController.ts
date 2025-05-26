@@ -165,16 +165,21 @@ export class SimulationController {
         // Reserve space for interrupt table with 4 entries at 0xC0000000 (start of kernel space)
         const numberOfInterrupts = 4;
         const interruptTableLengthInBytes = numberOfInterrupts * DoubleWord.SIZE_IN_BYTES; // 4 entries at 4 bytes each (Doubleword size)
+        const startOfKernelSpace = SimulationController.KERNEL_SPACE.lowAddressToDecimal();
+        this._physicalAddressSpaceForInterruptTable = new AddressSpace( // TODO use startOfKernelSpace instead of 0xFFFF once assembly supports high addresses
+            PhysicalAddress.fromInteger(0x30), PhysicalAddress.fromInteger(startOfKernelSpace + interruptTableLengthInBytes))
         // Load kernel code into memory rigth after the interrup table
-        const kernelCodeStartAddress = SimulationController.KERNEL_SPACE.lowAddressToDecimal() + interruptTableLengthInBytes // 0xC0000010
+        const kernelCodeStartAddress = startOfKernelSpace + interruptTableLengthInBytes // 0xC0000010
         const compiledOS: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}os/os.asm`, "utf-8"), kernelCodeStartAddress)
         for (let i = 0; i < compiledOS.length; i++) {
             this.mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(kernelCodeStartAddress + i*DoubleWord.SIZE_IN_BYTES), compiledOS[i])
         }
+        this._physicalAddressSpaceForInterruptHandlers = new AddressSpace(
+            PhysicalAddress.fromInteger(kernelCodeStartAddress), PhysicalAddress.fromInteger(kernelCodeStartAddress + compiledOS.length))
         // Run kernel to fill interrupt table
         this.core.setEIP(Address.fromInteger(kernelCodeStartAddress))
         while (this.core.cycle()) {}
-
+        this.core.setEIP(Address.fromInteger(0))
 
         /**
          * Write list with available page frames into physical memory.
@@ -406,7 +411,7 @@ export class SimulationController {
                 ) {
                     writableFlag = false;
                     executableFlag = true;
-                } else if (this._physicalAddressSpaceForInterruptTable!.inRange(virtualAddressOfCurrentPage)) {
+                } else if ( this._physicalAddressSpaceForInterruptTable!.inRange(virtualAddressOfCurrentPage)) {
                     writableFlag = false;
                     executableFlag = false;
                 } else {

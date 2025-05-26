@@ -585,7 +585,8 @@
                         "MEMORY_ADDRESS_BINARY",
                         "IMMEDIATE_DECIMAL",
                         "IMMEDIATE_HEXADECIMAL",
-                        "IMMEDIATE_BINARY"
+                        "IMMEDIATE_BINARY",
+                        "LABEL"
                     ]
                 },
                 {

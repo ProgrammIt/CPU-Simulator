@@ -504,7 +504,7 @@ export class CPUCore {
                 this.nop();
                 break;
             case EncodedOperations.CALL:
-                this.call(this._decodedInstruction.operands![0]);
+                jumpPerformed = this.call(this._decodedInstruction.operands![0]);
                 break;
             case EncodedOperations.RET:
                 this.ret();
@@ -2145,12 +2145,13 @@ export class CPUCore {
      * this method writes a return address onto the STACK. Afterwards the (virtual) address gets loaded into the instruction pointer 
      * (EIP) register and control is transfered to the callee (targeted subroutine).
      * @param target This operand defines the (virtual) base address of the subroutine to call.
+     * @returns True if jump was performed, which is always the case.
      * @throws {UnsupportedOperandTypeError} If the target operand is of type IMMEDIATE.
      * @throws {MissingOperandError} If the operand given is of type NO.
      * @throws {RegisterNotAvailableError} If the register to read from, is not available.
      * @throws {UnknownRegisterError} If the register to read from, is unknown.
      */
-    private call(target: InstructionOperand): void {
+    private call(target: InstructionOperand): boolean {
         // Check if the source operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             const msg: string = CPUCore._ERROR_MESSAGE_INVALID_OPERANDTYPE;
@@ -2190,7 +2191,7 @@ export class CPUCore {
         } else {
             this.eip.content = this.readRegister(target);
         }
-        return;
+        return true;
     }
 
     /**
