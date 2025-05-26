@@ -239,11 +239,16 @@ export class Assembler {
 			}
 		}
 			
+		let handleLabelsAsImmediate = false;
+		if (instructionMnemonic == "MOV") {
+			handleLabelsAsImmediate = true;
+		}
+
 		// Check for second operand
 		if (regexMatchArrayInstruction.length > 3) {
 			// A second operand given
 			addressingModeOperand2 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[3], line);
-			typeOperand2 = this.encodeOperandType(regexMatchArrayInstruction[3], line);
+			typeOperand2 = this.encodeOperandType(regexMatchArrayInstruction[3], line, handleLabelsAsImmediate);
 			encodedOperandValue2 = this.encodeOperandValue(regexMatchArrayInstruction[3], line, jumpLabels);
 		} else {
 			// No second operand given
@@ -256,7 +261,7 @@ export class Assembler {
 		if (regexMatchArrayInstruction.length > 2) {
 			// A single operand given
 			addressingModeOperand1 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[2], line);
-			typeOperand1 = this.encodeOperandType(regexMatchArrayInstruction[2], line);
+			typeOperand1 = this.encodeOperandType(regexMatchArrayInstruction[2], line, handleLabelsAsImmediate);
 			encodedOperandValue1 = this.encodeOperandValue(regexMatchArrayInstruction[2], line, jumpLabels);
 		} else {
 			// No operand given
@@ -450,17 +455,18 @@ export class Assembler {
 	 * This method encodes the given operands type.
 	 * @param operand An operand whichs type will be encoded.
 	 * @param line The original computer programs line of code which is currently encoded.
+	 * @param handleLabelsAsImmediate By default labels will be interpreted as addresses. Set to true to use the label address as immediate value.
 	 * @returns The binary encoded operands type.
 	 */
-	private encodeOperandType(operand: string, line: number): Array<Bit> {
+	private encodeOperandType(operand: string, line: number, handleLabelsAsImmediate: boolean = false): Array<Bit> {
 		let encodedType: Array<Bit> = new Array<Bit>(7);
 		if (operand.length === 0) {
 			encodedType = new Array<Bit>(7).fill(0);
 		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
 			encodedType = new Array<Bit>(1, 1, 0, 0, 0, 0, 0);
-		} else if (operand.startsWith("$")) {
+		} else if (operand.startsWith("$") || (operand.match(this.languageDefinition.label_formats.usage) && handleLabelsAsImmediate)) {
 			encodedType = new Array<Bit>(1, 0, 1, 0, 0, 0, 0);
-		} else if (operand.startsWith("@") || operand.match(this.languageDefinition.label_formats.usage)) {
+		} else if (operand.startsWith("@") || (operand.match(this.languageDefinition.label_formats.usage) && !handleLabelsAsImmediate)) {
 			encodedType = new Array<Bit>(1, 1, 1, 0, 0, 0, 0);
 		} else {
 			throw Error(`In line ${line + 1}: Unrecognized type of operand.`);
