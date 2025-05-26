@@ -1,2 +1,2 @@
-INT $0
+INT $2
 NOP

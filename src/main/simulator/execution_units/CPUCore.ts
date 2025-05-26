@@ -2261,11 +2261,13 @@ export class CPUCore {
         // Disable software interrupts by clearing the interrupt flag.
         this.eflags.clearInterrupt();
         // Add the number of the interrupt handler to the interrupt tables base address, which is stored in the ITP register.
-        const interruptHandlerAddress: DoubleWord = this.alu.add(this.itp.content, target.value);
+        const interruptHandlerTableEntry: Address = Address.fromInteger(this.itp.content.toUnsignedNumber() + target.value.toUnsignedNumber()*4);
         // Push the current EFLAGS onto the STACK to save them for later.
         this.pushf();
+        // Load interrupt handler address
+        const interruptHandler = this.mmu.readDoublewordFrom(interruptHandlerTableEntry, true)
         // Call subroutine at the interrupt handlers address.
-        this.call(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.MEMORY_ADDRESS, interruptHandlerAddress));
+        this.call(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.MEMORY_ADDRESS, interruptHandler));
         return;
     }
 
