@@ -14,6 +14,7 @@ import { InstructionOperand } from "../../types/binary/InstructionOperand";
 import { EncodedAddressingModes } from "../../types/enumerations/EncodedAdressingModes";
 import { AddressSpace } from "../../types/binary/AddressSpace";
 import { EncodedOperandTypes } from "../../types/enumerations/EncodedOperandTypes";
+import { Address } from "../../types/binary/Address";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
@@ -160,39 +161,27 @@ export class SimulationController {
         this.core.eflags.enterKernelMode();
         // Enable real mode and disable memory virtualization.
         this.core.mmu.disableMemoryVirtualization();
-        // Compile and write interrupt handlers.
-        const compiledIRH1: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}/os/interrupt_handler/mount_page_frame.asm`, "utf-8"));
-        const compiledIRH2: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}/os/interrupt_handler/unmount_page_frame.asm`, "utf-8"));
-        // -> TODO: Compile other interrupt handlers
-        // Load interrupt handlers into kernel space.
-        const baseAddressesInterruptHandlers: Array<PhysicalAddress> = this.loadInterruptHandlers(
-            PhysicalAddress.fromInteger(SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC),
-            [
-                compiledIRH1,
-                compiledIRH2
-            ]
-        );
-        /**
-         * Initialize interrupt table.
-         * The next lower physical address following the base address of the last interrupt handler, which was loaded into kernel space,
-         * is the highest physical address of the interrupt table.
-         */
-        const baseAddressesOfLastInterruptHandlerLoadedInKernelSpaceDec: number = 
-            parseInt(baseAddressesInterruptHandlers[baseAddressesInterruptHandlers.length - 1].toString(), 2);
-        const highestAddressOfInterruptTable: PhysicalAddress = 
-            PhysicalAddress.fromInteger(baseAddressesOfLastInterruptHandlerLoadedInKernelSpaceDec - 1);
-        const baseAddressInterruptTable: PhysicalAddress = this.initializeInterruptTable(
-            highestAddressOfInterruptTable,
-            baseAddressesInterruptHandlers
-        );
-        // -> TODO: Compile system functions and save their physical base addresses.
+
+        // Reserve space for interrupt table with 4 entries at 0xC0000000 (start of kernel space)
+        const numberOfInterrupts = 4;
+        const interruptTableLengthInBytes = numberOfInterrupts * DoubleWord.SIZE_IN_BYTES; // 4 entries at 4 bytes each (Doubleword size)
+        // Load kernel code into memory rigth after the interrup table
+        const kernelCodeStartAddress = SimulationController.KERNEL_SPACE.lowAddressToDecimal() + interruptTableLengthInBytes // 0xC0000010
+        const compiledOS: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}os/os.asm`, "utf-8"), kernelCodeStartAddress)
+        for (let i = 0; i < compiledOS.length; i++) {
+            this.mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(kernelCodeStartAddress + i*DoubleWord.SIZE_IN_BYTES), compiledOS[i])
+        }
+        // Run kernel to fill interrupt table
+        this.core.setEIP(Address.fromInteger(kernelCodeStartAddress))
+        while (this.core.cycle()) {}
+
+
         /**
          * Write list with available page frames into physical memory.
          * The next lower physical address following the base address of the interrupt table is the highest physical address of the list with
          * available page frames.
          */
-        const nextLowerAddressFollowingBaseAddressInterruptTableDec: number = parseInt(baseAddressInterruptTable.toString(), 2) - 1;
-        const highestAddressOfListWithAvailablePageFrames: PhysicalAddress = PhysicalAddress.fromInteger(nextLowerAddressFollowingBaseAddressInterruptTableDec);
+        const highestAddressOfListWithAvailablePageFrames: PhysicalAddress = PhysicalAddress.fromInteger(0xFFFFFFFF);
         const baseAddressOfListWithAvailablePageFrames: PhysicalAddress = 
             this.initializeListOfAvailablePageFrames(highestAddressOfListWithAvailablePageFrames);
         /**
@@ -209,73 +198,6 @@ export class SimulationController {
         return;
     }
 
-    /**
-     * This method takes a list of compiled interrupt handlers and loads it into the kernel space.
-     * @param highestPhysicalAddress The highest physical address, where the first byte of the first interrupt handler will be written to.
-     * @param compiledInterruptHandlers The list of compiled interrupt handlers.
-     * @return A list of the interrupt handlers base addresses to create the interrupt table from.
-     */
-    private loadInterruptHandlers(highestPhysicalAddress: PhysicalAddress, compiledInterruptHandlers: Array<Array<DoubleWord>>): Array<PhysicalAddress> {
-        const baseAddresses: Array<PhysicalAddress> = new Array<PhysicalAddress>();
-        let currentPhysicalAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
-        // Load the given interrupt handlers to kernel space.
-        for (const compiledInterruptHandler of compiledInterruptHandlers) {
-            baseAddresses.push(this.loadInterruptHandler(PhysicalAddress.fromInteger(currentPhysicalAddressDec), compiledInterruptHandler));
-            currentPhysicalAddressDec -= ((compiledInterruptHandler.length * DataSizes.DOUBLEWORD)/DataSizes.BYTE);
-        }
-        this._physicalAddressSpaceForInterruptHandlers = new AddressSpace<PhysicalAddress>(
-            PhysicalAddress.fromInteger(currentPhysicalAddressDec),
-            highestPhysicalAddress
-        );
-        return baseAddresses;
-    }
-
-    /**
-     * This method loads the given compiled interrupt handler into the main memory based on the given base address.
-     * @param highestPhysicalAddress The highest physical address of the interrupt handler.
-     * @param compiledIRH The compiled interrupt handler.
-     * @returns The physical base address of the interrupt handler.
-     */
-    private loadInterruptHandler(highestPhysicalAddress: PhysicalAddress, compiledIRH: DoubleWord[]): PhysicalAddress {
-        // Load compiled interrupt handler into the main memory.
-        let currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2) - 4;
-        for (const binaryValue of compiledIRH) {
-            const physicalAddress: PhysicalAddress = PhysicalAddress.fromInteger(currentAddressDec);
-            this.mainMemory.writeDoublewordTo(physicalAddress, binaryValue);
-            currentAddressDec -= 4;
-        }
-        return PhysicalAddress.fromInteger(currentAddressDec);
-    }
-
-    /**
-     * This method initializes the interrupt table. The interrupt table contains a number of interrupt handlers base addresses.
-     * @param highestPhysicalAddress The highest physical base address of the interrupt table.
-     * @param baseAddressesInterruptHandlers The physical base addresses of the interrupt handlers.
-     * @returns The physical base address of the interrupt table, which is the lowest physical address of the interrupt table.
-     */
-    private initializeInterruptTable(highestPhysicalAddress: PhysicalAddress, baseAddressesInterruptHandlers: DoubleWord[]): PhysicalAddress {
-        let currentAddressDec: number = parseInt(highestPhysicalAddress.toString(), 2);
-        for (const physicalBaseAddress of Array.from(baseAddressesInterruptHandlers).reverse()) {
-            currentAddressDec -= 4;
-            // Write physical address of interrupt handler into main memory.
-            this.mainMemory.writeDoublewordTo(
-                PhysicalAddress.fromInteger(currentAddressDec), 
-                physicalBaseAddress
-            );
-        }
-        this._physicalAddressSpaceForInterruptTable = new AddressSpace<PhysicalAddress>(
-            PhysicalAddress.fromInteger(currentAddressDec),
-            highestPhysicalAddress
-        );
-        const physicalBaseAddressOfInterruptTable: PhysicalAddress = PhysicalAddress.fromInteger(currentAddressDec);
-        /**
-         * Point ITP register to base address of the interrupt table.
-         * As the kernel space is mapped into the virtual address space of a process, the physical 
-         * address corresponds to the virtual address of the interupt table.
-         */
-        this.core.itp.content = physicalBaseAddressOfInterruptTable;
-        return physicalBaseAddressOfInterruptTable;
-    }
 
     /**
      * This method initializes the list of available page frames and loads it into the physical memory space of the operating system.

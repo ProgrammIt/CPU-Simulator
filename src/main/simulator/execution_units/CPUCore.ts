@@ -2636,4 +2636,11 @@ export class CPUCore {
         this.eax.content.value = oldEAX;
         return poppedValue;
     }
+
+    /**
+     * Set instruction pointer. Used during boot to start the kernel code. 
+     */
+    public setEIP(address: Address) {
+        this.eip.content = address;
+    }
 }

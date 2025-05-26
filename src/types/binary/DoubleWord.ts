@@ -7,6 +7,7 @@ export class DoubleWord extends BinaryValue {
 	public static readonly MAXIMUM_NUMBER_DEC: number = 2_147_483_647;
 	public static readonly MINIMUM_NUMBER_DEC: number = -2_147_483_648;
 	public static readonly NUMBER_OF_BITS_DEC: number = 32;
+	public static readonly SIZE_IN_BYTES: number = 4;
 
 	/**
 	 * Instantiates a new object.
