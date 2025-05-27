@@ -516,7 +516,7 @@ export class CPUCore {
                 );
                 break;
             case EncodedOperations.INT:
-                this.int(this._decodedInstruction.operands![0]);
+                jumpPerformed = this.int(this._decodedInstruction.operands![0]);
                 break;
             case EncodedOperations.IRET:
                 this.iret();
@@ -2222,9 +2222,10 @@ export class CPUCore {
      * interrupted, the interrupt flag is cleared as well. Afterwards the handler is called. 
      * The call follows the same rules as a normal function call.
      * @param target The interrupt handlers number.
+     * @returns True if jump was performed which is always the case.
      * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
      */
-    public int(target: InstructionOperand): void {
+    public int(target: InstructionOperand): boolean {
         // Check if exactly one operand is present.
         if (target.type === EncodedOperandTypes.NO) {
             const msg: string = CPUCore._ERROR_MESSAGE_MISSING_OPERAND;
@@ -2268,7 +2269,7 @@ export class CPUCore {
         const interruptHandler = this.mmu.readDoublewordFrom(interruptHandlerTableEntry, true)
         // Call subroutine at the interrupt handlers address.
         this.call(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.MEMORY_ADDRESS, interruptHandler));
-        return;
+        return true;
     }
 
     /**

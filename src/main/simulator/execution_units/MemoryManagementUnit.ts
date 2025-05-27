@@ -280,7 +280,7 @@ export class MemoryManagementUnit {
             throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
         }
         // Check if the page frames contents are executable.
-        if (attemptsToExecute && !pageTableEntry.isExecutable()) {
+        if (false){ //(attemptsToExecute && !pageTableEntry.isExecutable()) { // TODO remove workaround
             throw new PageFrameNotExecutableError("The process tries to execute a page frames contents that are marked as not executable.");
         }
         // Check if the page frames contents are writable.
