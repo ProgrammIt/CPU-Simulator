@@ -37,19 +37,22 @@
 
 .INTERRUPT_HANDLER_SYSCALL:
     DEV $0b00001000, $5555 ; console_print_number(number=op2)
+    IRET
 
 
 .INTERRUPT_HANDLER_PRIVILEGE_VIOLATION:
     DEV $0b00001000, $6666 ; console_print_number(number=op2)
+    IRET
 
 
 .INTERRUPT_HANDLER_PAGE_FAULT:
     DEV $0b00001000, $7777 ; console_print_number(number=op2)
+    IRET
 
 
 .INTERRUPT_HANDLER_CONSOLE_INPUT:
     DEV $0b00001000, $8888 ; console_print_number(number=op2)
-
+    IRET
 
 
 

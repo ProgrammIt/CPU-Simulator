@@ -2385,6 +2385,7 @@ export class CPUCore {
      * This method does nothing.
      */
     private nop(): void {
+        //this.eflags.enterKernelMode()
         return;
     }
 
