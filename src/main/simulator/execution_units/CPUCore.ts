@@ -26,7 +26,7 @@ import { PrivilegeViolationError } from "../../../types/errors/PrivilegeViolatio
 import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 import { EncodedReadableRegisters } from "../../../types/enumerations/EncodedReadableRegisters";
 import { EncodedWritableRegisters } from "../../../types/enumerations/EncodedWritableRegisters";
-import { EncodedOperations } from "../../../types/enumerations/EncodedOperations";
+import { encodedOperationNameByValue, EncodedOperations } from "../../../types/enumerations/EncodedOperations";
 import { EncodedInstructionTypes } from "../../../types/enumerations/EncodedInstructionTypes";
 import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandTypes";
 import { devCommandNameByValue, DevCommands } from "../../../types/enumerations/DevOperationCommands";
@@ -78,7 +78,7 @@ export class CPUCore {
      * Third general purpose register: can be used for storing all kinds of "datatypes".
      * @readonly
      */
-    public readonly edx: GeneralPurposeRegister;
+    public readonly ecx: GeneralPurposeRegister;
     
     /**
      * Instruction pointer: stores the virtual/physical address of the currently executed instruction.
@@ -183,7 +183,7 @@ export class CPUCore {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
-        this.edx = new GeneralPurposeRegister("ECX");
+        this.ecx = new GeneralPurposeRegister("ECX");
         this.eip = new PointerRegister("EIP");
         this.eflags = new EFLAGS();
         this.eir = new InstructionRegister();
@@ -363,6 +363,17 @@ export class CPUCore {
             throw new Error("No instruction is currently ready to be executed.");
         }
         const operation: EncodedOperations = this._decodedInstruction.operation;
+        
+        // Debug prints
+
+        console.log("Executing " + encodedOperationNameByValue(operation.toString()) + " at " + this.eip.content.toUnsignedNumber())
+        const wasInKernelMode = this.eflags.isInKernelMode
+        this.eflags.enterKernelMode()
+        console.log("Stack value: " + this.mmu.readDoublewordFrom(this.esp.content, false))
+        if (!wasInKernelMode) {
+            this.eflags.enterUserMode()
+        }
+
         let jumpPerformed = false;
         switch (operation) {
             case EncodedOperations.NOT:
@@ -507,7 +518,7 @@ export class CPUCore {
                 jumpPerformed = this.call(this._decodedInstruction.operands![0]);
                 break;
             case EncodedOperations.RET:
-                this.ret();
+                jumpPerformed = this.ret();
                 break;
             case EncodedOperations.MOV:
                 this.mov(
@@ -519,7 +530,7 @@ export class CPUCore {
                 jumpPerformed = this.int(this._decodedInstruction.operands![0]);
                 break;
             case EncodedOperations.IRET:
-                this.iret();
+                jumpPerformed = this.iret();
                 break;
             case EncodedOperations.SYSENTER:
                 this.sysenter(this._decodedInstruction.operands![0]);
@@ -562,22 +573,22 @@ export class CPUCore {
      * 
      * 
      * command:
-     * 00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
-     *      mode:   0 - Seek from current position
+     * 0    00000000 - io_seek (fd=op2, offset=stack, mode=stack) -> success=eax
+     *          mode:   0 - Seek from current position
      *              1 - Seek from start of file
      *              2 - Seek from end of file
-     * 00000001 - io_close (fd=op2)
-     * 00000010 - io_read_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_read=eax
-     * 00000011 - io_write_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_written=eax
-     * 00000100 - file_create (filename_ptr=op2)
-     * 00000101 - file_delete (filename_ptr=op2) -> success=eax
-     * 00000110 - file_open (filename_ptr=op2) -> fd=eax
-     * 00000111 - file_stat (filename_ptr=op2) -> file_length=eax
-     * 00001000 - console_print_number(number=op2)
-     * 00001001 - console_read_number() -> number=eax, error=ebx
-     * 00001010 - process_create(filename_ptr=op2) -> process_id=eax
-     * 00001011 - process_exit ()
-     * 00001100 - process_yield ()
+     * 1    00000001 - io_close (fd=op2)
+     * 2    00000010 - io_read_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_read=eax
+     * 3    00000011 - io_write_buffer (fd=op2, buffer_ptr=stack, buffer_size=stack) -> bytes_written=eax
+     * 4    00000100 - file_create (filename_ptr=op2)
+     * 5    00000101 - file_delete (filename_ptr=op2) -> success=eax
+     * 6    00000110 - file_open (filename_ptr=op2) -> fd=eax
+     * 7    00000111 - file_stat (filename_ptr=op2) -> file_length=eax
+     * 8    00001000 - console_print_number(number=op2)
+     * 9    00001001 - console_read_number() -> number=eax, error=ebx
+     * 10   00001010 - process_create(filename_ptr=op2) -> process_id=eax
+     * 11   00001011 - process_exit ()
+     * 12   00001100 - process_yield ()
      * 
      * 
      * file descriptor (fd):
@@ -2197,15 +2208,16 @@ export class CPUCore {
     /**
      * This method returns from a subroutine. It reads the return address from the STACK and transfers
      * control to the caller, by loading the return address into the instruction pointer (EIP) register.
+     * @returns Always returns true to indicate a jump was performed.
      */
-    private ret(): void {
+    private ret(): boolean {
         // Read the return address from the STACK.
         this.eip.content = this.mmu.readDoublewordFrom(this.esp.content, false);
         // Deallocate one doubleword from the STACK by incrementing ESP.
         this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
         // TODO: Call interrupt handler for deallocation of page frame in page table.
         this.esp.content = PhysicalAddress.fromInteger(parseInt(this.esp.content.toString(), 2) + 4);
-        return;
+        return true;
     }
 
     /*
@@ -2222,7 +2234,7 @@ export class CPUCore {
      * interrupted, the interrupt flag is cleared as well. Afterwards the handler is called. 
      * The call follows the same rules as a normal function call.
      * @param target The interrupt handlers number.
-     * @returns True if jump was performed which is always the case.
+     * @returns Always returns true to indicate a jump was performed.
      * @throws {StackOverflowError} If the ESP reached the lowest possible address (top) of the STACK segment.
      */
     public int(target: InstructionOperand): boolean {
@@ -2257,18 +2269,33 @@ export class CPUCore {
             throw new BadOperandError("Interrupt operand must be between 0 and 3.")
         }
 
+        // Push the current EFLAGS onto the STACK to save them for later.
+        this.pushf();
         // Switch to kernel mode.
         this.eflags.enterKernelMode();
         // Disable software interrupts by clearing the interrupt flag.
         this.eflags.clearInterrupt();
         // Add the number of the interrupt handler to the interrupt tables base address, which is stored in the ITP register.
         const interruptHandlerTableEntry: Address = Address.fromInteger(this.itp.content.toUnsignedNumber() + target.value.toUnsignedNumber()*4);
-        // Push the current EFLAGS onto the STACK to save them for later.
-        this.pushf();
         // Load interrupt handler address
         const interruptHandler = this.mmu.readDoublewordFrom(interruptHandlerTableEntry, true)
-        // Call subroutine at the interrupt handlers address.
-        this.call(new InstructionOperand(EncodedAddressingModes.DIRECT, EncodedOperandTypes.MEMORY_ADDRESS, interruptHandler));
+        /*
+         * Before calling a subroutine, the caller needs to push the return address onto the STACK.
+         * The return address is necessary to hand over control to the caller again after the subroutine 
+         * has finished. The return address is an alias for the address of the instruction following the 
+         * CALL instruction. Therefore, one doubleword ((4)_10 byte) needs to be allocated on the STACK 
+         * by decrementing ESP first.
+         */
+        this.esp.content = PhysicalAddress.fromInteger(parseInt(this.esp.content.toString(), 2) - 4);
+        /*
+         * The instruction following the CALL instruction is located at EIP (currently pointing at
+         * the CALL instruction) plus (12)_10 ((3)_10 * (4)_10 byte per instruction).
+         */
+        const returnAddress: DoubleWord = this.alu.add(this.eip.content, DoubleWord.fromInteger(12));
+        // Write the return address to the STACK.
+        this.mmu.writeDoublewordTo(this.esp.content, returnAddress, false);
+        // Jump into subroutine at the interrupt handlers address.
+        this.setEIP(interruptHandler)
         return true;
     }
 
@@ -2276,9 +2303,10 @@ export class CPUCore {
      * This method returns from an interrupt handler triggered by a software interrupt. It reads the return address from the STACK
      * and transfers control back to the interrupted process. Additionally, the EFLAGS gets restored from the STACK, the interrupt flag
      * is cleared and the CPU switches back to user mode.
+     * @returns Always returns true to indicate a jump was performed.
      * @throws {PrivilegeViolationError} If the CPU is not in kernel mode when this mehtod is called.
      */
-    public iret(): void {
+    public iret(): boolean {
         // Check whether CPU is in kernel mode.
         if (!this.eflags.isInKernelMode()) {
             // CPU is not in kernel mode.
@@ -2290,9 +2318,7 @@ export class CPUCore {
         this.eflags.setInterrupt();
         // Restore the old EFLAGS contents from the STACK.
         this.popf();
-        // Switch back to user mode.
-        this.eflags.enterUserMode();
-        return;
+        return true
     }
 
     /*
@@ -2386,6 +2412,7 @@ export class CPUCore {
      */
     private nop(): void {
         //this.eflags.enterKernelMode()
+        this.mmu.disableMemoryVirtualization()
         return;
     }
 
@@ -2531,7 +2558,7 @@ export class CPUCore {
                 register = this.ebx;
                 break;
             case EncodedReadableRegisters.ECX:
-                register = this.edx;
+                register = this.ecx;
                 break;
             case EncodedReadableRegisters.EIP:
                 register = this.eip;
@@ -2582,7 +2609,7 @@ export class CPUCore {
                 register = this.ebx;
                 break;
             case EncodedWritableRegisters.ECX:
-                register = this.edx;
+                register = this.ecx;
                 break;
             case EncodedWritableRegisters.EIP:
                 register = this.eip;

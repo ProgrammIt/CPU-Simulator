@@ -317,7 +317,7 @@ const registerHandlers = (simulator: SimulationController, win: BrowserWindow): 
 	});
 
 	ipcMain.handle("readECX", async (event: IpcMainInvokeEvent, basis: NumberSystems): Promise<string> => {
-		const content: DoubleWord = simulator.core.edx.content;
+		const content: DoubleWord = simulator.core.ecx.content;
 		let result: string = twosComplementToDecimal(content).toString(basis);
 		if (basis === NumberSystems.HEX) {
 			result = `0x${twosComplementToDecimal(content).toString(16)}`;

@@ -2,7 +2,7 @@
  * An enum representing the available operations and their binary codes.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-export const enum EncodedOperations {
+export enum EncodedOperations {
 	ADD = "0000000",
 	ADC = "0000001",
 	SUB = "0000010",
@@ -44,4 +44,14 @@ export const enum EncodedOperations {
 	SYSEXIT = "0100110",
 	DEV = "0100111",
 	NOP = "1111111"
+}
+
+
+export function encodedOperationNameByValue(value: string): string {
+	for (const [key, val] of Object.entries(EncodedOperations)) {
+		if (val === value) {
+			return key;
+		}
+	}
+	return "UNKNOWN"
 }

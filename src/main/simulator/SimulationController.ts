@@ -15,6 +15,8 @@ import { EncodedAddressingModes } from "../../types/enumerations/EncodedAdressin
 import { AddressSpace } from "../../types/binary/AddressSpace";
 import { EncodedOperandTypes } from "../../types/enumerations/EncodedOperandTypes";
 import { Address } from "../../types/binary/Address";
+import { disassemble } from "./Disassembler";
+import { exit } from "process";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
@@ -45,8 +47,8 @@ export class SimulationController {
      */
     private static readonly KERNEL_SPACE:  AddressSpace<PhysicalAddress> = 
         new AddressSpace<PhysicalAddress>(
-            PhysicalAddress.fromInteger(0xC0000000), // 3_221_225_472
-            PhysicalAddress.fromInteger(SimulationController.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC)
+            PhysicalAddress.fromInteger(0x40000000),
+            PhysicalAddress.fromInteger(0x7FFFFFFF)
         );
 
     /**
@@ -162,15 +164,20 @@ export class SimulationController {
         // Enable real mode and disable memory virtualization.
         this.core.mmu.disableMemoryVirtualization();
 
-        // Reserve space for interrupt table with 4 entries at 0xC0000000 (start of kernel space)
+        // Reserve space for interrupt table with 4 entries at 0x40000000 (start of kernel space)
         const numberOfInterrupts = 4;
         const interruptTableLengthInBytes = numberOfInterrupts * DoubleWord.SIZE_IN_BYTES; // 4 entries at 4 bytes each (Doubleword size)
         const startOfKernelSpace = SimulationController.KERNEL_SPACE.lowAddressToDecimal();
         this._physicalAddressSpaceForInterruptTable = new AddressSpace( // TODO use startOfKernelSpace instead of 0xFFFF once assembly supports high addresses
-            PhysicalAddress.fromInteger(0x30), PhysicalAddress.fromInteger(startOfKernelSpace + interruptTableLengthInBytes))
+            PhysicalAddress.fromInteger(0x40000000), PhysicalAddress.fromInteger(startOfKernelSpace + interruptTableLengthInBytes))
         // Load kernel code into memory rigth after the interrup table
-        const kernelCodeStartAddress = startOfKernelSpace + interruptTableLengthInBytes // 0xC0000010
-        const compiledOS: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}os/os.asm`, "utf-8"), kernelCodeStartAddress)
+        const kernelCodeStartAddress = startOfKernelSpace + interruptTableLengthInBytes // 0x40000010
+        if (kernelCodeStartAddress != 0x40000010) {
+            throw new EvalError("Unexpected begin of OS memory")
+        }
+        const compiledOS: DoubleWord[] = this._assembler.compile(readFileSync(`${this._pathToAssemblyFiles}/os/os.asm`, "utf-8"), kernelCodeStartAddress)
+        disassemble(compiledOS, kernelCodeStartAddress)
+        //exit(1)
         for (let i = 0; i < compiledOS.length; i++) {
             this.mainMemory.writeDoublewordTo(PhysicalAddress.fromInteger(kernelCodeStartAddress + i*DoubleWord.SIZE_IN_BYTES), compiledOS[i])
         }
@@ -345,7 +352,10 @@ export class SimulationController {
         );
         // Disable real mode and enable memory virtualization. Safetyguard.
         this.core.mmu.enableMemoryVirtualization();
-        this.core.esp.content = VirtualAddress.fromInteger(parseInt(this.core.ptp.content.toString(), 2) - 4);
+        
+        // This line is commented since the OS now sets the initial esp address
+        //this.core.esp.content = VirtualAddress.fromInteger(parseInt(this.core.ptp.content.toString(), 2) - 4);
+        
         // Disable kernel mode.
         this.core.eflags.enterUserMode();
         // Load compiled program into virtual address space starting at the lowest possible address.
@@ -518,7 +528,7 @@ export class SimulationController {
                 // Load physical base address of list with available page frames into EBX register.
                 this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
                 // Load phyiscal base address of list with used page frames into ECX register.
-                this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
+                this.core.ecx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                 // Call interrupt handler.
                 this.core.int(new InstructionOperand(
                     EncodedAddressingModes.DIRECT,
@@ -574,7 +584,7 @@ export class SimulationController {
                     // Load physical base address of list with available page frames into EBX register.
                     this.core.ebx.content = this._physicalAddressSpaceListOfAvailablePageFrames!.lowAddress;
                     // Load phyiscal base address of list with used page frames into ECX register.
-                    this.core.edx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
+                    this.core.ecx.content = this._physicalAddressSpaceListOfUsedPageFrames!.lowAddress;
                     // Call interrupt handler.
                     this.core.int(new InstructionOperand(
                         EncodedAddressingModes.DIRECT,

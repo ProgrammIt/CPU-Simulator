@@ -159,6 +159,9 @@ export class Assembler {
 							break;
 						}
 					}
+					if (lineEncoded) {
+						break;
+					}
 				} else {
 					// Instruction has no operands.
 					const regexInstruction = new RegExp(instruction.regex, "gim");
