@@ -247,13 +247,15 @@ export class MemoryManagementUnit {
      * @param virtualAddress A binary value representing a virtual memory address.
      * @param attemptsToWrite Indicates whether the process attempts to execute the data located at the page frame associated with the given virtual address.
      * @param attemptsToExecute Indicates whether the process attempts to write data to the page frame associated with the given virtual address.
+     * @param ignorePermissionFlags Disables the privilege violation check with the EFLAGS.
+     * @param disableTlbLookUp Disables the usage of the TLB while translating an address.
      * @throws {PageFaultError} If the page the given virtual address is part of, is currently not associated with a page frame.
      * @throws {PrivilegeViolationError} If the page frame associated with this page is not accessable in user mode.
      * @throws {PageFrameNotExecutableError} If the page frame associated with this page is not executable.
      * @throws {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      * @returns The physical memory address associated with the given virtual address.
      */
-    private translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlbLookUp: boolean = false): PhysicalAddress {
+    public translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlbLookUp: boolean = false): PhysicalAddress {
         if (!this._memoryVirtualizationEnabled) {
             return virtualAddress;
         }
