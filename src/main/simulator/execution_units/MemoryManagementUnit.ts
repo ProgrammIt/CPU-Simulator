@@ -253,7 +253,7 @@ export class MemoryManagementUnit {
      * @throws {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      * @returns The physical memory address associated with the given virtual address.
      */
-    private translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean): PhysicalAddress {
+    private translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlbLookUp: boolean = false): PhysicalAddress {
         if (!this._memoryVirtualizationEnabled) {
             return virtualAddress;
         }
@@ -275,18 +275,21 @@ export class MemoryManagementUnit {
                 )
             );
         }
-        // Check if the page frame is accessable only in kernel mode.
-        if (pageTableEntry.isAccessableOnlyInKernelMode() && !this._flags.isInKernelMode()) {
-            throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
+        if (!ignorePermissionFlags) {
+            // Check if the page frame is accessable only in kernel mode.
+            if (pageTableEntry.isAccessableOnlyInKernelMode() && !this._flags.isInKernelMode()) {
+                throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
+            }
+            // Check if the page frames contents are executable.
+            if (attemptsToExecute && !pageTableEntry.isExecutable()) {
+                throw new PageFrameNotExecutableError("The process tries to execute a page frames contents that are marked as not executable.");
+            }
+            // Check if the page frames contents are writable.
+            if (attemptsToWrite && (!this._flags.isInKernelMode() && !pageTableEntry.isWritable())) {
+                throw new PageFrameNotWritableError("The process tries to write to a page frame, which is marked as read-only.");
+            }
         }
-        // Check if the page frames contents are executable.
-        if (attemptsToExecute && !pageTableEntry.isExecutable()) {
-            throw new PageFrameNotExecutableError("The process tries to execute a page frames contents that are marked as not executable.");
-        }
-        // Check if the page frames contents are writable.
-        if (attemptsToWrite && (!this._flags.isInKernelMode() && !pageTableEntry.isWritable())) {
-            throw new PageFrameNotWritableError("The process tries to write to a page frame, which is marked as read-only.");
-        }
+        
         if (attemptsToWrite) {
             // Set changed flag bit.
             pageTableEntry.setChangedFlag();
@@ -301,8 +304,11 @@ export class MemoryManagementUnit {
             pageTableEntry.frameNbr.concat(virtualAddress.getLeastSignificantBits(MemoryManagementUnit.NUMBER_BITS_OFFSET))
         );
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
-        this._tlb.insert([virtualAddress, pageTableEntry]);
+        if (!disableTlbLookUp) {
+            this._tlb.insert([virtualAddress, pageTableEntry]);
+        }
         return physicalAddress;
+        
     }
 
     /**
