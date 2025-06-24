@@ -726,6 +726,125 @@ export class Renderer {
     }
 
     /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the EAX register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerEAX: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readEAX(this.dataRepresentationEAX);
+            if (this._eax !== null) {
+                this.jumpToVirtualRamElement(content, this.dataRepresentationEAX);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the EBX register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerEBX: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readEBX(this.dataRepresentationEBX);
+            if (this._ebx !== null) {
+                this.jumpToVirtualRamElement(content, this.dataRepresentationEBX);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the ECX register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerECX: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readECX(this.dataRepresentationECX);
+            if (this._ecx !== null) {
+                this.jumpToVirtualRamElement(content, this.dataRepresentationECX);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the ESP register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerESP: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readESP(this.dataRepresentationESP);
+            if (this._esp !== null) {
+                this.jumpToVirtualRamElement(content, this.dataRepresentationESP);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the EIP register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerEIP: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readEIP(this.dataRepresentationEIP);
+            if (this._eip !== null) {
+                this.jumpToVirtualRamElement(content, this.dataRepresentationEIP);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the ITP register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerITP: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readITP(this.dataRepresentationITP);
+            if (this._itp !== null) {
+                this.jumpToPhysicalRamElement(content, this.dataRepresentationITP);
+            }
+        } 
+        return;
+    }
+
+    /**
+     * This callback is used as the click listener logic for the GUI element, which visualizes the PTP register.
+     * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
+     */
+    private readonly onClickListenerPTP: EventListenerOrEventListenerObject = async (event: Event): Promise<void> => {
+        const target: HTMLElement = event.target as HTMLElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            if (target.getAttribute("name") === "register-select-representation") return;
+            let content: string = await this._window.simulator.readPTP(this.dataRepresentationPTP);
+            if (this._ptp !== null) {
+                this.jumpToPhysicalRamElement(content, this.dataRepresentationPTP);
+            }
+        } 
+        return;
+    }
+
+    /**
      * This field represents a flag, which enables automatic scroll for the GUIs virtual RAM widget.
      */
     public autoScrollForVirtualRAMEnabled: boolean;
@@ -751,7 +870,7 @@ export class Renderer {
         this.dataRepresentationEAX = NumberSystem.BIN;
         this._ebx = document.getElementById("ebx");
         this.dataRepresentationEBX = NumberSystem.BIN;
-        this._ecx = document.getElementById("edx");
+        this._ecx = document.getElementById("ecx");
         this.dataRepresentationECX = NumberSystem.BIN;
         this._eflags = document.getElementById("eflags");
         this._eip = document.getElementById("eip");
@@ -848,6 +967,46 @@ export class Renderer {
             }
             if (eventListener !== undefined) {
                 selectElement.addEventListener("change", eventListener);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This method registers the click listeners during the start of the simulator for all register GUI elements 
+     * which represent registers that could hold a memory address.
+     */
+    public registerClickListener(): void {
+        const registerElements: HTMLCollectionOf<Element> = this._document.getElementsByClassName("register");
+        for (const register of registerElements) {
+            let eventListener: EventListenerOrEventListenerObject | undefined = undefined;
+            switch (register.getAttribute("id")!.toLowerCase()) {
+                case "eax":
+                    eventListener = this.onClickListenerEAX;
+                    break;
+                case "ebx":
+                    eventListener = this.onClickListenerEBX;
+                    break;
+                case "ecx":
+                    eventListener = this.onClickListenerECX;
+                    break;
+                case "esp":
+                    eventListener = this.onClickListenerESP;
+                    break;
+                case "eip":
+                    eventListener = this.onClickListenerEIP;
+                    break;
+                case "itp":
+                    eventListener = this.onClickListenerITP;
+                    break;
+                case "ptp":
+                    eventListener = this.onClickListenerPTP;
+                    break;
+                default:
+                    break;
+            }
+            if (eventListener !== undefined) {
+                register.addEventListener("click", eventListener);
             }
         }
         return;
@@ -1203,63 +1362,6 @@ export class Renderer {
     }
 
     /**
-     * This method reads the content of the EIP register.
-     */
-    public async readEIP(radix: NumberSystem): Promise<void> {
-        let content: string = await this._window.simulator.readEIP(radix);
-        if (this._eip !== null) {
-            this._eip.children.namedItem("register-content")!.textContent = content;
-            let virtualAddressHexString = "";
-            if (this.dataRepresentationEIP === NumberSystem.HEX) {
-                virtualAddressHexString = content;
-            } else if (this.dataRepresentationEIP === NumberSystem.DEC) {
-                virtualAddressHexString = `0x${parseInt(content, 10).toString(16)}`;
-            } else {
-                content = content.replace(/[\s]+/g, "");
-                virtualAddressHexString = `0x${parseInt(content, 2).toString(16)}`;
-            }
-            // Remove CSS class "highlighted" from any other HTML element(s).
-            for (const element of this._document.querySelectorAll(`div[data-virtual-address="${virtualAddressHexString}"]`)) {
-                if (element.classList.contains("highlighted")) {
-                    element.classList.remove("highlighted");
-                }
-            }
-            // Find HTML element representing the loaded virtual memory address.
-            let element: Element | null = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
-            /**
-             *  Check if automatic scroll for the virtual memory widget is enabled.
-             */
-            if (this.autoScrollForVirtualRAMEnabled && this.programLoaded) {
-                // Check if a GUI element, representing a virtual memory address, is currently present in the document
-                if (element === null) {
-                    // Element is not present in document. Load it (alongside 30 addresses above and beneath) into the document.
-                    let firstVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) - 15;
-                    let lastVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) + 14;
-                    if (firstVirtualAddressToReadDec <= 0) {
-                        firstVirtualAddressToReadDec = 0;
-                    }
-                    if (lastVirtualAddressToReadDec >= Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
-                        lastVirtualAddressToReadDec = Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC;
-                    }
-                    const firstVirtualAddressToReadHex = `0x${(firstVirtualAddressToReadDec).toString(16)}`;
-                    const lastVirtualAddressToReadHex = `0x${(lastVirtualAddressToReadDec).toString(16)}`;
-                    await this.createVirtualRAMView(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
-                    element = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
-                }
-                if (element !== null) {
-                    // Scroll this element into view.
-                    element.scrollIntoView();
-                }
-            }
-            if (element !== null) {
-                // Emphesize this element.
-                element.classList.add("highlighted");
-            }
-        }
-        return;
-    }
-
-    /**
      * This method reads the content of the EFLAGS register.
      */
     public async readEFLAGS(): Promise<void> {
@@ -1358,6 +1460,136 @@ export class Renderer {
     }
 
     /**
+     * This method jumps to a virtual memory address and highlights the GUI element in the "Virtual RAM" view representing the memory address.
+     * @param ramAddress The virtual memory address to highlight and scroll to.
+     * @param dataRepresentationRegister The number system the memory address is represented in.
+     */
+    public async jumpToVirtualRamElement(ramAddress: string, dataRepresentationRegister: NumberSystem): Promise<void> {
+        let virtualAddressHexString = "";
+        if (dataRepresentationRegister === NumberSystem.HEX) {
+            virtualAddressHexString = ramAddress;
+        } else if (dataRepresentationRegister === NumberSystem.DEC) {
+            virtualAddressHexString = `0x${parseInt(ramAddress, 10).toString(16)}`;
+        } else {
+            ramAddress = ramAddress.replace(/[\s]+/g, "");
+            virtualAddressHexString = `0x${parseInt(ramAddress, 2).toString(16)}`;
+        }
+        // Remove CSS class "highlighted" from any other HTML element(s).
+        for (const element of this._document.querySelectorAll(`div[data-physical-address]`)) {
+            if (element.classList.contains("highlighted")) {
+                element.classList.remove("highlighted");
+            }
+        }
+        for (const element of this._document.querySelectorAll(`div[data-virtual-address]`)) {
+            if (element.classList.contains("highlighted")) {
+                element.classList.remove("highlighted");
+            }
+        }
+        // Find HTML element representing the loaded virtual memory address.
+        let element: Element | null = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
+        /**
+         *  Check if automatic scroll for the virtual memory widget is enabled.
+         */
+        if (this.autoScrollForVirtualRAMEnabled && this.programLoaded) {
+            // Check if a GUI element, representing a virtual memory address, is currently present in the document
+            if (element === null) {
+                // Element is not present in document. Load it (alongside 30 addresses above and beneath) into the document.
+                let firstVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) - 15;
+                let lastVirtualAddressToReadDec: number = parseInt(virtualAddressHexString, 16) + 14;
+                if (firstVirtualAddressToReadDec <= 0) {
+                    firstVirtualAddressToReadDec = 0;
+                }
+                if (lastVirtualAddressToReadDec >= Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
+                    lastVirtualAddressToReadDec = Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC;
+                }
+                const firstVirtualAddressToReadHex = `0x${(firstVirtualAddressToReadDec).toString(16)}`;
+                const lastVirtualAddressToReadHex = `0x${(lastVirtualAddressToReadDec).toString(16)}`;
+                await this.createVirtualRAMView(firstVirtualAddressToReadHex, lastVirtualAddressToReadHex);
+                element = this._document.querySelector<Element>(`[data-virtual-address="${virtualAddressHexString}"]`);
+            }
+            if (element !== null) {
+                // Scroll this element into view.
+                element.scrollIntoView();
+            }
+        }
+        if (element !== null) {
+            // Emphesize this element.
+            element.classList.add("highlighted");
+        }
+    }
+
+    /**
+     * This method jumps to a physical memory address and highlights the GUI element in the "Physical RAM" view representing the memory address.
+     * @param ramAddress The physical memory address to highlight and scroll to.
+     * @param dataRepresentationRegister The number system the memory address is represented in.
+     */
+    public async jumpToPhysicalRamElement(ramAddress: string, dataRepresentationRegister: NumberSystem): Promise<void> {
+        let physicalAddressHexString = "";
+        if (dataRepresentationRegister === NumberSystem.HEX) {
+            physicalAddressHexString = ramAddress;
+        } else if (dataRepresentationRegister === NumberSystem.DEC) {
+            physicalAddressHexString = `0x${parseInt(ramAddress, 10).toString(16)}`;
+        } else {
+            ramAddress = ramAddress.replace(/[\s]+/g, "");
+            physicalAddressHexString = `0x${parseInt(ramAddress, 2).toString(16)}`;
+        }
+        // Remove CSS class "highlighted" from any other HTML element(s).
+        for (const element of this._document.querySelectorAll(`div[data-physical-address]`)) {
+            if (element.classList.contains("highlighted")) {
+                element.classList.remove("highlighted");
+            }
+        }
+        for (const element of this._document.querySelectorAll(`div[data-virtual-address]`)) {
+            if (element.classList.contains("highlighted")) {
+                element.classList.remove("highlighted");
+            }
+        }
+        // Find HTML element representing the loaded physical memory address.
+        let element: Element | null = this._document.querySelector<Element>(`[data-physical-address="${physicalAddressHexString}"]`);
+        /**
+         *  Check if automatic scroll for the physical memory widget is enabled.
+         */
+        if (this.autoScrollForPhysicalRAMEnabled && this.programLoaded) {
+            // Check if a GUI element, representing a physical memory address, is currently present in the document
+            if (element === null) {
+                // Element is not present in document. Load it (alongside 30 addresses above and beneath) into the document.
+                let firstPhysicalAddressToReadDec: number = parseInt(physicalAddressHexString, 16) - 15;
+                let lastPhysicalAddressToReadDec: number = parseInt(physicalAddressHexString, 16) + 14;
+                if (firstPhysicalAddressToReadDec <= 0) {
+                    firstPhysicalAddressToReadDec = 0;
+                }
+                if (lastPhysicalAddressToReadDec >= Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC) {
+                    lastPhysicalAddressToReadDec = Renderer.HIGH_ADDRESS_PHYSICAL_MEMORY_DEC;
+                }
+                const firstPhysicalAddressToReadHex = `0x${(firstPhysicalAddressToReadDec).toString(16)}`;
+                const lastPhysicalAddressToReadHex = `0x${(lastPhysicalAddressToReadDec).toString(16)}`;
+                await this.createPhysicalRAMView(firstPhysicalAddressToReadHex, lastPhysicalAddressToReadHex);
+                element = this._document.querySelector<Element>(`[data-physical-address="${physicalAddressHexString}"]`);
+            }
+            if (element !== null) {
+                // Scroll this element into view.
+                element.scrollIntoView();
+            }
+        }
+        if (element !== null) {
+            // Emphesize this element.
+            element.classList.add("highlighted");
+        }
+    }
+
+    /**
+     * This method reads the content of the EIP register.
+     */
+    public async readEIP(radix: NumberSystem): Promise<void> {
+        let content: string = await this._window.simulator.readEIP(radix);
+        if (this._eip !== null) {
+            this._eip.children.namedItem("register-content")!.textContent = content;
+            this.jumpToVirtualRamElement(content, radix);
+        }
+        return;
+    }
+
+    /**
      * Performs the next CPU cycle (fetch, decode, execute).
      */
     public async cycle(): Promise<void> {
@@ -1380,6 +1612,7 @@ export class Renderer {
         // TODO: Hide until a new place for the GUI element, representing the EIR register, is found.
         // await renderer.readEIR();
         await this.readESP(this.dataRepresentationESP);
+        await this.readPTP(this.dataRepresentationPTP);
         await this.readGPTP(this.dataRepresentationGPTP);
         await this.readITP(this.dataRepresentationITP);
         await this.readNPTP(this.dataRepresentationNPTP);

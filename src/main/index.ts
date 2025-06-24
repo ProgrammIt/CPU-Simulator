@@ -477,6 +477,7 @@ const registerHandlers = (simulator: SimulationController, win: BrowserWindow): 
 		simulator.autoScrollForPageTableEnabled = true;
 		return;
 	});
+
 };
 
 // This method will be called when Electron has finished
