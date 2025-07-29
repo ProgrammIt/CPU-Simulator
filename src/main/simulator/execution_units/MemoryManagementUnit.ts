@@ -247,13 +247,15 @@ export class MemoryManagementUnit {
      * @param virtualAddress A binary value representing a virtual memory address.
      * @param attemptsToWrite Indicates whether the process attempts to execute the data located at the page frame associated with the given virtual address.
      * @param attemptsToExecute Indicates whether the process attempts to write data to the page frame associated with the given virtual address.
+     * @param ignorePermissionFlags Disables the privilege violation check with the EFLAGS.
+     * @param disableTlbLookUp Disables the usage of the TLB while translating an address.
      * @throws {PageFaultError} If the page the given virtual address is part of, is currently not associated with a page frame.
      * @throws {PrivilegeViolationError} If the page frame associated with this page is not accessable in user mode.
      * @throws {PageFrameNotExecutableError} If the page frame associated with this page is not executable.
      * @throws {PageFrameNotWritableError} If the page frame associated with this page is not writable.
      * @returns The physical memory address associated with the given virtual address.
      */
-    private translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean): PhysicalAddress {
+    public translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlbLookUp: boolean = false): PhysicalAddress {
         if (!this._memoryVirtualizationEnabled) {
             return virtualAddress;
         }
@@ -275,18 +277,21 @@ export class MemoryManagementUnit {
                 )
             );
         }
-        // Check if the page frame is accessable only in kernel mode.
-        if (pageTableEntry.isAccessableOnlyInKernelMode() && !this._flags.isInKernelMode()) {
-            throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
+        if (!ignorePermissionFlags) {
+            // Check if the page frame is accessable only in kernel mode.
+            if (pageTableEntry.isAccessableOnlyInKernelMode() && !this._flags.isInKernelMode()) {
+                throw new PrivilegeViolationError("Process tries to access a page frame, which is accessible only in kernel mode.");
+            }
+            // Check if the page frames contents are executable.
+            if (attemptsToExecute && !pageTableEntry.isExecutable()) {
+                throw new PageFrameNotExecutableError("The process tries to execute a page frames contents that are marked as not executable.");
+            }
+            // Check if the page frames contents are writable.
+            if (attemptsToWrite && (!this._flags.isInKernelMode() && !pageTableEntry.isWritable())) {
+                throw new PageFrameNotWritableError("The process tries to write to a page frame, which is marked as read-only.");
+            }
         }
-        // Check if the page frames contents are executable.
-        if (attemptsToExecute && !pageTableEntry.isExecutable()) {
-            throw new PageFrameNotExecutableError("The process tries to execute a page frames contents that are marked as not executable.");
-        }
-        // Check if the page frames contents are writable.
-        if (attemptsToWrite && (!this._flags.isInKernelMode() && !pageTableEntry.isWritable())) {
-            throw new PageFrameNotWritableError("The process tries to write to a page frame, which is marked as read-only.");
-        }
+        
         if (attemptsToWrite) {
             // Set changed flag bit.
             pageTableEntry.setChangedFlag();
@@ -301,8 +306,11 @@ export class MemoryManagementUnit {
             pageTableEntry.frameNbr.concat(virtualAddress.getLeastSignificantBits(MemoryManagementUnit.NUMBER_BITS_OFFSET))
         );
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
-        this._tlb.insert([virtualAddress, pageTableEntry]);
+        if (!disableTlbLookUp) {
+            this._tlb.insert([virtualAddress, pageTableEntry]);
+        }
         return physicalAddress;
+        
     }
 
     /**
