@@ -40,13 +40,10 @@ INT $0
 ; move file descriptor into ecx
 MOV %eax, %ecx
 
-; write 5 bytes '12345'
+; write 4 bytes '1234'
 ; prepare buffer
-MOV $1, @1000
-MOV $2, @1001
-MOV $3, @1002
-MOV $4, @1003
-MOV $5, @1004
+MOV $0x34333231, @1000
+
 ; setup struct for syscall parameter
 MOV $2000, %ebx
 ; file descriptor
@@ -54,7 +51,7 @@ MOV %ecx, *%ebx
 
 ADD $4, %ebx
 ; buffer size = 5
-MOV $5, *%ebx
+MOV $4, *%ebx
 
 ADD $4, %ebx
 ; buffer pointer = 1000
