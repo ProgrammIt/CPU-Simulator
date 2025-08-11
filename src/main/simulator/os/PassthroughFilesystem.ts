@@ -204,7 +204,7 @@ export class PassthroughFilesystem {
             return -1;
         }
         const stat = lstatSync(path)
-        if (!stat.isFile || stat.isDirectory()) {
+        if (!stat.isFile() || stat.isDirectory()) {
             // not a file
             return -2;
         }
