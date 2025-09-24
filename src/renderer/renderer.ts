@@ -176,6 +176,17 @@ export class Renderer {
     public dataRepresentationPTP: NumberSystem;
 
     /**
+     * This field stores a reference to the HTMLElement representing the RAM search widget.
+     * @readonly
+     */
+    private readonly _ramSearch: HTMLElement | null;
+
+    /**
+     * This field stores the currently selected representation of the memory address for the RAM search.
+     */
+    public dataRepresentationRAMSearch: NumberSystem;
+
+    /**
      * This field is used to observe the visibility of the GUI elements representing cells of the physical RAM.
      * @readonly
      */
@@ -726,6 +737,60 @@ export class Renderer {
     }
 
     /**
+     * This callback is used as the change listeners logic for the GUI element, which visualizes the RAM-Cell search module.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerRAMSearch: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentLocation: string = parent.getAttribute("search-location")!;
+            const demandedLocation: string = target.value;
+            const searchValue: string = (this._document.getElementById("ramsearch-input") as HTMLInputElement).value;
+            parent.setAttribute("search-location", demandedLocation);
+            if (currentLocation === demandedLocation) {
+                return;
+            } else if (demandedLocation === "PHYSICAL") {
+                this.jumpToPhysicalRamElement(searchValue, this.dataRepresentationRAMSearch);
+            } else {
+                this.jumpToVirtualRamElement(searchValue, this.dataRepresentationRAMSearch);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as the keyup listeners logic for the GUI element, which visualizes the RAM-Cell search module.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <input> element contained in the GUI element.
+     */
+    private readonly onKeyUpRAMSearch: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLInputElement = event.target as HTMLInputElement;
+        const parent: HTMLElement | null = target.parentElement;
+        const keyboardEvent: KeyboardEvent = event as KeyboardEvent;
+        const searchValue: string = target.value;
+        const regExAllowedChars = /^[0-9a-fA-Fx]+$/;
+        const regExEnter = /(0[x])?[a-fA-F0-9]+$/;
+        let isHex = regExAllowedChars.test(searchValue);
+        if(!isHex) {
+            target.value = searchValue.slice(0, -1);
+        }
+        if (keyboardEvent.key === 'Enter' && parent !== null) {
+            isHex = regExEnter.test(searchValue);
+            if (!isHex) {
+                target.value = "0x0";
+                return;
+            }
+            const currentLocation = parent.getAttribute("search-location")!;
+            if (currentLocation === "PHYSICAL") {
+                this.jumpToPhysicalRamElement(searchValue, this.dataRepresentationRAMSearch);
+            } else {
+                this.jumpToVirtualRamElement(searchValue, this.dataRepresentationRAMSearch);
+            }
+        }
+        return;
+    }
+
+    /**
      * This callback is used as the click listener logic for the GUI element, which visualizes the EAX register.
      * @param event An object, which represents the event fired, whenever a click on the GUI element occurs.
      */
@@ -889,6 +954,8 @@ export class Renderer {
         this.dataRepresentationPTP = NumberSystem.BIN;
         this._vmptr = document.getElementById("vmptr");
         this.dataRepresentationVMPTR = NumberSystem.BIN;
+        this._ramSearch = document.getElementById("ram-search");
+        this.dataRepresentationRAMSearch = NumberSystem.HEX;
         this._physicalRAMObserver = new IntersectionObserver(this._physicalRAMObserverCallback, {
             root: null,             // Viewport is root element.
             rootMargin: "0px",      // Margin for root element.
@@ -912,6 +979,20 @@ export class Renderer {
         this.autoScrollForPageTableEnabled = true;
         this.programLoaded = false;
         this._window = window;
+    }
+
+    /**
+     * This method registers all the listener for the RAM-Cell search-module
+     */
+    public registerRAMSearchListener(): void {
+        const searchModules: HTMLCollectionOf<Element> = this._document.getElementsByClassName("search-module");
+        for (const searchModule of searchModules) {
+            const selectElement: Element = searchModule.children.namedItem("select-address-space")!;
+            const inputElement: Element = searchModule.children.namedItem("searchbox")!;
+            selectElement.addEventListener("change", this.onChangeListenerRAMSearch);
+            inputElement.addEventListener("keyup", this.onKeyUpRAMSearch);
+        }
+        return;
     }
 
     /**
@@ -1549,7 +1630,7 @@ export class Renderer {
         /**
          *  Check if automatic scroll for the physical memory widget is enabled.
          */
-        if (this.autoScrollForPhysicalRAMEnabled && this.programLoaded) {
+        if (this.autoScrollForPhysicalRAMEnabled) {
             // Check if a GUI element, representing a physical memory address, is currently present in the document
             if (element === null) {
                 // Element is not present in document. Load it (alongside 30 addresses above and beneath) into the document.
