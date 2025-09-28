@@ -1,4 +1,10 @@
 export interface AssemblyLanguageDefinition {
+    constant_formats: {
+        declarationInteger: string;
+        declarationString: string;
+        usage: string;
+    };
+
     comment_format: string;
     
     label_formats: {
