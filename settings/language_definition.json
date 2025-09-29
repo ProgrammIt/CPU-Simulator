@@ -2,7 +2,7 @@
     "comment_format" : "[ ]*;.*",
     "label_formats" : {
         "declaration" : "\\.[a-zA-Z][a-zA-Z\\-_0-9]*\\:",
-        "usage" : "[a-zA-Z][a-zA-Z\\-_0-9]*"
+        "usage" : "^[a-zA-Z][a-zA-Z\\-_0-9]*"
     },
     "number_formats" : {
         "decimal" : "-?[ ]*(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+\\b",
