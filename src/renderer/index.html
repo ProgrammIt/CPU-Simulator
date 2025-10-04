@@ -15,6 +15,14 @@
                         Next instruction
                     </button>
                 </li>
+                <div class="search-module control-module" id="ram-search" search-location="PHYSICAL">
+                        <div class="lg-text">RAM-Cell Search</div>
+                        <input type="text" class="ram-searchfield" name="searchbox" id="ramsearch-input" value="0x0" maxlength="10">
+                        <select name="select-address-space" title="Switch for changing search location">
+                            <option selected value="PHYSICAL">Physical RAM</option>
+                            <option value="VIRTUAL">Virtual RAM</option>
+                        </select>
+                </div>
             </menu>
         </header>
         <main>

@@ -25,6 +25,7 @@ window.onload = async (event) => {
 	});
 	renderer.registerChangeListener();
 	renderer.registerClickListener();
+	renderer.registerRAMSearchListener();
 	renderer.createPhysicalRAMView();
 };
 

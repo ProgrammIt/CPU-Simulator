@@ -136,6 +136,12 @@ td {
   box-shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.75);
 }
 
+.control-module {
+  padding: 1rem;
+  background-color: var(--cadet-gray);
+  border-radius: 10px;
+}
+
 .header {
   margin: 0;
   padding: 1rem;
@@ -208,7 +214,8 @@ td {
   overflow-y: auto;
 }
 
-.register {
+.register,
+.search-module {
   margin: 0rem;
   padding: 1rem;
   min-width: 200px;
@@ -216,12 +223,14 @@ td {
 }
 
 .register-content,
-.ram-cell-content {
+.ram-cell-content,
+.ram-searchfield {
   margin: 0.5rem 0rem;
   padding: 0.5rem;
   font-weight: bold;
   font-size: large;
   border-radius: 10px;
+  color: white;
   background-color: var(--prussian-blue);
 }
 
