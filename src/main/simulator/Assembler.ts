@@ -290,7 +290,8 @@ export class Assembler {
 			if (line.match(new RegExp(this.languageDefinition.constant_formats.usage, "gim"))) {
 				//Test if constant name is included in line and replace it with its value
 				integerConstants.forEach((constantValue, constantName) => {
-					if (line.includes(constantName)) {
+					const regex = new RegExp("[$%@]" + constantName , "m");
+					if (line.match(regex) !== null) {
 						const replacedLine = line.replace(constantName,constantValue);
 						lines.set(lineNo, replacedLine);
 					}
