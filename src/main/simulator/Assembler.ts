@@ -225,9 +225,11 @@ export class Assembler {
 			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
 				//If a string constant is found, skip as many memory cells as needed to fit all characters plus null terminator 
 				//plus one instruction for the jump instruction.
-				//For simplicity each character is utf-16 encoded but uses 32 bit to match the instruction size.
-				const constValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "");
-				programLocationCounter += 4 * (constValue.length + 1) + 12;
+				const constValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
+				//Calculate the size the string will use in memory including null termination and round up to the next size that
+				//is divisible by four. This insures the string always fits into multiple double words.
+				const stringMemSize = Math.ceil((Buffer.byteLength(constValue) / 4)) * 4;
+				programLocationCounter += stringMemSize + 12;
 			} else {
 				programLocationCounter += 12;
 			}
@@ -262,17 +264,16 @@ export class Assembler {
 				lines.delete(lineNo);
 			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
 				const constantName = line.replace(/const[ ]|[ ]?=[ ]?".*/gim, "");
-				const constantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "");
+				const constantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
 				//programLocationCounter +12 since the jump instruction will be located in front of the string memory array.
 				constants.set(
 					constantName, 
 					"0b" + VirtualAddress.fromInteger(programLocationCounter+12).toString()
 				);
-				/**
-				 * Skipping as many memory cells as needed to fit all characters plus null terminator.
-				 * One instruction (+12 addresses) is skipped to keep enough space to add a jump to after the end of the string.
-				 */
-				programLocationCounter += 4 * (constantValue.length + 1) + 12;
+				//Calculate the size the string will use in memory including null termination and round up to the next size that
+				//is divisible by four. This insures the string always fits into multiple double words.
+				const stringMemSize = Math.ceil((Buffer.byteLength(constantValue) / 4)) * 4;
+				programLocationCounter += stringMemSize + 12;
 			} else {
 				programLocationCounter += 12;
 			}
@@ -312,23 +313,64 @@ export class Assembler {
 	private encodeString(lineNo: number, line: string, jumpLabels: Map<string, string>, constants: Map<string, string>) : DoubleWord[] {
 		const encodedInstructions: DoubleWord[] = [];
 		const stringConstantName = line.replace(/const[ ]|[ ]?=[ ]?".*/gim, "");
-		const stringConstantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "");
+		const stringConstantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
 		let stringEncoded = false;
 		if (constants.has(stringConstantName)) {
 			const stringStartAddress: string = constants.get(stringConstantName)!.replace(/^0b/gim, "");
+			const stringMemSize = Math.ceil((Buffer.byteLength(stringConstantValue) / 4)) * 4;
 			//The memory address after the string array with the next instruction
-			const jumpAddress:string = VirtualAddress.fromInteger(parseInt(stringStartAddress, 2) + (4 * (stringConstantValue.length + 1))).toString();
+			const jumpAddress:string = VirtualAddress.fromInteger(parseInt(stringStartAddress, 2) + stringMemSize).toString();
 			const jumpInstruction:string = "JMP @0b" + jumpAddress;
 			const encodedInstruction: DoubleWord[] = this.encodeLine(-1, jumpInstruction, jumpLabels, constants);
 			encodedInstructions.push(...encodedInstruction);
-			let char32BitEncoded: DoubleWord;
-			
-			for (let i = 0; i < stringConstantValue.length; i++) {
-				char32BitEncoded = DoubleWord.fromInteger(stringConstantValue.charCodeAt(i));
-				encodedInstructions.push(char32BitEncoded);
+			//Create a buffer from the string in utf8 encoding and calculate some important values.
+			const stringBuffer = Buffer.from(stringConstantValue, "utf8");
+			const stringByteLength = stringBuffer.length;
+			const continousBufferSegmentSize = stringByteLength - (stringByteLength % 4);
+			const restOfBufferSize = stringByteLength % 4;
+			//Slice the part of the buffer that is divisible by four (in byte) into 32 bit big segments
+			//and encode each segment into binary values.
+			if (continousBufferSegmentSize > 0) {
+				for (let i = 0; i <= stringByteLength - 4; i += 4) {
+					const bufferSegment = stringBuffer.toString("hex", 0 + i, 4 + i);
+					const binaryString = parseInt(bufferSegment, 16).toString(2).padStart(32, "0");
+					const bitArray: Array<Bit> = new Array<Bit>(
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0
+					)
+					binaryString.split("").forEach((bit, index) => {
+						bitArray[index] = (bit === "0") ? 0 : 1;
+					})
+					const encodedStringPart = new DoubleWord(bitArray);
+					encodedInstructions.push(encodedStringPart);
+				}
 			}
-			char32BitEncoded = DoubleWord.fromInteger(0);
-			encodedInstructions.push(char32BitEncoded);	
+			//Get the last bytes from the buffer
+			if (restOfBufferSize > 0) {
+				const bufferSegment = stringBuffer.toString("hex", continousBufferSegmentSize, stringByteLength);
+				const binaryString = parseInt(bufferSegment, 16).toString(2).padStart((8 * restOfBufferSize), "0");
+				const bitArray: Array<Bit> = new Array<Bit>(
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0
+				)
+				binaryString.split("").forEach((bit, index) => {
+					bitArray[index] = (bit === "0") ? 0 : 1;
+				})
+				const encodedStringPart = new DoubleWord(bitArray);
+				encodedInstructions.push(encodedStringPart);
+			}
 			stringEncoded = true;
 		}
 		if (!stringEncoded) {
