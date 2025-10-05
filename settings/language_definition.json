@@ -1,4 +1,9 @@
 {
+    "constant_formats" : {
+        "declarationInteger" : "^const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?[0-9]*$",
+        "declarationString" : "^const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?\"[a-zA-Z0-9]*\"$",
+        "usage" : "[$%@][a-zA-Z][a-zA-Z\\-_0-9]*"
+    },
     "comment_format" : "[ ]*;.*",
     "label_formats" : {
         "declaration" : "\\.[a-zA-Z][a-zA-Z\\-_0-9]*\\:",

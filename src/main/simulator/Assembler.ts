@@ -69,88 +69,74 @@ export class Assembler {
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
 	private encode(lines: Map<number, string>): DoubleWord[] {
-		let lineEncoded = false;
 		const encodedInstructions: DoubleWord[] = [];
-		const jumpLabels: Map<string, string> = this.locateJumpLabels(lines);	
+		const constants: Map<string, string> = this.locateConstants(lines);
+		const replacedConstants: Map<number, string> = this.replaceConstants(lines, constants);
+		const jumpLabels: Map<string, string> = this.locateJumpLabels(replacedConstants);	
 
 		// Remove jump labels as they will not be encoded.
 		lines = this.removeJumpLabels(lines);
 		
 		// Iterate lines of code.
 		for (const [lineNo, line] of lines.entries()) {
+			const encodedInstruction: DoubleWord[] = this.encodeLine(lineNo, line, jumpLabels, constants);
+			encodedInstructions.push(...encodedInstruction);	
+		}
+		return encodedInstructions;
+	}
+
+	/**
+	 * This method encodes a single line of assembly code.
+	 * @param lineNo The original computer programs line number of code which is currently encoded.
+	 * @param line The original computer programs line of code which is currently encoded.
+	 * @param jumpLabels The jump labels found in the assembly code.
+	 * @param constants The constants found in the assembly code.
+	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
+	 */
+	private encodeLine(lineNo: number, line: string, jumpLabels: Map<string, string>, constants: Map<string, string>) : DoubleWord[] {
+		const encodedInstructions: DoubleWord[] = [];
+		let lineEncoded = false;
+		lineEncoded = false;
+		
+		// For every line of code, search for a contained instruction.
+		for (const instruction of this.languageDefinition.instructions) {
+			const illegalCombosOfOperandTypes: {__SOURCE__: string, __TARGET__: string}[] | undefined 
+				= instruction.illegal_combinations_of_operand_types;
 			
-			lineEncoded = false;
-			
-			// For every line of code, search for a contained instruction.
-			for (const instruction of this.languageDefinition.instructions) {
-				const illegalCombosOfOperandTypes: {__SOURCE__: string, __TARGET__: string}[] | undefined 
-					= instruction.illegal_combinations_of_operand_types;
-				
-				if (instruction.operands !== undefined && instruction.operands.length === 2) {
-					const operand1: {name: string, allowed_types: string[]} = instruction.operands[0];
-					const operand2: {name: string, allowed_types: string[]} = instruction.operands[1];
-					/*
-					 * The instruction expects two operands. Iterate over all possible combinations of operand types
-					 * and check if the resulting regex matches the current line of code.
-					 */
-					for (const operand1TypeString of operand1.allowed_types) {
-						for (const operand2TypeString of operand2.allowed_types) {
-							const regexInstructionString: string = instruction.regex;
-							// Create a combination of operand types.
-							const typeCombination: { __SOURCE__: string, __TARGET__: string } 
-									= { __SOURCE__ : operand1TypeString, __TARGET__ : operand2TypeString };
-							// Check if the combination of operand types is forbidden for this instruction.
-							if (illegalCombosOfOperandTypes !== undefined && illegalCombosOfOperandTypes.includes(typeCombination)) {
-								continue;
-							}
-							// Locate the operand type of the first operand in the language definition.
-							const operand1TypeDefinition: {name: string; code: string; regex: string;}
-								= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
-							// Locate the operand type of the second operand in the language definition.
-							const operand2TypeDefinition: {name: string; code: string; regex: string;}
-								= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
-							// Create a regex for the current combination of operand types.
-							const regexInstruction = new RegExp(
-								regexInstructionString
-									.replace(operand1.name, operand1TypeDefinition.regex)
-									.replace(operand2.name, operand2TypeDefinition.regex), 
-								"gim"
-							);
-							// Check if the current line of code matches the created regex.
-							const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
-							if (regexMatchArrayInstruction !== null) {
-								// Instruction found. Encode it.							
-								const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
-								// Store the instruction along its encoded representation in the translations map.
-								this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
-								encodedInstructions.push(...encodedInstruction);
-								lineEncoded = true;
-								break;
-							}
-						}
-						if (lineEncoded) {
-							break;
-						}
-					}
-				} else if (instruction.operands !== undefined && instruction.operands.length === 1) {
-					const operand: {name: string, allowed_types: string[]} = instruction.operands[0];
-					/**
-					 * This instruction expects only one operand. Iterate over all possible types of the operand.
-					 */
-					for (const operandTypeString of operand.allowed_types) {
+			if (instruction.operands !== undefined && instruction.operands.length === 2) {
+				const operand1: {name: string, allowed_types: string[]} = instruction.operands[0];
+				const operand2: {name: string, allowed_types: string[]} = instruction.operands[1];
+				/*
+					* The instruction expects two operands. Iterate over all possible combinations of operand types
+					* and check if the resulting regex matches the current line of code.
+					*/
+				for (const operand1TypeString of operand1.allowed_types) {
+					for (const operand2TypeString of operand2.allowed_types) {
 						const regexInstructionString: string = instruction.regex;
+						// Create a combination of operand types.
+						const typeCombination: { __SOURCE__: string, __TARGET__: string } 
+								= { __SOURCE__ : operand1TypeString, __TARGET__ : operand2TypeString };
+						// Check if the combination of operand types is forbidden for this instruction.
+						if (illegalCombosOfOperandTypes !== undefined && illegalCombosOfOperandTypes.includes(typeCombination)) {
+							continue;
+						}
 						// Locate the operand type of the first operand in the language definition.
-						const operandTypeDefinition: {name: string; code: string; regex: string;}
-							= this.languageDefinition.operand_types.find((current) => current.name === operandTypeString)!;
-						// Create a regex for the current operand type.
+						const operand1TypeDefinition: {name: string; code: string; regex: string;}
+							= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
+						// Locate the operand type of the second operand in the language definition.
+						const operand2TypeDefinition: {name: string; code: string; regex: string;}
+							= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
+						// Create a regex for the current combination of operand types.
 						const regexInstruction = new RegExp(
-							regexInstructionString.replace(operand.name, operandTypeDefinition.regex), 
+							regexInstructionString
+								.replace(operand1.name, operand1TypeDefinition.regex)
+								.replace(operand2.name, operand2TypeDefinition.regex), 
 							"gim"
 						);
 						// Check if the current line of code matches the created regex.
 						const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 						if (regexMatchArrayInstruction !== null) {
-							// Instruction found. Encode it.
+							// Instruction found. Encode it.							
 							const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
 							// Store the instruction along its encoded representation in the translations map.
 							this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
@@ -159,9 +145,26 @@ export class Assembler {
 							break;
 						}
 					}
-				} else {
-					// Instruction has no operands.
-					const regexInstruction = new RegExp(instruction.regex, "gim");
+					if (lineEncoded) {
+						break;
+					}
+				}
+			} else if (instruction.operands !== undefined && instruction.operands.length === 1) {
+				const operand: {name: string, allowed_types: string[]} = instruction.operands[0];
+				/**
+				 * This instruction expects only one operand. Iterate over all possible types of the operand.
+				 */
+				for (const operandTypeString of operand.allowed_types) {
+					const regexInstructionString: string = instruction.regex;
+					// Locate the operand type of the first operand in the language definition.
+					const operandTypeDefinition: {name: string; code: string; regex: string;}
+						= this.languageDefinition.operand_types.find((current) => current.name === operandTypeString)!;
+					// Create a regex for the current operand type.
+					const regexInstruction = new RegExp(
+						regexInstructionString.replace(operand.name, operandTypeDefinition.regex), 
+						"gim"
+					);
+					// Check if the current line of code matches the created regex.
 					const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
 					if (regexMatchArrayInstruction !== null) {
 						// Instruction found. Encode it.
@@ -170,19 +173,37 @@ export class Assembler {
 						this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
 						encodedInstructions.push(...encodedInstruction);
 						lineEncoded = true;
+						break;
 					}
 				}
+			} else {
+				// Instruction has no operands.
+				const regexInstruction = new RegExp(instruction.regex, "gim");
+				const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
+				if (regexMatchArrayInstruction !== null) {
+					// Instruction found. Encode it.
+					const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
+					// Store the instruction along its encoded representation in the translations map.
+					this.translations.set(regexMatchArrayInstruction[0].toString(), encodedInstruction);
+					encodedInstructions.push(...encodedInstruction);
+					lineEncoded = true;
+				}
 			}
-			if (!lineEncoded) {
-				throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${line}`);
-			}
+		}
+		if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
+			const encodedInstruction: DoubleWord[] = this.encodeString(lineNo, line, jumpLabels, constants);
+			encodedInstructions.push(...encodedInstruction);
+			lineEncoded = true;
+		}
+		if (!lineEncoded) {
+			throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${line}`);
 		}
 		return encodedInstructions;
 	}
 
 	/**
-	 * This methods locates jump labels in the assembly code and creates a map between a jump label and a (virtual) memory address.
-	 * This mpa is later used to replace the label in instructions with their (virtual) memory address.
+	 * This method locates jump labels in the assembly code and creates a map between a jump label and a (virtual) memory address.
+	 * This map is later used to replace the label in instructions with their (virtual) memory address.
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
 	 * @returns A map of jump labels and their associated (virtual) memory address.
 	 */
@@ -201,11 +222,161 @@ export class Assembler {
 					jumpLabel, 
 					VirtualAddress.fromInteger(programLocationCounter).toString()
 				);
+			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
+				//If a string constant is found, skip as many memory cells as needed to fit all characters plus null terminator 
+				//plus one instruction for the jump instruction.
+				const constValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
+				//Calculate the size the string will use in memory including null termination and round up to the next size that
+				//is divisible by four. This insures the string always fits into multiple double words.
+				const stringMemSize = Math.ceil((Buffer.byteLength(constValue) / 4)) * 4;
+				programLocationCounter += stringMemSize + 12;
 			} else {
 				programLocationCounter += 12;
 			}
 		}
 		return jumpLabels;
+	}
+
+	/**
+	 * This method finds constants and stores their value in a map with their constant name.
+	 * If the constant is a string then a (virtual) memory address is mapped to the constant name instead.
+	 * The created map is later used to replace constants by name with their actual value or (virtual) memory address.
+	 * The line that initializes an integer constant is deleted as it doesn't get translated.
+	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
+	 * @returns A map of integer constants and their value.
+	 */
+	private locateConstants(lines: Map<number, string>) : Map<string, string> {
+		const constants: Map<string, string> = new Map();
+		/**
+		 * Use this variable in order to count the instructions, that need to be encoded
+		 * later, because the keys in the map do not have to be consecutive, as blank lines 
+		 * have been removed from the original source text.
+		 */
+		let programLocationCounter = 0;
+		for (const [lineNo, line] of lines.entries()) {
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationInteger, "gim"))) {
+				const constantName = line.replace(/const[ ]|[ ]?=[ ]?[0-9]*/gim, "");
+				const constantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?/gim, "");
+				constants.set(
+					constantName, 
+					constantValue
+				);
+				lines.delete(lineNo);
+			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
+				const constantName = line.replace(/const[ ]|[ ]?=[ ]?".*/gim, "");
+				const constantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
+				//programLocationCounter +12 since the jump instruction will be located in front of the string memory array.
+				constants.set(
+					constantName, 
+					"0b" + VirtualAddress.fromInteger(programLocationCounter+12).toString()
+				);
+				//Calculate the size the string will use in memory including null termination and round up to the next size that
+				//is divisible by four. This insures the string always fits into multiple double words.
+				const stringMemSize = Math.ceil((Buffer.byteLength(constantValue) / 4)) * 4;
+				programLocationCounter += stringMemSize + 12;
+			} else {
+				programLocationCounter += 12;
+			}
+		}
+		return constants;
+	}
+
+	/**
+	 * This method locates and removes the constants in the program code and replaces them with their value or with their (virtual) memory start address.
+	 * @param lines The lines of code to search for constants.
+	 * @returns The lines of code without jump labels.
+	 */
+	private replaceConstants(lines: Map<number, string>, integerConstants: Map<string, string>): Map<number, string> {
+		for (const [lineNo, line] of lines.entries()) {	
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.usage, "gim"))) {
+				//Test if constant name is included in line and replace it with its value
+				integerConstants.forEach((constantValue, constantName) => {
+					const regex = new RegExp("[$%@]" + constantName , "m");
+					if (line.match(regex) !== null) {
+						const replacedLine = line.replace(constantName,constantValue);
+						lines.set(lineNo, replacedLine);
+					}
+				});
+			}
+		}
+		return lines;
+	}
+
+	/**
+	 * This method encodes a null terminated string by writing it to memory and adding a jump instruction to the first memory address after the string.
+	 * @param lineNo The original computer programs line number of code which is currently encoded.
+	 * @param line The original computer programs line of code which is currently encoded.
+	 * @param jumpLabels The jump labels found in the assembly code.
+	 * @param constants A map of the names of constants and their corresponding value in case of integer or (virtual) memory start address in case of strings.
+	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
+	 */
+	private encodeString(lineNo: number, line: string, jumpLabels: Map<string, string>, constants: Map<string, string>) : DoubleWord[] {
+		const encodedInstructions: DoubleWord[] = [];
+		const stringConstantName = line.replace(/const[ ]|[ ]?=[ ]?".*/gim, "");
+		const stringConstantValue = line.replace(/const[ ][a-zA-Z][a-zA-Z\\-_0-9]*[ ]?=[ ]?|"/gim, "") + "\0";
+		let stringEncoded = false;
+		if (constants.has(stringConstantName)) {
+			const stringStartAddress: string = constants.get(stringConstantName)!.replace(/^0b/gim, "");
+			const stringMemSize = Math.ceil((Buffer.byteLength(stringConstantValue) / 4)) * 4;
+			//The memory address after the string array with the next instruction
+			const jumpAddress:string = VirtualAddress.fromInteger(parseInt(stringStartAddress, 2) + stringMemSize).toString();
+			const jumpInstruction:string = "JMP @0b" + jumpAddress;
+			const encodedInstruction: DoubleWord[] = this.encodeLine(-1, jumpInstruction, jumpLabels, constants);
+			encodedInstructions.push(...encodedInstruction);
+			//Create a buffer from the string in utf8 encoding and calculate some important values.
+			const stringBuffer = Buffer.from(stringConstantValue, "utf8");
+			const stringByteLength = stringBuffer.length;
+			const continousBufferSegmentSize = stringByteLength - (stringByteLength % 4);
+			const restOfBufferSize = stringByteLength % 4;
+			//Slice the part of the buffer that is divisible by four (in byte) into 32 bit big segments
+			//and encode each segment into binary values.
+			if (continousBufferSegmentSize > 0) {
+				for (let i = 0; i <= stringByteLength - 4; i += 4) {
+					const bufferSegment = stringBuffer.toString("hex", 0 + i, 4 + i);
+					const binaryString = parseInt(bufferSegment, 16).toString(2).padStart(32, "0");
+					const bitArray: Array<Bit> = new Array<Bit>(
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0, 0
+					)
+					binaryString.split("").forEach((bit, index) => {
+						bitArray[index] = (bit === "0") ? 0 : 1;
+					})
+					const encodedStringPart = new DoubleWord(bitArray);
+					encodedInstructions.push(encodedStringPart);
+				}
+			}
+			//Get the last bytes from the buffer
+			if (restOfBufferSize > 0) {
+				const bufferSegment = stringBuffer.toString("hex", continousBufferSegmentSize, stringByteLength);
+				const binaryString = parseInt(bufferSegment, 16).toString(2).padStart((8 * restOfBufferSize), "0");
+				const bitArray: Array<Bit> = new Array<Bit>(
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0
+				)
+				binaryString.split("").forEach((bit, index) => {
+					bitArray[index] = (bit === "0") ? 0 : 1;
+				})
+				const encodedStringPart = new DoubleWord(bitArray);
+				encodedInstructions.push(encodedStringPart);
+			}
+			stringEncoded = true;
+		}
+		if (!stringEncoded) {
+			throw new Error(`Error encoding string constant in line: ${lineNo + 1}: ${line}`);
+		}
+		return encodedInstructions;
 	}
 
 	/**
@@ -298,7 +469,7 @@ export class Assembler {
 	 * This method requires an operand that is coded into its binary form.
 	 * It extracts the addressing mode and converts the given decimal, hexadecimal or binary value into an 32-bit value.
 	 * The method returns a tupel of binary lists. The first one contains the operand as part of the instruction. According to
-	 * the opcodes definition, this part of the instruction serves as an indicator for the datatype of the oerand.
+	 * the opcodes definition, this part of the instruction serves as an indicator for the datatype of the operand.
 	 * The second one represents the actual value encoded as a 32-bit value.
 	 * @param operand The operand to encode binary.
 	 * @param line The original computer programs line of code which is currently encoded.
