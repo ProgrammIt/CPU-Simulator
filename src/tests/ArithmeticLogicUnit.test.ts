@@ -1,9 +1,10 @@
 import { Byte } from "../types/binary/Byte";
 import { DoubleWord } from "../types/binary/DoubleWord";
-import { ArithmeticLogicUnit } from "../main/simulator/execution_units/ArithmeticLogicUnit";
-import { RAM } from "../main/simulator/functional_units/RAM";
-import { CPUCore } from "../main/simulator/execution_units/CPUCore";
+import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
+import { RAM } from "../simulator/functional_units/RAM";
+import { CPUCore } from "../simulator/execution_units/CPUCore";
 import { DataSizes } from "../types/enumerations/DataSizes";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Test ALU", () => {
     const mainMemory = new RAM(DoubleWord.SIZE);

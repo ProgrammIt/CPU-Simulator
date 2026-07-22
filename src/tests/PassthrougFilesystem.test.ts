@@ -1,8 +1,9 @@
-import { PassthroughFilesystem } from "../main/simulator/os/PassthroughFilesystem";
+import { PassthroughFilesystem } from "../simulator/os/PassthroughFilesystem";
 import { mkdtempSync, existsSync, writeFileSync, readFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FilesystemError } from "../types/errors/FilesystemError";
+import { describe, expect, test } from '@jest/globals';
 
 describe('PassthroughFilesystem', () => {
     let tmp: string;

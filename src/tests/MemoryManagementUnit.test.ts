@@ -1,9 +1,10 @@
-import { CPUCore } from "../main/simulator/execution_units/CPUCore";
-import { MemoryManagementUnit } from "../main/simulator/execution_units/MemoryManagementUnit";
-import { RAM } from "../main/simulator/functional_units/RAM";
+import { CPUCore } from "../simulator/execution_units/CPUCore";
+import { MemoryManagementUnit } from "../simulator/execution_units/MemoryManagementUnit";
+import { RAM } from "../simulator/functional_units/RAM";
 import { Byte } from "../types/binary/Byte";
 import { DoubleWord } from "../types/binary/DoubleWord";
 import { DataSizes } from "../types/enumerations/DataSizes";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Read from and write to main memory using MMU as proxy", () => {
     const mainMemory = new RAM(DoubleWord.SIZE);

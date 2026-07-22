@@ -1,5 +1,5 @@
 import { InstructionTypes } from "../enumerations/InstructionTypes";
-import { Instructions } from "../enumerations/IntructionSet";
+import { Instructions } from "../enumerations/Instructions";
 import { InstructionOperand } from "./InstructionOperand";
 
 /**

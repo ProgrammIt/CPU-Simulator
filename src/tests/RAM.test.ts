@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import { RAM } from '../main/simulator/functional_units/RAM';
+import { RAM } from '../simulator/functional_units/RAM';
 import { Byte } from '../types/binary/Byte';
 import { DoubleWord } from '../types/binary/DoubleWord';
 

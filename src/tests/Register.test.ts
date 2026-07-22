@@ -1,5 +1,6 @@
-import { GeneralPurposeRegister } from "../main/simulator/functional_units/GeneralPurposeRegister";
+import { GeneralPurposeRegister } from "../simulator/functional_units/GeneralPurposeRegister";
 import { DoubleWord } from "../types/binary/DoubleWord";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Read and write from or to main memory", () => {
     const eax: GeneralPurposeRegister = new GeneralPurposeRegister("EAX");

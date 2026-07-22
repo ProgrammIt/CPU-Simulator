@@ -1,19 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "node16",
-    "rootDir": "./src",
+    "target": "ESNext",
+    "module": "NodeNext",
+    "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "dist",
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
-    "types": ["jest", "node"],
     "isolatedModules": true
-  },
-  "include": ["src/**/*"]
+  }
 }

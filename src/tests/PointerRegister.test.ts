@@ -1,5 +1,6 @@
 import { DoubleWord } from "../types/binary/DoubleWord";
-import { PointerRegister } from "../main/simulator/functional_units/PointerRegister";
+import { PointerRegister } from "../simulator/functional_units/PointerRegister";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Test register for addresses", () => {
     const ip: PointerRegister = new PointerRegister("EIP");

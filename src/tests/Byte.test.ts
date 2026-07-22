@@ -1,4 +1,5 @@
 import { Byte } from "../types/binary/Byte";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Test instantiation of a byte", () => {
 

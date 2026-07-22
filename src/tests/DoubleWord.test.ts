@@ -1,8 +1,9 @@
-import { ArithmeticLogicUnit } from "../main/simulator/execution_units/ArithmeticLogicUnit";
+import { ArithmeticLogicUnit } from "../simulator/execution_units/ArithmeticLogicUnit";
 import { DoubleWord } from "../types/binary/DoubleWord";
-import { CPUCore } from "../main/simulator/execution_units/CPUCore";
-import { RAM } from "../main/simulator/functional_units/RAM";
+import { CPUCore } from "../simulator/execution_units/CPUCore";
+import { RAM } from "../simulator/functional_units/RAM";
 import { DataSizes } from "../types/enumerations/DataSizes";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Create doubleword from decimal integer values", () => {
     test("Create doubleword from decimal -6", () => {

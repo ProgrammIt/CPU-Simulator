@@ -1,4 +1,5 @@
-import { FLAGS } from "../main/simulator/functional_units/FLAGS";
+import { FLAGS } from "../simulator/functional_units/FLAGS";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Set and clear flag bits in the EFLAGS register", () => {
     const eflags: FLAGS = new FLAGS();

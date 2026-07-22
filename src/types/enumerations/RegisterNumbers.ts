@@ -15,3 +15,18 @@ export const enum RegisterNumbers {
 	NPTP = 0b1010,
 	VMPTR = 0b1011
 }
+
+export const enum RegisterNames {
+	EAX = "EAX",
+	EBX = "EBX",
+	ECX = "ECX",
+	EDX = "EDX",
+	EIP = "EIP",
+	EIR = "EIR",
+	ESP = "ESP",
+	ITP = "ITP",
+	PTP = "PTP",
+	FLAGS = "FLAGS",
+	NPTP = "NPTP",
+	VMPTR = "VMPTR"
+}

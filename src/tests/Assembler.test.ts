@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
-import { Assembler } from '../main/simulator/Assembler';
+import { Assembler } from '../simulator/Assembler';
 import { DoubleWord } from '../types/binary/DoubleWord';
+import { describe, expect, test } from '@jest/globals';
 
 describe('Encode instructions', () => {
     const assembler = new Assembler("./settings/language_definition.json", "./os_filesystem");

@@ -1,8 +1,9 @@
-import { TranslationLookasideBuffer } from "../main/simulator/functional_units/TranslationLookasideBuffer";
+import { TranslationLookasideBuffer } from "../simulator/functional_units/TranslationLookasideBuffer";
 import { PageTableEntry } from "../types/binary/PageTableEntry";
 import { PageNumber } from "../types/binary/PageNumber";
 import { PageTableEntryFlags } from "../types/binary/PageTableEntryFlags";
 import { FrameNumber } from "../types/binary/FrameNumber";
+import { describe, expect, test } from '@jest/globals';
 
 describe("Test TLB", () => {
     const translationLookasideBuffer: TranslationLookasideBuffer = new TranslationLookasideBuffer(2);
