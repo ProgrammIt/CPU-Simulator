@@ -32,10 +32,11 @@
                         <section class="registers">
                             <h1 class="header sticky-top">Registers</h1>
                             <div class="grid">
-                                <RegisterWidget v-for="reg in registers" :key="reg.id" :register-id="reg.id"
-                                    :name="reg.name" :subtitle="reg.subtitle" :content="reg.content"
+                                <RegisterWidget v-for="reg in registers" :key="reg.name" :register-id="reg.id"
+                                    :name="reg.name as RegisterNames" :subtitle="reg.subtitle" :content="reg.content"
                                     :hidden="reg.hidden" :show-select="reg.showSelect" :loading="registersLoading"
-                                    :representation="reg.representation" />
+                                    :radix="reg.representation" 
+                                    @representation-change="handleRegisterRepresentationChange" />
                             </div>
                         </section>
 
@@ -91,6 +92,7 @@ import RAMView from './components/RAMView.vue';
 import LogPanel from './components/LogPanel.vue';
 import CodeEditor from './components/CodeEditor.vue';
 import { NumberSystems } from './../src/types/enumerations/NumberSystems';
+import { RegisterNames } from './types/enumerations/RegisterNumbers';
 
 // --- Tab State ---
 const activeTab = ref<'simulator' | 'editor'>('simulator');
@@ -137,19 +139,18 @@ const physicalRAMRef = ref<InstanceType<typeof RAMView> | null>(null);
 const logPanelRef = ref<InstanceType<typeof LogPanel> | null>(null);
 
 const registers = reactive<RegisterDef[]>([
-    { id: Register.EAX, name: 'EAX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.EBX, name: 'EBX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.ECX, name: 'ECX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.EDX, name: 'EDX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.FLAGS, name: 'FLAGS', subtitle: 'State Register', content: '11000000', hidden: false, showSelect: false, representation: NumberSystems.BIN },
-    { id: Register.EIP, name: 'EIP', subtitle: 'Instruction Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.EIR, name: 'EIR', subtitle: 'Instruction Register', content: '00000000 00000000 00000000 00000000', hidden: true, showSelect: false, representation: NumberSystems.BIN },
-    { id: Register.ESP, name: 'ESP', subtitle: 'STACK Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.PTP, name: 'PTP', subtitle: 'Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.GPTP, name: 'GPTP', subtitle: 'Guest Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: true, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.ITP, name: 'ITP', subtitle: 'Interrupt Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.NPTP, name: 'NPTP', subtitle: 'Nested Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: Register.VMPTR, name: 'VMPTR', subtitle: 'Virtual Machine Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.EAX, name: 'EAX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.EBX, name: 'EBX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.ECX, name: 'ECX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.EDX, name: 'EDX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.FLAGS, name: 'FLAGS', subtitle: 'State Register', content: '11000000', hidden: false, showSelect: false, representation: NumberSystems.BIN },
+    { id: RegisterNames.EIP, name: 'EIP', subtitle: 'Instruction Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.EIR, name: 'EIR', subtitle: 'Instruction Register', content: '00000000 00000000 00000000 00000000', hidden: true, showSelect: false, representation: NumberSystems.BIN },
+    { id: RegisterNames.ESP, name: 'ESP', subtitle: 'STACK Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.PTP, name: 'PTP', subtitle: 'Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.ITP, name: 'ITP', subtitle: 'Interrupt Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.NPTP, name: 'NPTP', subtitle: 'Nested Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
+    { id: RegisterNames.VMPTR, name: 'VMPTR', subtitle: 'Virtual Machine Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
 ]);
 
 /**
@@ -168,6 +169,24 @@ function handleGlobalKeydown(event: KeyboardEvent) {
         event.preventDefault();
         triggerNextCycle();
     }
+}
+
+/**
+ * Handles the change of the value representation in a register.
+ * @param registerName The name of the register.
+ * @param newRadix The new representation's radix.
+ */
+function handleRegisterRepresentationChange(registerName: RegisterNames, newRadix: NumberSystems) {
+    console.log(`Register ${registerName} representation changed to:`, newRadix);
+    window.simulator.readRegister(registerName, newRadix).then((value) => {
+        const register = registers.find((reg) => reg.name === registerName);
+        if (register) {
+            register.representation = newRadix;
+            register.content = value;
+        }
+    }).catch((error) => {
+        console.error(`Failed to read register ${registerName}:`, error);
+    });
 }
 
 onMounted(() => {
