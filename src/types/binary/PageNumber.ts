@@ -1,6 +1,7 @@
 import { DoubleWord } from "./DoubleWord";
+import { VirtualAddress } from "./VirtualAddress";
 
-export type PageNumber = number & { __brand: "PageNumber" };
+export type PageNumber = number & { __brand: "PageNumber" & "FrameNumber" };
 
 export namespace PageNumber {
 
@@ -22,7 +23,7 @@ export namespace PageNumber {
      * @param virtualAddress 
      * @returns
      */
-    export function fromVirtualAddress(virtualAddress: DoubleWord): PageNumber {
+    export function fromVirtualAddress(virtualAddress: VirtualAddress): PageNumber {
         return ((virtualAddress >> (DoubleWord.NUMBER_OF_BITS - NUMBER_OF_BITS)) & MAX_POSITIVE_NUMBER) as PageNumber;
     }
 }

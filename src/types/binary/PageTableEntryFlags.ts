@@ -1,4 +1,6 @@
 import { Bit } from "./Bit";
+import { FrameNumber } from "./FrameNumber";
+import { PageTableEntry } from "./PageTableEntry";
 
 export type PageTableEntryFlags = number & { __brand: "PageTableEntryFlags" };
 
@@ -13,7 +15,7 @@ export namespace PageTableEntryFlags {
 		| 8 | 9 | 10 | 11;
 
 
-    export enum FlagBits {
+    export const enum FlagBits {
         
         PRESENT = 0,
         WRITABLE = 1,
@@ -30,7 +32,16 @@ export namespace PageTableEntryFlags {
      * @returns
      */
     export function fromNumber(number: number): PageTableEntryFlags {
-        return (number & 0xfff) as PageTableEntryFlags;
+        return (number & MAX_POSITIVE_NUMBER) as PageTableEntryFlags;
+    }
+
+	/**
+     * This method creates the PageTableEntryFlags from a PageTableEntry.
+	 * @param pageTableEntry 
+     * @returns
+     */
+    export function fromPageTableEntry(pageTableEntry: PageTableEntry): PageTableEntryFlags {
+        return ((pageTableEntry >>> FrameNumber.NUMBER_OF_BITS) & MAX_POSITIVE_NUMBER) as PageTableEntryFlags;
     }
 
     /**

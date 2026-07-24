@@ -6,7 +6,7 @@ import { FrameNumber } from "../types/binary/FrameNumber";
 import { describe, expect, test } from '@jest/globals';
 
 describe("Test TLB", () => {
-    const translationLookasideBuffer: TranslationLookasideBuffer = new TranslationLookasideBuffer(2);
+    const translationLookasideBuffer: TranslationLookasideBuffer = new TranslationLookasideBuffer();
 
     const pageNbr1: PageNumber = PageNumber.fromNumber(10);
     const frameNbr1: FrameNumber = FrameNumber.fromNumber(1);
@@ -26,47 +26,37 @@ describe("Test TLB", () => {
     test("Insert first entry", () => {
         translationLookasideBuffer.insert([pageNbr1, pageTableEntry1]);
 
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 1]],
-        ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
     });
 
     test("Get entry", () => {
         translationLookasideBuffer.get(pageNbr1);
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 2]],
-        ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
     });
 
     test("Insert second entry", () => {
         translationLookasideBuffer.insert([pageNbr2, pageTableEntry2]);
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 2]],
-            [pageNbr2, [pageTableEntry2, 1]]
-        ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
+        expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
     });
 
     test("Get entry", () => {
         translationLookasideBuffer.get(pageNbr1);
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 3]],
-            [pageNbr2, [pageTableEntry2, 1]]
-        ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
+        expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
     });
 
     test("Insert third entry", () => {
         translationLookasideBuffer.insert([pageNbr3, pageTableEntry3]);
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 3]],
-            [pageNbr3, [pageTableEntry3, 1]]
-            ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
+        expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
+        expect(translationLookasideBuffer.get(pageNbr3)).toEqual(pageTableEntry3);
     });
 
     test("Get entry", () => {
         translationLookasideBuffer.get(pageNbr1);
-        expect(translationLookasideBuffer.toString()).toEqual([
-            [pageNbr1, [pageTableEntry1, 4]],
-            [pageNbr3, [pageTableEntry3, 1]]
-        ].toString());
+        expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
+        expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
+        expect(translationLookasideBuffer.get(pageNbr3)).toEqual(pageTableEntry3);
     });
 });

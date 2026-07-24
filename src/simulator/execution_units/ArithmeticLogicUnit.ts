@@ -2,6 +2,7 @@ import { DoubleWord } from "../../types/binary/DoubleWord";
 import { CPUCore } from "./CPUCore";
 import { InterruptNumbers } from "../../types/enumerations/InterruptNumbers";
 import { ExceptionError } from "../../types/errors/ExceptionError";
+import { Byte } from "../../../types/binary/Byte";
 
 /**
  * @author Erik Burmester <erik.burmester@nextbeam.net>
@@ -40,13 +41,18 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value.
      */
     private checkForParity(operand: DoubleWord): void {
-        let noSetBits = 0;
-        DoubleWord.getFourthByte(operand).toString(2).split("").forEach(bit => {
-            if (bit === "1") {
-                ++noSetBits
-            }
-        });
-        if (noSetBits % 2 === 0) {
+        let value = DoubleWord.getFourthByte(operand);
+
+        let parity = 0;
+
+        // count bits using bitwise ops
+        for (let i = 0; i < 8; i++) {
+            const result = Byte.logicalRightShift(value);
+            value = result[0];
+            parity ^= result[1];
+        }
+        
+        if (parity === 0) {
             this._cpu.flags.setParity();
         } else {
             this._cpu.flags.clearParity();

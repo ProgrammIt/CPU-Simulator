@@ -61,7 +61,22 @@
     ;   (ebx)     Pointer to a ASCII filename
     ; Return value (immediate value):
     ;   eax     success status (0 = success, -1 = file did not exist)
-    .CONST CONST_SYSCALL_FILE_DELETE 7    
+    .CONST CONST_SYSCALL_FILE_DELETE 7
+
+    ; SYSCALLS_CONSOLE_PRINT_NUMBER
+    ; Parameters (ebx is used as immediate value):
+    ;   ebx     Number
+    ; Return value:
+    ;   none
+    .CONST CONST_SYSCALL_CONSOLE_PRINT_NUMBER 8
+
+    ; SYSCALLS_CONSOLE_READ_NUMBER
+    ; Parameters
+    ;   none
+    ; Return value:
+    ;   eax     Number
+    ;   ebx success status (0 = success, -1 = no input ready, -2 = could not parse number, -3 = number does not fit into 32 bit DoubleWord)
+    .CONST CONST_SYSCALL_CONSOLE_READ_NUMBER 9
 
     ; SYSCALLS_PROCESS_CREATE
     ; Parameters (ebx is a pointer to the start of an ASCII filename):

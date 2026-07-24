@@ -14,6 +14,7 @@ export interface AssemblyLanguageDefinition {
         declarationHexadecimal: string;
         declarationBinary: string;
         declarationString: string;
+        declarationBuffer: string;
         usage: string;
     };
 

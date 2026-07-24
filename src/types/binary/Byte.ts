@@ -127,7 +127,7 @@ export namespace Byte {
 		const msb: Bit = Byte.getMostSignificantBit(operand);
         // Arithmetic right shift by 1
         operand = operand >>> 1 as Byte;
-        Byte.setBit(operand, 0, msb);
+        operand = Byte.setBit(operand, 0, msb);
 		return [operand, removedBit];
     }
 

@@ -1,6 +1,12 @@
 
 .CONST _INIT_START_CONST_PROCES_NAME_FILE_PATH "os/util/new_process_name.bin"
 
+; set periodic timer for _UTIL_SCHEDULER_PROCESS_RUNNING
+MOV $CONST_OS_PERIODIC_TIMER_FREQUENCY, %eax
+DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, %eax
+
+
+
 ._INIT_START:
 
 MOV $_INIT_START_CONST_PROCES_NAME_FILE_PATH, %ebx
@@ -156,10 +162,10 @@ PUSH %eax ; file descriptor
     POP %ebx ; file length
 
 ._INIT_SET_TIMER:
-    MOV $10, %ebx
+    MOV $13, %ebx
     MOV $CONST_SYSCALL_TIMER_START, %eax
     INT $0x80
     JMP _INIT_START
 
 
-.INCLUDE "os/include/syscalls"
+.INCLUDE "os/src/constants"

@@ -23,9 +23,13 @@ import { DebugLogger } from "../Logger";
 import { ExceptionError } from "../../types/errors/ExceptionError";
 import { RegisterNumbers } from "../../types/enumerations/RegisterNumbers";
 import { applicationWindow } from "./../../main";
+import { PeriodicTimer } from "./PeriodicTimer";
+import { FrameNumber } from "../../types/binary/FrameNumber";
+import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
+import { InstructionSet } from "../../types/enumerations/InstructionSet";
 
 /**
- * This class represents a CPU core which is capable of executing instructions.
+ * This class represents a CPU core which is capable of executing InstructionSet.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 export class CPUCore {
@@ -171,6 +175,7 @@ export class CPUCore {
     public fs: PassthroughFilesystem;
 
     public readonly timer: Timer;
+    public readonly periodicTimer: PeriodicTimer;
 
     public mainMemory: RAM;
 
@@ -202,6 +207,7 @@ export class CPUCore {
         this.mmu = new MemoryManagementUnit(this);
         this.fs = new PassthroughFilesystem(pathToOSFilesystem);
         this.timer = new Timer(this);
+        this.periodicTimer = new PeriodicTimer(this);
         this._decodedInstruction = null;
         this._processingWidth = processingWidth;
     }
@@ -244,6 +250,7 @@ export class CPUCore {
         {
             this.internalCycle();
             this.timer.countDown();
+            this.periodicTimer.countDown();
         }
 
         while (this.flags.isInKernelMode())
@@ -330,13 +337,7 @@ export class CPUCore {
      * The command pointer always points to the instruction to be executed.
      */
     private fetch(): void {
-
-        // Read address of next instruction from EIP register.
-        const instructionAddress: DoubleWord = this.eip.content;
-        // Read next instruction from mainMemory.
-        const instruction: DoubleWord = this.mmu.readDoublewordFrom(instructionAddress, true);
-        // Load instruction into EIR register.
-        this.eir.content = instruction;
+        this.eir.content = this.mmu.readDoublewordFrom(this.eip.content, true);
     }
 
     /**
@@ -352,32 +353,31 @@ export class CPUCore {
         const binaryEncodedTypeFirstOperand: number =  DoubleWord.getBitRange(instruction, 16, 23);
         const binaryEncodedAddressingModeSecondOperand: number =  DoubleWord.getBitRange(instruction, 23, 25);
         const binaryEncodedTypeSecondOperand: number =  DoubleWord.getBitRange(instruction, 25);
-        // Decode instruction.
+
         // Decode instruction type.
-        const decodedInstructionType: InstructionTypes = this.decodeInstructionType(binaryEncodedInstructionType);
-        // Decode operation.
-        const decodedOperation: Instructions = 
-            (decodedInstructionType === InstructionTypes.I) ? 
-                this.decodeIInstruction(binaryEncodedOperation) : 
-                    (decodedInstructionType === InstructionTypes.R) ? 
-                        this.decodeRIntruction(binaryEncodedOperation) : 
-                        this.decodeJIntruction(binaryEncodedOperation);
-        // Decode addressing mode of first operand.
-        const decodedAddressingModeFirstOperand: AddressingModes = 
-            this.decodeAddressingMode(binaryEncodedAddressingModeFirstOperand);
-        // Decode addressing mode of second operand.
-        const decodedAddressingModeSecondOperand: AddressingModes = 
-            this.decodeAddressingMode(binaryEncodedAddressingModeSecondOperand);
+        if (!(binaryEncodedInstructionType in InstructionTypes)) {
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        }
+        const decodedInstructionType: InstructionTypes = binaryEncodedInstructionType as InstructionTypes;
+
+        // Decode instruction.
+        if (!(binaryEncodedOperation in InstructionSet)) {
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        }
+        const decodedOperation: InstructionSet = binaryEncodedOperation as InstructionSet;
+
         // Decode type of first operand.
-        const decodedTypeFirstOperand: OperandTypeCodes = 
-            this.decodeOperandType(binaryEncodedTypeFirstOperand);
+        if (!(binaryEncodedTypeFirstOperand in OperandTypeCodes)) {
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        }
+        const decodedTypeFirstOperand: OperandTypeCodes = binaryEncodedTypeFirstOperand as OperandTypeCodes;
+
         // Decode type of second operand.
-        const decodedTypeSecondOperand: OperandTypeCodes = 
-            this.decodeOperandType(binaryEncodedTypeSecondOperand);
-        // Create a new instance of a DecodedInstruction to save the decoded instruction to.
-        this._decodedInstruction = new Instruction(decodedInstructionType, decodedOperation);
-        // Retrieve current instruction pointer and convert its binary value to a decimal value.
-        const addressOfCurrentInstructionDec: number = this.eip.content
+        if (!(binaryEncodedTypeSecondOperand in OperandTypeCodes)) {
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        }
+        const decodedTypeSecondOperand: OperandTypeCodes = binaryEncodedTypeSecondOperand as OperandTypeCodes;
+
         // Define variables for decoded operands.
         let decodedSecondOperand: InstructionOperand | undefined = undefined;
         let decodedFirstOperand: InstructionOperand | undefined = undefined;
@@ -388,8 +388,16 @@ export class CPUCore {
              * It is located at addresses with an offset of 8 from the first 
              * address of the instruction.
              */
-            const encodedValueSecondOperand: DoubleWord = 
-                this.mmu.readDoublewordFrom(DoubleWord.fromNumber(addressOfCurrentInstructionDec + 8), true);
+            const encodedValueSecondOperand: DoubleWord = this.mmu.readDoublewordFrom(DoubleWord.fromNumber(this.eip.content + 8), true);
+
+
+            // Decode addressing mode of second operand.
+
+            if (!(binaryEncodedAddressingModeSecondOperand in AddressingModes)) {
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+            }
+
+            const decodedAddressingModeSecondOperand: AddressingModes = binaryEncodedAddressingModeSecondOperand as AddressingModes;
 
             /**
              * Create instance of an InstructionOperand for the second operand.
@@ -399,8 +407,6 @@ export class CPUCore {
                 decodedTypeSecondOperand,
                 encodedValueSecondOperand
             );
-        } else {
-            decodedSecondOperand = undefined;
         }
         
         if (decodedTypeFirstOperand !== OperandTypeCodes.NO) {
@@ -409,8 +415,17 @@ export class CPUCore {
              * It is located at addresses with an offset of 4 from the first 
              * address of the instruction.
              */
-            const encodedValueFirstOperand: DoubleWord = 
-                this.mmu.readDoublewordFrom(DoubleWord.fromNumber(addressOfCurrentInstructionDec + 4), true);
+            const encodedValueFirstOperand: DoubleWord = this.mmu.readDoublewordFrom(DoubleWord.fromNumber(this.eip.content + 4), true);
+
+
+            // Decode addressing mode of first operand.
+
+            if (!(binaryEncodedAddressingModeFirstOperand in AddressingModes)) {
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+            }
+
+            const decodedAddressingModeFirstOperand: AddressingModes = binaryEncodedAddressingModeFirstOperand as AddressingModes;
+
 
             /**
              * Create instance of an InstructionOperand for the first operand.
@@ -420,18 +435,10 @@ export class CPUCore {
                 decodedTypeFirstOperand,
                 encodedValueFirstOperand
             );
-        } else {
-            decodedFirstOperand = undefined;
         }
 
         // Set decoded operand values on decoded instruction.
-        if (decodedFirstOperand !== undefined && decodedSecondOperand !== undefined) {
-            this._decodedInstruction = new Instruction(decodedInstructionType, decodedOperation, [decodedFirstOperand, decodedSecondOperand]);
-        } else if (decodedFirstOperand !== undefined && decodedSecondOperand === undefined) {
-            this._decodedInstruction = new Instruction(decodedInstructionType, decodedOperation, [decodedFirstOperand, undefined]);
-        } else {
-            this._decodedInstruction = new Instruction(decodedInstructionType, decodedOperation);
-        }
+        this._decodedInstruction = new Instruction(decodedInstructionType, decodedOperation, [decodedFirstOperand, decodedSecondOperand]);
     }
 
     /**
@@ -439,27 +446,26 @@ export class CPUCore {
      */
     private execute(): void {
         if (this._decodedInstruction === null) {
-            throw new Error("No instruction is currently ready to be executed.");
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
-        const operation: Instructions = this._decodedInstruction.instruction;
-        const currentOperation:string = Instructions[operation];
-
+        const operation: InstructionSet = this._decodedInstruction.instruction;
 
         let logText = "";
 
         if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode())
         {
+            const currentOperation:string = InstructionSet[operation];
             logText = this.getLogText(currentOperation)
         }
 
         if (DebugLogger.isLoggingEnabled()) {
 
-            if (Instructions.CALL === operation || Instructions.INT === operation)
+            if (InstructionSet.CALL === operation || InstructionSet.INT === operation)
             {
                 DebugLogger.log("");
             }
 
-            if (Instructions.RET === operation || Instructions.IRET === operation)
+            if (InstructionSet.RET === operation || InstructionSet.IRET === operation)
             {
                 DebugLogger.removeIndentation()
             }
@@ -477,226 +483,223 @@ export class CPUCore {
 
         let jumpPerformed = false;
         switch (operation) {
-            case Instructions.NOT:
+            case InstructionSet.NOT:
                 this.not(
                     this._decodedInstruction.operands[0]!
                 );
                 break;
-            case Instructions.AND:
+            case InstructionSet.AND:
                 this.and(
                     this._decodedInstruction.operands[0]!, 
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.OR:
+            case InstructionSet.OR:
                 this.or(
                     this._decodedInstruction.operands[0]!, 
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.XOR:
+            case InstructionSet.XOR:
                 this.xor(
                     this._decodedInstruction.operands[0]!, 
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.NEG:
+            case InstructionSet.NEG:
                 this.neg(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.ADD:
+            case InstructionSet.ADD:
                 this.add(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.ADC:
+            case InstructionSet.ADC:
                 this.adc(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.SUB:
+            case InstructionSet.SUB:
                 this.sub(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.SBB:
+            case InstructionSet.SBB:
                 this.sbb(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.MUL:
+            case InstructionSet.MUL:
                 this.mul(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.DIV:
+            case InstructionSet.DIV:
                 this.div(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.TEST:
+            case InstructionSet.TEST:
                 this.test(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 )
                 break;
-            case Instructions.CMP:
+            case InstructionSet.CMP:
                 this.cmp(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.STI:
+            case InstructionSet.STI:
                 this.sti();
                 break;
-            case Instructions.CLI:
+            case InstructionSet.CLI:
                 this.cli();
                 break;
-            case Instructions.CLC:
+            case InstructionSet.CLC:
                 this.clc();
                 break;
-            case Instructions.CMC:
+            case InstructionSet.CMC:
                 this.cmc();
                 break;
-            case Instructions.STC:
+            case InstructionSet.STC:
                 this.stc();
                 break;
-            case Instructions.POPF:
+            case InstructionSet.POPF:
                 this.popf();
                 break;
-            case Instructions.PUSHF:
+            case InstructionSet.PUSHF:
                 this.pushf();
                 break;
-            case Instructions.POP:
+            case InstructionSet.POP:
                 this.pop(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.PUSH:
+            case InstructionSet.PUSH:
                 this.push(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JMP:
+            case InstructionSet.JMP:
                 this.jmp(this._decodedInstruction.operands[0]!);
                 jumpPerformed = true;
                 break;
-            case Instructions.JE:
+            case InstructionSet.JE:
                 jumpPerformed = this.je(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JA:
+            case InstructionSet.JA:
                 jumpPerformed = this.ja(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JAE:
+            case InstructionSet.JAE:
                 jumpPerformed = this.jae(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JB:
+            case InstructionSet.JB:
                 jumpPerformed = this.jb(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JBE:
+            case InstructionSet.JBE:
                 jumpPerformed = this.jle(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JG:
+            case InstructionSet.JG:
                 jumpPerformed = this.jg(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JL:
+            case InstructionSet.JL:
                 jumpPerformed = this.jl(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JGE:
+            case InstructionSet.JGE:
                 jumpPerformed = this.jge(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JLE:
+            case InstructionSet.JLE:
                 jumpPerformed = this.jle(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JNE:
+            case InstructionSet.JNE:
                 jumpPerformed = this.jne(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JNZ:
+            case InstructionSet.JNZ:
                 jumpPerformed = this.jnz(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.JZ:
+            case InstructionSet.JZ:
                 jumpPerformed = this.jz(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.LEA:
+            case InstructionSet.LEA:
                 this.lea(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.NOP:
+            case InstructionSet.NOP:
                 this.nop();
                 break;
-            case Instructions.CALL:
+            case InstructionSet.CALL:
                 jumpPerformed = this.call(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.RET:
+            case InstructionSet.RET:
                 jumpPerformed = this.ret();
                 break;
-            case Instructions.MOV:
+            case InstructionSet.MOV:
                 this.mov(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.INT:
+            case InstructionSet.INT:
                 jumpPerformed = this.int(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.IRET:
+            case InstructionSet.IRET:
                 this.iret();
                 jumpPerformed = true;
                 break;
-            case Instructions.SYSENTER:
+            case InstructionSet.SYSENTER:
                 this.sysenter(this._decodedInstruction.operands[0]!);
                 break;
-            case Instructions.SYSEXIT:
+            case InstructionSet.SYSEXIT:
                 this.sysexit();
                 break;
-            case Instructions.DEV:
+            case InstructionSet.DEV:
                 this.dev(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.SHL: // SHL = SAL
+            case InstructionSet.SHL: // SHL = SAL
                 this.shl(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.SHR:
+            case InstructionSet.SHR:
                 this.shr(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.SAR:
+            case InstructionSet.SAR:
                 this.sar(
                     this._decodedInstruction.operands[0]!,
                     this._decodedInstruction.operands[1]!
                 );
                 break;
-            case Instructions.INVTLB:
+            case InstructionSet.INVTLB:
                 this.invtlb();
                 break;
             default:
                 // Call interrupt handler for Invalid Opcode.
                 throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-                break;
         }
         if (!jumpPerformed) {
             /**
              * Increment EIP by 3 x 4 bytes/addresses (<-> 12 Bytes) after execution 
              * of the current instruction.
              */
-            const flags: Byte = this.flags.content;
             this.eip.content = DoubleWord.fromNumber(this.eip.content + 12);
-            this.flags.content = flags;
         }
 
         if (DebugLogger.isLoggingEnabled()) {
 
-            if (Instructions.CALL === operation || Instructions.INT === operation)
+            if (InstructionSet.CALL === operation || InstructionSet.INT === operation)
             {
                 DebugLogger.addIndentation()
             }
@@ -715,7 +718,7 @@ export class CPUCore {
                 DebugLogger.log("Stack value: Not Mapped");
             }
             
-            if (Instructions.RET === operation || Instructions.IRET === operation)
+            if (InstructionSet.RET === operation || InstructionSet.IRET === operation)
             {
                 DebugLogger.log("");
                 DebugLogger.removeIndentation()
@@ -873,20 +876,39 @@ export class CPUCore {
             case DevOperations.IO_READ_BUFFER: {// 00000010 - io_read_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_read=eax
                 const bufferAddress = this.internal_pop();
                 const bufferSize = this.internal_pop();
-                const buffer = new Uint8Array(bufferSize);
+                const buffer = new DataView(new ArrayBuffer(bufferSize));
                 const bytesRead = this.fs.io_read_buffer(op2, buffer, bufferSize);
                 this.eax.content = DoubleWord.fromNumber(bytesRead);
 
+                const doubleWordbytesRead = bytesRead - (bytesRead % 4);
+
+
                 if (this.mmu.isMemoryVirtualizationEnabled()) {
                     if (bytesRead > 0) {
-                        for (let index = 0; index < bytesRead; index++) {
-                            this.mmu.writeByteTo(DoubleWord.fromNumber(bufferAddress + index), Byte.fromNumber(buffer[index]));
+
+                        for (let index = 0; index < doubleWordbytesRead; index += 4) {
+                            this.mmu.writeDoublewordTo(PhysicalAddress.fromNumber(bufferAddress + index), buffer.getUint32(index) as DoubleWord, false);
+                        }
+
+                        for (let index = 0; index < bytesRead % 4; index++) {
+                            this.mmu.writeByteTo(PhysicalAddress.fromNumber(bufferAddress + index), buffer.getUint8(index) as Byte);
                         }
                     }
                 } else {
                     if (bytesRead > 0) {
-                        for (let index = 0; index < bytesRead; index++) {
-                            this.mainMemory.writeByteTo(DoubleWord.fromNumber(bufferAddress + index), Byte.fromNumber(buffer[index]));
+
+                        if (bytesRead > 0 && this.fs.fd_map.get(op2)?.filename === "os/util/empty_frame.bin")
+                        {
+                            this.mainMemory.clearFrame(FrameNumber.fromPhysicalAddress(PhysicalAddress.fromNumber(bufferAddress)));
+                            break;
+                        }
+                        
+                        for (let index = 0; index < doubleWordbytesRead; index += 4) {
+                            this.mainMemory.writeDoubleWordTo(PhysicalAddress.fromNumber(bufferAddress + index), buffer.getUint32(index) as DoubleWord);
+                        }
+
+                        for (let index = 0; index < bytesRead % 4; index++) {
+                            this.mainMemory.writeByteTo(PhysicalAddress.fromNumber(bufferAddress + index), buffer.getUint8(index) as Byte);
                         }
                     }
                 }
@@ -896,11 +918,19 @@ export class CPUCore {
             case DevOperations.IO_WRITE_BUFFER: {// 00000011 - io_write_buffer (fd=op2, buffer=stack, b_size=stack) -> bytes_written=eax
                 const writeBufferAddress = this.internal_pop();
                 const writeBufferSize = this.internal_pop();
-                const writeBuffer = new Uint8Array(writeBufferSize);
-                for (let index = 0; index < writeBufferSize; index++) {
-                    const byte = this.mmu.readByteFrom(DoubleWord.fromNumber(writeBufferAddress + index))
-                    writeBuffer[index] = byte;
+                const writeBuffer = new DataView(new ArrayBuffer(writeBufferSize));
+
+                const doubleWordBufferSize = writeBufferSize - (writeBufferSize % 4);
+                for (let index = 0; index < doubleWordBufferSize; index += 4) {
+                    const doubleWord = this.mmu.readDoublewordFrom(PhysicalAddress.fromNumber(writeBufferAddress + index), false)
+                    writeBuffer.setUint32(index, doubleWord);
                 }
+
+                for (let index = 0; index < writeBufferSize % 4; index++) {
+                    const byte = this.mmu.readByteFrom(PhysicalAddress.fromNumber(writeBufferAddress + index))
+                    writeBuffer.setUint8(index, byte);
+                }
+
                 const bytesWritten = this.fs.io_write_buffer(op2, writeBuffer, writeBufferSize);
                 this.eax.content = DoubleWord.fromNumber(bytesWritten);
                 break;
@@ -957,6 +987,16 @@ export class CPUCore {
                 const timeValue = this.internal_pop();
 
                 this.timer.addTimer(op2, timeValue);
+                break;
+            }
+            case DevOperations.PERIODIC_TIMER_SET:{ //  0001111 setupTimer(time_value=op2)
+                const timerValue = op2;
+                this.periodicTimer.setupTimer(timerValue);
+                break;
+            }
+            case DevOperations.CONSOLE_BUFFER_STATUS:{
+                this.eax.content = DoubleWord.fromNumber(this.fs.getStdinBufferNumberCount());
+                this.ebx.content = DoubleWord.fromNumber(this.fs.getStdinBufferStringCount());
                 break;
             }
             default:{
@@ -2249,7 +2289,7 @@ export class CPUCore {
         // Read contents of flags register from STACK into flags register.
         const content = this.mmu.readDoublewordFrom(this.esp.content, false);
         // Deallocate four bytes from STACK by incrementing the value in ESP.
-        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
 
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
 
@@ -2287,7 +2327,7 @@ export class CPUCore {
             this.writeRegister(value, target);
         }
         // Deallocate one doubleword from STACK by incrementing the value in ESP.
-        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
         // TODO: Call interrupt handler for deallocation of page frame in page table.
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
         return;
@@ -2386,7 +2426,7 @@ export class CPUCore {
         // Read the return address from the STACK.
         this.eip.content = this.mmu.readDoublewordFrom(this.esp.content, false);
         // Deallocate one doubleword from the STACK by incrementing ESP.
-        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
 
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
         return true;
@@ -2491,7 +2531,7 @@ export class CPUCore {
         this.ret();
         // Restore the old EFLAGS contents from the STACK.
         const eflagsValue = this.mmu.readDoublewordFrom(this.esp.content, false);
-        this.mmu.clearMemory(this.esp.content, DataSizes.DOUBLEWORD);
+        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
 
         // Restore the old STACK value.
@@ -2856,90 +2896,6 @@ export class CPUCore {
         // TODO implement
         this.logToLogger("");
         this.logToLogger("KERNEL PANIC! RESETING SIMULATOR");
-    }
-
-    /**
-     * This method decodes the type of an instruction.
-     * @param encodedOperandType 
-     * @throws {ExceptionError} If an exception was generated
-     * @returns 
-     */
-    public decodeOperandType(encodedOperandType: number): OperandTypeCodes {
-        if (OperandTypeCodes[encodedOperandType] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedOperandType as OperandTypeCodes;
-    }
-
-    /**
-     * This method decodes the addressing mode of an instruction.
-     * @param encodedAddressingMode 
-     * @throws {ExceptionError} If an exception was generated
-     * @returns 
-     */
-    public decodeAddressingMode(encodedAddressingMode: number): AddressingModes {
-        if (AddressingModes[encodedAddressingMode] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedAddressingMode as AddressingModes;
-    }
-
-    /**
-     * This methods decodes an instructions type.
-     * @param encodedInstructionType The binary encoded instructions type.
-     * @throws {ExceptionError} If an exception was generated
-     * @returns A decoded representation of the type.
-     */
-    public decodeInstructionType(encodedInstructionType: number): InstructionTypes {
-        if (InstructionTypes[encodedInstructionType] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedInstructionType as InstructionTypes;
-    }
-
-    /**
-     * This methods decodes an I-type instruction.
-     * @param encodedOperation The binary encoded I-type operation.
-     * @throws {ExceptionError} If an exception was generated
-     * @returns A decoded representation of the operation.
-     */
-    public decodeIInstruction(encodedOperation: number): Instructions {
-        if (Instructions[encodedOperation] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedOperation as Instructions;
-    }
-
-    /**
-     * This methods decodes a J-type instruction.
-     * @param encodedOperation The binary encoded J-type instruction.
-     * @throws {ExceptionError} If an exception was generated
-     * @returns A decoded representation of the operation.
-     */
-    public decodeJIntruction(encodedOperation: number): Instructions {
-        if (Instructions[encodedOperation] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedOperation as Instructions;
-    }
-
-    /**
-     * This methods decodes a R-type instruction.
-     * @param encodedOperation The binary encoded R-type instruction.
-     * @throws {ExceptionError} If an exception was generated
-     * @returns A decoded representation of the operation.
-     */
-    public decodeRIntruction(encodedOperation: number): Instructions {
-        if (Instructions[encodedOperation] === undefined) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-
-        return encodedOperation as Instructions;
     }
 
     /**

@@ -2,7 +2,7 @@ import { Bit } from "./Bit";
 import { Byte } from "./Byte";
 import { Word } from "./Word";
 
-export type DoubleWord = number & { __brand: "DoubleWord" };
+export type DoubleWord = number & { __brand: "DoubleWord" & "VirtualAddress" & "PyhsicalAddress" & "PageTableEntry" };
 
 export namespace DoubleWord {
 

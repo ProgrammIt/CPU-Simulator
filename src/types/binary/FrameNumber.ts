@@ -1,6 +1,8 @@
 import { DoubleWord } from "./DoubleWord";
+import { PageTableEntry } from "./PageTableEntry";
+import { PhysicalAddress } from "./PhysicalAddress";
 
-export type FrameNumber = number & { __brand: "FrameNumber" };
+export type FrameNumber = number & { __brand: "PageNumber" & "FrameNumber" };
 
 export namespace FrameNumber {
     
@@ -19,10 +21,19 @@ export namespace FrameNumber {
 
     /**
      * This method gets the FrameNumber from a pyhsical address.
-     * @param pyhsicalAddress 
+     * @param physicalAddress 
      * @returns
      */
-    export function fromPyhsicalAddress(pyhsicalAddress: DoubleWord): FrameNumber {
-        return ((pyhsicalAddress >> (DoubleWord.NUMBER_OF_BITS - NUMBER_OF_BITS)) & MAX_POSITIVE_NUMBER) as FrameNumber;
+    export function fromPhysicalAddress(physicalAddress: PhysicalAddress): FrameNumber {
+        return ((physicalAddress >> (DoubleWord.NUMBER_OF_BITS - NUMBER_OF_BITS)) & MAX_POSITIVE_NUMBER) as FrameNumber;
+    }
+
+    /**
+     * This method gets the FrameNumber from a PageTableEntry.
+     * @param pageTableEntry 
+     * @returns
+     */
+    export function fromPageTableEntry(pageTableEntry: PageTableEntry): FrameNumber {
+        return (pageTableEntry & MAX_POSITIVE_NUMBER) as FrameNumber;
     }
 }

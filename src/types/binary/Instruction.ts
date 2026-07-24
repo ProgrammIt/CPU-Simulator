@@ -1,5 +1,5 @@
+import { InstructionSet } from "../enumerations/InstructionSet";
 import { InstructionTypes } from "../enumerations/InstructionTypes";
-import { Instructions } from "../enumerations/Instructions";
 import { InstructionOperand } from "./InstructionOperand";
 
 /**
@@ -15,7 +15,7 @@ export class Instruction {
 	/**
 	 * The instructions operation.
 	 */
-	private readonly _instruction: Instructions;
+	private readonly _instruction: InstructionSet;
 
 	/**
 	 * A list of the operations operands or undefined, if no operand is present.
@@ -28,7 +28,7 @@ export class Instruction {
 	 * @param instruction The instruction.
 	 * @param operands The instructions operands.
 	 */
-    public constructor(type: InstructionTypes, instruction: Instructions, operands: [InstructionOperand | undefined, InstructionOperand | undefined] = [undefined, undefined]) {
+    public constructor(type: InstructionTypes, instruction: InstructionSet, operands: [InstructionOperand | undefined, InstructionOperand | undefined] = [undefined, undefined]) {
         this._type = type;
         this._instruction = instruction;
         this._operands = operands;
@@ -38,7 +38,7 @@ export class Instruction {
 		return this._type;
 	}
 
-	public get instruction(): Instructions {
+	public get instruction(): InstructionSet {
 		return this._instruction;
 	}
 

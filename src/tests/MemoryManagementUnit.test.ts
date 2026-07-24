@@ -3,6 +3,10 @@ import { MemoryManagementUnit } from "../simulator/execution_units/MemoryManagem
 import { RAM } from "../simulator/functional_units/RAM";
 import { Byte } from "../types/binary/Byte";
 import { DoubleWord } from "../types/binary/DoubleWord";
+import { FrameNumber } from "../types/binary/FrameNumber";
+import { FrameOffset } from "../types/binary/FrameOffset";
+import { PhysicalAddress } from "../types/binary/PhysicalAddress";
+import { VirtualAddress } from "../types/binary/VirtualAddress";
 import { DataSizes } from "../types/enumerations/DataSizes";
 import { describe, expect, test } from '@jest/globals';
 
@@ -12,29 +16,27 @@ describe("Read from and write to main memory using MMU as proxy", () => {
     const mmu = new MemoryManagementUnit(cpu);
 
     test("Write byte to main memory", () => {
-        mainMemory.cells.clear();
-        const virtualAddress = DoubleWord.fromNumber(0xFFFFFFFF);
-        mmu.writeByteTo(virtualAddress, Byte.fromNumber(-128));
 
-        expect(mainMemory.cells).toEqual(new Map<number, number>([
-            [0xFFFFFFFF, Byte.fromNumber(-128)]
-        ]));
+
+        const byte = Byte.fromNumber(-128)
+
+        mainMemory.cells.clear();
+        const virtualAddress = VirtualAddress.fromNumber(0xFFFFFFFF);
+        mmu.writeByteTo(virtualAddress, byte);
+
+        expect(mainMemory.cells.get(FrameNumber.fromPhysicalAddress(virtualAddress as PhysicalAddress))?.getUint8(FrameOffset.fromPhysicalAddress(virtualAddress))).toEqual(byte);
+        
     });
 
     test("Write doubleword to main memory", () => {
+
+        const doubleWord = DoubleWord.fromNumber(0b01101100_10010111_01010000_10110000);
+
         mainMemory.cells.clear();
         const virtualAddress = DoubleWord.fromNumber(0x1000000);
-        mmu.writeDoublewordTo(
-            virtualAddress, 
-            DoubleWord.fromNumber(0b01101100_10010111_01010000_10110000),
-            false
-        );
-        expect(mainMemory.cells).toEqual(new Map<number, number>([
-            [0x1000000, Byte.fromNumber(0b01101100)],
-            [0x1000001, Byte.fromNumber(0b10010111)],
-            [0x1000002, Byte.fromNumber(0b01010000)],
-            [0x1000003, Byte.fromNumber(0b10110000)]
-        ]));
+        mmu.writeDoublewordTo(virtualAddress, doubleWord, false);
+
+        expect(mainMemory.cells.get(FrameNumber.fromPhysicalAddress(virtualAddress as PhysicalAddress))?.getUint32(FrameOffset.fromPhysicalAddress(virtualAddress))).toEqual(doubleWord);
     });
 
     test("Read single byte from memory address", () => {

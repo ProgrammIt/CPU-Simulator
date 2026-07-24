@@ -8,7 +8,15 @@ import { InterruptNumbers } from "../../types/enumerations/InterruptNumbers";
 import { ExceptionError } from "../../types/errors/ExceptionError";
 import { PageNumber } from "../../types/binary/PageNumber";
 import { PageTableEntryFlags } from "../../types/binary/PageTableEntryFlags";
+import { VirtualAddress } from "../../../types/binary/VirtualAddress";
+import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
+import { PageTableEntry } from "../../../types/binary/PageTableEntry";
+import { FrameNumber } from "../../../types/binary/FrameNumber";
 
+interface memoryMapEntry {
+        pageTableId: number;
+        pageNumber: number;
+}
 /**
  * This class represents a Memory Management Unit (MMU). This specialized execution unit is responsible
  * for translating virtual memory addresses into physical memory addresses.
@@ -62,7 +70,7 @@ export class MemoryManagementUnit {
      * This member stores a reference to the Translation Lookaside Buffer.
      * @readonly
      */
-    private readonly _tlb: TranslationLookasideBuffer = new TranslationLookasideBuffer(128);;
+    private readonly _tlb: TranslationLookasideBuffer = new TranslationLookasideBuffer();
 
     /**
      * This member stores a reference to the Page Table Pointer register of the CPU core, this MMU
@@ -77,6 +85,16 @@ export class MemoryManagementUnit {
     private _memoryVirtualizationEnabled: boolean = false;
 
     public pageFaultAddress: DoubleWord | undefined = undefined;
+
+    /**
+     * This array stores a mapping between the physical frame number and virtual page numbers along with the associated pid.
+     * Each entry is an array of objects. The Entries are only populated if a vpn is mapped to that frame number.
+     * {
+     *  pageTableId: number
+     *  pageNumber: number
+     * }
+     */
+    public reverseMemoryMap: memoryMapEntry[][] = [];
 
 
     /**
@@ -123,10 +141,10 @@ export class MemoryManagementUnit {
      * @param attemptsToExecute 
      * @throws {ExceptionError} If an exception was generated
      */
-    public writeDoublewordTo(virtualAddress: DoubleWord, doubleword: DoubleWord, attemptsToExecute: boolean): void {
-        const physicalAddress: DoubleWord = this.translate(virtualAddress, true, attemptsToExecute);
+    public writeDoublewordTo(virtualAddress: VirtualAddress, doubleword: DoubleWord, attemptsToExecute: boolean): void {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress, true, attemptsToExecute);
+        this.updateReverseMemoryMap(physicalAddress, doubleword as PageTableEntry)
         this._cpu.mainMemory.writeDoubleWordTo(physicalAddress, doubleword);
-        return;
     }
 
     /**
@@ -136,8 +154,8 @@ export class MemoryManagementUnit {
      * @throws {ExceptionError} If an exception was generated
      * @returns Doubleword-sized binary data.
      */
-    public readDoublewordFrom(virtualAddress: DoubleWord, attemptsToExecute: boolean): DoubleWord {
-        const physicalAddress: DoubleWord = this.translate(virtualAddress, false, attemptsToExecute);
+    public readDoublewordFrom(virtualAddress: VirtualAddress, attemptsToExecute: boolean): DoubleWord {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress, false, attemptsToExecute);
         return this._cpu.mainMemory.readDoublewordFrom(physicalAddress);
     }
 
@@ -148,10 +166,9 @@ export class MemoryManagementUnit {
      * @param data Byte-sized data to write to the specified pyhsical memory address.
      * @throws {ExceptionError} If an exception was generated
      */
-    public writeByteTo(virtualAddress: DoubleWord, data: Byte): void {
-        const physicalAddress: DoubleWord = this.translate(virtualAddress, true, false);
+    public writeByteTo(virtualAddress: VirtualAddress, data: Byte): void {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress, true, false);
         this._cpu.mainMemory.writeByteTo(physicalAddress, data);
-        return;
     }
 
     /**
@@ -162,32 +179,19 @@ export class MemoryManagementUnit {
      * @throws {ExceptionError} If an exception was generated
      * @returns The byte of data found at the specified address.
      */
-    public readByteFrom(virtualAddress: DoubleWord): Byte {
-        const physicalAddress: DoubleWord = this.translate(virtualAddress, false, false);
+    public readByteFrom(virtualAddress: VirtualAddress): Byte {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress, false, false);
         return this._cpu.mainMemory.readByteFrom(physicalAddress);
     }
 
     /**
      * This method clears all bits at the specified locations, depending on the given number of bytes.
      * @param virtualAddress The virtual address to clear all bits at.
-     * @param length The number of bytes to clear, starting at the given physical address.
      * @throws {ExceptionError} If an exception was generated
      */
-    public clearMemory(virtualAddress: DoubleWord, length: DataSizes): void {
-        // The first virtual memory address to translate and to clear all bits at.
-        // Calculate the number of cells, which should get cleared.
-        const numberOfCellsToClear : number = length/DataSizes.BYTE;
-        for (let i = 0; i < numberOfCellsToClear; ++i) {
-            // Create virtual memory address from 
-            const currentVirtualAddress: DoubleWord = DoubleWord.fromNumber(virtualAddress + i);
-            /**
-             * Translate virtual memory address to physical memory address.
-             * As this method attempts to clear all bits at the specified address, the corresponding parameter is set to true.
-             */
-            const physicalAddress: DoubleWord | null = this.translate(currentVirtualAddress, true, false);
-            // Clear all bits at the resulting physical memory address.
-            this._cpu.mainMemory.clearByte(physicalAddress);
-        }
+    public clearDoubleWord(virtualAddress: VirtualAddress): void {
+        const physicalAddress: PhysicalAddress = this.translate(virtualAddress, false, false);
+        this._cpu.mainMemory.writeDoubleWordTo(physicalAddress, DoubleWord.ZERO);
     }
 
     /**
@@ -198,37 +202,38 @@ export class MemoryManagementUnit {
      * @param attemptsToWrite Indicates whether the process attempts to execute the data located at the page frame associated with the given virtual address.
      * @param attemptsToExecute Indicates whether the process attempts to write data to the page frame associated with the given virtual address.
      * @param ignorePermissionFlags Disables the privilege violation check with the EFLAGS.
-     * @param disableTlbLookUp Disables the usage of the TLB while translating an address.
+     * @param disableTlb Disables the usage of the TLB while translating an address.
      * @throws {ExceptionError} If the page the given virtual address is part of, is currently not associated with a page frame.
      * @returns The physical memory address associated with the given virtual address.
      */
-    public translate(virtualAddress: DoubleWord, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlbLookUp: boolean = false): DoubleWord {
+    public translate(virtualAddress: VirtualAddress, attemptsToWrite: boolean, attemptsToExecute: boolean, ignorePermissionFlags: boolean = false, disableTlb: boolean = false): PhysicalAddress {
         if (!this._memoryVirtualizationEnabled) {
-            return virtualAddress;
+            return virtualAddress as PhysicalAddress;
         }
 
         const pageNumber = PageNumber.fromVirtualAddress(virtualAddress);
-        const pageTableEntry: PageTableEntry = this._tlb.get(pageNumber) ?? this.searchPageTable(virtualAddress);
-        const pageTableEntryFlags: PageTableEntryFlags = PageTableEntry.getFlags(pageTableEntry);
+        const pageTableEntry: PageTableEntry = disableTlb ? this.searchPageTable(virtualAddress)
+                : this._tlb.get(pageNumber) ?? this.searchPageTable(virtualAddress);
+
+        const pageTableEntryFlags: PageTableEntryFlags = PageTableEntryFlags.fromPageTableEntry(pageTableEntry);
 
         // Check if a page frame is connected to the page to which the specified virtual address refers.
         if (!PageTableEntryFlags.isPresent(pageTableEntryFlags)) {
-
             this.pageFaultAddress = virtualAddress;
-            
             throw new ExceptionError(InterruptNumbers.PAGE_FAULT);
         }
-        if (!ignorePermissionFlags) {
+
+        if (!ignorePermissionFlags && !this._cpu.flags.isInKernelMode()) {
             // Check if the page frame is accessable only in kernel mode.
-            if (PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags) && !this._cpu.flags.isInKernelMode()) {
+            if (PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags)) {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
             // Check if the page frames contents are executable.
-            if (attemptsToExecute && !this._cpu.flags.isInKernelMode() && !PageTableEntryFlags.isExecutable(pageTableEntryFlags)) {
+            if (attemptsToExecute && !PageTableEntryFlags.isExecutable(pageTableEntryFlags)) {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
             // Check if the page frames contents are writable.
-            if (attemptsToWrite && !this._cpu.flags.isInKernelMode() && !PageTableEntryFlags.isWritable(pageTableEntryFlags)) {
+            if (attemptsToWrite && !PageTableEntryFlags.isWritable(pageTableEntryFlags)) {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
         }
@@ -239,15 +244,13 @@ export class MemoryManagementUnit {
             // Update flag bits of page table entry in memory as well.
             this._cpu.mainMemory.writeDoubleWordTo(this.calcPhysicalAddressOfPageTableEntry(virtualAddress), pageTableEntry);
         }
-        // Page frame is present and operation is permitted.
-        // Create a valid physical memory address from the page frame number and the offset extracted from the given virtual memory address.
-        const physicalAddress: DoubleWord = DoubleWord.fromNumber((PageTableEntry.getFrameNumber(pageTableEntry) << MemoryManagementUnit.NUMBER_BITS_OFFSET) | DoubleWord.getLeastSignificantBits(virtualAddress, MemoryManagementUnit.NUMBER_BITS_OFFSET as DoubleWord.BitCount));
+
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
-        if (!disableTlbLookUp && !this._tlb.has(pageNumber)) {
+        if (!disableTlb) {
             this._tlb.insert([pageNumber, pageTableEntry]);
         }
-        return physicalAddress;
-        
+
+        return PhysicalAddress.fromPageTableEntryAndVirtualAddress(pageTableEntry, virtualAddress);
     }
 
     /**
@@ -256,13 +259,13 @@ export class MemoryManagementUnit {
      * @param virtualAddress The virtual address to compute the physical address of the page table entry for.
      * @returns The physical address of the page table entry.
      */
-    private calcPhysicalAddressOfPageTableEntry(virtualAddress: DoubleWord): DoubleWord {
+    private calcPhysicalAddressOfPageTableEntry(virtualAddress: VirtualAddress): PhysicalAddress {
         /* 
          * Add the page number * 4 to the physical page table base address to get the address of the page table entry.
          * Because every page table entry is 4 bytes long, the page number needs to be multiplied by 4 before 
          * adding it to the page tables base address.
          */
-        return DoubleWord.fromNumber(this._cpu.ptp.content + PageNumber.fromVirtualAddress(virtualAddress) * 4);
+        return PhysicalAddress.fromNumber(this._cpu.ptp.content + PageNumber.fromVirtualAddress(virtualAddress) * 4);
     }
 
     /**
@@ -274,21 +277,81 @@ export class MemoryManagementUnit {
      * bits and possibly the physical base address of a page frame.
      * @param virtualAddress The virtual memory address to look up in the page table.
      */
-    private searchPageTable(virtualAddress: DoubleWord): PageTableEntry {
-        const wasInKernelMode: boolean = this._cpu.flags.isInKernelMode();
-        // Enter kernel mode in order to be able to search the page table.
-        this._cpu.flags.enterKernelMode();
+    private searchPageTable(virtualAddress: VirtualAddress): PageTableEntry {
         // Compute the physical address, where the page table resides in the page table.
-        const addressOfPageTableEntry: DoubleWord = this.calcPhysicalAddressOfPageTableEntry(virtualAddress);
+        const addressOfPageTableEntry: PhysicalAddress = this.calcPhysicalAddressOfPageTableEntry(virtualAddress);
         // Read page table entry from memory.
-        const contentOfPageTableEntry: DoubleWord = this._cpu.mainMemory.readDoublewordFrom(addressOfPageTableEntry);
-        // Create object from this content.
-        const pageTableEntry: PageTableEntry = PageTableEntry.fromDoubleWord(contentOfPageTableEntry);
-        if (!wasInKernelMode) {
-            // Enter user mode.
-            this._cpu.flags.enterUserMode();
+        return this._cpu.mainMemory.readDoublewordFrom(addressOfPageTableEntry) as PageTableEntry;
+    }
+
+    /**
+     * This method updates the reverse memory map based on the present bit of the given page table entry.
+     * The reverse memory map maps a physical frame number to an object which contains the mapped virtual page number and the page table id, which the virtual page number belongs to.
+     * Each index in the reverse memory map represents the physical frame number.
+     * If the present bit of the page table entry changes from zero to one, then a new entry is created.
+     * If the present bit of the page table entry changes from one to zero, then all entries that match the virtual page number and page table id at the entry of the physical frame number in the
+     * reverse memory map get removed.
+     * If the present bit stays at one and the physical frame number changes, then the old entry gets removed and a new entry is written.
+     * @param ptEntryAddress The memory address of the page table entry.
+     * @param ptEntry The page table entry.
+     */
+    private updateReverseMemoryMap(ptEntryAddress: PhysicalAddress, ptEntry: PageTableEntry): void {
+        const pageTablesStartAddress: number = 0xD0000000;
+        const pageTablesEndAddress: number = 0xDFFFFFFF;
+        if (ptEntryAddress < pageTablesStartAddress || ptEntryAddress > pageTablesEndAddress) {
+            return
         }
-        return pageTableEntry;
+        const newPtEntry: PageTableEntry = ptEntry;
+        const oldPtEntry: PageTableEntry = this._cpu.mainMemory.readDoublewordFrom(ptEntryAddress) as PageTableEntry;
+
+        const newPtPresentBit: number = PageTableEntry.getFlags(newPtEntry) >> 11;
+        const oldPtPresentBit: number = PageTableEntry.getFlags(oldPtEntry) >> 11;
+        const newFrameNumber: number = PageTableEntry.getFrameNumber(newPtEntry);
+        const oldFrameNumber: number = PageTableEntry.getFrameNumber(oldPtEntry);
+
+        const ptMemoryOffset: number = ptEntryAddress - pageTablesStartAddress;
+        
+        //Divide by four
+        const globalEntryIndex: number = ptMemoryOffset >> 2;
+        //Bitwise modulo 2^20 to find the page number since a page table has 2^20 entries
+        const pageNumber: number = globalEntryIndex & 0xFFFFF;
+        const pageTableId: number = globalEntryIndex >> 20;
+
+        if (newPtPresentBit === 1 && oldPtPresentBit === 0) {
+            (this.reverseMemoryMap[newFrameNumber] ??= []).push({pageTableId: pageTableId, pageNumber: pageNumber});
+        }
+
+        if (newPtPresentBit === 0 && oldPtPresentBit === 1) {
+            if (!this.reverseMemoryMap[newFrameNumber]) {
+                return;
+            }
+            this.reverseMemoryMap[newFrameNumber] = this.reverseMemoryMap[newFrameNumber].filter(
+                (entry) => !(entry.pageTableId === pageTableId && entry.pageNumber === pageNumber)
+            );
+        }
+
+        if (oldPtPresentBit === 1 && newPtPresentBit === 1) {
+            if (newFrameNumber === oldFrameNumber) {
+                return
+            }
+            this.reverseMemoryMap[oldFrameNumber] = this.reverseMemoryMap[oldFrameNumber].filter(
+                (entry) => !(entry.pageTableId === pageTableId && entry.pageNumber === pageNumber)
+            );
+            (this.reverseMemoryMap[newFrameNumber] ??= []).push({pageTableId: pageTableId, pageNumber: pageNumber});
+        }
+    }
+
+    public findVirtualFromPhysical(physicalAddress: PhysicalAddress): VirtualAddress[] {
+        const frameNumber: FrameNumber = FrameNumber.fromPhysicalAddress(physicalAddress);
+        const reverseMemoryMapEntry: memoryMapEntry[] = this.reverseMemoryMap[frameNumber];
+        const virtualAddresses: VirtualAddress[] = [];
+        for (const entry of reverseMemoryMapEntry) {
+            const pNumber: number = entry.pageNumber;
+            const offset: number = physicalAddress & 0xFFF;
+            const virtualAddress: VirtualAddress = VirtualAddress.fromNumber(pNumber | offset);
+            virtualAddresses.push(virtualAddress);
+        }
+        return virtualAddresses;
     }
 
 }

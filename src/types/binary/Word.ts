@@ -6,7 +6,7 @@ export type Word = number & { __brand: "Word" };
 export namespace Word {
 
 	export const SIZE: number = 2**16;
-	export const MAX_POSITIVE_NUMBER: number = 16 - 1;
+	export const MAX_POSITIVE_NUMBER: number = 2**16 - 1;
 	export const MAX_NEGATIVE_NUMBER: number = -(2**15);
 	export const NUMBER_OF_BITS: number = 16;
 	export const NUMBER_OF_BYTES: number = 2;
@@ -161,7 +161,7 @@ export namespace Word {
 		const msb: Bit = Word.getMostSignificantBit(operand);
         // Arithmetic right shift by 1
         operand = operand >>> 1 as Word;
-        Word.setBit(operand, 0, msb);
+        operand = Word.setBit(operand, 0, msb);
 		return [operand, removedBit];
     }
 

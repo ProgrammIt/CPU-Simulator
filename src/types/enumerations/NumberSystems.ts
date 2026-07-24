@@ -1,4 +1,4 @@
-export enum NumberSystems {
+export const enum NumberSystems {
 	HEX = 16,
 	DEC = 10,
 	BIN = 2

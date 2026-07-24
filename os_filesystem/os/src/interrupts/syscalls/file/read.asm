@@ -26,9 +26,36 @@
     ADD %ecx, %eax
     SUB $1, %eax
     CALL ASSERT_EAX_POINTER_IN_USERSPACE
-    
+
+      
 .SYSCALLS_FILE_READ:
 
+    ; If the input is a normal file, then do not block and read immediately.
+    CMP $0, *%ebx
+
+    JG _SYSCALLS_FILE_READ_FILE
+
+    PUSH %ebx
+    DEV $CONST_DEV_COMMAND_CONSOLE_BUFFER_STATUS, $0
+    MOV %ebx, %eax
+    POP %ebx
+
+    CMP $0, %eax
+    JG _SYSCALLS_FILE_READ_FILE
+
+
+    MOV $CONST_OS_CURRENT_PCB_POINTER, %eax
+    MOV *%eax, %eax;
+
+    ; set process status to blocked for IO
+    AND $0xFF00FFFF, *%eax ; mask the page table bytes and set status to zero
+    MOV $CONST_OS_PROCESS_STATUS_IO_BLOCKED, %ecx
+    SHL $16, %ecx ; move the status bit into the correct position
+    OR %ecx, *%eax ; apply the process status
+ 
+    CALL UTIL_SCHEDULER ; reschedule
+
+._SYSCALLS_FILE_READ_FILE:
     ; move user-provided arguments onto stack (required for DEV instruction)
     ;   ebx+8    buffer size
     MOV %ebx, %eax

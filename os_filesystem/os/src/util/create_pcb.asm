@@ -188,6 +188,12 @@
         MOV $0x0, *%eax   ; flags - set cpl and interrupt bit to 0 (kernel mode with interrupts disabled)
         ADD $4, %eax
 
+        ; set fresh time slice
+        MOV $CONST_OS_PROCESS_TIME_SLICE_SIZE, %ebx;
+        SHL $16, %ebx
+        AND $0xFFFF, *%eax
+        OR %ebx, *%eax
+        ADD $4, %eax
 
     ; PCB created
 

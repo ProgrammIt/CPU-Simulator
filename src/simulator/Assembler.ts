@@ -221,6 +221,20 @@ export class Assembler {
 					lineEncoded = true;
 				}
 			}
+		} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationBuffer, "gim"))) {
+			const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationBuffer, "gim");
+			const regexMatch = regexExp.exec(line);
+			if (regexMatch !== null) {
+				const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
+				const bufferName = stringParts[3];
+				const bufferSize: number = parseInt(stringParts[2], 10);
+				if (constants.has(bufferName)) {
+					const bufferAddress = constants.get(bufferName)!;
+					const encodedInstruction: DoubleWord[] = this.initializeBuffer(lineNo, line, jumpLabels, bufferAddress, bufferSize);
+					encodedInstructions.push(...encodedInstruction);
+					lineEncoded = true;
+				}
+			}
 		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationString, "gim"))) {
 			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationString, "gim");
 			const regexMatch = regexExp.exec(line);
@@ -378,6 +392,23 @@ export class Assembler {
 					const stringMemSize = Math.ceil((Buffer.byteLength(constantValue) / 4)) * 4;
 					programLocationCounter += stringMemSize + 12;
 				}
+			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationBuffer, "gim"))) {
+				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationBuffer, "gim");
+				const regexMatch = regexExp.exec(line);
+				if (regexMatch !== null) {
+					const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
+					const bufferName = stringParts[3];
+					const bufferSize: number = parseInt(stringParts[2], 10);
+					//programLocationCounter +12 since the jump instruction will be located in front of the buffer memory array.
+					constants.set(
+						bufferName, 
+						"0b" + (programLocationCounter+12).toString(2).padStart(DataSizes.DOUBLEWORD, "0")
+					);
+					//Calculate the size the buffer will take up in memory. Since the system is based on fixed 32 bit instructions, the buffer size needs to fit into
+					//multiple of double words.
+					const bufferMemSize = Math.ceil((bufferSize / 4)) * 4;
+					programLocationCounter += bufferMemSize + 12;
+				}
 			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim");
 				const regexMatch = regexExp.exec(line);
@@ -489,6 +520,39 @@ export class Assembler {
 			}
 		}
 		return lines;
+	}
+
+	/**
+	 * This method reserves empty memory space for a buffer.
+	 * @param lineNo The original computer programs line number of code which is currently encoded.
+	 * @param line The original computer programs line of code which is currently encoded.
+	 * @param jumpLabels The jump labels found in the assembly code.
+	 * @param bufferAddress The (virtual) memory start address of the buffer.
+	 * @param bufferSize The size of the buffer.
+	 * @returns 
+	 */
+	private initializeBuffer(lineNo: number, line: string, jumpLabels: Map<string, string>, bufferAddress: string, bufferSize: number) : DoubleWord[] {
+		const encodedInstructions: DoubleWord[] = [];
+		let bufferEncoded = false;
+		const bufferStartAddress: string = bufferAddress.replace(/^0b/gim, "");
+		const bufferDoubleWordSize = Math.ceil(bufferSize / 4);
+		const bufferMemSize = bufferDoubleWordSize * 4;
+		//The memory address after the string array with the next instruction
+		const jumpAddress:string = (parseInt(bufferStartAddress, 2) + bufferMemSize).toString(2);
+		const jumpInstruction:string = "JMP @0b" + jumpAddress;
+		const encodedInstruction: DoubleWord[] = this.encodeLine(-1, jumpInstruction, jumpLabels);
+		encodedInstructions.push(...encodedInstruction);
+		//Create empty double words to reserve space for the buffer
+		for (let i = 0; i < bufferDoubleWordSize; ++i) {
+			encodedInstructions.push(DoubleWord.fromNumber(0));
+		}
+
+		bufferEncoded = true;
+		
+		if (!bufferEncoded) {
+			throw new Error(`Error encoding string in line: ${lineNo + 1}: ${line}`);
+		}
+		return encodedInstructions;
 	}
 
 	/**
@@ -680,7 +744,7 @@ export class Assembler {
 			// Register used with direct addressing mode
 			operand32BitEncoded = this.encodeRegister(operand.replace("%", ""), line);
 		} else {
-			throw Error(`In line ${line + 1}: Unrecognized operand type and value.`);
+			throw Error(`In line ${line + 1}: Unrecognized operand type and value. Caused by: ` + operand);
 		}
 		return operand32BitEncoded;
 	}
