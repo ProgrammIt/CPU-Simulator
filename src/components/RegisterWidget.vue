@@ -26,36 +26,37 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { NumberSystems } from './../../src/types/enumerations/NumberSystems';
+import { RegisterNames } from '../types/enumerations/RegisterNumbers';
 
 const props = withDefaults(defineProps<{
   registerId: string;
-  name: string;
+  name: RegisterNames;
   subtitle: string;
   content: string;
   hidden?: boolean;
   showSelect?: boolean;
   loading?: boolean;
-  representation?: NumberSystems;
+  radix?: NumberSystems;
 }>(), {
   hidden: false,
   showSelect: true,
   loading: false,
-  representation: NumberSystems.BIN
+  radix: NumberSystems.BIN
 });
 
 const emit = defineEmits<{
-  representationChange: [newRep: string];
+  representationChange: [registerName: RegisterNames, newRep: NumberSystems];
   click: [];
 }>();
 
-const currentRepresentation = ref<NumberSystems>(props.representation ?? NumberSystems.BIN);
+const currentRepresentation = ref<NumberSystems>(props.radix ?? NumberSystems.BIN);
 
-watch(() => props.representation, (newVal) => {
+watch(() => props.radix, (newVal) => {
   if (newVal !== undefined) currentRepresentation.value = newVal;
 });
 
 function handleRepresentationChange() {
-  emit('representationChange', currentRepresentation.value.toString());
+  emit('representationChange', props.name, currentRepresentation.value);
 }
 
 function handleClick(event: MouseEvent) {
