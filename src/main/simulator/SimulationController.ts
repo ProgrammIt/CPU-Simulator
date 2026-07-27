@@ -110,6 +110,7 @@ export class SimulationController {
      * where the operating system is located in memory is sometimes called kernel space.
      */
     private bootKernel(): void {
+        this.core.performanceTimerStart(0)
         // Enter kernel mode.
         this.core.flags.enterKernelMode();
         // Enable real mode and disable memory virtualization.

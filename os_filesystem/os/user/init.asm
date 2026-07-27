@@ -162,6 +162,7 @@ PUSH %eax ; file descriptor
     POP %ebx ; file length
 
 ._INIT_SET_TIMER:
+    DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, $0 ; measure time it takes for the complete boot process
     MOV $13, %ebx
     MOV $CONST_SYSCALL_TIMER_START, %eax
     INT $0x80

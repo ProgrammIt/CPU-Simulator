@@ -23,7 +23,7 @@
 ; Return value (immediate value):
 ;   none
 .UTIL_INITIALIZE_PAGE_TABLE:
-
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, $5
     PUSH %ebx
 
     .CONST _UTIL_INITIALIZE_PAGE_TABLE_CONST_PAGE_TABLE_FILE_PATH "os/util/page_table.bin"
@@ -105,5 +105,5 @@
     POP %ebx
 
 ; Page Table Is Set Up
-
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, $5 ; time it takes to initialize a page table
 RET

@@ -102,6 +102,7 @@ JMP _OS_ENTRY ; start of the os
 
 ; Interrupt Table Is Set Up
 
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, $2
 ; Create the init process
     
     ; the code for init Program should be located in the file os/user/init (as bynary file)
@@ -128,7 +129,8 @@ JMP _OS_ENTRY ; start of the os
     ; TODO stop the simulator
 
     ._SOS_BOOT_INIT_PROCESS_CREATED:
-
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, $2 ; measure the time to setup init process
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, $3
 ; Create the idle process
 
     ; the code for idle Program should be located in the file os/user/idle (as bynary file)
@@ -153,7 +155,7 @@ JMP _OS_ENTRY ; start of the os
     ; TODO stop the simulator
 
     ._OS_ENTRY_IDLE_PROCESS_CREATED:
-
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, $3 ; measure the time it takes to setup the idle process
 
     ; set the init process to the running process
     MOV $CONST_OS_CURRENT_PCB_POINTER, %eax
