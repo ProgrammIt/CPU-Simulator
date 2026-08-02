@@ -31,13 +31,12 @@ Symbolic string constants are treated a bit differently than symbolic integer co
 .CONST myStringConst "I am a string."
 ```
 
-The given string is stored as a UTF-8 encoded and null terminated array in the code segment of the CPU-Simulator.
+The given string is stored as a UTF-8 encoded and null terminated array in the read only (rodata) segment of the program in memory.
+By being placed in the rodata segment the constants are write protected and read only as the name implies.
 
 In case that the length of the encoded string is not divisible by four bytes, its storage is rounded up to a multiple of four bytes. This is due to the current CPU simulator design using fixed 32 bit instructions and operands. The unused rest of the four bytes storage at the end of such a string is filled by bytes with a zero value, so some memory overhead is expected.
 
-Being stored in the code segment makes the string constant as the code segment is write protected in user mode and only writeable in kernel mode. To not interrupt the code execution, a jump instruction is automatically placed in front of the string array. The target of the jump instruction is the first virtual memory address after the string array.
-
-The assembler replaces the symbolic name of the string constant with the virtual memory start address of the string array. The encoding of the first character in the string starts at the lowest virtual memory address.
+The assembler replaces the symbolic name of the string constant with the virtual memory start address of the string array in the rodata segment. The encoding of the first character in the string starts at the lowest virtual memory address.
 
 The symbolic name of the string constant can then be used like a memory address in the assembly code.
 Here is an example of writing the (start) virtual memory address of the previously defined string constant into the EAX register:
@@ -46,38 +45,37 @@ Here is an example of writing the (start) virtual memory address of the previous
 MOV $myStringConst, %eax
 ```
 
-In the current implementation the constants can be misused as variables, see the warning [below](#12-symbolic-variables).
-
 ## 1.2 Symbolic Variables
 
-:warning:**Caution:** In the current implementation the symbolic integer and string variables are stored in the code segment. The code segment is write protected in user mode and only writeable in kernel mode. To assign different values to the variables during program runtime, the program has to switch into kernel mode. Under normal circumstances the program should not be able to switch into kernel mode directly. To make the variables work correctly, a modified NOP instruction has been implemented as a work-around, which switches the program into kernel mode. This NOP instruction has to be used once before variables can be assigned a new value (see the examples below). The modified NOP instruction is needed until a (writable) data segment or some other way of holding the variables in writable storage is implemented.
-
-Using the modified NOP instruction also makes constants behave like variables, so caution is advised.
+Symbolic variables can either store an integer or a string. The actual value of the variables get stored in the data segment, which is writable in user mode. For more detail about the layout of a program in memory see 
+# PLACEHOLDER.
+By convention the variables should be defined and declared between the `.DATA` and the `.CODE` label in the program text.
 
 ### 1.2.1 Symbolic Integer Variables
 
 Symbolic integer variables can store a 32-Bit integer value. They can be created as follows:
 
 ``` Assembly
-NOP
 .DATA
-.intVariable ;uninitialized integer variable
-.intVariableWithValue 5 ;creates integer variable with the value 5
+.intVariable ; uninitialized integer variable
+.intVariableWithValue 5 ; creates integer variable with the value 5
 .CODE
 ```
 
-Defining and declaring symbolic integer variables always has to be done between the `.DATA` and the `.CODE` blocks. The variable is initialized with zero internally if no value is given, like shown for the first variable above, otherwise it is initialized with the given numerical value.  
-The assembler encodes the integer variable as a 32 bit integer and stores it in the code segment of the CPU simulator. To not interrupt the program flow, a jump instruction is automatically added by the assembler in front of the integer variable in virtual memory. The jump target is the first virtual memory address after the integer variable.  
-The assembler replaces all occurrences of the symbolic name of the integer variable with its virtual memory address.
-The `NOP` instruction switches the program into kernel mode, see the warning [above](#12-symbolic-variables).
+The variable is initialized with zero internally if no value is given, like shown for the first variable above, otherwise it is initialized with the given numerical value.
+The assembler replaces all occurrences of the symbolic name of the integer variable with the virtual memory address which points to the memory that contains the variable value.
+The memory address is the pointer to the memory that contains the actual variable content.
 
-Reassigning the value of a symbolic integer variable can be done as follows:
+Accessing and reassigning the value of a symbolic integer variable can be done as follows:
 
 ```Assembly
-MOV $10, @intVariable
+MOV $intVariable, %eax ; move the memory address that contains the variable value into eax
+MOV $10, *%eax ; moves the value 10 into the memory which eax points to
 ```
 
 In the above example the value 10 is assigned to the symbolic integer variable `intVariable`.
+First the virtual memory address that points to the memory containing the variable value is moved into eax.
+In the second step the value 10 gets moved to the actual memory content that contains the variable by dereferencing the memory address in eax and moving the new value into it.
 The symbolic name can be used like a normal memory address.
 
 ### 1.2.2 Symbolic String Variables
@@ -85,21 +83,70 @@ The symbolic name can be used like a normal memory address.
 Symbolic string variables are used to store a string in memory. They can be defined as follows:
 
 ``` Assembly
-NOP
 .DATA
 .stringVariable "I am a string."
 .CODE
 ```
 
-In the current implementation the string is encoded in UTF-8 and stored in a null terminated array of bytes in the code segment of the CPU-Simulator like the symbolic string constants. Again, the `NOP` instruction is modified and needed to switch the program into kernel mode. For more details see [1.1.2 Symbolic String Constants](#112-symbolic-string-constants) and the warning [above](#12-symbolic-variables).
+In the current implementation the string is encoded in UTF-8 and stored in a null terminated array of bytes in the data segment of the program.
 
-The assembler replaces the symbolic name of the string variables in the assembly code with their virtual memory address. The virtual memory address is the start address of the array of bytes that encodes the string. The symbolic name can be used like a normal memory address.
+The assembler replaces the symbolic name of the string variables in the assembly code with the virtual memory address which points to the location in the data segment that contains the string value. The virtual memory address is the start address of the array of bytes that encodes the string. Analog to string constants the size of a string gets rounded up to the next four byte aligned size if the encoded string size is not divisible by four. The padding to achieve the needed length is done by adding null bytes to the end of the string. The symbolic name can be used like a normal memory address.
 
 ``` Assembly
 MOV $stringVariable, %eax
 ```
 
 In the above example the virtual memory start address of the `stringVariable` is written into the EAX register.
+
+Similarly to integer variables the content of string variables can be manipulated by writing to the memory that the virtual memory address points to.
+
+``` Assembly
+.DATA
+.string "Strings are cool"
+.newValue "Foo"
+.CODE
+
+MOV $string, %eax ; loads the virtual memory start address of stringVariable into eax
+MOV $newValue, %ebx  ; loads the virtual memory start address of newValue into ebx
+MOV *%ebx, %ebx ; moves the content of newValue into ebx
+MOV *%eax, %ecx ; moves the content of string into ecx
+AND $0xFF, %ecx ; masks the last byte (utf-8 encoded "i") and clears the rest
+OR %ecx, %ebx ; combines the utf-8 encoded "i" with utf-8 encoded "Foo" in ebx (utf-8 encoded "Fooi")
+MOV %ebx, *%eax ; Writes the content of ebx into the string variable string
+```
+
+The example above shows how to overwrite parts of one string with another string. Since register are 32 bit a MOV instruction always moves four byte of the string content when accessing it.
+
+In the example the null terminator of the string `newValue` would overwrite the "i" in "String" of the variable `string`. One solution is to take the first four UTF-8 encoded characters of `string`and masking the last byte, which is the UTF-8 encoded "i".
+The masking is achieved by the `AND` operation with the `0xFF` bitmask, setting every byte in the register to zero except the UTF-8 encoded "i".
+
+In the next step the "i" can be combined with the content of ebx, which is null terminated "Foo".
+The `OR` operation can be applied immediately as the null terminator in UTF-8 is a single zero byte.
+After the `OR` operation ebx contains "Fooi" which can now be written into the string variable `string` resulting in "Fooings are cool" in memory.
+Similarly other parts of strings can be extracted, overwritten and manipulated.
+To overwrite or copy strings that are larger than a register a loop has to be used.
+
+``` Assembly
+.DATA
+.string "Strings are cool"
+.newValue "Foo"
+.CODE
+
+MOV $string, %eax ; loads the virtual memory start address of stringVariable into eax
+MOV $newValue, %ebx  ; loads the virtual memory start address of newValue into ebx
+
+ADD $4, %eax ; move the memory pointer by 4 bytes
+
+MOV *%ebx, %ebx ; moves the content of newValue into ebx
+MOV *%eax, %ecx ; moves the content of string into ecx
+AND $0xFF, %ecx ; masks the last byte (utf-8 encoded " ") and clears the rest
+OR %ecx, %ebx ; combines the utf-8 encoded " " with utf-8 encoded "Foo" in ebx (utf-8 encoded "Foo ")
+MOV %ebx, *%eax ; Writes the content of ebx into the string variable string
+```
+
+The previous example has been expanded to show that a string can be accessed like an array. To demonstrate the last three characters of "Strings" in the variable `string` get overwritten by "Foo".
+The approach is the same as in the previous example with the exception that the memory pointer in eax, which contains the base memory address of the variable `string`, gets shifted by four byte.
+To shift the memory pointer by four byte in the `string` variable the `ADD` operation is used. The rest of the example is the same as previously.
 
 ## 1.3 Console IO
 
