@@ -168,7 +168,9 @@ The console has four different types of IO operations. These include writing a n
 
 Internally the console uses an array of Uint8Arrays as input buffer. Each line on the console populates a new index in the input buffer. The `\n` escape sequence can be used as well to indicate a new line. The array is populated on the FIFO principle and is limited to 255 entries. If the user adds another input that would bring the buffer over 255 entries, then the first entry is removed and the new entry is put at the end of the buffer.
 
-Both read operations for numbers and strings are blocking. When the process attempts to read from the console it changes into the blocked state waiting for IO and gets put into the waiting queue for IO. The waiting queue is FIFO. Once the keyboard interrupt triggers the first process in the waiting queue for IO changes into the ready state. If multiple processes wait for keyboard IO and multiple keyboard interrupts get triggered, then the processes change their state to ready and get put into the waiting queue in the order they have entered the blocked waiting for IO queue. Which process actually gets to read the data first is decided by the scheduler, depending on which process gets set to the running state first.
+Both read operations for numbers and strings are blocking if the console buffer is empty. If data is already in the console input buffer when a read operation is performed the function executes and returns immediately. When the process attempts to read from the console it changes into the blocked state waiting for IO and gets put into the waiting queue for IO. The waiting queue is FIFO. Once the keyboard interrupt triggers the first process in the waiting queue for IO changes into the ready state. If multiple processes wait for keyboard IO and multiple keyboard interrupts get triggered, then the processes change their state to ready and get put into the waiting queue in the order they have entered the blocked waiting for IO queue. Which process actually gets to read the data first is decided by the scheduler, depending on which process gets set to the running state first.
+
+A console library has been implemented as well to make accessing the console easier by not having to manage the stack for the syscall manually. To make use of the library functions the library first has to be included by using the `.INCLUDE` directive as shown in the library examples.
 
 ### 1.3.1 Console Read Number
 
@@ -296,6 +298,103 @@ INT $0x80 ; Trigger interrupt for syscall
 ```
 
 In the previous example the string constant `stringTest` gets written to the console. The example puts the parameter for the file write onto the stack, including the file descriptor for the console. The string constant is used as buffer in this case. After the operation the string `Test` appears on the console and eax contains the success status of the operation.
+
+### 1.3.4 Console Library Read Number
+
+The console library function to read a number from the console has the following parameters and return values.
+
+Parameters: none
+
+Return value (immediate value):
+eax: The number read from the console
+ebx: Success status
+0 -> Success
+-1 -> No input ready
+-2 -> Could not parse number
+-3 -> Number does not fit into 32 bit DoubleWord
+
+``` Assembly
+.INCLUDE "os/include/console"
+CALL console_read_number
+```
+
+In the above example eax contains the number read from the console and ebx the status code of the operation after the library function call. If the console input buffer already contains data that can be parsed as number the call returns immediately without blocking, otherwise the program blocks until a keyboard interrupt gets triggered.
+
+### 1.3.5 Console Library Write Number
+
+The console library function to write a number to console has the following parameters and return values.
+
+Parameters (immediate value)
+ebx: Number to write to the console
+
+Return value: none
+
+``` Assembly
+.INCLUDE "os/include/console"
+MOV $10, %ebx ; Number to write to the console
+CALL console_write_number
+```
+
+In the above example the number 10 gets written to the console. The console write operations are non blocking.
+
+### 1.3.6 Console Library Read String
+
+The console library function to read a string from the console has the following parameters and return values.
+
+Parameters:
+eax: Amount of bytes to read from the cosnole
+ebx: Pointer to buffer
+
+Return value:
+eax: Success status
+\>=0 -> Number of bytes read  
+-1 -> Invalid file descriptor  
+-2 -> Seek position out of file bounds  
+-3 -> No console input ready
+
+The pointer to a buffer can be either the base address of a buffer or a memory address that references free space on the stack.
+
+``` Assembly
+.INCLUDE "os/include/console"
+
+.DATA
+.BUF 4 stringBuffer ; creates a four byte large buffer to store the string
+.CODE
+
+MOV $4, %eax ; Number of bytes to read from the console
+MOV $stringBuffer, %ebx ; Buffer to store the string
+
+CALL console_read_string ; Call the library function
+```
+
+In the above example the console library function gets used to read four byte of a string from the console and to store them in the buffer named `stringBuffer`. Similar to the other console read operations the program returns immediately if data is already present in the console buffer. If no data is present the program blocks until a keyboard interrupt gets triggered.
+
+### 1.3.7 Console Library Write String
+
+The console function to write a string to the console has the following parameters and return values.
+
+Parameters:
+eax: Amount of bytes to write to the console
+ebx: Pointer to the buffer that contains the data to write to the console
+
+Return value:
+eax: Success status
+\>=0 -> Number of bytes written  
+-1 -> Invalid file descriptor  
+-2 -> Seek position out of file bounds
+
+``` Assembly
+.INCLUDE "os/include/console"
+
+.CONST stringConstant "My string"
+
+MOV $9, %eax ; Amount of bytes to write to the console from the buffer
+MOV $stringConstant, %ebx ; Set the string constant as buffer to read from 
+
+CALL console_write_string ; Call the library function
+```
+
+In the above example the string "My string" gets written to the console. For write operations to the the console constants can be used as well as the content does not get modified. The program does not block as the operation is a write operation and the function returns immediately.
 
 ## 2 Interrupts
 
