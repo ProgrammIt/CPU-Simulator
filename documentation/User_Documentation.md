@@ -148,6 +148,20 @@ The previous example has been expanded to show that a string can be accessed lik
 The approach is the same as in the previous example with the exception that the memory pointer in eax, which contains the base memory address of the variable `string`, gets shifted by four byte.
 To shift the memory pointer by four byte in the `string` variable the `ADD` operation is used. The rest of the example is the same as previously.
 
+### 1.2.3 Modifiable Buffer
+
+Buffer are located in the data segment of a program, which is marked as writable in the page table and are initialized with zero in memory. As the buffer are modifiable and are located in the data segment, they are classified as variables. Similar to strings buffers can be accessed and manipulated as arrays.
+Analog to strings the size of a buffer has to be multiple of four bytes as the simulator is designed around 32-bit instructions and operands. If a buffer is not a multiple of four bytes the size is padded to the next four byte aligned size.
+The assembler replaces all occurrences of the symbolic buffer name in the program with the virtual memory start address of the buffer. The syntax to create a buffer is `.BUF <buffer size in byte> <buffer name>`.
+
+``` Assembly
+.DATA
+.BUF 3 myBuffer
+.CODE
+```
+
+The example above shows the creation of a three byte large buffer with the name `myBuffer`. The actual buffer size gets padded to four bytes as mentioned before.
+
 ## 1.3 Console IO
 
 The console has four different types of IO operations. These include writing a number to the console, reading a number from the console, writing a string to the console and reading a string from the console. Once the user has input data and presses the enter-key an interrupt is triggered, see [2.1.1 Keyboard Interrupt](#211-keyboard-interrupt) for details.
