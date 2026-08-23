@@ -162,6 +162,8 @@ The assembler replaces all occurrences of the symbolic buffer name in the progra
 
 The example above shows the creation of a three byte large buffer with the name `myBuffer`. The actual buffer size gets padded to four bytes as mentioned before.
 
+## 1.3 Syscalls
+
 ## 1.3 Console IO
 
 The console has four different types of IO operations. These include writing a number to the console, reading a number from the console, writing a string to the console and reading a string from the console. Once the user has input data and presses the enter-key an interrupt is triggered, see [2.1.1 Keyboard Interrupt](#211-keyboard-interrupt) for details.
@@ -431,7 +433,7 @@ Clicking anywhere inside the console window puts the selection focus on the writ
 
 ## 3 Operating System
 
-## 3.1 Time-slice Management
+### 3.1 Time-slice Management
 
 To fairly distribute processing time between multiple running processes the Ihme-Core simulator uses time-slice management. Each process gets a time slice of a certain length. In the Ihme-Core OS the time slice is implemented through a counter in the process control block.
 On boot the OS sets a periodic timer, the system timer. Each time the periodic timer runs out it sends an interrupt. The interrupt service routine decrements the time slice counter in the process control block of the currently running process. The time slice counter only gets decremented if the current running process is in the user mode. Once the time slice counter hits zero the process is put into the ready state and the scheduler picks a new process to run with a reset time slice counter.
@@ -444,3 +446,396 @@ The time slice counter uses periodic interrupts as unit of measurement and the p
 ```
 
 In this example three periodic timer interrupts can happen before the scheduler causes a context switch and 5 user instructions can be run before the periodic timer triggers a hardware interrupt.
+
+## 4 DEV Operations
+
+DEV operations are akin to hypercalls in a hypervisor. The DEV operations allow the operating system to directly talk to the simulator layer of the system. This includes interactions with the simulated hardware to change settings and also is used to interact with the filesystem of the system that the simulator is running on. DEV operations can be only used when the system is in the kernel mode. To use the a DEV operation the `DEV <operand1>, <operand2>` instruction has to be used. The first operand (`operand1`) determines which DEV operation is executed and is represented by an integer. Most DEV operations are used in conjunction with syscalls ([1.3 Syscalls](#13-syscalls)). Constants have been defined to make the use of the DEV operations easier, making it possible to address the DEV operation with a symbolic name. All listed DEV operations are non blocking operations.
+The following table gives an overview of the DEV operations by the defined symbolic name, the assigned integer, and the syscall they are used in if present. The syscalls that are not used in a syscall are used for system level management.
+
+| DEV operation | DEV number | Syscall |
+| :--- | ---: | :--- |
+| CONST_DEV_COMMAND_IO_SEEK | 0 | CONST_SYSCALL_FILE_SEEK |
+| CONST_DEV_COMMAND_IO_CLOSE | 1 | CONST_SYSCALL_FILE_CLOSE |
+| CONST_DEV_COMMAND_IO_READ_BUFFER | 2 | CONST_SYSCALL_FILE_READ |
+| CONST_DEV_COMMAND_IO_WRITE_BUFFER | 3 | CONST_SYSCALL_FILE_WRITE |
+| CONST_DEV_COMMAND_FILE_CREATE | 4 | CONST_SYSCALL_FILE_CREATE |
+| CONST_DEV_COMMAND_FILE_DELETE | 5 | CONST_SYSCALL_FILE_DELETE |
+| CONST_DEV_COMMAND_OPEN_FILE | 6 | CONST_SYSCALL_FILE_OPEN |
+| CONST_DEV_COMMAND_FILE_STAT | 7 | CONST_SYSCALL_FILE_STAT |
+| CONST_DEV_COMMAND_CONSOLE_PRINT_NUMBER | 8 | CONST_SYSCALL_CONSOLE_PRINT_NUMBER |
+| CONST_DEV_COMMAND_CONSOLE_READ_NUMBER | 9 | CONST_SYSCALL_CONSOLE_READ_NUMBER |
+| CONST_DEV_COMMAND_CPU_IS_MEMORY_VIRTUALIZATION_ENABLED | 10 | - |
+| CONST_DEV_COMMAND_CPU_ENABLE_MEMORY_VIRTUALIZATION | 11 | - |
+| CONST_DEV_COMMAND_CPU_DISABLE_MEMORY_VIRTUALIZATION | 12 | - |
+| CONST_DEV_COMMAND_TIMER_GET_FINISHED | 13 | - |
+| CONST_DEV_COMMAND_TIMER_SET | 14 | - |
+| CONST_DEV_COMMAND_PERIODIC_TIMER_SET | 15 | - |
+| CONST_DEV_COMMAND_CONSOLE_BUFFER_STATUS | 16 | - |
+| CONST_DEV_COMMAND_FRAME_MAPPED_SIGNAL | 17 | - |
+| CONST_DEV_COMMAND_FRAME_UNMAPPED_SIGNAL | 18 | - |
+| CONST_DEV_COMMAND_PERFORMANCE_TIMER_START | 19 | - |
+| CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP | 20 | - |
+
+## 4.1 IO Seek
+
+This DEV operation is used to seek inside a file in the filesystem of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_IO_SEEK, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: File descriptor
+
+Additional parameter on the stack:
+stack + 0: Seek Mode
+0 -> Seek from current position
+1 -> Seek from start of file
+2 -> Seek from end of file
+stack + 4: Offset
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: eax
+0 -> success
+-1 -> Invalid file descriptor
+-2 -> Seek position out of file bounds
+-3 -> Negative seek position
+
+## 4.2 IO Close
+
+This DEV operation is used to close an open file in the filesystem of the simulator. It can be called as follow:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_IO_CLOSE, <operand2>
+```
+
+The DEV operation uses the following parameter:
+operand2: File descriptor
+
+Return value: eax
+0 -> success
+-1 -> invalid file descriptor
+
+## 4.3 IO Read Buffer
+
+This DEV operation is used to read bytes from a file in the filesystem of the simulator or to read from the console of the simulator. The data gets stored in a buffer. If more bytes are requested to be read than the file, at the offset the file descriptor points to, then only as many bytes as are available get read. Trying to read more bytes than the buffer can store can lead to undefined behavior or cause a general protection fault. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_IO_READ_BUFFER, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: File descriptor
+0 -> Special file descriptor for console access
+
+Additional parameter on the stack:
+stack + 0: Buffer address
+stack + 4: Amount of bytes to read
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: eax
+\>= 0 -> Amount of bytes read
+-1 -> Invalid file descriptor
+-2 -> Invalid seek position
+-3 -> No console input ready
+
+## 4.4 IO Write Buffer
+
+This DEV operation is used to write bytes to a file in the filesystem of the simulator or to write to the console of the simulator. The data gets read from a buffer that acts as source, to write to the target. Trying to write more bytes to the target than the source buffer contains can lead to undefined behavior or cause a general protection fault. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_IO_WRITE_BUFFER, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: File descriptor
+0 -> Special file descriptor for console access
+
+Additional parameter on the stack:
+stack + 0: Buffer address
+stack + 4: Amount of bytes to write
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: eax
+\>= 0 -> Amount of bytes written
+-1 -> Invalid file descriptor
+-2 -> Invalid seek position
+
+## 4.5 File Create
+
+This DEV operation is used to create a file in the file system of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_FILE_CREATE, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Pointer to an address containing string with the filename
+
+Return value: eax
+\>= 0 -> Success
+-1 -> File already exists
+
+## 4.6 File Delete
+
+This DEV operation is used to delete a file in the filesystem of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_FILE_DELETE, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Pointer to an address containing string with the filename
+
+Return value: eax
+0 -> Success
+-1 -> File does not exist
+
+## 4.7 Open File
+
+This DEV operation is used to open a file in the filesystem of the Simulator. It returns a file descriptor for later use with other operations. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_OPEN_FILE, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Pointer to an address containing string with the filename
+
+Return value: eax
+\>= 0 -> File descriptor
+-1 -> Invalid filename
+
+## 4.8 File Stat
+
+This DEV operation is used to get the filesize of a file in the filesystem of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_FILE_STAT, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Pointer to an address containing string with the filename
+
+Return value: eax
+\>= 0 -> Filesize
+-1 -> File does not exist
+-2 -> Not a file
+
+## 4.9 Console Print Number
+
+This DEV operation is used to print a number to the console of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CONSOLE_PRINT_NUMBER, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Number to print on the console
+
+Return value: none
+
+## 4.10 Console Read Number
+
+This DEV operation is used to print a number to the console of the simulator. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CONSOLE_READ_NUMBER, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value:
+eax: Number read from the console
+ebx: Status
+0  -> Success
+-1 -> No input ready
+-2 -> Not a number
+-3 -> Number does not fit into a 32 bit DoubleWord
+
+## 4.11 Is Memory Virtualization Enabled
+
+This DEV operation queries if memory virtualization is enabled. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CPU_IS_MEMORY_VIRTUALIZATION_ENABLED, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value: eax
+0 -> Disabled
+1 -> Enabled
+
+## 4.12 Enable Memory Virtualization
+
+This DEV operation enables the memory virtualization. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CPU_ENABLE_MEMORY_VIRTUALIZATION, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value: none
+
+## 4.13 Disable Memory Virtualization
+
+This DEV operation disables the memory virtualization. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CPU_DISABLE_MEMORY_VIRTUALIZATION, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value: none
+
+## 4.14 Timer Get Finished
+
+This DEV operation is used to get the ID of a hardware timer that triggered an interrupt and ran out. The simulator has an internal list in case multiple timer finished counting down. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_TIMER_GET_FINISHED, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value:
+eax: ID of the finished timer
+
+## 4.15 Timer Set
+
+This DEV operation is used to setup a hardware timer with a specified start value to count down and an ID. The value of the timer is expressed in instructions in user mode. Each time an instruction is run in user mode, the timer is decremented by one. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The timer ID as integer
+
+Additional parameter on the stack:
+stack + 0: Timer start value
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: none
+
+## 4.16 Periodic Timer Set
+
+This DEV operation is used to set the periodic hardware timer. The DEV operation sets the interval in which the timer will trigger an interrupt. The interval is given in instruction in user mode. For each instruction that gets executed while the system is in user mode, the timer gets decremented by one. Once the interval is set, it does not need to be set again. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: Timer value in instructions as integer
+
+Return value: none
+
+## 4.17 Console Buffer Status
+
+This DEV operation is used to query the buffer status of the console buffer. It returns how many of the lines in the buffer can be parsed as number and how many as string. A line that only contains numbers can get parsed as number. At the same time a line that only contains numbers, can also be interpreted as a string and counts as both, as number and string. As soon as a line contains any symbol besides a number, it gets solely counted as string. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_CONSOLE_BUFFER_STATUS, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+
+Return value:
+eax: Amount of lines that can be parsed as number
+ebx: Amount of lines that can be interpreted as string
+
+## 4.18 Frame Mapped Signal
+
+This DEV operation is used to update the reverse memory map in the MMU, which is used by the GUI to find all virtual memory addresses, that point to a specific physical address, without walking the page table of each process. The DEV operation informs the simulator that a new page frame has been mapped. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_FRAME_MAPPED_SIGNAL, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The process ID of the process the frame is associated with
+
+Additional parameter on the stack:
+stack + 0: Physical memory address of the frame
+stack + 4: The virtual memory address the frame got mapped to
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: none
+
+## 4.19 Frame Unmapped Signal
+
+This DEV operation is used to update the reverse memory map in the MMU, which is used by the GUI to find all virtual memory addresses, that point to a specific physical address, without walking the page table of each process. The DEV operation informs the simulator that a page frame has been freed and  unmapped. It can be called as follows:
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_FRAME_UNMAPPED_SIGNAL, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The process ID of the process the frame is associated with
+
+Additional parameter on the stack:
+stack + 0: Physical memory address of the frame
+stack + 4: The virtual memory address the frame got mapped to
+
+The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+
+Return value: none
+
+## 4.20 Performance Timer Start
+
+The performance timer is a special timer that is used to measure the execution time between starting and stopping the timer. The purpose of the timer is to measure performance changes when changing the implementation OS components.
+This DEV operation is used to start the performance timer with a specific ID.
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The ID of the timer as integer
+
+## 4.21 Performance Timer Stop
+
+The performance timer is a special timer that is used to measure the execution time between starting and stopping the timer. The purpose of the timer is to measure performance changes when changing the implementation OS components.
+This DEV operation is used to stop the performance timer with a specific ID. If there is no performance timer currently running with the given ID, then an error is thrown.
+
+``` Assembly
+DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, <operand2>
+```
+
+The DEV operation uses the following parameter:
+
+operand2: The ID of the timer as integer
