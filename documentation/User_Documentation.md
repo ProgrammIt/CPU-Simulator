@@ -47,8 +47,8 @@ MOV $myStringConst, %eax
 
 ## 1.2 Symbolic Variables
 
-Symbolic variables can either store an integer or a string. The actual value of the variables get stored in the data segment, which is writable in user mode. For more detail about the layout of a program in memory see 
-# PLACEHOLDER.
+Symbolic variables can either store an integer or a string. The actual value of the variables get stored in the data segment, which is writable in user mode. For more detail about the layout of a program in memory see [5 Ihme Core Executable Files](#5-ihme-core-executable-files).
+
 By convention the variables should be defined and declared between the `.DATA` and the `.CODE` label in the program text.
 
 ### 1.2.1 Symbolic Integer Variables
@@ -839,3 +839,62 @@ DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, <operand2>
 The DEV operation uses the following parameter:
 
 operand2: The ID of the timer as integer
+
+## 5 Ihme Core Executable Files
+
+To load a program as process in the simulator it needs to be compiled into a binary file. Both operations can be executed through the GUI. The programs that are run by the simulator are split into different segments. Currently three segments are implemented. The text segment, the rodata segment and the data segment.
+The text segment contains the actual program code that gets executed by the simulator. Once the segment is loaded by the operating system it is marked as executable in the page table. Since the segment is only marked as executable it is write protected by default, preventing the program from changing itself by writing into the text segment.
+The rodata (read only data) segment is used for constants. This segment is neither executable nor writable. Only read access is permitted, as the name implies. This ensures that the constants are not modifiable.
+The data segment is dedicated to writable data, such as [symbolic integer variables](#121-symbolic-integer-variables), [symbolic string variables](#122-symbolic-string-variables) and the [modifiable buffer](#123-modifiable-buffer). Since the segment is marked as read-write (RW) in the page table once the program is loaded into memory, this data can be altered at runtime. Leaving the executable bit unset protects the simulator from arbitrary code execution. This is especially relevant if the buffer is used to store data that is read from a file, which could contain executable code.
+
+The simulator uses a custom format to structure the binary files, the so called ICE-format (Ihme Core Executable). These files have a specific structure and need to end in the file extension `.bin`.
+
+The following table shows the file structure of an ICE-file:
+
+### ICE File Layout
+
+| ICE-File Structure |
+| :---: |
+| ICE Header |
+| Program Header |
+| Text Segment |
+| Rodata Segment |
+| Data Segment |
+
+As the table shows, the files are split into metadata, such as the ICE header and the program header and the different segments segments.
+
+The ICE header is structured as shown in the following table:
+
+### ICE Header Layout
+
+| Offset (DWORD) | Function |
+| ---: | :--- |
+| 0 | Magic Number (0x7F 49 43 45) |
+| 1 | Program Header Offset (Byte) |
+| 2-7 | Reserved |
+
+The ICE header is eight doublewords (32 byte) large and contains important metadata about the file content. The first 32-bit doubleword in the ICE header contains the magic number. The magic number is used by the operating system, while the program gets loaded, to test and verify if the binary file is valid and contains an executable program. If the magic number is not present or different from the expected value, then the loading gets canceled immediately.
+The second doubleword contains the offset at which the program header can be found inside the ICE-file. The offset is given in byte. The last six doublewords are reserved for future implementations.
+
+The program header contains the metadata about how the program segments are organized inside the binary file and how they have to be loaded into memory once the program gets loaded. It is made up out of 16 doublewords (64 byte). The full structure of the program header is shown in the following table:
+
+### Program Header Layout
+
+| Offset (DWORD) | Function |
+| ---: | :--- |
+| 0 | Required L2 Page Tables |
+| 1 | Text Segment Virt. Base Address |
+| 2 | Text Segment Offset (Byte) |
+| 3 | Text Segment Size (Byte) |
+| 4 | Rodata Segment Virt. Base Address |
+| 5 | Rodata Segment Offset (Byte) |
+| 6 | Rodata Segment Size (Byte) |
+| 7 | Data Segment Virt. Base Address |
+| 8 | Data Segment Offset (Byte) |
+| 9 | Data Segment Size (Byte) |
+| 10-15 | Reserved |
+
+The first doubleword contains the amount of L2 page tables that the operating system needs to load, so that all segments of the program can be mapped into memory. This was an optimization that has been done to minimize the complexity of the code that loads the program.
+The other entries contain the information about the program segments. Each segment has a virtual memory base address. This base address describes where the segment gets mapped in the virtual address space of the program when it is loaded into memory. This virtual base address is always aligned to a page boarder (4 KiB aligned).
+The offset for each segment describes where the segment is located inside the binary file. The offset is given in bytes and is used by the code that loads the program to find the segment in the binary file. Finally the segment size describes how large the segment is inside the binary file, so the program loader knows when to stop reading the segment data into memory.
+The last six doublewords are reserved for future implementations and feature expansions.
