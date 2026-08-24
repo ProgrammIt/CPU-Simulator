@@ -23,7 +23,7 @@ describe("Test TLB", () => {
     const pageTableEntry3: PageTableEntry = PageTableEntry.fromFlagAndFrameNumber(flagBits3, frameNbr3);
     
     test("Insert first entry", () => {
-        translationLookasideBuffer.insert([pageNbr1, pageTableEntry1]);
+        translationLookasideBuffer.insert(pageNbr1, pageTableEntry1);
 
         expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
     });
@@ -34,7 +34,7 @@ describe("Test TLB", () => {
     });
 
     test("Insert second entry", () => {
-        translationLookasideBuffer.insert([pageNbr2, pageTableEntry2]);
+        translationLookasideBuffer.insert(pageNbr2, pageTableEntry2);
         expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
         expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
     });
@@ -46,7 +46,7 @@ describe("Test TLB", () => {
     });
 
     test("Insert third entry", () => {
-        translationLookasideBuffer.insert([pageNbr3, pageTableEntry3]);
+        translationLookasideBuffer.insert(pageNbr3, pageTableEntry3);
         expect(translationLookasideBuffer.get(pageNbr1)).toEqual(pageTableEntry1);
         expect(translationLookasideBuffer.get(pageNbr2)).toEqual(pageTableEntry2);
         expect(translationLookasideBuffer.get(pageNbr3)).toEqual(pageTableEntry3);

@@ -249,20 +249,38 @@ const createWindow = (): void => {
 	let pathToLanguageDefinition: string;
 	let pathToOSFilesystem: string;
 	if (app.isPackaged) {
-		pathToLanguageDefinition = `${process.resourcesPath}/settings/language_definition.json`;
+		pathToLanguageDefinition = path.join(process.resourcesPath, "settings", "language_definition.json");
+		pathToOSFilesystem = path.join(app.getPath("userData"), "os_filesystem");
 
-  		const resourcePath = `${process.resourcesPath}/os_filesystem`;
-		const userPath = `${app.getPath("userData")}/os_filesystem`;
+		const pathToVersionFile = path.join(app.getPath("userData"), "version");
+		const currentVersion = app.getVersion();
 
-		// copy once on first run
-		if (!fs.existsSync(userPath)) {
-			fs.cpSync(resourcePath, userPath, { recursive: true });
+		if (!fs.existsSync(pathToVersionFile)) {
+			fs.writeFileSync(pathToVersionFile, currentVersion, "utf8");
 		}
 
-		pathToOSFilesystem = userPath;
+		if (fs.readFileSync(pathToVersionFile, "utf8").trim() !== currentVersion || !fs.existsSync(pathToOSFilesystem)) {
+			fs.writeFileSync(pathToVersionFile, currentVersion, "utf8");
+
+			if (!fs.existsSync(pathToOSFilesystem)) {
+				fs.mkdirSync(pathToOSFilesystem);
+			}
+
+			const pathToIntenalOSFilesystem =  path.join(process.resourcesPath, "os_filesystem");
+
+			if (!fs.existsSync(path.join(pathToOSFilesystem, "home"))) {
+				fs.cpSync(path.join(pathToIntenalOSFilesystem, "home"), path.join(pathToOSFilesystem, "home"), { recursive: true });
+			}
+
+			if (!fs.existsSync(path.join(pathToOSFilesystem, "bin"))) {
+				fs.mkdirSync(path.join(pathToOSFilesystem, "bin"));
+			}
+
+			fs.cpSync(path.join(pathToIntenalOSFilesystem, "os"), path.join(pathToOSFilesystem, "os"), { recursive: true });
+		}
 	} else {
-		pathToLanguageDefinition = process.cwd() +  "/settings/language_definition.json";
-		pathToOSFilesystem = process.cwd() + "/os_filesystem";
+		pathToLanguageDefinition = path.join(process.cwd(), "settings", "language_definition.json");
+		pathToOSFilesystem = path.join(process.cwd(), "os_filesystem");
 	}
 	
 	const simulator = SimulationController.getInstanceOrCreate(

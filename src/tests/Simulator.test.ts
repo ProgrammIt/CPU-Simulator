@@ -16,7 +16,7 @@ describe('Test Simulator', () => {
     console.timeEnd("init");
 
     console.time("load");
-    simulator.createProcess(simulator.pathToOSFilesystem + "/home/examples/loop.asm");
+    simulator.createProcess(simulator.pathToOSFilesystem + "/testing/loop.asm");
     console.timeEnd("load");
 
     console.time("execution");

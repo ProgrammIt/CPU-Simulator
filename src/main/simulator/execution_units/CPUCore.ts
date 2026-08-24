@@ -464,7 +464,7 @@ export class CPUCore {
         if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode())
         {
             const currentOperation:string = OpCode[operation];
-            logText = this.getLogText(currentOperation)
+            logText = this.getLogText(currentOperation);
         }
 
         if (DebugLogger.isLoggingEnabled()) {
@@ -638,8 +638,7 @@ export class CPUCore {
                 );
                 break;
             case OpCode.NOP:
-                this.nop();
-                break;
+                return;
             case OpCode.CALL:
                 this.call(this._decodedInstruction.operand1!);
                 break;
@@ -1019,8 +1018,6 @@ export class CPUCore {
                 throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
             }
         }
-
-        return;
     }
 
     /**
@@ -1089,7 +1086,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1134,7 +1130,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1180,7 +1175,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1225,7 +1219,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1272,7 +1265,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1319,7 +1311,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1364,7 +1355,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1409,7 +1399,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1458,7 +1447,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /*
@@ -1498,7 +1486,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1543,7 +1530,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1588,7 +1574,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1633,7 +1618,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1668,7 +1652,6 @@ export class CPUCore {
         } else {
             this.writeRegister(result, target);
         }
-        return;
     }
 
     /**
@@ -1708,7 +1691,6 @@ export class CPUCore {
         // Perform the CMP operation
         this.alu.cmp(firstOperandsValue, secondOperandsValue);
         // Both operands are read-only, so no need to write the result back.
-        return;
     }
 
     /**
@@ -1748,7 +1730,6 @@ export class CPUCore {
         // Perform the TEST operation.
         this.alu.test(secondOperandsValue, firstOperandsValue);
         // Both operands are read-only, so no need to write the result back.
-        return;
     }
 
     /*
@@ -1774,7 +1755,6 @@ export class CPUCore {
         // Load the given virtual address into the instruction pointer in order to perform the jump.
         this.eip.content = target.value;
         // The jump is automatically performed by the instruction fetcher. There is no need to return something.
-        return;
     }    
 
     /**
@@ -2167,7 +2147,6 @@ export class CPUCore {
         } else {
             this.writeRegister(valueToMove, target);
         }
-        return;
     }
 
     /**
@@ -2208,7 +2187,6 @@ export class CPUCore {
         } else {
             this.writeRegister(address, target);
         }
-        return;
     }
 
     /*
@@ -2220,7 +2198,6 @@ export class CPUCore {
      */
     private clc(): void {
         this.flags.clearCarry();
-        return;
     }
 
     /**
@@ -2233,7 +2210,6 @@ export class CPUCore {
         } else {
             this.flags.setCarry();
         }
-        return;
     }
 
     /**
@@ -2241,7 +2217,6 @@ export class CPUCore {
      */
     private stc(): void {
         this.flags.setCarry();
-        return;
     }
 
     /**
@@ -2254,10 +2229,8 @@ export class CPUCore {
         if (!this.flags.isInKernelMode()) {
             // CPU is not in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-            return;
         }
         this.flags.clearInterrupt();
-        return;
     }
 
     /**
@@ -2269,10 +2242,8 @@ export class CPUCore {
         if (!this.flags.isInKernelMode()) {
             // CPU is not in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-            return;
         }
         this.flags.setInterrupt();
-        return;
     }
 
     /*
@@ -2288,7 +2259,6 @@ export class CPUCore {
         if (!this.flags.isInKernelMode()) {
             // CPU is not in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-            return;
         }
         // Check whether ESP reached lowest address (top) of STACK segment.
         // if (this.esp.content.equal(Doubleword.fromInteger(this._lowestAddressOfStackDec))) {
@@ -2299,8 +2269,6 @@ export class CPUCore {
         this.esp.content = DoubleWord.fromNumber(this.esp.content - 4);
         // Write contents of flags register on STACK.
         this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.fromNumber(this.flags.content), false);
-
-        return;
     }
 
     /**
@@ -2313,7 +2281,6 @@ export class CPUCore {
         if (!this.flags.isInKernelMode()) {
             // CPU is not in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-            return;
         }
         // Check whether ESP reached highest address (bottom) of STACK segment.
         // if (this.esp.content.equal(Doubleword.fromInteger(this._highestAddressOfStackDec))) {
@@ -2329,7 +2296,6 @@ export class CPUCore {
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
 
         this.flags.content = DoubleWord.getFourthByte(content);
-        return;
     }
 
     /**
@@ -2338,7 +2304,7 @@ export class CPUCore {
      * @param target This operand defines where to put the red binary value from the STACK to.
      * @throws {ExceptionError} If an exception was generated
      */
-    public pop(target: InstructionOperand) {
+    public pop(target: InstructionOperand): void {
         // Check whether ESP reached highest address (bottom) of STACK segment.
         // if (this.esp.content.equal(Doubleword.fromInteger(this._highestAddressOfStackDec))) {
         //     // ESP reached highest address (bottom) of STACK segment.
@@ -2364,7 +2330,6 @@ export class CPUCore {
         // Deallocate one doubleword from STACK by incrementing the value in ESP.
         this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
-        return;
     }
 
     /**
@@ -2400,7 +2365,6 @@ export class CPUCore {
         }
         // Write the value to the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, value, false);
-        return;
     }
 
     /*
@@ -2413,10 +2377,9 @@ export class CPUCore {
      * this method writes a return address onto the STACK. Afterwards the (virtual) address gets loaded into the instruction pointer 
      * (EIP) register and control is transfered to the callee (targeted subroutine).
      * @param target This operand defines the (virtual) base address of the subroutine to call.
-     * @returns True if jump was performed, which is always the case.
      * @throws {ExceptionError} If an exception was generated
      */
-    private call(target: InstructionOperand): boolean {
+    private call(target: InstructionOperand): void {
         // Check if the source operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2447,23 +2410,20 @@ export class CPUCore {
         } else {
             this.eip.content = this.readRegister(target);
         }
-        return true;
     }
 
     /**
      * This method returns from a subroutine. It reads the return address from the STACK and transfers
      * control to the caller, by loading the return address into the instruction pointer (EIP) register.
      * @throws {ExceptionError} If an exception was generated
-     * @returns Always returns true to indicate a jump was performed.
      */
-    private ret(): boolean {
+    private ret(): void {
         // Read the return address from the STACK.
         this.eip.content = this.mmu.readDoublewordFrom(this.esp.content, false);
         // Deallocate one doubleword from the STACK by incrementing ESP.
         this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
 
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
-        return true;
     }
 
     /*
@@ -2480,10 +2440,9 @@ export class CPUCore {
      * interrupted, the interrupt flag is cleared as well. Afterwards the handler is called. 
      * The call follows the same rules as a normal function call.
      * @param target The interrupt handlers number.
-     * @returns Always returns true to indicate a jump was performed.
      * @throws {ExceptionError} If an exception was generated
      */
-    public int(target: InstructionOperand): boolean {
+    public int(target: InstructionOperand): void {
         // Check if exactly one operand is present and it is Immediate.
         if (target.type !== EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2538,7 +2497,6 @@ export class CPUCore {
         this.mmu.writeDoublewordTo(this.esp.content, returnAddress, false);
         // Jump into subroutine at the interrupt handlers address.
         this.eip.content = interruptHandler;
-        return true;
     }
 
     /**
@@ -2614,8 +2572,7 @@ export class CPUCore {
                 EncodedOperandTypes.MEMORY_ADDRESS, 
                 systemSubroutineAddress)
         );
-        return;
-    }
+    }   
 
     /**
      * This method returns from a systems subroutine. It reads the return address from the STACK
@@ -2635,7 +2592,6 @@ export class CPUCore {
         this.popf();
         // Switch back to user mode.
         this.flags.enterUserMode();
-        return;
     }
 
     /*
@@ -2643,26 +2599,17 @@ export class CPUCore {
      */
 
     /**
-     * This method does nothing.
-     */
-    private nop(): void {
-        return;
-    }
-
-    /**
      * This method invalidates the TLB
      * @throws {ExceptionError} If an exception was generated
      */
     private invtlb(): void {
-               // Check whether CPU is in kernel mode.
+        // Check whether CPU is in kernel mode.
         if (!this.flags.isInKernelMode()) {
             // CPU is not in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
         }
 
         this.mmu.invalidateTLB();
-
-        return;
     }
     
     /**
@@ -2674,15 +2621,14 @@ export class CPUCore {
      * @returns The red binary value.
      */
     private writeRegister(value: DoubleWord, operand: InstructionOperand): void {
-        if (operand.type === EncodedOperandTypes.REGISTER_INDIRECT) {
+        if (operand.type === EncodedOperandTypes.REGISTER_DIRECT) {
+            this.writeRegisterDirect(value, operand.value);
+        } else if (operand.type === EncodedOperandTypes.REGISTER_INDIRECT) {
             const register: Register<DoubleWord> = this.decodeWritableRegister(operand.value);
             this.mmu.writeDoublewordTo(register.content, value, false);       
-        } else if (operand.type === EncodedOperandTypes.REGISTER_DIRECT) {
-            this.writeRegisterDirect(value, operand.value);
         } else {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
-        return;
     }
 
     /**
@@ -2707,10 +2653,9 @@ export class CPUCore {
         } else if (register === this.vmtpr && !this.flags.isInKernelMode()) {
             // Writing to the VMPTR register is only allowed in kernel mode.
             throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-        } else {
-            // Write the doubleword to the register.
-            register.content = value;
         }
+        // Write the doubleword to the register.
+        register.content = value;
     }
 
     /**
@@ -2722,17 +2667,14 @@ export class CPUCore {
      * @returns The binary value red from the register or the referenced (virtual) memory address.
      */
     private readRegister(operand: InstructionOperand): DoubleWord {
-        let doubleword: DoubleWord;
-        if (operand.type === EncodedOperandTypes.REGISTER_INDIRECT) {
+        if (operand.type === EncodedOperandTypes.REGISTER_DIRECT) {
+            return this.readRegisterDirect(operand.value);
+        } else if (operand.type === EncodedOperandTypes.REGISTER_INDIRECT) {
             const address: DoubleWord = this.decodeReadableRegister(operand.value).content;
-            doubleword = this.mmu.readDoublewordFrom(address, false);        
-        } else if (operand.type === EncodedOperandTypes.REGISTER_DIRECT) {
-            doubleword = this.readRegisterDirect(operand.value);
+            return this.mmu.readDoublewordFrom(address, false);        
         } else {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
-
-        return doubleword;
     }
 
     /**
@@ -2754,45 +2696,32 @@ export class CPUCore {
      * @returns The decoded register.
      */
     private decodeReadableRegister(registerNumber: number): Register<DoubleWord> {
-        let register: Register<DoubleWord> = this.eax;
         switch (registerNumber) {
             case RegisterNumbers.EAX:
-                register = this.eax;
-                break;
+                return this.eax;
             case RegisterNumbers.EBX:
-                register = this.ebx;
-                break;
+                return this.ebx;
             case RegisterNumbers.ECX:
-                register = this.ecx;
-                break;
+                return this.ecx;
             case RegisterNumbers.EDX:
-                register = this.edx;
-                break;
+                return this.edx;
             case RegisterNumbers.EIP:
-                register = this.eip;
-                break;
+                return this.eip;
             case RegisterNumbers.EIR:
-                register = this.eir;
-                break;
+                return this.eir;
             case RegisterNumbers.ESP:
-                register = this.esp;
-                break;
+                return this.esp;
             case RegisterNumbers.PTP:
-                register = this.ptp;
-                break;
+                return this.ptp;
             case RegisterNumbers.ITP:
-                register = this.itp;
-                break;
+                return this.itp;
             case RegisterNumbers.NPTP:
-                register = this.nptp;
-                break;
+                return this.nptp;
             case RegisterNumbers.VMPTR:
-                register = this.vmtpr;
-                break;
+                return this.vmtpr;
             default:
                 throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
-        return register;
     }
 
     /**
@@ -2803,42 +2732,30 @@ export class CPUCore {
      * @returns The decoded register.
      */
     private decodeWritableRegister(registerNumber: number): Register<DoubleWord> {
-        let register: Register<DoubleWord> = this.eax;
         switch (registerNumber) {
             case RegisterNumbers.EAX:
-                register = this.eax;
-                break;
+                return this.eax;
             case RegisterNumbers.EBX:
-                register = this.ebx;
-                break;
+                return this.ebx;
             case RegisterNumbers.ECX:
-                register = this.ecx;
-                break;
+                return this.ecx;
             case RegisterNumbers.EDX:
-                register = this.edx;
-                break;
+                return this.edx;
             case RegisterNumbers.EIP:
-                register = this.eip;
-                break;
+                return this.eip;
             case RegisterNumbers.ESP:
-                register = this.esp;
-                break;
+                return this.esp;
             case RegisterNumbers.PTP:
-                register = this.ptp;
-                break;
+                return this.ptp;
             case RegisterNumbers.ITP:
-                register = this.itp;
-                break;
+                return this.itp;
             case RegisterNumbers.NPTP:
-                register = this.nptp;
-                break;
+                return this.nptp;
             case RegisterNumbers.VMPTR:
-                register = this.vmtpr;
-                break;
+                return this.vmtpr;
             default:
                 throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
-        return register;
     }
 
     /**

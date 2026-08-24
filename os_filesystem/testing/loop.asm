@@ -9,6 +9,7 @@ MOV $100, %eax      ; Kopiere den Wert 100 in das Register eax.
 
 ; Ende des Programms. Das Ergebnis steht in Register eax.
 
+MOV $0x12345678, %edx ; notify the simulator (for the Siulator.test.ts test)
 MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
 INT $0x80 ; Exit Syscall
 

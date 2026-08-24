@@ -11,7 +11,7 @@ export class TranslationLookasideBuffer {
         this.tlb[0] = 1;
     }
 
-    public insert([pageNumber, entry]: [PageNumber, PageTableEntry]): void {
+    public insert(pageNumber: PageNumber, entry: PageTableEntry): void {
         const index = (pageNumber & (this.TLB_ENTRIES - 1)) * 2;
 
         this.tlb[index] = pageNumber;

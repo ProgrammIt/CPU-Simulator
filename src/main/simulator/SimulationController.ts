@@ -125,8 +125,6 @@ export class SimulationController {
         const buffer = readFileSync(this.pathToOSFilesystem + "/os/bin/ihmeOS.bin");
 
         const metatdata: ProgramMetadata = ProgramMetadata.fromBuffer(buffer);
-
-        const programHeaderOffset = ProgramMetadata.getProgramHeaderOffset(metatdata); //ice header position for program header offset
         
         // load text segment
         const codeFileOffset = ProgramMetadata.getTextSegmentFileOffset(metatdata); //header position for code offset in binary

@@ -220,7 +220,7 @@ export class MemoryManagementUnit {
 
         if (!ignorePermissionFlags) {
             // Check if the page frame is accessable only in kernel mode.
-            if (!this._cpu.flags.isInKernelMode() && PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags)) {
+            if (this._cpu.flags.isInUserMode() && PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags)) {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
             // Check if the page frames contents are executable.
@@ -233,7 +233,7 @@ export class MemoryManagementUnit {
             }
         }
         
-        if (attemptsToWrite) {
+        if (attemptsToWrite && !PageTableEntryFlags.hasChanged(pageTableEntryFlags)) {
             // Set changed flag bit.
             PageTableEntryFlags.setChangedFlagBit(pageTableEntryFlags, 1);
             // Update flag bits of page table entry in memory as well.
@@ -242,7 +242,7 @@ export class MemoryManagementUnit {
 
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
         if (!disableTlb) {
-            this._tlb.insert([pageNumber, pageTableEntry]);
+            this._tlb.insert(pageNumber, pageTableEntry);
         }
 
         return PhysicalAddress.fromPageTableEntryAndVirtualAddress(pageTableEntry, virtualAddress);
@@ -284,8 +284,7 @@ export class MemoryManagementUnit {
      * @returns The page table entry that was searched for.
      */
     private findPageTableEntry(virtualAddress: VirtualAddress): PageTableEntry {
-        const pageTableEntry: DoubleWord = this._cpu.mainMemory.readDoublewordFrom(this.findPageTableEntryPhysicalAddress(virtualAddress)) as PageTableEntry;
-        return pageTableEntry;
+        return this._cpu.mainMemory.readDoublewordFrom(this.findPageTableEntryPhysicalAddress(virtualAddress)) as PageTableEntry;
     }
 
     /**
