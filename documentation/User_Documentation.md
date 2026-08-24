@@ -6,13 +6,13 @@
 
 ### 1.1.1 Symbolic Integer Constants
 
-Symbolic integer constants can store a 32 bit integer value and can be defined as follows:
+Symbolic integer constants can store a 32-bit integer value and can be defined as follows:
 
 ``` Assembly
 .CONST myIntConst 5
 ```
 
-The assembler stores the integer value and replaces all occurrences of the symbolic integer constant in the assembly code with their actual value.
+The assembler stores the integer value and replaces all occurrences of the symbolic integer constant in the assembly code with its actual value.
 
 The symbolic name of the integer constant can then be used like a normal integer value in the assembly code.
 Here is an example of writing the previously defined integer constant into the EAX register:
@@ -25,21 +25,21 @@ This writes the value 5 into the EAX register.
 
 ### 1.1.2 Symbolic String Constants
 
-Symbolic string constants are treated a bit differently than symbolic integer constants and can be defined as follows:
+Symbolic string constants are treated slightly differently from symbolic integer constants and can be defined as follows:
 
 ``` Assembly
 .CONST myStringConst "I am a string."
 ```
 
-The given string is stored as a UTF-8 encoded and null terminated array in the read only (rodata) segment of the program in memory.
-By being placed in the rodata segment the constants are write protected and read only as the name implies.
+The given string is stored as a UTF-8-encoded and null-terminated array in the read-only (`.rodata`) segment of the program in memory.
+Because they are placed in the `.rodata` segment, these constants are write-protected and read-only, as the name implies.
 
-In case that the length of the encoded string is not divisible by four bytes, its storage is rounded up to a multiple of four bytes. This is due to the current CPU simulator design using fixed 32 bit instructions and operands. The unused rest of the four bytes storage at the end of such a string is filled by bytes with a zero value, so some memory overhead is expected.
+If the length of the encoded string is not divisible by four bytes, its storage is rounded up to a multiple of four bytes. This is because the CPU simulator design uses fixed 32-bit instructions and operands. Any remaining unused bytes in the 4-byte block are padded with zeros, so some memory overhead is expected.
 
-The assembler replaces the symbolic name of the string constant with the virtual memory start address of the string array in the rodata segment. The encoding of the first character in the string starts at the lowest virtual memory address.
+The assembler replaces the symbolic name of the string constant with the starting virtual memory address of the string array in the `.rodata` segment. The encoding of the first character in the string starts at the lowest virtual memory address.
 
 The symbolic name of the string constant can then be used like a memory address in the assembly code.
-Here is an example of writing the (start) virtual memory address of the previously defined string constant into the EAX register:
+Here is an example of writing the starting virtual memory address of the previously defined string constant into the EAX register:
 
 ``` Assembly
 MOV $myStringConst, %eax
@@ -47,7 +47,7 @@ MOV $myStringConst, %eax
 
 ## 1.2 Symbolic Variables
 
-Symbolic variables can either store an integer or a string. The actual value of the variables get stored in the data segment, which is writable in user mode. For more detail about the layout of a program in memory see [5 Ihme Core Executable Files](#5-ihme-core-executable-files).
+Symbolic variables can store either an integer or a string. The actual values of the variables get stored in the data segment, which is writable in user mode. For more details about the layout of a program in memory, see [5 Ihme Core Executable Files](#5-ihme-core-executable-files).
 
 By convention the variables should be defined and declared between the `.DATA` and the `.CODE` label in the program text.
 
@@ -62,9 +62,8 @@ Symbolic integer variables can store a 32-Bit integer value. They can be created
 .CODE
 ```
 
-The variable is initialized with zero internally if no value is given, like shown for the first variable above, otherwise it is initialized with the given numerical value.
-The assembler replaces all occurrences of the symbolic name of the integer variable with the virtual memory address which points to the memory that contains the variable value.
-The memory address is the pointer to the memory that contains the actual variable content.
+If no value is given, the variable is internally initialized with zero, as shown for the first variable above; otherwise, it is initialized with the given numerical value.
+The assembler replaces all occurrences of the symbolic name of the integer variable with the virtual memory address that points to the memory containing the variable's value.
 
 Accessing and reassigning the value of a symbolic integer variable can be done as follows:
 
@@ -73,9 +72,9 @@ MOV $intVariable, %eax ; move the memory address that contains the variable valu
 MOV $10, *%eax ; moves the value 10 into the memory which eax points to
 ```
 
-In the above example the value 10 is assigned to the symbolic integer variable `intVariable`.
-First the virtual memory address that points to the memory containing the variable value is moved into eax.
-In the second step the value 10 gets moved to the actual memory content that contains the variable by dereferencing the memory address in eax and moving the new value into it.
+In the above example, the value 10 is assigned to the symbolic integer variable `intVariable`.
+First, the virtual memory address that points to the variable's value is moved into EAX.
+In the second step, the value 10 is moved into the actual memory location of the variable by dereferencing the memory address in EAX and moving the new value into it.
 The symbolic name can be used like a normal memory address.
 
 ### 1.2.2 Symbolic String Variables
@@ -88,17 +87,17 @@ Symbolic string variables are used to store a string in memory. They can be defi
 .CODE
 ```
 
-In the current implementation the string is encoded in UTF-8 and stored in a null terminated array of bytes in the data segment of the program.
+In the current implementation, the string is encoded in UTF-8 and stored as a null-terminated array of bytes in the data segment of the program.
 
-The assembler replaces the symbolic name of the string variables in the assembly code with the virtual memory address which points to the location in the data segment that contains the string value. The virtual memory address is the start address of the array of bytes that encodes the string. Analog to string constants the size of a string gets rounded up to the next four byte aligned size if the encoded string size is not divisible by four. The padding to achieve the needed length is done by adding null bytes to the end of the string. The symbolic name can be used like a normal memory address.
+The assembler replaces the symbolic name of the string variable in the assembly code with the virtual memory address that points to the location in the data segment containing the string value. The virtual memory address is the start address of the byte array that encodes the string. Analogous to string constants, the size of a string is rounded up to the next 4-byte-aligned size if the encoded string size is not divisible by four. The padding to achieve the needed length is done by adding null bytes to the end of the string. The symbolic name can be used like a normal memory address.
 
 ``` Assembly
 MOV $stringVariable, %eax
 ```
 
-In the above example the virtual memory start address of the `stringVariable` is written into the EAX register.
+In the above example, the starting virtual memory address of `stringVariable` is written into the EAX register.
 
-Similarly to integer variables the content of string variables can be manipulated by writing to the memory that the virtual memory address points to.
+Similar to integer variables, the content of string variables can be manipulated by writing to the memory that the virtual memory address points to.
 
 ``` Assembly
 .DATA
@@ -115,16 +114,16 @@ OR %ecx, %ebx ; combines the utf-8 encoded "i" with utf-8 encoded "Foo" in ebx (
 MOV %ebx, *%eax ; Writes the content of ebx into the string variable string
 ```
 
-The example above shows how to overwrite parts of one string with another string. Since register are 32 bit a MOV instruction always moves four byte of the string content when accessing it.
+The example above shows how to overwrite parts of one string with another string. Since registers are 32-bit, a `MOV` instruction always moves four bytes of the string content when accessing it.
 
-In the example the null terminator of the string `newValue` would overwrite the "i" in "String" of the variable `string`. One solution is to take the first four UTF-8 encoded characters of `string`and masking the last byte, which is the UTF-8 encoded "i".
-The masking is achieved by the `AND` operation with the `0xFF` bitmask, setting every byte in the register to zero except the UTF-8 encoded "i".
+In the example, the null terminator of the string `newValue` would overwrite the "i" in "Strings" of the variable `string`. One solution is to take the first four UTF-8-encoded characters of `string` and mask the last byte, which is the UTF-8-encoded "i".
+The masking is achieved by the `AND` operation with the `0xFF` bitmask, setting every byte in the register to zero except the UTF-8-encoded "i".
 
-In the next step the "i" can be combined with the content of ebx, which is null terminated "Foo".
-The `OR` operation can be applied immediately as the null terminator in UTF-8 is a single zero byte.
-After the `OR` operation ebx contains "Fooi" which can now be written into the string variable `string` resulting in "Fooings are cool" in memory.
-Similarly other parts of strings can be extracted, overwritten and manipulated.
-To overwrite or copy strings that are larger than a register a loop has to be used.
+In the next step, the "i" can be combined with the content of EBX, which is the null-terminated "Foo".
+The `OR` operation can be applied immediately, as the null terminator in UTF-8 is a single zero byte.
+After the `OR` operation, EBX contains "Fooi", which can now be written into the string variable string, resulting in "Fooings are cool" in memory.
+Similarly, other parts of strings can be extracted, overwritten, and manipulated.
+To overwrite or copy strings that are larger than a register, a loop has to be used.
 
 ``` Assembly
 .DATA
@@ -144,14 +143,15 @@ OR %ecx, %ebx ; combines the utf-8 encoded " " with utf-8 encoded "Foo" in ebx (
 MOV %ebx, *%eax ; Writes the content of ebx into the string variable string
 ```
 
-The previous example has been expanded to show that a string can be accessed like an array. To demonstrate the last three characters of "Strings" in the variable `string` get overwritten by "Foo".
-The approach is the same as in the previous example with the exception that the memory pointer in eax, which contains the base memory address of the variable `string`, gets shifted by four byte.
-To shift the memory pointer by four byte in the `string` variable the `ADD` operation is used. The rest of the example is the same as previously.
+The previous example has been expanded to show that a string can be accessed like an array. To demonstrate, the last three characters of "Strings" in the variable `string` are overwritten by "Foo".
+The approach is the same as in the previous example, with the exception that the memory pointer in EAX, which contains the base memory address of the variable `string`, is shifted by four bytes.
+To shift the memory pointer by four bytes in the `string` variable, the `ADD` operation is used. The rest of the example is the same as previously.
 
-### 1.2.3 Modifiable Buffer
+### 1.2.3 Modifiable Buffers
 
-Buffer are located in the data segment of a program, which is marked as writable in the page table and are initialized with zero in memory. As the buffer are modifiable and are located in the data segment, they are classified as variables. Similar to strings buffers can be accessed and manipulated as arrays.
-Analog to strings the size of a buffer has to be multiple of four bytes as the simulator is designed around 32-bit instructions and operands. If a buffer is not a multiple of four bytes the size is padded to the next four byte aligned size.
+Buffers are located in the data segment of a program, which is marked as writable in the page tables, and they are initialized to zero in memory. Because buffers are modifiable and located in the data segment, they are classified as variables. Similar to strings, buffers can be accessed and manipulated as arrays.
+
+Analogous to strings, the size of a buffer must be a multiple of four bytes, as the simulator is designed around 32-bit instructions and operands. If a buffer's size is not a multiple of four bytes, it is padded to the next 4-byte-aligned size.
 The assembler replaces all occurrences of the symbolic buffer name in the program with the virtual memory start address of the buffer. The syntax to create a buffer is `.BUF <buffer size in byte> <buffer name>`.
 
 ``` Assembly
@@ -160,33 +160,34 @@ The assembler replaces all occurrences of the symbolic buffer name in the progra
 .CODE
 ```
 
-The example above shows the creation of a three byte large buffer with the name `myBuffer`. The actual buffer size gets padded to four bytes as mentioned before.
-
-## 1.3 Syscalls
+The example above shows the creation of a 3-byte buffer named `myBuffer`. The actual buffer size is padded to four bytes as mentioned before.
 
 ## 1.3 Console IO
 
-The console has four different types of IO operations. These include writing a number to the console, reading a number from the console, writing a string to the console and reading a string from the console. Once the user has input data and presses the enter-key an interrupt is triggered, see [2.1.1 Keyboard Interrupt](#211-keyboard-interrupt) for details.
+The console has four different types of I/O operations. These include writing a number to the console, reading a number from the console, writing a string to the console, and reading a string from the console. Once the user inputs data and presses the Enter key, an interrupt is triggered (see [2.1.1 Keyboard Interrupt](#211-keyboard-interrupt) for details).
 
-Internally the console uses an array of Uint8Arrays as input buffer. Each line on the console populates a new index in the input buffer. The `\n` escape sequence can be used as well to indicate a new line. The array is populated on the FIFO principle and is limited to 255 entries. If the user adds another input that would bring the buffer over 255 entries, then the first entry is removed and the new entry is put at the end of the buffer.
+Internally, the console uses an array of `Uint8Array`s as an input buffer. Each line on the console populates a new index in the input buffer. The `\n` escape sequence can also be used to indicate a newline. The array is populated based on the FIFO (First-In-First-Out) principle and is limited to 255 entries. If the user adds an input that exceeds the 255-entry limit, the oldest entry is removed, and the new entry is placed at the end of the buffer.
 
-Both read operations for numbers and strings are blocking if the console buffer is empty. If data is already in the console input buffer when a read operation is performed the function executes and returns immediately. When the process attempts to read from the console it changes into the blocked state waiting for IO and gets put into the waiting queue for IO. The waiting queue is FIFO. Once the keyboard interrupt triggers the first process in the waiting queue for IO changes into the ready state. If multiple processes wait for keyboard IO and multiple keyboard interrupts get triggered, then the processes change their state to ready and get put into the waiting queue in the order they have entered the blocked waiting for IO queue. Which process actually gets to read the data first is decided by the scheduler, depending on which process gets set to the running state first.
+Both read operations for numbers and strings are blocking if the console buffer is empty. If data is already in the console input buffer when a read operation is performed, the function executes and returns immediately. When a process attempts to read from an empty console, it enters a blocked state waiting for I/O and is placed in the I/O waiting queue. This waiting queue operates on a FIFO basis.
 
-A console library has been implemented as well to make accessing the console easier by not having to manage the stack for the syscall manually. To make use of the library functions the library first has to be included by using the `.INCLUDE` directive as shown in the library examples.
+Once the keyboard interrupt triggers, the first process in the I/O waiting queue transitions to the waiting state. If multiple processes are waiting for keyboard I/O and multiple keyboard interrupts are triggered, the processes change to the waiting state in the order they originally entered the blocked queue. The scheduler ultimately decides which process actually gets to read the data first, depending on which process is set to the running state first.
+
+A console library has also been implemented to simplify console access, removing the need to manually manage the stack for syscalls. To use these library functions, the library must first be included using the `.INCLUDE` directive, as shown in the examples.
 
 ### 1.3.1 Console Read Number
 
-To read a number from the console the `$CONST_SYSCALL_CONSOLE_PRINT_NUMBER` constant can be used if the `os/include/syscalls` file has been included in the program.
+To read a number from the console, the `$CONST_SYSCALL_CONSOLE_READ_NUMBER` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-Parameters: none  
+Parameters: `none`  
 
-Return value:  
-eax: Number read from the console  
-ebx: Success status  
-    0 -> Success  
-   -1 -> No input ready  
-   -2 -> Could not parse number  
-   -3 -> Number does not fit into 32 bit DoubleWord  
+Return value:
+
+* EAX: Number read from the console  
+* EBX: Success status  
+*   `0` -> Success
+*   `-1` -> No input ready
+*   `-2` -> Could not parse number
+*   `-3` -> Number does not fit into 32 bit DoubleWord
 
 The read operation is blocking, see [1.3 Console IO](#13-console-io) for more details.
 
@@ -196,17 +197,17 @@ MOV $CONST_SYSCALL_CONSOLE_READ_NUMBER, %eax ; Sets up the syscall to be execute
 INT $0x80 ; Trigger interrupt for syscall
 ```
 
-In the above example `%eax` now contains the number read from the console and `%ebx` contains the status code of the operation.
+In the above example, `%eax` now contains the number read from the console, and `%ebx` contains the status code of the operation.
 
 ### 1.3.2 Console Write Number
 
 To write a number to the console the `$CONST_SYSCALL_CONSOLE_PRINT_NUMBER` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-Parameters (ebx is used as immediate value):  
-ebx: Number to be printed to the console  
+Parameters:
 
-Return value:  
-none
+*   EBX: Number to be printed to the console  (used as immediate value)
+
+Return value: `none`
 
 ``` Assembly
 MOV $0, %ebx
@@ -214,24 +215,25 @@ MOV $CONST_SYSCALL_CONSOLE_PRINT_NUMBER, %eax ; Sets up the syscall to be execut
 INT $0x80 ; Trigger interrupt for syscall
 ```
 
-In the above example the number `0` gets written to the `%ebx` register and then printed to the console.
+In the above example, the number `0` is written to the `%ebx` register and then printed to the console.
 
 ### 1.3.3 Console Read String
 
-Since the console gets treated as file, similar to Linux, the file read syscall is used to to read from the console. The console has the file descriptor `0` to differentiate it from normal files.  
-To read a string from the console the `$CONST_SYSCALL_FILE_READ` constant can be used if the `os/include/syscalls` file has been included in the program.
+Because the console is treated as a file, similar to Linux, the file read syscall is used to read from the console. The console uses the file descriptor `0` to differentiate it from normal files.
 
-Parameters (ebx is a pointer to the following struct):  
-*(ebx): File descriptor (fd=0 for console, fd>0 for files)  
-*(ebx+4): Pointer to buffer, this buffer will be filled by the file system  
-*(ebx+8): Buffer size, limits the amount of bytes that will be read  
+To read a string from the console, the `$CONST_SYSCALL_FILE_READ` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-Return value (immediate value):  
-eax: Success status  
-\>=0 -> Number of bytes read  
--1 -> Invalid file descriptor  
--2 -> Seek position out of file bounds  
--3 -> No console input ready
+* Parameters (EBX is a pointer to the following struct):  
+*   `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
+*   `*(EBX+4)`: Pointer to a buffer; this buffer will be filled by the file system  
+*   `*(EBX+8)`: Buffer size; limits the amount of bytes that will be read  
+
+* Return value (immediate value):  
+* EAX: Success status  
+*   `>=0` -> Number of bytes read  
+*   `-1` -> Invalid file descriptor  
+*   `-2` -> Seek position out of file bounds  
+*   `-3` -> No console input ready
 
 ``` Assembly
 .INCLUDE "os/include/syscalls"
@@ -254,36 +256,37 @@ MOV $CONST_SYSCALL_FILE_READ, %eax ; Sets up the syscall to be executed
 INT $0x80 ; Trigger interrupt for syscall
 ```
 
-In the above example the file read is set up to read four bytes from the console. The parameter for the file read, including the buffer to store the read data, are put on the stack. At the end of the above example the data read from the console is in the buffer on the stack and `%eax` contains the status code of the operation.
+In the above example, the file read is set up to read four bytes from the console. The parameters for the file read, including the buffer to store the read data, are pushed onto the stack. At the end of the above example, the data read from the console is in the buffer on the stack, and `%eax` contains the status code of the operation.
 
-Both the [1.3.1 Console Read Number](#131-console-read-number) and the console read string operation access the same console input buffer. The console read string operation first reads only strings from the console input buffer since a number can be interpreted as a string on the console. Strings that can be interpreted as a number get skipped. This prevents the console read string operation from accidentally reading and flushing a number from the buffer, in the case that two programs are waiting for keyboard IO. One of the programs waiting for a number and one for a string. Only if no other strings are present in the console input buffer the read operation will fall back to reading a number as string.
+Both the [1.3.1 Console Read Number](#131-console-read-number) and the Console Read String operations access the same console input buffer. The Console Read String operation first reads only strings from the console input buffer, since a number can be interpreted as a string on the console. Strings that can be interpreted as a number are skipped. This prevents the Console Read String operation from accidentally reading and flushing a number from the buffer in the event that two programs are waiting for keyboard I/O (e.g., one program waiting for a number and one waiting for a string). Only if no other strings are present in the console input buffer will the read operation fall back to reading a number as a string.
 
-If more bytes are read than are present in the buffer, then only the amount of bytes that are present get read. In the case that less bytes are read, the rest of the data stays in the buffer and the line is not removed from the buffer.
+If a read operation requests more bytes than are currently present in the buffer, only the number of bytes available are read. If fewer bytes are requested than are present, the remaining data stays in the buffer, and the line is not removed.
 
 The read operation is blocking, see [1.3 Console IO](#13-console-io) for more details on the blocking behavior and the input buffer design.
 
 ### 1.3.4 Console Write String
 
-Since the console gets treated as file, similar to Linux, the file read syscall is used to to read from the console. The console has the file descriptor `0` to differentiate it from normal files.  
-To read a string from the console the `$CONST_SYSCALL_FILE_WRITE` constant can be used if the `os/include/syscalls` file has been included in the program.
+Because the console is treated as a file, similar to Linux, the file write syscall is used to write to the console. The console uses the file descriptor `0` to differentiate it from normal files.
 
-Parameters (ebx is a pointer to the following struct):  
-*(ebx): File descriptor (fd=0 for console, fd>0 for files)  
-*(ebx+4): Pointer to buffer, this buffer will be used by the file system  
-*(ebx+8): Buffer size, limits the amount of bytes that will be written  
+To write a string to the console, the `$CONST_SYSCALL_FILE_WRITE` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-Return value (immediate value):  
-eax: Success status  
-\>=0 -> Number of bytes written  
--1 -> Invalid file descriptor  
--2 -> Seek position out of file bounds
+* Parameters (EBX is a pointer to the following struct):  
+*   `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
+*   `*(EBX+4)`: Pointer to buffer; this buffer will be used by the file system  
+*   `*(EBX+8)`: Buffer size; limits the amount of bytes that will be written  
+
+* Return value (immediate value):  
+*   EAX: Success status  
+*   `>=0` -> Number of bytes written  
+*   `-1` -> Invalid file descriptor  
+*   `-2` -> Seek position out of file bounds
 
 ``` Assembly
 .INCLUDE "os/include/syscalls"
 CONST stringTest "Test"
 
 ; Prepare the parameter for file write
-MOV $4, %eax ; Amount of bytes to write. 4 bytes for "Test"
+MOV $4, %eax ; Number of bytes to write. 4 bytes for "Test"
 PUSH %eax
 
 MOV $stringTest, %eax ; Move pointer to the start of the string constant stringTest into eax
@@ -299,37 +302,37 @@ MOV $CONST_SYSCALL_FILE_WRITE, %eax ; Sets up the syscall to be executed
 INT $0x80 ; Trigger interrupt for syscall
 ```
 
-In the previous example the string constant `stringTest` gets written to the console. The example puts the parameter for the file write onto the stack, including the file descriptor for the console. The string constant is used as buffer in this case. After the operation the string `Test` appears on the console and eax contains the success status of the operation.
+In the previous example, the string constant `stringTest` is written to the console. The example pushes the parameters for the file write onto the stack, including the file descriptor for the console. The string constant is used as the buffer in this case. After the operation, the string `Test` appears on the console, and EAX contains the success status of the operation.
 
-### 1.3.4 Console Library Read Number
+### 1.3.5 Console Library Read Number
 
-The console library function to read a number from the console has the following parameters and return values.
+The console library function to read a number from the console has the following parameters and return values:
 
-Parameters: none
+Parameters: `none`
 
 Return value (immediate value):
-eax: The number read from the console
-ebx: Success status
-0 -> Success
--1 -> No input ready
--2 -> Could not parse number
--3 -> Number does not fit into 32 bit DoubleWord
+*   EAX: The number read from the console
+*   EBX: Success status
+*   `0` -> Success
+*   `-1` -> No input ready
+*   `-2` -> Could not parse number
+*   `-3` -> Number does not fit into 32 bit DoubleWord
 
 ``` Assembly
 .INCLUDE "os/include/console"
 CALL console_read_number
 ```
 
-In the above example eax contains the number read from the console and ebx the status code of the operation after the library function call. If the console input buffer already contains data that can be parsed as number the call returns immediately without blocking, otherwise the program blocks until a keyboard interrupt gets triggered.
+In the above example, EAX contains the number read from the console, and EBX contains the status code of the operation after the library function call. If the console input buffer already contains data that can be parsed as a number, the call returns immediately without blocking; otherwise, the program blocks until a keyboard interrupt is triggered.
 
-### 1.3.5 Console Library Write Number
+### 1.3.6 Console Library Write Number
 
-The console library function to write a number to console has the following parameters and return values.
+The console library function to write a number to console has the following parameters and return values:
 
-Parameters (immediate value)
-ebx: Number to write to the console
+* Parameters (immediate value)
+*   EBX: Number to write to the console
 
-Return value: none
+Return value: `none`
 
 ``` Assembly
 .INCLUDE "os/include/console"
@@ -337,22 +340,24 @@ MOV $10, %ebx ; Number to write to the console
 CALL console_write_number
 ```
 
-In the above example the number 10 gets written to the console. The console write operations are non blocking.
+In the above example, the number 10 is written to the console. Console write operations are non-blocking.
 
-### 1.3.6 Console Library Read String
+### 1.3.7 Console Library Read String
 
-The console library function to read a string from the console has the following parameters and return values.
+The console library function to read a string from the console has the following parameters and return values:
 
 Parameters:
-eax: Amount of bytes to read from the cosnole
-ebx: Pointer to buffer
+
+*   EAX: Number of bytes to read from the cosnole
+*   EBX: Pointer to buffer
 
 Return value:
-eax: Success status
-\>=0 -> Number of bytes read  
--1 -> Invalid file descriptor  
--2 -> Seek position out of file bounds  
--3 -> No console input ready
+
+*   EAX: Success status
+*   `>=0` -> Number of bytes read  
+*   `-1` -> Invalid file descriptor  
+*   `-2` -> Seek position out of file bounds  
+*   `-3` -> No console input ready
 
 The pointer to a buffer can be either the base address of a buffer or a memory address that references free space on the stack.
 
@@ -369,34 +374,36 @@ MOV $stringBuffer, %ebx ; Buffer to store the string
 CALL console_read_string ; Call the library function
 ```
 
-In the above example the console library function gets used to read four byte of a string from the console and to store them in the buffer named `stringBuffer`. Similar to the other console read operations the program returns immediately if data is already present in the console buffer. If no data is present the program blocks until a keyboard interrupt gets triggered.
+In the above example, the console library function is used to read four bytes of a string from the console and store them in the buffer named `stringBuffer`. Similar to the other console read operations, the program returns immediately if data is already present in the console buffer. If no data is present, the program blocks until a keyboard interrupt is triggered.
 
-### 1.3.7 Console Library Write String
+### 1.3.8 Console Library Write String
 
-The console function to write a string to the console has the following parameters and return values.
+The console library function to write a string to the console has the following parameters and return values:
 
 Parameters:
-eax: Amount of bytes to write to the console
-ebx: Pointer to the buffer that contains the data to write to the console
+
+*   EAX: Number of bytes to write to the console
+*   EBX: Pointer to the buffer that contains the data to write to the console
 
 Return value:
-eax: Success status
-\>=0 -> Number of bytes written  
--1 -> Invalid file descriptor  
--2 -> Seek position out of file bounds
+
+*   EAX: Success status
+*   `>=0` -> Number of bytes written  
+*   `-1` -> Invalid file descriptor  
+*   `-2` -> Seek position out of file bounds
 
 ``` Assembly
 .INCLUDE "os/include/console"
 
 .CONST stringConstant "My string"
 
-MOV $9, %eax ; Amount of bytes to write to the console from the buffer
+MOV $9, %eax ; Number of bytes to write to the console from the buffer
 MOV $stringConstant, %ebx ; Set the string constant as buffer to read from 
 
 CALL console_write_string ; Call the library function
 ```
 
-In the above example the string "My string" gets written to the console. For write operations to the the console constants can be used as well as the content does not get modified. The program does not block as the operation is a write operation and the function returns immediately.
+In the above example, the string "My string" is written to the console. For write operations to the console, constants can be used as well, since their content is not modified. The program does not block, as the operation is a write operation, and the function returns immediately.
 
 ## 2 Interrupts
 
@@ -404,7 +411,7 @@ In the above example the string "My string" gets written to the console. For wri
 
 ### 2.1.1 Keyboard Interrupt
 
-When the console [GUI element](#32-console) is focused by the user, indicated by a blinking cursor and the enter-key is pressed, then a hardware interrupt is triggered. The interrupt is classified as an external interrupt, since it is not generated by the CPU-Hardware. The designated interrupt number for the keyboard interrupt is `0x81`.
+When the console [GUI element](#32-console) is focused by the user (indicated by a blinking cursor) and the Enter key is pressed, a hardware interrupt is triggered. The interrupt is classified as an external interrupt, as it is not generated by the CPU hardware. The designated interrupt number for the keyboard interrupt is `0x81`.
 
 ## 3 GUI
 
@@ -412,8 +419,9 @@ When the console [GUI element](#32-console) is focused by the user, indicated by
 
 ### 3.1.1 Clickable Registers
 
-Some registers can hold memory addresses either for the virtual or for the physical memory. A feature has been implemented that allows the user to jump to those memory addresses by clicking on the GUI element of the register. The memory cell in the virtual or physical memory gets highlighted after the jump. This minimizes the scrolling necessary and makes it easier to find those memory address easier.
-The following registers implement the jump on click feature:
+Some registers can hold memory addresses for either virtual or physical memory. A feature has been implemented that allows users to jump directly to these memory addresses by clicking the register's GUI element. The target memory cell in virtual or physical memory is highlighted after the jump. This minimizes scrolling and makes finding those memory addresses much easier.
+
+The following registers implement the jump-on-click feature:
 
 - EAX
 - EBX
@@ -425,32 +433,39 @@ The following registers implement the jump on click feature:
 
 ## 3.2 Console
 
-The console GUI element is used as input and output for programs to read from or write to. The console is enabled by default but can be enabled or disabled through the settings.  
-Settings -> Behavior -> Output -> Console -> Enable Console  
-Settings -> Behavior -> Output -> Console -> Disable Console  
-If the console is disabled the previous content stays intact. Only the GUI element gets hidden and the content is shown again on enablement.
-Clicking anywhere inside the console window puts the selection focus on the write element of the console, indicated by the blinking cursor. Once the cursor is blinking the user can input data by writing and submitting it by pressing the enter key.
+The console GUI element serves as the input and output interface for programs to read from or write to. The console is enabled by default, but it can be enabled or disabled through the settings: 
+`Settings -> Behavior -> Output -> Console -> Enable Console`  
+`Settings -> Behavior -> Output -> Console -> Disable Console`  
+If the console is disabled, its existing content remains intact; only the GUI element is hidden, and the content reappears when re-enabled.
 
-## 3 Operating System
+Clicking anywhere inside the console window focuses the input field, as indicated by the blinking cursor. Once the cursor is blinking, the user can type data and submit it by pressing the Enter key.
 
-### 3.1 Time-slice Management
+## 4 Operating System
 
-To fairly distribute processing time between multiple running processes the Ihme-Core simulator uses time-slice management. Each process gets a time slice of a certain length. In the Ihme-Core OS the time slice is implemented through a counter in the process control block.
-On boot the OS sets a periodic timer, the system timer. Each time the periodic timer runs out it sends an interrupt. The interrupt service routine decrements the time slice counter in the process control block of the currently running process. The time slice counter only gets decremented if the current running process is in the user mode. Once the time slice counter hits zero the process is put into the ready state and the scheduler picks a new process to run with a reset time slice counter.
-If a process yields or is put in the blocked state, the time slice timer is reset.
-The time slice counter uses periodic interrupts as unit of measurement and the periodic timer uses instructions. Both values can be set independently in the `os_filesystem/os/src/constants.asm` file.
+### 4.1 Time-slice Management
+
+To fairly distribute processing time among multiple running processes, the Ihme-Core simulator uses time-slice management. Each process receives a time slice of a fixed duration. In the Ihme-Core OS, the time slice is implemented via a counter in the process control block.
+
+On boot, the OS sets a periodic timer (the system timer). Every time the periodic timer expires, it triggers an interrupt. The interrupt service routine decrements the time-slice counter in the process control block of the currently running process. This counter is only decremented while the running process is executing in user mode. Once the time-slice counter reaches zero, the process is placed in the ready state, and the scheduler selects a new process to run with a freshly reset time-slice counter.
+
+If a process yields or enters the blocked state, its time-slice counter is reset.
+
+The time-slice counter uses periodic interrupts as its unit of measurement, while the periodic timer uses instruction counts. Both values can be configured independently in the `os_filesystem/os/src/constants.asm` file.
 
 ``` Assembly
 .CONST CONST_OS_PROCESS_TIME_SLICE_SIZE 3
 .CONST CONST_OS_PERIODIC_TIMER_FREQUENCY 5
 ```
 
-In this example three periodic timer interrupts can happen before the scheduler causes a context switch and 5 user instructions can be run before the periodic timer triggers a hardware interrupt.
+In this example, three periodic timer interrupts can occur before the scheduler causes a context switch, and five user instructions can execute before the periodic timer triggers a hardware interrupt.
 
-## 4 DEV Operations
+## 5 DEV Operations
 
-DEV operations are akin to hypercalls in a hypervisor. The DEV operations allow the operating system to directly talk to the simulator layer of the system. This includes interactions with the simulated hardware to change settings and also is used to interact with the filesystem of the system that the simulator is running on. DEV operations can be only used when the system is in the kernel mode. To use the a DEV operation the `DEV <operand1>, <operand2>` instruction has to be used. The first operand (`operand1`) determines which DEV operation is executed and is represented by an integer. Most DEV operations are used in conjunction with syscalls ([1.3 Syscalls](#13-syscalls)). Constants have been defined to make the use of the DEV operations easier, making it possible to address the DEV operation with a symbolic name. All listed DEV operations are non blocking operations.
-The following table gives an overview of the DEV operations by the defined symbolic name, the assigned integer, and the syscall they are used in if present. The syscalls that are not used in a syscall are used for system level management.
+DEV operations are akin to hypercalls in a hypervisor. They allow the operating system to communicate directly with the simulator layer of the system. This includes interactions with the simulated hardware to change settings, and they are also used to interact with the file system of the host system that the simulator is running on.
+
+DEV operations can only be used when the system is in kernel mode. To use a DEV operation, the `DEV <operand1>, <operand2>` instruction must be used. The first operand (`operand1`) determines which DEV operation is executed and is represented by an integer. Most DEV operations are used in conjunction with syscalls. Constants have been defined to make using DEV operations easier, making it possible to address the DEV operation with a symbolic name. All listed DEV operations are non-blocking.
+
+The following table provides an overview of the DEV operations by their defined symbolic name, assigned integer, and the syscall they are used in (if applicable). The DEV operations that are not associated with a syscall are used for system-level management.
 
 | DEV operation | DEV number | Syscall |
 | :--- | ---: | :--- |
@@ -476,9 +491,9 @@ The following table gives an overview of the DEV operations by the defined symbo
 | CONST_DEV_COMMAND_PERFORMANCE_TIMER_START | 19 | - |
 | CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP | 20 | - |
 
-## 4.1 IO Seek
+## 5.1 IO Seek
 
-This DEV operation is used to seek inside a file in the filesystem of the simulator. It can be called as follows:
+This DEV operation is used to seek inside a file in the file system of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_IO_SEEK, <operand2>
@@ -486,41 +501,44 @@ DEV $CONST_DEV_COMMAND_IO_SEEK, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: File descriptor
+* `operand2`: File descriptor
 
-Additional parameter on the stack:
-stack + 0: Seek Mode
-0 -> Seek from current position
-1 -> Seek from start of file
-2 -> Seek from end of file
-stack + 4: Offset
+Additional parameters on the stack:
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Seek Mode
+*   `0` -> Seek from current position
+*   `1` -> Seek from start of file
+*   `2` -> Seek from end of file
+*   `stack + 4`: Offset
 
-Return value: eax
-0 -> success
--1 -> Invalid file descriptor
--2 -> Seek position out of file bounds
--3 -> Negative seek position
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.2 IO Close
+Return value (EAX):
 
-This DEV operation is used to close an open file in the filesystem of the simulator. It can be called as follow:
+*   `0` -> Success
+*   `-1` -> Invalid file descriptor
+*   `-2` -> Seek position out of file bounds
+*   `-3` -> Negative seek position
+
+## 5.2 IO Close
+
+This DEV operation is used to close an open file in the file system of the simulator. It can be called as follow:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_IO_CLOSE, <operand2>
 ```
 
 The DEV operation uses the following parameter:
-operand2: File descriptor
 
-Return value: eax
-0 -> success
--1 -> invalid file descriptor
+* `operand2`: File descriptor
 
-## 4.3 IO Read Buffer
+* Return value (EAX):
+*   `0` -> Success
+*   `-1` -> Invalid file descriptor
 
-This DEV operation is used to read bytes from a file in the filesystem of the simulator or to read from the console of the simulator. The data gets stored in a buffer. If more bytes are requested to be read than the file, at the offset the file descriptor points to, then only as many bytes as are available get read. Trying to read more bytes than the buffer can store can lead to undefined behavior or cause a general protection fault. It can be called as follows:
+## 5.3 IO Read Buffer
+
+This DEV operation is used to read bytes from a file in the file system of the simulator or to read from the console of the simulator. The data is stored in a buffer. If more bytes are requested than are available in the file at the offset the file descriptor points to, only the available bytes are read. Trying to read more bytes than the buffer can store can lead to undefined behavior or cause a general protection fault. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_IO_READ_BUFFER, <operand2>
@@ -528,24 +546,26 @@ DEV $CONST_DEV_COMMAND_IO_READ_BUFFER, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: File descriptor
-0 -> Special file descriptor for console access
+* `operand2`: File descriptor
+*   `0` -> Special file descriptor for console access
 
-Additional parameter on the stack:
-stack + 0: Buffer address
-stack + 4: Amount of bytes to read
+Additional parameters on the stack:
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Buffer address
+*   `stack + 4`: Number of bytes to read
 
-Return value: eax
-\>= 0 -> Amount of bytes read
--1 -> Invalid file descriptor
--2 -> Invalid seek position
--3 -> No console input ready
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.4 IO Write Buffer
+Return value (EAX):
 
-This DEV operation is used to write bytes to a file in the filesystem of the simulator or to write to the console of the simulator. The data gets read from a buffer that acts as source, to write to the target. Trying to write more bytes to the target than the source buffer contains can lead to undefined behavior or cause a general protection fault. It can be called as follows:
+*   `>= 0` -> Number of bytes read
+*   `-1` -> Invalid file descriptor
+*   `-2` -> Invalid seek position
+*   `-3` -> No console input ready
+
+## 5.4 IO Write Buffer
+
+This DEV operation writes bytes to a file in the simulator's file system or to the simulator console. Data is read from a source buffer and written to the target destination. Attempting to write more bytes than the source buffer contains can lead to undefined behavior or trigger a general protection fault. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_IO_WRITE_BUFFER, <operand2>
@@ -553,23 +573,25 @@ DEV $CONST_DEV_COMMAND_IO_WRITE_BUFFER, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: File descriptor
-0 -> Special file descriptor for console access
+* `operand2`: File descriptor
+*   `0` -> Special file descriptor for console access
 
-Additional parameter on the stack:
-stack + 0: Buffer address
-stack + 4: Amount of bytes to write
+Additional parameters on the stack:
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Buffer address
+*   `stack + 4`: Number of bytes to write
 
-Return value: eax
-\>= 0 -> Amount of bytes written
--1 -> Invalid file descriptor
--2 -> Invalid seek position
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.5 File Create
+Return value (EAX):
 
-This DEV operation is used to create a file in the file system of the simulator. It can be called as follows:
+*   `>= 0` -> Number of bytes written
+*   `-1` -> Invalid file descriptor
+*   `-2` -> Invalid seek position
+
+## 5.5 File Create
+
+This DEV operation creates a file in the file system of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_FILE_CREATE, <operand2>
@@ -577,15 +599,16 @@ DEV $CONST_DEV_COMMAND_FILE_CREATE, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Pointer to an address containing string with the filename
+* `operand2`: Pointer to a string containing the filename
 
-Return value: eax
-\>= 0 -> Success
--1 -> File already exists
+Return value (EAX):
 
-## 4.6 File Delete
+*   `>= 0` -> Success
+*   `-1` -> File already exists
 
-This DEV operation is used to delete a file in the filesystem of the simulator. It can be called as follows:
+## 5.6 File Delete
+
+This DEV operation deletes a file in the file system of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_FILE_DELETE, <operand2>
@@ -593,15 +616,16 @@ DEV $CONST_DEV_COMMAND_FILE_DELETE, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Pointer to an address containing string with the filename
+* `operand2`: Pointer to a string containing the filename
 
-Return value: eax
-0 -> Success
--1 -> File does not exist
+Return value (EAX):
 
-## 4.7 Open File
+*   `0` -> Success
+*   `-1` -> File does not exist
 
-This DEV operation is used to open a file in the filesystem of the Simulator. It returns a file descriptor for later use with other operations. It can be called as follows:
+## 5.7 Open File
+
+This DEV operation opens a file in the file system of the simulator. It returns a file descriptor for subsequent operations. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_OPEN_FILE, <operand2>
@@ -609,15 +633,16 @@ DEV $CONST_DEV_COMMAND_OPEN_FILE, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Pointer to an address containing string with the filename
+* `operand2`: Pointer to a string containing the filename
 
-Return value: eax
-\>= 0 -> File descriptor
--1 -> Invalid filename
+Return value (EAX):
 
-## 4.8 File Stat
+*   `>= 0` -> File descriptor
+*   `-1` -> Invalid filename
 
-This DEV operation is used to get the filesize of a file in the filesystem of the simulator. It can be called as follows:
+## 5.8 File Stat
+
+This DEV operation retrieves the file size of a file in the file system of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_FILE_STAT, <operand2>
@@ -625,16 +650,17 @@ DEV $CONST_DEV_COMMAND_FILE_STAT, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Pointer to an address containing string with the filename
+* `operand2`: Pointer to a string containing the filename
 
-Return value: eax
-\>= 0 -> Filesize
--1 -> File does not exist
--2 -> Not a file
+Return value (EAX):
 
-## 4.9 Console Print Number
+*   `>= 0` -> Filesize
+*   `-1` -> File does not exist
+*   `-2` -> Not a file
 
-This DEV operation is used to print a number to the console of the simulator. It can be called as follows:
+## 5.9 Console Print Number
+
+This DEV operation prints a number to the console of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CONSOLE_PRINT_NUMBER, <operand2>
@@ -642,13 +668,13 @@ DEV $CONST_DEV_COMMAND_CONSOLE_PRINT_NUMBER, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Number to print on the console
+* `operand2`: Number to print on the console
 
-Return value: none
+Return value: `none`
 
-## 4.10 Console Read Number
+## 5.10 Console Read Number
 
-This DEV operation is used to print a number to the console of the simulator. It can be called as follows:
+This DEV operation reads a number from the console of the simulator. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CONSOLE_READ_NUMBER, <operand2>
@@ -656,19 +682,20 @@ DEV $CONST_DEV_COMMAND_CONSOLE_READ_NUMBER, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
 Return value:
-eax: Number read from the console
-ebx: Status
-0  -> Success
--1 -> No input ready
--2 -> Not a number
--3 -> Number does not fit into a 32 bit DoubleWord
 
-## 4.11 Is Memory Virtualization Enabled
+* EAX: Number read from the console
+* EBX: Status
+*   `0`  -> Success
+*   `-1` -> No input ready
+*   `-2` -> Not a number
+*   `-3` -> Number does not fit into a 32-bit DoubleWord
 
-This DEV operation queries if memory virtualization is enabled. It can be called as follows:
+## 5.11 Is Memory Virtualization Enabled
+
+This DEV operation queries whether memory virtualization is enabled. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CPU_IS_MEMORY_VIRTUALIZATION_ENABLED, <operand2>
@@ -676,15 +703,16 @@ DEV $CONST_DEV_COMMAND_CPU_IS_MEMORY_VIRTUALIZATION_ENABLED, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
-Return value: eax
-0 -> Disabled
-1 -> Enabled
+Return value (EAX):
 
-## 4.12 Enable Memory Virtualization
+*   `0` -> Disabled
+*   `1` -> Enabled
 
-This DEV operation enables the memory virtualization. It can be called as follows:
+## 5.12 Enable Memory Virtualization
+
+This DEV operation enables memory virtualization. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CPU_ENABLE_MEMORY_VIRTUALIZATION, <operand2>
@@ -692,13 +720,13 @@ DEV $CONST_DEV_COMMAND_CPU_ENABLE_MEMORY_VIRTUALIZATION, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
-Return value: none
+Return value: `none`
 
-## 4.13 Disable Memory Virtualization
+## 5.13 Disable Memory Virtualization
 
-This DEV operation disables the memory virtualization. It can be called as follows:
+This DEV operation disables memory virtualization. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CPU_DISABLE_MEMORY_VIRTUALIZATION, <operand2>
@@ -706,13 +734,13 @@ DEV $CONST_DEV_COMMAND_CPU_DISABLE_MEMORY_VIRTUALIZATION, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
-Return value: none
+Return value: `none`
 
-## 4.14 Timer Get Finished
+## 5.14 Timer Get Finished
 
-This DEV operation is used to get the ID of a hardware timer that triggered an interrupt and ran out. The simulator has an internal list in case multiple timer finished counting down. It can be called as follows:
+This DEV operation retrieves the ID of a hardware timer that expired and triggered an interrupt. The simulator maintains an internal queue in case multiple timers have finished counting down. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_TIMER_GET_FINISHED, <operand2>
@@ -720,33 +748,36 @@ DEV $CONST_DEV_COMMAND_TIMER_GET_FINISHED, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
 Return value:
-eax: ID of the finished timer
 
-## 4.15 Timer Set
+*   EAX: ID of the finished timer
 
-This DEV operation is used to setup a hardware timer with a specified start value to count down and an ID. The value of the timer is expressed in instructions in user mode. Each time an instruction is run in user mode, the timer is decremented by one. It can be called as follows:
+## 5.15 Timer Set
+
+This DEV operation sets up a hardware timer with a specified ID and start value. The timer duration is expressed in user-mode instructions. Each time an instruction executes in user mode, the timer is decremented by one. It can be called as follows:
+
 
 ``` Assembly
-DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, <operand2>
+DEV $CONST_DEV_COMMAND_TIMER_SET, <operand2>
 ```
 
 The DEV operation uses the following parameter:
 
-operand2: The timer ID as integer
+* `operand2`: Timer ID as an integer
 
 Additional parameter on the stack:
-stack + 0: Timer start value
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Timer start value
 
-Return value: none
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.16 Periodic Timer Set
+Return value: `none`
 
-This DEV operation is used to set the periodic hardware timer. The DEV operation sets the interval in which the timer will trigger an interrupt. The interval is given in instruction in user mode. For each instruction that gets executed while the system is in user mode, the timer gets decremented by one. Once the interval is set, it does not need to be set again. It can be called as follows:
+## 5.16 Periodic Timer Set
+
+This DEV operation configures the periodic hardware timer and sets the interval at which it will trigger interrupts. The interval is specified in user-mode instructions. For each instruction executed while the system is in user mode, the timer is decremented by one. Once set, the interval automatically repeats without needing to be reconfigured. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, <operand2>
@@ -754,13 +785,15 @@ DEV $CONST_DEV_COMMAND_PERIODIC_TIMER_SET, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: Timer value in instructions as integer
+* `operand2`: Timer interval in instructions as an integer
 
-Return value: none
+Return value: `none`
 
-## 4.17 Console Buffer Status
+## 5.17 Console Buffer Status
 
-This DEV operation is used to query the buffer status of the console buffer. It returns how many of the lines in the buffer can be parsed as number and how many as string. A line that only contains numbers can get parsed as number. At the same time a line that only contains numbers, can also be interpreted as a string and counts as both, as number and string. As soon as a line contains any symbol besides a number, it gets solely counted as string. It can be called as follows:
+This DEV operation queries the status of the console buffer. It returns how many lines in the buffer can be parsed as numbers and how many as strings.
+
+A line containing only numbers can be parsed as a number, but it can also be interpreted as a string and is counted toward both totals. If a line contains any character other than digits, it is counted solely as a string. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_CONSOLE_BUFFER_STATUS, <operand2>
@@ -768,15 +801,16 @@ DEV $CONST_DEV_COMMAND_CONSOLE_BUFFER_STATUS, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The operand is not used, but must be set. Otherwise an invalid opcode error is thrown. Best is to use $0 here.
+* `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
 Return value:
-eax: Amount of lines that can be parsed as number
-ebx: Amount of lines that can be interpreted as string
 
-## 4.18 Frame Mapped Signal
+*   EAX: Number of lines that can be parsed as number
+*   EBX: Number of lines that can be interpreted as string
 
-This DEV operation is used to update the reverse memory map in the MMU, which is used by the GUI to find all virtual memory addresses, that point to a specific physical address, without walking the page table of each process. The DEV operation informs the simulator that a new page frame has been mapped. It can be called as follows:
+## 5.18 Frame Mapped Signal
+
+This DEV operation updates the reverse memory map in the MMU. The GUI uses this map to find all virtual memory addresses that point to a specific physical address without walking the page table of each process. This DEV operation informs the simulator that a new page frame has been mapped. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_FRAME_MAPPED_SIGNAL, <operand2>
@@ -784,19 +818,20 @@ DEV $CONST_DEV_COMMAND_FRAME_MAPPED_SIGNAL, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The process ID of the process the frame is associated with
+* `operand2`: The process ID of the process the frame is associated with
 
-Additional parameter on the stack:
-stack + 0: Physical memory address of the frame
-stack + 4: The virtual memory address the frame got mapped to
+Additional parameters on the stack:
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Physical memory address of the frame
+*   `stack + 4`: The virtual memory address the frame was mapped to
 
-Return value: none
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.19 Frame Unmapped Signal
+Return value: `none`
 
-This DEV operation is used to update the reverse memory map in the MMU, which is used by the GUI to find all virtual memory addresses, that point to a specific physical address, without walking the page table of each process. The DEV operation informs the simulator that a page frame has been freed and  unmapped. It can be called as follows:
+## 5.19 Frame Unmapped Signal
+
+This DEV operation updates the reverse memory map in the MMU. The GUI uses this map to find all virtual memory addresses that point to a specific physical address without walking the page table of each process. This DEV operation informs the simulator that a page frame has been freed and unmapped. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_FRAME_UNMAPPED_SIGNAL, <operand2>
@@ -804,20 +839,20 @@ DEV $CONST_DEV_COMMAND_FRAME_UNMAPPED_SIGNAL, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The process ID of the process the frame is associated with
+* `operand2`: The process ID of the process the frame is associated with
 
-Additional parameter on the stack:
-stack + 0: Physical memory address of the frame
-stack + 4: The virtual memory address the frame got mapped to
+Additional parameters on the stack:
 
-The values on the stack get removed by the DEV command and the stack does not need to be cleaned manually.
+*   `stack + 0`: Physical memory address of the frame
+*   `stack + 4`: The virtual memory address the frame got mapped to
 
-Return value: none
+Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-## 4.20 Performance Timer Start
+Return value: `none`
 
-The performance timer is a special timer that is used to measure the execution time between starting and stopping the timer. The purpose of the timer is to measure performance changes when changing the implementation OS components.
-This DEV operation is used to start the performance timer with a specific ID.
+## 5.20 Performance Timer Start
+
+The performance timer is a special timer used to measure execution time between starting and stopping it. Its primary purpose is to benchmark performance changes when modifying the implementation of OS components. This DEV operation starts the performance timer with a specific ID. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, <operand2>
@@ -825,12 +860,13 @@ DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_START, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The ID of the timer as integer
+* `operand2`: Timer ID as an integer
 
-## 4.21 Performance Timer Stop
+Return value: `none`
 
-The performance timer is a special timer that is used to measure the execution time between starting and stopping the timer. The purpose of the timer is to measure performance changes when changing the implementation OS components.
-This DEV operation is used to stop the performance timer with a specific ID. If there is no performance timer currently running with the given ID, then an error is thrown.
+## 5.21 Performance Timer Stop
+
+The performance timer is a special timer used to measure execution time between starting and stopping it. Its primary purpose is to benchmark performance changes when modifying the implementation of OS components. This DEV operation stops the performance timer associated with a specific ID. If there is no performance timer currently running with the given ID, an error is thrown. It can be called as follows:
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, <operand2>
@@ -838,18 +874,23 @@ DEV $CONST_DEV_COMMAND_PERFORMANCE_TIMER_STOP, <operand2>
 
 The DEV operation uses the following parameter:
 
-operand2: The ID of the timer as integer
+* `operand2`: Timer ID as an integer
 
-## 5 Ihme Core Executable Files
+Return value: `none`
 
-To load a program as process in the simulator it needs to be compiled into a binary file. Both operations can be executed through the GUI. The programs that are run by the simulator are split into different segments. Currently three segments are implemented. The text segment, the rodata segment and the data segment.
-The text segment contains the actual program code that gets executed by the simulator. Once the segment is loaded by the operating system it is marked as executable in the page table. Since the segment is only marked as executable it is write protected by default, preventing the program from changing itself by writing into the text segment.
-The rodata (read only data) segment is used for constants. This segment is neither executable nor writable. Only read access is permitted, as the name implies. This ensures that the constants are not modifiable.
-The data segment is dedicated to writable data, such as [symbolic integer variables](#121-symbolic-integer-variables), [symbolic string variables](#122-symbolic-string-variables) and the [modifiable buffer](#123-modifiable-buffer). Since the segment is marked as read-write (RW) in the page table once the program is loaded into memory, this data can be altered at runtime. Leaving the executable bit unset protects the simulator from arbitrary code execution. This is especially relevant if the buffer is used to store data that is read from a file, which could contain executable code.
+## 6 Ihme Core Executable Files
 
-The simulator uses a custom format to structure the binary files, the so called ICE-format (Ihme Core Executable). These files have a specific structure and need to end in the file extension `.bin`.
+To load a program as a process in the simulator, it needs to be compiled into a binary file. Both compilation and loading can be executed through the GUI. Programs executed by the simulator are divided into different segments. Currently, three segments are implemented: the text segment, the rodata segment, and the data segment.
 
-The following table shows the file structure of an ICE-file:
+The text segment contains the actual program code that is executed by the simulator. Once the segment is loaded by the operating system, it is marked as executable in the page table. Because the segment is marked only as executable, it is write-protected by default, preventing the program from modifying its own code by writing to the text segment.
+
+The rodata (read-only data) segment is used for constants. This segment is neither executable nor writable. Only read access is permitted, as the name implies. This ensures that constants are not modifiable.
+
+The data segment is dedicated to writable data, such as [symbolic integer variables](#121-symbolic-integer-variables), [symbolic string variables](#122-symbolic-string-variables), and the [modifiable buffer](#123-modifiable-buffers). Because the segment is marked as read-write (RW) in the page table once the program is loaded into memory, this data can be altered at runtime. Leaving the executable bit unset protects the simulator from arbitrary code execution. This is especially relevant if the buffer is used to store data read from a file, which could contain executable code.
+
+The simulator uses a custom format to structure the binary files, the so-called ICE (Ihme Core Executable) format. These files adhere to a specific structure and must end with the `.bin` file extension.
+
+The following table shows the file structure of an ICE file:
 
 ### ICE File Layout
 
@@ -861,7 +902,7 @@ The following table shows the file structure of an ICE-file:
 | Rodata Segment |
 | Data Segment |
 
-As the table shows, the files are split into metadata, such as the ICE header and the program header and the different segments segments.
+As the table shows, the files are split into the different data segments and metadata, such as the ICE header and the program header.
 
 The ICE header is structured as shown in the following table:
 
@@ -873,10 +914,11 @@ The ICE header is structured as shown in the following table:
 | 1 | Program Header Offset (Byte) |
 | 2-7 | Reserved |
 
-The ICE header is eight doublewords (32 byte) large and contains important metadata about the file content. The first 32-bit doubleword in the ICE header contains the magic number. The magic number is used by the operating system, while the program gets loaded, to test and verify if the binary file is valid and contains an executable program. If the magic number is not present or different from the expected value, then the loading gets canceled immediately.
-The second doubleword contains the offset at which the program header can be found inside the ICE-file. The offset is given in byte. The last six doublewords are reserved for future implementations.
+The ICE header is eight doublewords (32 bytes) large and contains important metadata about the file content. The first 32-bit doubleword in the ICE header contains the magic number. The magic number is used by the operating system during program loading to test and verify whether the binary file is valid and contains an executable program. If the magic number is not present or differs from the expected value, the loading is canceled immediately.
 
-The program header contains the metadata about how the program segments are organized inside the binary file and how they have to be loaded into memory once the program gets loaded. It is made up out of 16 doublewords (64 byte). The full structure of the program header is shown in the following table:
+The second doubleword contains the offset at which the program header can be found inside the ICE file. The offset is given in bytes. The last six doublewords are reserved for future implementations.
+
+The program header contains metadata about how the program segments are organized inside the binary file and how they must be loaded into memory once the program is initialized. It consists of 16 doublewords (64 bytes). The full structure of the program header is shown in the following table:
 
 ### Program Header Layout
 
@@ -894,7 +936,10 @@ The program header contains the metadata about how the program segments are orga
 | 9 | Data Segment Size (Byte) |
 | 10-15 | Reserved |
 
-The first doubleword contains the amount of L2 page tables that the operating system needs to load, so that all segments of the program can be mapped into memory. This was an optimization that has been done to minimize the complexity of the code that loads the program.
-The other entries contain the information about the program segments. Each segment has a virtual memory base address. This base address describes where the segment gets mapped in the virtual address space of the program when it is loaded into memory. This virtual base address is always aligned to a page boarder (4 KiB aligned).
-The offset for each segment describes where the segment is located inside the binary file. The offset is given in bytes and is used by the code that loads the program to find the segment in the binary file. Finally the segment size describes how large the segment is inside the binary file, so the program loader knows when to stop reading the segment data into memory.
+The first doubleword contains the number of L2 page tables that the operating system needs to load so that all segments of the program can be mapped into memory. This is an optimization introduced to minimize the complexity of the code that loads the program.
+
+The other entries contain information about the program segments. Each segment has a virtual memory base address. This base address dictates where the segment is mapped in the virtual address space of the program when it is loaded into memory. This virtual base address is always aligned to a page boundary (4 KiB aligned).
+
+The offset for each segment describes where the segment is located inside the binary file. The offset is given in bytes and is used by the loader code to locate the segment within the file. Finally, the segment size specifies how large the segment is inside the binary file, so the program loader knows when to stop reading the segment data into memory.
+
 The last six doublewords are reserved for future implementations and feature expansions.
