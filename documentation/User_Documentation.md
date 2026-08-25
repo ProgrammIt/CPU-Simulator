@@ -405,6 +405,79 @@ CALL console_write_string ; Call the library function
 
 In the above example, the string "My string" is written to the console. For write operations to the console, constants can be used as well, since their content is not modified. The program does not block, as the operation is a write operation, and the function returns immediately.
 
+## 1.4 Process Management
+
+Several syscalls are available for process management, allowing users to create, yield, or exit a process. Because the Ihme-Core OS is a multiprocess operating system, multiple processes must share CPU time. The scheduler dictates how long a process is allowed to run on the CPU by monitoring its time slice before switching to the next process. However, a process can also voluntarily give up its execution time by using the yield syscall.
+
+### 1.4.1 Process Create
+
+This syscall creates a new process by loading a program from an ICE (Ihme Core Executable) file. Internally, this involves creating the PCB for the process, setting up the page directory and necessary L2 page tables, and loading the program data into memory. Once loaded, the new process enters the `waiting` state, ready to be scheduled and transitioned to the `running` state after the syscall returns. The process starts with a fresh [time-slice](#41-time-slice-management).
+
+Parameters:
+
+* EBX: Pointer to a string containing the file path
+
+Return value:
+
+* EAX: Success status
+*   `0` -> Success
+*   `1` -> Error
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST FILE_PATH "bin/loop.bin" ; create a constant with the file path of the program to load
+
+MOV $FILE_PATH, %ebx ; prepare the parameter for the syscall
+
+MOV $CONST_SYSCALL_PROCESS_CREATE, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+In the example above, a new process is created from the example program `loop`. The program needs to be compiled first, which can be done through the GUI.
+
+### 1.4.2 Process Yield
+
+A process can voluntarily give up its CPU time before its time slice expires. Its time slice is reset, and the process is placed back into the `waiting` state. This gives other processes a chance to execute, provided they are available and also in the `waiting` state.
+
+Parameters: `none`
+
+Return value: `none`
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+MOV $CONST_SYSCALL_PROCESS_YIELD, %eax ; Sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above causes the currently executing process to yield and return to the `waiting` state.
+
+### 1.4.3 Process Exit
+
+Exiting a process causes it to terminate, permanently ending its execution. Calling this syscall at the end of a program is strictly necessary; failing to do so leads to undefined behavior. Without an explicit exit, the CPU will continue fetching instructions past the end of the program, likely triggering an invalid opcode error or a general protection fault depending on the adjacent memory region.
+
+When a process exits, all memory previously used by it is freed.
+
+Parameters: `none`
+
+Return value: `none`
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+MOV $CONST_SYSCALL_PROCESS_EXIT, %eax ; Sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to terminate the currently running process.
+
 ## 2 Interrupts
 
 ## 2.1 Hardware Interrupts
