@@ -170,7 +170,7 @@ Internally, the console uses an array of `Uint8Array`s as an input buffer. Each 
 
 Both read operations for numbers and strings are blocking if the console buffer is empty. If data is already in the console input buffer when a read operation is performed, the function executes and returns immediately. When a process attempts to read from an empty console, it enters a blocked state waiting for I/O and is placed in the I/O waiting queue. This waiting queue operates on a FIFO basis.
 
-Once the keyboard interrupt triggers, the first process in the I/O waiting queue transitions to the waiting state. If multiple processes are waiting for keyboard I/O and multiple keyboard interrupts are triggered, the processes change to the waiting state in the order they originally entered the blocked queue. The scheduler ultimately decides which process actually gets to read the data first, depending on which process is set to the running state first.
+Once the keyboard interrupt triggers, the first process in the I/O waiting queue transitions to the `waiting` state. If multiple processes are waiting for keyboard I/O and multiple keyboard interrupts are triggered, the processes change to the waiting state in the order they originally entered the blocked queue. The scheduler ultimately decides which process actually gets to read the data first, depending on which process is set to the running state first.
 
 A console library has also been implemented to simplify console access, removing the need to manually manage the stack for syscalls. To use these library functions, the library must first be included using the `.INCLUDE` directive, as shown in the examples.
 
@@ -506,7 +506,7 @@ The following registers implement the jump-on-click feature:
 
 ## 3.2 Console
 
-The console GUI element serves as the input and output interface for programs to read from or write to. The console is enabled by default, but it can be enabled or disabled through the settings: 
+The console GUI element serves as the input and output interface for programs to read from or write to. The console is enabled by default, but it can be enabled or disabled through the settings:  
 `Settings -> Behavior -> Output -> Console -> Enable Console`  
 `Settings -> Behavior -> Output -> Console -> Disable Console`  
 If the console is disabled, its existing content remains intact; only the GUI element is hidden, and the content reappears when re-enabled.
@@ -531,6 +531,34 @@ The time-slice counter uses periodic interrupts as its unit of measurement, whil
 ```
 
 In this example, three periodic timer interrupts can occur before the scheduler causes a context switch, and five user instructions can execute before the periodic timer triggers a hardware interrupt.
+
+### 4.2 Process States
+
+Processes in the Ihme-Core OS can be in one of several states. A process's current state is stored in its Process Control Block (PCB). The following table lists all currently implemented process states:
+
+| Status | Numerical Value |
+| :--- | ---: |
+| Terminated | 0 |
+| Running | 1 |
+| Waiting | 2 |
+| Timer Blocked | 3 |
+| IO Blocked | 4 |
+
+The `terminated` state indicates that the process has finished execution, will not be executed again, and its memory has been freed. When a process terminates, the scheduler finds the next available process and performs a context switch.
+
+Because the simulated Ihme-Core CPU is single-core and single-threaded, only one process can be active at a time. The process currently being executed by the CPU is in the `running` state.
+
+Processes in the `waiting` state are ready for execution and are held in a waiting queue. Multiple processes can be in the `waiting` state simultaneously. The scheduler selects the first process in the waiting queue to execute on the next context switch.
+
+A process in a `blocked` state is not ready to execute because it is waiting for a specific event to occur. Currently, there are two types of `blocked` states implemented: `timer blocked` and `IO blocked`.
+
+* Processes in the `timer blocked` state are waiting for a timer to expire. Once the timer expires, an interrupt is triggered, moving the process back into the `waiting` state.
+
+* Processes waiting for I/O on the console enter the `IO blocked` state. They transition back to the waiting state once input becomes available on the [console](#13-console-io), which is signaled by an interrupt.
+
+The OS maintains separate queues for processes in the `timer blocked` and `IO blocked` states.
+
+A process can never transition directly from a `blocked` state to the `running` state; it must first be moved to the `waiting` state and then be scheduled by the scheduler.
 
 ## 5 DEV Operations
 
