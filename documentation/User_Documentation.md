@@ -47,7 +47,7 @@ MOV $myStringConst, %eax
 
 ## 1.2 Symbolic Variables
 
-Symbolic variables can store either an integer or a string. The actual values of the variables get stored in the data segment, which is writable in user mode. For more details about the layout of a program in memory, see [5 Ihme Core Executable Files](#5-ihme-core-executable-files).
+Symbolic variables can store either an integer or a string. The actual values of the variables get stored in the data segment, which is writable in user mode. For more details about the layout of a program in memory, see [6 Ihme Core Executable Files](#6-ihme-core-executable-files).
 
 By convention the variables should be defined and declared between the `.DATA` and the `.CODE` label in the program text.
 
@@ -184,10 +184,10 @@ Return value:
 
 * EAX: Number read from the console  
 * EBX: Success status  
-*   `0` -> Success
-*   `-1` -> No input ready
-*   `-2` -> Could not parse number
-*   `-3` -> Number does not fit into 32 bit DoubleWord
+  * `0` -> Success
+  * `-1` -> No input ready
+  * `-2` -> Could not parse number
+  * `-3` -> Number does not fit into 32 bit DoubleWord
 
 The read operation is blocking, see [1.3 Console IO](#13-console-io) for more details.
 
@@ -205,7 +205,7 @@ To write a number to the console the `$CONST_SYSCALL_CONSOLE_PRINT_NUMBER` const
 
 Parameters:
 
-*   EBX: Number to be printed to the console  (used as immediate value)
+* EBX: Number to be printed to the console  (used as immediate value)
 
 Return value: `none`
 
@@ -223,17 +223,20 @@ Because the console is treated as a file, similar to Linux, the file read syscal
 
 To read a string from the console, the `$CONST_SYSCALL_FILE_READ` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-* Parameters (EBX is a pointer to the following struct):  
-*   `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
-*   `*(EBX+4)`: Pointer to a buffer; this buffer will be filled by the file system  
-*   `*(EBX+8)`: Buffer size; limits the amount of bytes that will be read  
+Parameters
 
-* Return value (immediate value):  
+* EBX: Pointer to parameter struct
+  * `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
+  * `*(EBX+4)`: Pointer to a buffer; this buffer will be filled by the file system  
+  * `*(EBX+8)`: Buffer size; limits the amount of bytes that will be read  
+
+Return value:
+
 * EAX: Success status  
-*   `>=0` -> Number of bytes read  
-*   `-1` -> Invalid file descriptor  
-*   `-2` -> Seek position out of file bounds  
-*   `-3` -> No console input ready
+  * `>=0` -> Number of bytes read  
+  * `-1` -> Invalid file descriptor  
+  * `-2` -> Seek position out of file bounds  
+  * `-3` -> No console input ready
 
 ``` Assembly
 .INCLUDE "os/include/syscalls"
@@ -270,16 +273,19 @@ Because the console is treated as a file, similar to Linux, the file write sysca
 
 To write a string to the console, the `$CONST_SYSCALL_FILE_WRITE` constant can be used if the `os/include/syscalls` file has been included in the program.
 
-* Parameters (EBX is a pointer to the following struct):  
-*   `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
-*   `*(EBX+4)`: Pointer to buffer; this buffer will be used by the file system  
-*   `*(EBX+8)`: Buffer size; limits the amount of bytes that will be written  
+Parameters:
 
-* Return value (immediate value):  
-*   EAX: Success status  
-*   `>=0` -> Number of bytes written  
-*   `-1` -> Invalid file descriptor  
-*   `-2` -> Seek position out of file bounds
+* EBX: Pointer to parameter struct
+  * `*(EBX)`: File descriptor (`fd=0` for console, `fd>0` for files)  
+  * `*(EBX+4)`: Pointer to buffer; this buffer will be used by the file system  
+  * `*(EBX+8)`: Buffer size; limits the amount of bytes that will be written  
+
+Return value:
+
+* EAX: Success status  
+  * `>=0` -> Number of bytes written  
+  * `-1` -> Invalid file descriptor  
+  * `-2` -> Seek position out of file bounds
 
 ``` Assembly
 .INCLUDE "os/include/syscalls"
@@ -310,13 +316,14 @@ The console library function to read a number from the console has the following
 
 Parameters: `none`
 
-Return value (immediate value):
-*   EAX: The number read from the console
-*   EBX: Success status
-*   `0` -> Success
-*   `-1` -> No input ready
-*   `-2` -> Could not parse number
-*   `-3` -> Number does not fit into 32 bit DoubleWord
+Return value:
+
+* EAX: The number read from the console
+* EBX: Success status
+  * `0` -> Success
+  * `-1` -> No input ready
+  * `-2` -> Could not parse number
+  * `-3` -> Number does not fit into 32 bit DoubleWord
 
 ``` Assembly
 .INCLUDE "os/include/console"
@@ -329,8 +336,9 @@ In the above example, EAX contains the number read from the console, and EBX con
 
 The console library function to write a number to console has the following parameters and return values:
 
-* Parameters (immediate value)
-*   EBX: Number to write to the console
+Parameters:
+
+* EBX: Number to write to the console
 
 Return value: `none`
 
@@ -348,16 +356,16 @@ The console library function to read a string from the console has the following
 
 Parameters:
 
-*   EAX: Number of bytes to read from the cosnole
-*   EBX: Pointer to buffer
+* EAX: Number of bytes to read from the cosnole
+* EBX: Pointer to buffer
 
 Return value:
 
-*   EAX: Success status
-*   `>=0` -> Number of bytes read  
-*   `-1` -> Invalid file descriptor  
-*   `-2` -> Seek position out of file bounds  
-*   `-3` -> No console input ready
+* EAX: Success status
+  * `>=0` -> Number of bytes read  
+  * `-1` -> Invalid file descriptor  
+  * `-2` -> Seek position out of file bounds  
+  * `-3` -> No console input ready
 
 The pointer to a buffer can be either the base address of a buffer or a memory address that references free space on the stack.
 
@@ -382,15 +390,15 @@ The console library function to write a string to the console has the following 
 
 Parameters:
 
-*   EAX: Number of bytes to write to the console
-*   EBX: Pointer to the buffer that contains the data to write to the console
+* EAX: Number of bytes to write to the console
+* EBX: Pointer to the buffer that contains the data to write to the console
 
 Return value:
 
-*   EAX: Success status
-*   `>=0` -> Number of bytes written  
-*   `-1` -> Invalid file descriptor  
-*   `-2` -> Seek position out of file bounds
+* EAX: Success status
+  * `>=0` -> Number of bytes written  
+  * `-1` -> Invalid file descriptor  
+  * `-2` -> Seek position out of file bounds
 
 ``` Assembly
 .INCLUDE "os/include/console"
@@ -420,8 +428,8 @@ Parameters:
 Return value:
 
 * EAX: Success status
-*   `0` -> Success
-*   `1` -> Error
+  * `0` -> Success
+  * `1` -> Error
 
 This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
 
@@ -492,8 +500,8 @@ Parameters:
 * EBX: Pointer to a parameter struct
   * `*(EBX)` -> File descriptor
     * `0` -> Special file descriptor for console
-  * `*(EBX + 4)` -> Pointer to buffer to store read data
-  * `*(EBX + 8)` -> Number of bytes to read
+  * `*(EBX+4)` -> Pointer to buffer to store read data
+  * `*(EBX+8)` -> Number of bytes to read
 
 Return value:
 
@@ -533,8 +541,8 @@ Parameters:
 * EBX: Pointer to a parameter struct
   * `*(EBX)` -> File descriptor
     * `0` -> Special file descriptor for console
-  * `*(EBX + 4)` -> Pointer to buffer that acts as source
-  * `*(EBX + 8)` -> Amount of bytes to write
+  * `*(EBX+4)` -> Pointer to buffer that acts as source
+  * `*(EBX+8)` -> Amount of bytes to write
 
 Return value:
 
@@ -653,8 +661,8 @@ Parameters:
 
 * EBX: Pointer to a parameter struct
   * `*(EBX)` -> File descriptor
-  * `*(EBX + 4)` -> Seek offset
-  * `*(EBX + 8)` -> Seek mode
+  * `*(EBX+4)` -> Seek offset
+  * `*(EBX+8)` -> Seek mode
     * `0` -> Seek from current position
     * `-1` -> Seek from start of the file
     * `-2` -> Seek from end of the file
@@ -760,13 +768,13 @@ Some registers can hold memory addresses for either virtual or physical memory. 
 
 The following registers implement the jump-on-click feature:
 
-- EAX
-- EBX
-- ECX
-- ESP
-- EIP
-- ITP
-- PTP
+* EAX
+* EBX
+* ECX
+* ESP
+* EIP
+* ITP
+* PTP
 
 ## 3.2 Console
 
@@ -870,20 +878,21 @@ The DEV operation uses the following parameter:
 
 Additional parameters on the stack:
 
-*   `stack + 0`: Seek Mode
-*   `0` -> Seek from current position
-*   `1` -> Seek from start of file
-*   `2` -> Seek from end of file
-*   `stack + 4`: Offset
+* `stack + 0`: Seek Mode
+  * `0` -> Seek from current position
+  * `1` -> Seek from start of file
+  * `2` -> Seek from end of file
+* `stack + 4`: Offset
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-Return value (EAX):
+Return value:
 
-*   `0` -> Success
-*   `-1` -> Invalid file descriptor
-*   `-2` -> Seek position out of file bounds
-*   `-3` -> Negative seek position
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Seek position out of file bounds
+  * `-3` -> Negative seek position
 
 ## 5.2 IO Close
 
@@ -897,9 +906,11 @@ The DEV operation uses the following parameter:
 
 * `operand2`: File descriptor
 
-* Return value (EAX):
-*   `0` -> Success
-*   `-1` -> Invalid file descriptor
+Return value:
+
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> Invalid file descriptor
 
 ## 5.3 IO Read Buffer
 
@@ -912,21 +923,22 @@ DEV $CONST_DEV_COMMAND_IO_READ_BUFFER, <operand2>
 The DEV operation uses the following parameter:
 
 * `operand2`: File descriptor
-*   `0` -> Special file descriptor for console access
+  * `0` -> Special file descriptor for console access
 
 Additional parameters on the stack:
 
-*   `stack + 0`: Buffer address
-*   `stack + 4`: Number of bytes to read
+* `stack+0`: Buffer address
+* `stack+4`: Number of bytes to read
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-Return value (EAX):
+Return value:
 
-*   `>= 0` -> Number of bytes read
-*   `-1` -> Invalid file descriptor
-*   `-2` -> Invalid seek position
-*   `-3` -> No console input ready
+* EAX: Success status
+  * `>= 0` -> Number of bytes read
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Invalid seek position
+  * `-3` -> No console input ready
 
 ## 5.4 IO Write Buffer
 
@@ -939,20 +951,21 @@ DEV $CONST_DEV_COMMAND_IO_WRITE_BUFFER, <operand2>
 The DEV operation uses the following parameter:
 
 * `operand2`: File descriptor
-*   `0` -> Special file descriptor for console access
+  * `0` -> Special file descriptor for console access
 
 Additional parameters on the stack:
 
-*   `stack + 0`: Buffer address
-*   `stack + 4`: Number of bytes to write
+* `stack+0`: Buffer address
+* `stack+4`: Number of bytes to write
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
-Return value (EAX):
+Return value:
 
-*   `>= 0` -> Number of bytes written
-*   `-1` -> Invalid file descriptor
-*   `-2` -> Invalid seek position
+* EAX: SUccess status
+  * `>= 0` -> Number of bytes written
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Invalid seek position
 
 ## 5.5 File Create
 
@@ -966,10 +979,11 @@ The DEV operation uses the following parameter:
 
 * `operand2`: Pointer to a string containing the filename
 
-Return value (EAX):
+Return value:
 
-*   `>= 0` -> Success
-*   `-1` -> File already exists
+* EAX: Success status
+  * `>= 0` -> Success
+  * `-1` -> File already exists
 
 ## 5.6 File Delete
 
@@ -983,10 +997,11 @@ The DEV operation uses the following parameter:
 
 * `operand2`: Pointer to a string containing the filename
 
-Return value (EAX):
+Return value:
 
-*   `0` -> Success
-*   `-1` -> File does not exist
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> File does not exist
 
 ## 5.7 Open File
 
@@ -1000,10 +1015,11 @@ The DEV operation uses the following parameter:
 
 * `operand2`: Pointer to a string containing the filename
 
-Return value (EAX):
+Return value:
 
-*   `>= 0` -> File descriptor
-*   `-1` -> Invalid filename
+* EAX: Success status
+  * `>= 0` -> File descriptor
+  * `-1` -> Invalid filename
 
 ## 5.8 File Stat
 
@@ -1017,11 +1033,12 @@ The DEV operation uses the following parameter:
 
 * `operand2`: Pointer to a string containing the filename
 
-Return value (EAX):
+Return value:
 
-*   `>= 0` -> Filesize
-*   `-1` -> File does not exist
-*   `-2` -> Not a file
+* EAX: Success status
+  * `>= 0` -> Filesize
+  * `-1` -> File does not exist
+  * `-2` -> Not a file
 
 ## 5.9 Console Print Number
 
@@ -1052,11 +1069,11 @@ The DEV operation uses the following parameter:
 Return value:
 
 * EAX: Number read from the console
-* EBX: Status
-*   `0`  -> Success
-*   `-1` -> No input ready
-*   `-2` -> Not a number
-*   `-3` -> Number does not fit into a 32-bit DoubleWord
+* EBX: Success status
+  * `0`  -> Success
+  * `-1` -> No input ready
+  * `-2` -> Not a number
+  * `-3` -> Number does not fit into a 32-bit DoubleWord
 
 ## 5.11 Is Memory Virtualization Enabled
 
@@ -1070,10 +1087,11 @@ The DEV operation uses the following parameter:
 
 * `operand2`: Unused operand, but must be set to prevent an invalid opcode error (passing `$0` is recommended).
 
-Return value (EAX):
+Return value:
 
-*   `0` -> Disabled
-*   `1` -> Enabled
+* EAX:
+  * `0` -> Disabled
+  * `1` -> Enabled
 
 ## 5.12 Enable Memory Virtualization
 
@@ -1117,12 +1135,11 @@ The DEV operation uses the following parameter:
 
 Return value:
 
-*   EAX: ID of the finished timer
+* EAX: ID of the finished timer
 
 ## 5.15 Timer Set
 
 This DEV operation sets up a hardware timer with a specified ID and start value. The timer duration is expressed in user-mode instructions. Each time an instruction executes in user mode, the timer is decremented by one. It can be called as follows:
-
 
 ``` Assembly
 DEV $CONST_DEV_COMMAND_TIMER_SET, <operand2>
@@ -1134,7 +1151,7 @@ The DEV operation uses the following parameter:
 
 Additional parameter on the stack:
 
-*   `stack + 0`: Timer start value
+* `stack+0`: Timer start value
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
@@ -1170,8 +1187,8 @@ The DEV operation uses the following parameter:
 
 Return value:
 
-*   EAX: Number of lines that can be parsed as number
-*   EBX: Number of lines that can be interpreted as string
+* EAX: Number of lines that can be parsed as number
+* EBX: Number of lines that can be interpreted as string
 
 ## 5.18 Frame Mapped Signal
 
@@ -1187,8 +1204,8 @@ The DEV operation uses the following parameter:
 
 Additional parameters on the stack:
 
-*   `stack + 0`: Physical memory address of the frame
-*   `stack + 4`: The virtual memory address the frame was mapped to
+* `stack+0`: Physical memory address of the frame
+* `stack+4`: The virtual memory address the frame was mapped to
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
@@ -1208,8 +1225,8 @@ The DEV operation uses the following parameter:
 
 Additional parameters on the stack:
 
-*   `stack + 0`: Physical memory address of the frame
-*   `stack + 4`: The virtual memory address the frame got mapped to
+* `stack+0`: Physical memory address of the frame
+* `stack+4`: The virtual memory address the frame got mapped to
 
 Note: The values on the stack are removed by the DEV command, so the stack does not need to be cleaned manually.
 
