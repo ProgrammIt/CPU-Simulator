@@ -478,6 +478,270 @@ INT $0x80 ; Trigger interrupt for syscall
 
 The example above shows how to terminate the currently running process.
 
+## 1.5 File Operations
+
+The Ihme-Core OS can perform multiple operations on files. The files are stored on the system the simulator is running on. To interact with those files as if they were files in the filesystem of the simulator, the [DEV operations](#5-dev-operations) are used. Since the DEV operations are only executable in kernel mode, syscalls have been implemented so user programs can perform these operations as well.
+
+### 1.5.1 File Read
+
+This syscall reads a given number of bytes from a file into a buffer. It is also used to read strings [from the console](#133-console-read-string). Trying to read more bytes than the given buffer can hold can lead to undefined behavior or cause a general protection fault.
+If fewer bytes are available to read than requested, only the available bytes will be read.
+
+Parameters:
+
+* EBX: Pointer to a parameter struct
+  * `*(EBX)` -> File descriptor
+    * `0` -> Special file descriptor for console
+  * `*(EBX + 4)` -> Pointer to buffer to store read data
+  * `*(EBX + 8)` -> Number of bytes to read
+
+Return value:
+
+* EAX: Success status
+  * `>=0` -> Number of bytes read
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Seek position out of file bounds
+  * `-3` -> No console input ready
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.DATA
+.BUF 4 inputBuffer ; creates a four byte large buffer to store the data
+.CODE
+
+PUSH $4 ; put the amount of bytes to read on the stack
+PUSH $inputBuffer ; put the buffer pointer on the stack
+PUSH %ecx ; put the file descriptor on the stack, assuming it is contained in ecx
+
+MOV %esp, %ebx ; put the start pointer of the struct into ebx for the syscall parameter
+
+MOV $CONST_SYSCALL_FILE_READ, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to read four bytes from a file. The example assumes that `ECX` already contains the file descriptor of an opened file.
+
+### 1.5.2 File Write
+
+This syscall writes a given number of bytes into a file acting as the target, using a buffer as the source for the data to write. Trying to write more bytes than the size of the source buffer can cause undefined behavior or trigger a general protection fault. The syscall can also be used to write a string [to the console](#134-console-write-string).
+
+Parameters:
+
+* EBX: Pointer to a parameter struct
+  * `*(EBX)` -> File descriptor
+    * `0` -> Special file descriptor for console
+  * `*(EBX + 4)` -> Pointer to buffer that acts as source
+  * `*(EBX + 8)` -> Amount of bytes to write
+
+Return value:
+
+* EAX: Success status
+  * `>=0` -> Number of bytes written
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Seek position out of file bounds
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST outputData "Test"
+
+PUSH $4 ; put the amount of bytes to write on the stack
+PUSH $outputData ; put the buffer pointer on the stack
+PUSH %ecx ; put the file descriptor on the stack, assuming it is contained in ecx
+
+MOV %esp, %ebx ; put the start pointer of the struct into ebx for the syscall parameter
+
+MOV $CONST_SYSCALL_FILE_WRITE, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to write the string `Test`, which equals four bytes of data, into a file. The example above assumes that `ECX` already contains the file descriptor of an opened file.
+
+### 1.5.3 File Open
+
+This syscall opens a file.
+
+Parameter:
+
+* EBX: Pointer to a string containing the file path
+
+Return value:
+
+* EAX: File descriptor
+  * `-1` -> Error
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST FILE_PATH "home/examples/loop.asm" ; create a constant with the file path of the file to open
+
+MOV $FILE_PATH, %ebx ; prepare the parameter for the syscall
+
+MOV $CONST_SYSCALL_FILE_OPEN, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to open the file `loop.asm` in the example programs folder. After the syscall returns successfully, `EAX` contains the file descriptor for the file. The file is open and ready for subsequent operations.
+
+### 1.5.4 File Close
+
+This syscall closes an open file.
+
+Parameter:
+
+* EBX: File descriptor of an open file
+
+Return value:
+
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> Invalid file descriptor
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+MOV $CONST_SYSCALL_FILE_CLOSE, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to close a file. The example assumes that `EBX` already contains the file descriptor of the file that is meant to be closed.
+
+### 1.5.5 File Stat
+
+This syscall queries the size of a file in bytes.
+
+Parameter:
+
+* EBX: Pointer to a string containing the file path
+
+Return value:
+
+* EAX: Success status
+  * `>=0` -> File size in byte
+  * `-1` -> File does not exist
+  * `-2` -> Not a file
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST FILE_PATH "home/examples/loop.asm" ; create a constant with the file path
+
+MOV $FILE_PATH, %ebx ; prepare the parameter for the syscall
+
+MOV $CONST_SYSCALL_FILE_STAT, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to query the filesize of the `loop.asm` example program.
+
+### 1.5.6 File Seek
+
+This syscall seeks inside a given file, supporting different seek modi.
+
+Parameters:
+
+* EBX: Pointer to a parameter struct
+  * `*(EBX)` -> File descriptor
+  * `*(EBX + 4)` -> Seek offset
+  * `*(EBX + 8)` -> Seek mode
+    * `0` -> Seek from current position
+    * `-1` -> Seek from start of the file
+    * `-2` -> Seek from end of the file
+
+Return value:
+
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> Invalid file descriptor
+  * `-2` -> Seek position out of file bounds
+  * `-3` -> Negative seek position
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+PUSH $1 ; put the seek mode on the stack (from beginning of file)
+PUSH $4 ; put the seek offset on the stack
+PUSH %ecx ; put the file descriptor on the stack, assuming it is contained in ecx
+
+MOV %esp, %ebx ; put the start pointer of the struct into ebx for the syscall parameter
+
+MOV $CONST_SYSCALL_FILE_SEEK, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above shows how to seek four bytes from the beginning of an open file. The example assumes that `ECX` already contains a file descriptor of an open file.
+
+### 1.5.7 File Create
+
+This syscall creates a new file.
+
+Parameter:
+
+* EBX: Pointer to a string containing the file path
+
+Return value:
+
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> File already exists
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST FILE_PATH "home/examples/test.asm" ; create a constant with the file path
+
+MOV $FILE_PATH, %ebx ; prepare the parameter for the syscall
+
+MOV $CONST_SYSCALL_FILE_CREATE, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above creates the file `test.asm`.
+
+### 1.5.8 File Delete
+
+This syscall deletes an existing file.
+
+Parameter:
+
+* EBX: Pointer to a string containing the file path
+
+Return value:
+
+* EAX: Success status
+  * `0` -> Success
+  * `-1` -> File does not exist
+
+This syscall has a predefined constant associated with it for easier use, which requires importing the `syscalls` file from the include directory. It can be called as follows:
+
+``` Assembly
+.INCLUDE "os/include/syscalls" ; import the constants for syscalls
+
+.CONST FILE_PATH "home/examples/test.asm" ; create a constant with the file path
+
+MOV $FILE_PATH, %ebx ; prepare the parameter for the syscall
+
+MOV $CONST_SYSCALL_FILE_DELETE, %eax ; sets up the syscall to be executed
+INT $0x80 ; Trigger interrupt for syscall
+```
+
+The example above deletes the file `test.asm`.
+
 ## 2 Interrupts
 
 ## 2.1 Hardware Interrupts
