@@ -26,6 +26,7 @@ import { PeriodicTimer } from "./PeriodicTimer";
 import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 import { InstructionSet } from "../../../types/enumerations/InstructionSet";
 import { VirtualAddress } from "../../../types/binary/VirtualAddress";
+import { programExecutionStepping } from "../../../types/enumerations/ProgramExecutionStepping";
 
 /**
  * This class represents a CPU core which is capable of executing InstructionSet.
@@ -179,6 +180,17 @@ export class CPUCore {
     public mainMemory: RAM;
 
     /**
+     * This field stores the program execution stepping.
+     */
+    public executionStepping: programExecutionStepping;
+
+    /**
+     * This field is used to determine if the program should be stopped because the program reached a stop point. 
+     * The type of the stop point is determined by the executionStepping.
+     */
+    private haltProgram: boolean;
+
+    /**
      * Constructs an instance of a CPU core.
      * @param mainMemory The main memory of the system.
      * @param processingWidth The maximum number of bits that can be processed in one cycle. Defaults to 32 bits (a doubleword).
@@ -209,6 +221,8 @@ export class CPUCore {
         this.periodicTimer = new PeriodicTimer(this);
         this._decodedInstruction = null;
         this._processingWidth = processingWidth;
+        this.executionStepping = programExecutionStepping.SINGLE;
+        this.haltProgram = false;
     }
 
     /**

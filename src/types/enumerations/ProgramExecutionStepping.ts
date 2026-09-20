@@ -1,4 +1,5 @@
 export enum programExecutionStepping {
+    SINGLE,
     CALL,
     RET,
     IRET,

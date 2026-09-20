@@ -9,6 +9,7 @@ import { DevOperations } from "../types/enumerations/DevOperations";
 import { InstructionSet } from "../types/enumerations/InstructionSet";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
+import { programExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
 
 /**
  * This enumeration is a duplicate of the one, that can be
@@ -248,6 +249,11 @@ export class Renderer {
      * This field stores the memory end address from the input box in the detailed RAM view.
      */
     public ramViewEndAddress: number;
+
+    /**
+     * This field stores the current stepping mode for the program execution.
+     */
+    public executionStepping: programExecutionStepping;
 
     /**
      * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
@@ -724,6 +730,28 @@ export class Renderer {
     }
 
     /**
+     * TODO Finish description and add function to button
+     */
+    private readonly onChangeListenerExecutionStepping: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentStepping: string = parent.getAttribute("stepping-mode")!;
+            const demandedStepping: string = target.value;
+            parent.setAttribute("stepping-mode", demandedStepping);
+            if (currentStepping === demandedStepping) {
+                return;
+            } else {
+                const newStepping: programExecutionStepping = programExecutionStepping[demandedStepping as keyof typeof programExecutionStepping];
+                this.executionStepping = newStepping;
+                this._window.simulator.changeExecutionStepping(newStepping);
+            }
+        }
+        return;
+    }
+
+
+    /**
      * This callback is used as the change listeners logic for the GUI element, which visualizes the RAM-Cell search module.
      * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
      */
@@ -1066,6 +1094,15 @@ export class Renderer {
         this.ramBlockSize = 1;
         this.ramViewStartAddress = 0x0;
         this.ramViewEndAddress = 0xb;
+        this.executionStepping = programExecutionStepping.SINGLE;
+    }
+
+    /**
+    * This method registers the select listener for the execution stepping selector element.
+    */
+    public registerExecutionSteppingSelectElement(): void {
+        const steppingModeSelect: HTMLSelectElement = this._document.getElementById("stepping-selector") as HTMLSelectElement;
+        steppingModeSelect.addEventListener("change", this.onChangeListenerExecutionStepping);
     }
 
     /**

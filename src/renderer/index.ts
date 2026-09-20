@@ -29,6 +29,7 @@ window.onload = async () => {
 	renderer.registerConsoleListener();
 	renderer.registerAddressRangeBoxListener();
 	renderer.registerDetailedRamViewSelectElement();
+	renderer.registerExecutionSteppingSelectElement();
 
 	await renderer.readEAX(renderer.dataRepresentationEAX);
 	await renderer.readEBX(renderer.dataRepresentationEBX);

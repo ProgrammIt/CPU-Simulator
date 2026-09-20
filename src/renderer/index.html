@@ -14,6 +14,18 @@
                         <img id="next_cycle" title="Triggers execution of the next instruction" src="" alt="Button for triggering the next instruction cycle">
                         Next instruction
                     </button>
+                    <div class="control-module" stepping-mode="SINGLE">
+                         <div class="lg-text">Execution Stepping</div>
+                        <select id="stepping-selector" title="Stepping mode for program execution">
+                            <option selected value="SINGLE">Single Instruction</option>
+                            <option value="CALL">Next Call</option>
+                            <option value="RET">Next Return</option>
+                            <option value="IRET">Next Interrupt Return</option>
+                            <option value="JMP">Next Jump</option>
+                            <option value="INT">Next Interrupt</option>
+                        </select>
+                    </div>
+                    
                 </li>
                 <div class="search-module control-module" id="ram-search" search-location="PHYSICAL">
                         <div class="lg-text">RAM-Cell Search</div>
