@@ -130,6 +130,7 @@ export class MemoryManagementUnit {
      */
     public invalidateTLB(): void {
         this._tlb.clear();
+        this._cpu.tlbHasChanged = true;
     }
 
     /**
@@ -243,6 +244,7 @@ export class MemoryManagementUnit {
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
         if (!disableTlb) {
             this._tlb.insert([pageNumber, pageTableEntry]);
+            this._cpu.tlbHasChanged = true;
         }
 
         return PhysicalAddress.fromPageTableEntryAndVirtualAddress(pageTableEntry, virtualAddress);

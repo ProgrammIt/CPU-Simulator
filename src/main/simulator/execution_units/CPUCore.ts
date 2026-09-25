@@ -207,6 +207,11 @@ export class CPUCore {
     private _isHandlingInterrupt: boolean;
 
     /**
+     * This field is used to check if the content of the tlb has changed.
+     */
+    public tlbHasChanged: boolean;
+
+    /**
      * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
      */
     private readonly _haltConditions: Record<ProgramExecutionStepping, Set<InstructionSet>> = {
@@ -218,6 +223,7 @@ export class CPUCore {
             InstructionSet.JG,InstructionSet.JGE,InstructionSet.JL,InstructionSet.JLE,InstructionSet.JMP,InstructionSet.JNE,InstructionSet.JNZ,
             InstructionSet.JZ]),
         [ProgramExecutionStepping.INT]: new Set([InstructionSet.INT]),
+        [ProgramExecutionStepping.TLB_CHANGE]: new Set(),
     };
 
     /**
@@ -255,6 +261,7 @@ export class CPUCore {
         this._wasHalted = false;
         this.debugKernel = true;
         this._isHandlingInterrupt = false;
+        this.tlbHasChanged = false;
     }
 
     /**
@@ -358,7 +365,21 @@ export class CPUCore {
             return true;
         }
 
+        if (this.executionStepping === ProgramExecutionStepping.TLB_CHANGE) {
+            return this.tlbHasChanged;
+        }
+
         return this._haltConditions[this.executionStepping].has(operation);
+    }
+
+    private determineProgramStatus(operation: InstructionSet | null | undefined): RunStatus {
+        if (!this._wasHalted && this.shouldHalt(operation)) {
+            this._wasHalted = true;
+            return RunStatus.Halted;
+        }
+        this._wasHalted = false;
+        this.tlbHasChanged = false;
+        return RunStatus.Continue;
     }
 
     /**
@@ -367,11 +388,10 @@ export class CPUCore {
      */
     public handleInterrupt(number: InterruptNumbers): RunStatus
     {
-        if (!this._wasHalted && this.shouldHalt(InstructionSet.INT)) {
-            this._wasHalted = true;
-            return RunStatus.Halted;
+        const runStatus = this.determineProgramStatus(InstructionSet.INT);
+        if (runStatus === RunStatus.Halted) {
+            return runStatus;
         }
-        this._wasHalted = false;
 
         if (this.flags.interrupt == 0) {
             this.reset(); //A CPU exception while interrupt are disabled -> panic, reset system
@@ -414,11 +434,11 @@ export class CPUCore {
         try {
             this.fetch();
             this.decode();
-            if (!this._wasHalted && this.shouldHalt(this._decodedInstruction?.instruction)) {
-                this._wasHalted = true;
-                return RunStatus.Halted;
+
+            const runStatus = this.determineProgramStatus(this._decodedInstruction?.instruction);
+            if (runStatus === RunStatus.Halted) {
+                return runStatus;
             }
-            this._wasHalted = false;
 
             this.execute();
             return RunStatus.Continue;

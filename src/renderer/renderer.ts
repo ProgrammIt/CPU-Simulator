@@ -260,6 +260,7 @@ export class Renderer {
         "Next Interrupt Return",
         "Next Jump",
         "Next Interrupt",
+        "Next TLB Change",
     ];
 
     /**

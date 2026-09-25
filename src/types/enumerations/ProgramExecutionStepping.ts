@@ -4,5 +4,6 @@ export enum ProgramExecutionStepping {
     RET,
     IRET,
     JMP,
-    INT
+    INT,
+    TLB_CHANGE
 }
