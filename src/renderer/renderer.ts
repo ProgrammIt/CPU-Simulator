@@ -251,6 +251,23 @@ export class Renderer {
     public ramViewEndAddress: number;
 
     /**
+     * This field stores the labels for the cycle button.
+     */
+    private readonly _buttonLabels: string[] = [
+        "Next Instruction",
+        "Next Call",
+        "Next Return",
+        "Next Interrupt Return",
+        "Next Jump",
+        "Next Interrupt",
+    ];
+
+    /**
+     * This field stores a reference to the cycle button.
+     */
+    private readonly _cycleButtonText: HTMLElement | null
+
+    /**
      * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
      * @param entries A list of elements, which triggered the intersection observer. 
      * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
@@ -731,7 +748,7 @@ export class Renderer {
     private readonly onChangeListenerExecutionStepping: EventListenerOrEventListenerObject = (event: Event): void => {
         const target: HTMLSelectElement = event.target as HTMLSelectElement;
         const parent: HTMLElement | null = target.parentElement;
-        if (parent !== null) {
+        if (parent !== null && this._cycleButtonText !== null) {
             const currentStepping: string = parent.getAttribute("stepping-mode")!;
             const demandedStepping: string = target.value;
             parent.setAttribute("stepping-mode", demandedStepping);
@@ -739,6 +756,7 @@ export class Renderer {
                 return;
             } else {
                 const newStepping: ProgramExecutionStepping = ProgramExecutionStepping[demandedStepping as keyof typeof ProgramExecutionStepping];
+                this._cycleButtonText.textContent = this._buttonLabels[newStepping]
                 this._window.simulator.changeExecutionStepping(newStepping);
             }
         }
@@ -1110,6 +1128,7 @@ export class Renderer {
         this.ramBlockSize = 1;
         this.ramViewStartAddress = 0x0;
         this.ramViewEndAddress = 0xb;
+        this._cycleButtonText = document.getElementById("cycle-btn-text")
     }
 
     /**
