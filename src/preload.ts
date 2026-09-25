@@ -74,6 +74,8 @@ contextBridge.exposeInMainWorld("simulator", {
 		ipcRenderer.send("keyboard_interrupt", consoleInput),
 	changeExecutionStepping: (executionStepping: ProgramExecutionStepping) =>
 		ipcRenderer.send("change_execution_stepping", executionStepping),
+	changeBreakMode: (debugKernel: boolean) =>
+		ipcRenderer.send("change_break_mode", debugKernel),
 });
 
 contextBridge.exposeInMainWorld("windowUpdate", {

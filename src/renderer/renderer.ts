@@ -251,11 +251,6 @@ export class Renderer {
     public ramViewEndAddress: number;
 
     /**
-     * This field stores the current stepping mode for the program execution.
-     */
-    public executionStepping: ProgramExecutionStepping;
-
-    /**
      * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
      * @param entries A list of elements, which triggered the intersection observer. 
      * @returns A callback, which is used as the logic to perform whenever elements enter or leave the observed viewspace.
@@ -730,7 +725,8 @@ export class Renderer {
     }
 
     /**
-     * TODO Finish description and add function to button
+     * This callback is used as change listener logic for the select element that allows the user to select the breakpoint at which to halt the program.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
      */
     private readonly onChangeListenerExecutionStepping: EventListenerOrEventListenerObject = (event: Event): void => {
         const target: HTMLSelectElement = event.target as HTMLSelectElement;
@@ -743,8 +739,28 @@ export class Renderer {
                 return;
             } else {
                 const newStepping: ProgramExecutionStepping = ProgramExecutionStepping[demandedStepping as keyof typeof ProgramExecutionStepping];
-                this.executionStepping = newStepping;
                 this._window.simulator.changeExecutionStepping(newStepping);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as change listener logic for the select element that controls the mode in which breakpoints should be respected.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerBreakMode: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentBreakMode: string = parent.getAttribute("break-mode")!;
+            const demandedBreakMode: string = target.value;
+            parent.setAttribute("break-mode", demandedBreakMode);
+            if (currentBreakMode === demandedBreakMode) {
+                return;
+            } else {
+                const kernelDebug = demandedBreakMode === "breakOnKernel"
+                this._window.simulator.changeBreakMode(kernelDebug);
             }
         }
         return;
@@ -1094,15 +1110,17 @@ export class Renderer {
         this.ramBlockSize = 1;
         this.ramViewStartAddress = 0x0;
         this.ramViewEndAddress = 0xb;
-        this.executionStepping = ProgramExecutionStepping.SINGLE;
     }
 
     /**
-    * This method registers the select listener for the execution stepping selector element.
+    * This method registers the select listener for the execution stepping control element.
     */
     public registerExecutionSteppingSelectElement(): void {
         const steppingModeSelect: HTMLSelectElement = this._document.getElementById("stepping-selector") as HTMLSelectElement;
         steppingModeSelect.addEventListener("change", this.onChangeListenerExecutionStepping);
+
+        const breakModeSelect: HTMLSelectElement = this._document.getElementById("breakMode-selector") as HTMLSelectElement;
+        breakModeSelect.addEventListener("change", this.onChangeListenerBreakMode);
     }
 
     /**

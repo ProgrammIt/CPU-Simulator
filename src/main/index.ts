@@ -571,6 +571,13 @@ const registerHandlers = (simulator: SimulationController, win: BrowserWindow): 
 	ipcMain.removeHandler("change_execution_stepping");
 	ipcMain.on("change_execution_stepping", async (event: IpcMainInvokeEvent, executionStepping: ProgramExecutionStepping): Promise<void> => {
 		simulator.core.executionStepping = executionStepping;
+		return;
+	})
+
+	ipcMain.removeHandler("change_break_mode");
+	ipcMain.on("change_break_mode", async (event: IpcMainInvokeEvent, debugKernel: boolean): Promise<void> => {
+		simulator.core.debugKernel = debugKernel;
+		return;
 	})
 };
 
