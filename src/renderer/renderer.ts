@@ -9,7 +9,7 @@ import { DevOperations } from "../types/enumerations/DevOperations";
 import { InstructionSet } from "../types/enumerations/InstructionSet";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
-import { programExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
+import { ProgramExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
 
 /**
  * This enumeration is a duplicate of the one, that can be
@@ -253,7 +253,7 @@ export class Renderer {
     /**
      * This field stores the current stepping mode for the program execution.
      */
-    public executionStepping: programExecutionStepping;
+    public executionStepping: ProgramExecutionStepping;
 
     /**
      * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
@@ -742,7 +742,7 @@ export class Renderer {
             if (currentStepping === demandedStepping) {
                 return;
             } else {
-                const newStepping: programExecutionStepping = programExecutionStepping[demandedStepping as keyof typeof programExecutionStepping];
+                const newStepping: ProgramExecutionStepping = ProgramExecutionStepping[demandedStepping as keyof typeof ProgramExecutionStepping];
                 this.executionStepping = newStepping;
                 this._window.simulator.changeExecutionStepping(newStepping);
             }
@@ -1094,7 +1094,7 @@ export class Renderer {
         this.ramBlockSize = 1;
         this.ramViewStartAddress = 0x0;
         this.ramViewEndAddress = 0xb;
-        this.executionStepping = programExecutionStepping.SINGLE;
+        this.executionStepping = ProgramExecutionStepping.SINGLE;
     }
 
     /**

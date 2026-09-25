@@ -7,7 +7,7 @@ import { DoubleWord } from './types/binary/DoubleWord';
 import { Byte } from './types/binary/Byte';
 import { PageNumber } from './types/binary/PageNumber';
 import { PageTableEntry } from './types/binary/PageTableEntry';
-import { programExecutionStepping } from './types/enumerations/ProgramExecutionStepping';
+import { ProgramExecutionStepping } from './types/enumerations/ProgramExecutionStepping';
 
 declare global {
 	interface Window {
@@ -72,7 +72,7 @@ contextBridge.exposeInMainWorld("simulator", {
 		ipcRenderer.on("enable_auto_scroll_page_table", () => callback()),
 	keyboardInterrupt: (consoleInput: string) =>
 		ipcRenderer.send("keyboard_interrupt", consoleInput),
-	changeExecutionStepping: (executionStepping: programExecutionStepping) =>
+	changeExecutionStepping: (executionStepping: ProgramExecutionStepping) =>
 		ipcRenderer.send("change_execution_stepping", executionStepping),
 });
 

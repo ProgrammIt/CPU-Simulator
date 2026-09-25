@@ -26,7 +26,12 @@ import { PeriodicTimer } from "./PeriodicTimer";
 import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 import { InstructionSet } from "../../../types/enumerations/InstructionSet";
 import { VirtualAddress } from "../../../types/binary/VirtualAddress";
-import { programExecutionStepping } from "../../../types/enumerations/ProgramExecutionStepping";
+import { ProgramExecutionStepping } from "../../../types/enumerations/ProgramExecutionStepping";
+
+export enum RunStatus {
+    Continue,
+    Halted
+}
 
 /**
  * This class represents a CPU core which is capable of executing InstructionSet.
@@ -182,13 +187,38 @@ export class CPUCore {
     /**
      * This field stores the program execution stepping.
      */
-    public executionStepping: programExecutionStepping;
+    public executionStepping: ProgramExecutionStepping;
 
     /**
-     * This field is used to determine if the program should be stopped because the program reached a stop point. 
-     * The type of the stop point is determined by the executionStepping.
+     * This field is used to remember if the simulator already stopped on the previous breakpoint once.
      */
-    private haltProgram: boolean;
+    private _wasHalted: boolean;
+
+    /**
+     * This field is used to determine if the stop points should also be considered in kernel mode.
+     * This field is set by the GUI.
+     */
+    public debugKernel: boolean;
+
+    /**
+     * This boolean is used to prevent nested interrupts and to prevent the execution loop from taking the next external interrupt from the queue,
+     * while the interrupt handler is still running.
+     */
+    private _isHandlingInterrupt: boolean;
+
+    /**
+     * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
+     */
+    private readonly _haltConditions: Record<ProgramExecutionStepping, Set<InstructionSet>> = {
+        [ProgramExecutionStepping.SINGLE]: new Set(),
+        [ProgramExecutionStepping.CALL]: new Set([InstructionSet.CALL]),
+        [ProgramExecutionStepping.RET]: new Set([InstructionSet.RET]),
+        [ProgramExecutionStepping.IRET]: new Set([InstructionSet.IRET]),
+        [ProgramExecutionStepping.JMP]: new Set([InstructionSet.JA,InstructionSet.JAE,InstructionSet.JB,InstructionSet.JBE,InstructionSet.JE,
+            InstructionSet.JG,InstructionSet.JGE,InstructionSet.JL,InstructionSet.JLE,InstructionSet.JMP,InstructionSet.JNE,InstructionSet.JNZ,
+            InstructionSet.JZ]),
+        [ProgramExecutionStepping.INT]: new Set([InstructionSet.INT]),
+    };
 
     /**
      * Constructs an instance of a CPU core.
@@ -221,8 +251,10 @@ export class CPUCore {
         this.periodicTimer = new PeriodicTimer(this);
         this._decodedInstruction = null;
         this._processingWidth = processingWidth;
-        this.executionStepping = programExecutionStepping.SINGLE;
-        this.haltProgram = false;
+        this.executionStepping = ProgramExecutionStepping.SINGLE;
+        this._wasHalted = false;
+        this.debugKernel = true;
+        this._isHandlingInterrupt = false;
     }
 
     /**
@@ -259,39 +291,88 @@ export class CPUCore {
      */
     public cycle(): void {
 
-        if (this.flags.isInUserMode())
-        {
-            this.internalCycle();
-            this.timer.countDown();
-            this.periodicTimer.countDown();
-        }
+        let executedInstructions = 0;
+        const MAX_INSTRUCTIONS_PER_CYCLE = 10_000_000_000;
 
-        while (this.flags.isInKernelMode())
-        {
-            this.internalCycle();
-        }
+        while (true) {
+            if (this.flags.interrupt && this.interruptQueue.length !== 0 && !this._isHandlingInterrupt) {
 
-        //Now handle all pending interrupts
-        while (this.flags.interrupt && this.interruptQueue.length !== 0) {
+                // Only copy interrupt to not lose it if a breakpoint is reached in handleInterrupt
+                const nextInterrupt = this.interruptQueue[0] as InterruptNumbers;
+                const interruptStatus = this.handleInterrupt(nextInterrupt);
 
-            this.handleInterrupt(this.interruptQueue.shift() as InterruptNumbers)
+                // A breakpoint has been reached, stop execution
+                if (interruptStatus !== RunStatus.Continue) {
+                    return;
+                }
 
-            while (this.flags.isInKernelMode())
-            {
-                this.internalCycle();
+                // Now remove interrupt after it got fully handled
+                this.interruptQueue.shift();
+            }
+
+            const wasInUserMode = this.flags.isInUserMode();
+            // run one internal cycle handling one instruction
+            const status = this.internalCycle();
+
+            // If a breakpoint was reached, stop executing program immediately
+            if (status !== RunStatus.Continue) {
+                return;
+            }
+
+            // If the previous instruction was executed in user mode, then count down the timers
+            // Must be after the check if a breakpoint was reached, because the instruction gets re-executed otherwise the timer would count down twice
+            if (wasInUserMode) {
+                this.timer.countDown();
+                this.periodicTimer.countDown();
+            }
+
+            // Failsafe to prevent loop if no breakpoint exists
+            executedInstructions++;
+            if (executedInstructions >= MAX_INSTRUCTIONS_PER_CYCLE) {
+                this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
+                return;
             }
         }
-
-
     }
 
+    /**
+     * This method is used to determine if the execution of the current program should get halted. If the kernel debug is set in the GUI,
+     * then the execution of the kernel can get halted as well.
+     * If the program should get halted is determined by the current program stepping mode.
+     * @param operation The opcode that gets evaluated against the current program stepping mode.
+     * @returns Returns true if the program should get halted.
+     */
+    private shouldHalt(operation: InstructionSet | null | undefined) {
+        if (operation == null) {
+            return false;
+        }
+        
+        // Check if the simulator should stop at breakpoints when in kernel mode as well
+        if (this.flags.isInKernelMode() && !this.debugKernel) {
+            // If IRET is selected as mode then break even if kernel debug is not set
+            // Needed because IRET is executed in kernel mode
+            return this.executionStepping === ProgramExecutionStepping.IRET && operation === InstructionSet.IRET;
+        }
+
+        if (this.executionStepping === ProgramExecutionStepping.SINGLE) {
+            return true;
+        }
+
+        return this._haltConditions[this.executionStepping].has(operation);
+    }
 
     /**
      * Handle an Interrupt
      * @param number Interrupt number to handle
      */
-    public handleInterrupt(number: InterruptNumbers)
+    public handleInterrupt(number: InterruptNumbers): RunStatus
     {
+        if (!this._wasHalted && this.shouldHalt(InstructionSet.INT)) {
+            this._wasHalted = true;
+            return RunStatus.Halted;
+        }
+        this._wasHalted = false;
+
         if (this.flags.interrupt == 0) {
             this.reset(); //A CPU exception while interrupt are disabled -> panic, reset system
             throw new Error("Kernel Panic");
@@ -322,26 +403,35 @@ export class CPUCore {
             this.mmu.writeDoublewordTo(this.esp.content, this.mmu.pageFaultAddress, false);
             this.mmu.pageFaultAddress = undefined;
         }
+        return RunStatus.Continue;
     }
 
     /**
      * This method performs a single instruction cycle.
+     * @returns The run status.
      */
-    private internalCycle(): void {
-
+    private internalCycle(): RunStatus {
         try {
             this.fetch();
             this.decode();
+            if (!this._wasHalted && this.shouldHalt(this._decodedInstruction?.instruction)) {
+                this._wasHalted = true;
+                return RunStatus.Halted;
+            }
+            this._wasHalted = false;
+
             this.execute();
+            return RunStatus.Continue;
         } catch(error) {
             if (!(error instanceof ExceptionError)) {
                 DebugLogger.log(error);
             }
             else
             {
-                this.handleInterrupt(error.interruptNumber)
+                return this.handleInterrupt(error.interruptNumber);
             }
         }
+        return RunStatus.Continue;
     }
 
     /**
@@ -470,7 +560,7 @@ export class CPUCore {
 
         let logText = "";
 
-        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode())
+        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel)
         {
             const currentOperation:string = InstructionSet[operation];
             logText = this.getLogText(currentOperation)
@@ -491,8 +581,14 @@ export class CPUCore {
             DebugLogger.log(logText);
         }
 
-        if (this.flags.isInUserMode()) {
-            let log = "Executing:    ";
+        if (this.flags.isInUserMode() || this.debugKernel) {
+            let log;
+            if (this.flags.isInKernelMode()) {
+                log = "Kernel Executing:    ";
+            } else {
+                log = "Executing:    ";
+            }
+            
             log += logText;
             
             this.logToLogger(" ");
@@ -2529,6 +2625,9 @@ export class CPUCore {
             this.logToLogger("Interrupted: " + InterruptNumbers[target.value]);
         }
 
+        // Mark the start of interrupt handling
+        this._isHandlingInterrupt = true;
+
         const eflagsValue = DoubleWord.fromNumber(this.flags.content);
         // Switch to kernel mode.
         this.flags.enterKernelMode();
@@ -2593,6 +2692,9 @@ export class CPUCore {
         this.esp.content = this.mmu.readDoublewordFrom(this.esp.content, false);
 
         this.flags.content = DoubleWord.getFourthByte(eflagsValue);
+
+        // Mark interrupt handling as done
+        this._isHandlingInterrupt = false;
 
         if (this.flags.isInUserMode())
         {

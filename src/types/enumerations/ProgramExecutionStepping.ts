@@ -1,4 +1,4 @@
-export enum programExecutionStepping {
+export enum ProgramExecutionStepping {
     SINGLE,
     CALL,
     RET,
