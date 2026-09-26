@@ -66,7 +66,7 @@ const buildMenu = (win: BrowserWindow, simulator: SimulationController): Menu =>
 						}).then(function(fileObj) {
 							if (!fileObj.canceled) {
 								simulator.assembleProgram(fileObj.filePaths[0].replaceAll("\\", "/"));
-								win.webContents.send("assembled_program", fileObj.filePaths);
+								win.webContents.send("assembled_program", fileObj.filePaths[0]);
 							}
 						}).catch((err) => win.webContents.send("on_error", err))
 					}				
@@ -81,8 +81,12 @@ const buildMenu = (win: BrowserWindow, simulator: SimulationController): Menu =>
 							filters: [{ name: "Select Binary", extensions: ['bin'] }]
 						}).then(function(fileObj) {
 							if (!fileObj.canceled) {
-								simulator.createProcess(fileObj.filePaths[0].replaceAll("\\", "/"));
-								win.webContents.send("loaded_program", fileObj.filePaths);
+								try {
+									simulator.createProcess(fileObj.filePaths[0].replaceAll("\\", "/"));
+									win.webContents.send("loaded_program", fileObj.filePaths[0]);
+								} catch (e) {
+									win.webContents.send("loaded_program", e);
+								}
 							}
 						}).catch((err) => win.webContents.send("on_error", err))
 					}	

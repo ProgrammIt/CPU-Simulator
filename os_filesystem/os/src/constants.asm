@@ -3,6 +3,8 @@
 
 ; constants for the kernel memory layout
 
+    .ALIAS CONST_ISA_VERION 1
+
     .ALIAS CONST_CPU_BIT_WIDTH 32
 
     .ALIAS CONST_USER_MEMORY_START 0x0

@@ -57,7 +57,7 @@
 
         ; prepare stack for further calls
         
-        .BUF 32 ICE_HEADER ; prepare buffer to store ice header
+        .BUF 16 ICE_HEADER ; prepare buffer to store ice header
 
         ; SYSCALLS_FILE_READ
         ; Parameters (ebx is a pointer to the following struct):
@@ -66,7 +66,7 @@
         ;   *(ebx+8)   buffer size, limits the amount of bytes that will be read
         ; Return value (immediate value):
         ;   eax     success status (>=0 = number of bytes read, -1 = invalid file descriptor, -2 = seek position out of file bounds, -3 = no console input ready)
-        PUSH $32 ; buffer size
+        PUSH $16 ; buffer size
         PUSH $ICE_HEADER ; pointer to buffer
         PUSH %eax ; file descriptor
         MOV %esp, %ebx ; prepare bx for read
@@ -95,6 +95,21 @@
             RET
 
         ._UTIL_LOAD_PROGRAM_MAGIC_MATCH:
+        ; get ISA version
+        MOV $ICE_HEADER, %ebx
+        ADD $8, %ebx
+        MOV *%ebx, %ebx
+        SHR $16, %ebx
+        CMP $CONST_ISA_VERION, %ebx ; check ISA version
+        JE _UTIL_LOAD_PROGRAM_ISA_VERSION_MATCH
+            MOV %edx, %esp ; reset stack
+            POP %ecx
+            POP %ebx
+            MOV $-4, %eax
+            RET
+
+        ._UTIL_LOAD_PROGRAM_ISA_VERSION_MATCH:
+
         MOV $ICE_HEADER, %ebx
         ADD $4, %ebx ; offset to read program header offset
         MOV *%ebx, %eax ; program header offset
@@ -132,8 +147,8 @@
         ;   *(ebx+8)   buffer size, limits the amount of bytes that will be read
         ; Return value (immediate value):
         ;   eax     success status (>=0 = number of bytes read, -1 = invalid file descriptor, -2 = seek position out of file bounds, -3 = no console input ready)
-        .BUF 64 PROGRAM_HEADER ; prepare buffer for program header
-        PUSH $64 ; buffer size
+        .BUF 48 PROGRAM_HEADER ; prepare buffer for program header
+        PUSH $48 ; buffer size
         PUSH $PROGRAM_HEADER ; pointer to buffer
         PUSH %ecx ; fd
         MOV %esp, %ebx ; set ebx for read

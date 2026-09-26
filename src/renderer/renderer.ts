@@ -3,7 +3,6 @@ import { Byte } from "../types/binary/Byte";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
 import { disassembleIfPossble } from "../main/simulator/Disassembler";
-import { Instruction } from "../types/binary/Instruction";
 
 /**
  * This enumeration is a duplicate of the one, that can be
@@ -685,7 +684,7 @@ export class Renderer {
             const blockSizeDisable: boolean = (demandedByteRepresentation === "UTF-8" || demandedByteRepresentation === "ASSEMBLY");
             ramBlockSizeSelector.disabled = blockSizeDisable;
             if (demandedByteRepresentation === "ASSEMBLY") {
-                this.ramBlockSize = Instruction.ALIGNEMT_SIZE;
+                this.ramBlockSize = 3 * DoubleWord.NUMBER_OF_BYTES;
             } else {
                 const previousBlockSize: string = parent.getAttribute("block-size")!;
                 this.ramBlockSize = parseInt(previousBlockSize);

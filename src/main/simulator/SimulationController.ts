@@ -226,6 +226,9 @@ export class SimulationController {
         const programName = pathToProgramCode.substring(pathToProgramCode.lastIndexOf("/"));
         let relativePathToCode = "/bin" + programName + "\0";
 
+        const buffer = readFileSync(this.pathToOSFilesystem + "/bin" + programName);
+        ProgramMetadata.fromBuffer(buffer);
+
         while (relativePathToCode.length % 4 != 0)
         {
             relativePathToCode = relativePathToCode.concat("\0");

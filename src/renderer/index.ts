@@ -44,7 +44,14 @@ window.onload = async () => {
 	await renderer.readVMPTR(renderer.dataRepresentationVMPTR);
 };
 
-window.simulator.onLoadedAssemblyProgram(async () => {
+window.simulator.onLoadedAssemblyProgram(async (path: string | Error) => {
+
+
+	if (path instanceof Error) {
+		alert("Program rejected. " + path.message);
+		return
+	}
+
 	renderer.programLoaded = true;
 	// TODO: Fix bug!
 	// await renderer.createPageTableView();

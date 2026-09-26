@@ -59,10 +59,10 @@ contextBridge.exposeInMainWorld("simulator", {
 	readITP: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readITP", radix),
 	readGPTP: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readGPTP", radix),
 	readPTP: (radix: NumberSystems = 16): Promise<string> => ipcRenderer.invoke("readPTP", radix),
-	onLoadedAssemblyProgram: (callback: (filePath: string[]) => void) => 
-		ipcRenderer.on("loaded_program", (_event, filePath: string[]) => callback(filePath)),
-	onAssembledProgram: (callback: (filePath: string[]) => void) => 
-		ipcRenderer.on("assembled_program", (_event, filePath: string[]) => callback(filePath)),
+	onLoadedAssemblyProgram: (callback: (filePath: string | Error) => void) => 
+		ipcRenderer.on("loaded_program", (_event, filePath: string | Error) => callback(filePath)),
+	onAssembledProgram: (callback: (filePath: string) => void) => 
+		ipcRenderer.on("assembled_program", (_event, filePath: string) => callback(filePath)),
 	onError: (callback: (errorDescription: string) => void) => 
 		ipcRenderer.on("on_error", (_event, errorDescription: string) => callback(errorDescription)),
 	onDisableAutoScrollForPageTable: (callback: () => void) => 

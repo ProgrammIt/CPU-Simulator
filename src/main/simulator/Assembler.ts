@@ -5,8 +5,8 @@ import { DoubleWord } from "../../types/binary/DoubleWord";
 import { Byte } from "../../types/binary/Byte";
 import { OpCode } from "../../types/enumerations/OpCode";
 import { EncodedOperandTypes } from "../../types/enumerations/EncodedOperandTypes";
-import { Instruction } from "../../types/binary/Instruction";
 import { ProgramMetadata } from "../../types/enumerations/ProgramMetadata";
+import { Word } from "../../types/binary/Word";
 
 export class Assembler {
 	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
@@ -15,7 +15,8 @@ export class Assembler {
 
 	private readonly nopInstruction: DoubleWord[];
 
-
+	private encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS;
+	private instructionAlignment: number = 0;
 	private metadata: ProgramMetadata = [] as ProgramMetadata;
 	private jumpLabels: Map<string, [number, number | null]> = new Map();
 	private aliases: Map<string, DoubleWord> = new Map();
@@ -133,30 +134,36 @@ export class Assembler {
 				instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
 			}
 
-			if ((instructionSize % Instruction.ALIGNEMT_SIZE) + alignmentOffset > Instruction.ALIGNEMT_SIZE) { //This breaks alignemnt
+			if (this.instructionAlignment !== Byte.ZERO && (instructionSize % this.instructionAlignment) + alignmentOffset > this.instructionAlignment) { //This breaks alignemnt
 				//Insert NOPs to preserve alignment
 				if (typeof encodedLine !== "number") {
 					const padding: DoubleWord[] = [];
-					for (let i = alignmentOffset; i < Instruction.ALIGNEMT_SIZE; i += DoubleWord.NUMBER_OF_BYTES) {
+					for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
 						padding.push(...this.nopInstruction);
 					}
 					padding.push(...encodedLine);
 					encodedInstructionsWithSymbols.set(lineNo, padding);
 				}
 
-				instructionSize += Instruction.ALIGNEMT_SIZE - alignmentOffset;
+				instructionSize += this.instructionAlignment - alignmentOffset;
 			}
 
 			alignmentOffset += instructionSize;
-			alignmentOffset %= Instruction.ALIGNEMT_SIZE;
+			alignmentOffset = this.instructionAlignment === Byte.ZERO ? 0 : alignmentOffset % this.instructionAlignment;
 
 			byteCount += instructionSize;
+		}
+
+		for (const [jumpLabel, [jumpLineNo,]] of this.jumpLabels.entries()) {
+			if ([...lines.keys()].at(-1)! < jumpLineNo) {
+				this.jumpLabels.set(jumpLabel, [jumpLineNo, byteCount + baseOffset]);
+			}
 		}
 
 		if (alignmentOffset !== 0)
 		{
 			const padding: DoubleWord[] = [];
-			for (let i = alignmentOffset; i < Instruction.ALIGNEMT_SIZE; i += DoubleWord.NUMBER_OF_BYTES) {
+			for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
 				padding.push(...this.nopInstruction);
 			}
 			encodedInstructionsWithSymbols.set(Math.max(...encodedInstructionsWithSymbols.keys()) + 1, padding);
@@ -183,21 +190,21 @@ export class Assembler {
 						instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
 					}
 					
-					if ((instructionSize % Instruction.ALIGNEMT_SIZE) + alignmentOffset > Instruction.ALIGNEMT_SIZE) { //This breaks alignemnt
+					if (this.instructionAlignment !== Byte.ZERO && (instructionSize % this.instructionAlignment) + alignmentOffset > this.instructionAlignment) { //This breaks alignemnt
 						//Insert NOPs to preserve alignment
 						const padding: DoubleWord[] = [];
-						for (let i = alignmentOffset; i < Instruction.ALIGNEMT_SIZE; i += DoubleWord.NUMBER_OF_BYTES) {
+						for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
 							padding.push(...this.nopInstruction);
 						}
 						padding.push(...encodedLine);
 						encodedInstructionsWithSymbols.set(lineNo, padding);
 
-						instructionSize += Instruction.ALIGNEMT_SIZE - alignmentOffset;
+						instructionSize += this.instructionAlignment - alignmentOffset;
 					}
 				}
 
 				alignmentOffset += instructionSize;
-				alignmentOffset %= Instruction.ALIGNEMT_SIZE;
+				alignmentOffset = this.instructionAlignment === Byte.ZERO ? 0 : alignmentOffset % this.instructionAlignment;
 
 				byteCount += instructionSize
 			}
@@ -212,33 +219,6 @@ export class Assembler {
 				.flat());
 	}
 
-	/**
-	 * Metadata Layout
-	 * ELF header 32 byte (8 dwords)
-	 * byte 0x0-0x4 magic number
-	 * byte 0x5-0x8 program header byte offset
-	 * 6 dwords free
-	 * 
-	 * Program header (16 dwords)
-	 * 1 DWORD Total_L2_Tables
-	 * 
-	 * 1 DWORD Text segment virtual start address
-	 * 1 DWORD Text segment file offset
-	 * 1 DWORD Text segment size
-	 * 
-	 * 1 DWORD RoData segment virtual start address
-	 * 1 DWORD RoData segment file offset
-	 * 1 DWORD RoData segment size
-	 * 
-	 * 1 DWORD Data segment virtual start address
-	 * 1 DWORD Data segment file offset
-	 * 1 DWORD Data segment size
-	 * 	 
-	 * 1 DWORD Uninitialized Data segment virtual start address
-	 * 1 DWORD Uninitialized Data segment size
-	 * 
-	 * 4 dwords free
-	 */
 	private writeMetadata(baseOffset: number, byteCount: number): void {
 
 		const textSizeBytes: number = byteCount;
@@ -266,13 +246,12 @@ export class Assembler {
 		// prepare elf header
 		const magicNumber: DoubleWord = ProgramMetadata.ICE_MAGIC_NUMBER;
 		const programHeaderOffset: DoubleWord = DoubleWord.fromNumber(ProgramMetadata.ICE_HEADER_SIZE_IN_DOUBLEWORDS * DoubleWord.NUMBER_OF_BYTES);
+
 		this.metadata.push(magicNumber);
 		this.metadata.push(programHeaderOffset);
+		this.metadata.push(DoubleWord.fromWords(ProgramMetadata.ISA_VERSION, Word.fromBytes(this.encodingType as Byte, this.instructionAlignment / DoubleWord.NUMBER_OF_BYTES as Byte)));
+		this.metadata.push(DoubleWord.ZERO);
 
-		//fill unused space with zero
-		for (let i = 0; i < ProgramMetadata.ICE_HEADER_SIZE_IN_DOUBLEWORDS - 2; ++i) {
-			this.metadata.push(DoubleWord.ZERO);
-		}
 
 		// calculate file offsets
 		const textFileOffset: number = ProgramMetadata.SIZE_IN_BYTES;
@@ -300,10 +279,7 @@ export class Assembler {
 		// uninitialized data metadata
 		this.metadata.push(DoubleWord.fromNumber(uninitializedDataBaseAddress));
 		this.metadata.push(DoubleWord.fromNumber(uninitializedDataSizeBytes));
-		
-		for (let i = 0; i < ProgramMetadata.PROGRAM_HEADER_SIZE_IN_DOUBLEWORDS - 12; ++i) {
-			this.metadata.push(DoubleWord.ZERO);
-		}
+	
 	}
 
 	/**
@@ -691,26 +667,49 @@ export class Assembler {
 		let embeddedOperand1 = 0;
 		let embeddedOperand2 = 0;
 
-		if (encodedOperandValue1 !== null) {
-
-			switch (typeOperand1) {
-				case EncodedOperandTypes.REGISTER_DIRECT:
-				case EncodedOperandTypes.REGISTER_INDIRECT:
-					embeddedOperand1 = encodedOperandValue1;
-					encodedOperandValue1 = null
-					break;
-				case EncodedOperandTypes.IMMEDIATE:
-				case EncodedOperandTypes.MEMORY_ADDRESS:
-					if (encodedOperandValue1 < 2**Byte.NUMBER_OF_BITS && allowFirstOperandPacking)
-					{
-						embeddedOperand1 = encodedOperandValue1;
-						encodedOperandValue1 = null;
+		switch (typeOperand1) {
+			case EncodedOperandTypes.NO:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
 						typeOperand1 ^= 0b1000;
-					}
-					break;
-				default:
-					break;
-			}
+						encodedOperandValue1 = DoubleWord.ZERO;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						break;
+				}
+				break;
+			case EncodedOperandTypes.REGISTER_DIRECT:
+			case EncodedOperandTypes.REGISTER_INDIRECT:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						typeOperand1 ^= 0b1000;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						embeddedOperand1 = encodedOperandValue1!;
+						encodedOperandValue1 = null
+						break;
+				}
+				break;
+			case EncodedOperandTypes.IMMEDIATE:
+			case EncodedOperandTypes.MEMORY_ADDRESS:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						if (encodedOperandValue1! < 2**Byte.NUMBER_OF_BITS && allowFirstOperandPacking)
+						{
+							typeOperand1 ^= 0b1000;
+							embeddedOperand1 = encodedOperandValue1!;
+							encodedOperandValue1 = null;
+						}
+						break;
+				}
+				break;
+			default:
+				break;
 		}
 
 
@@ -728,29 +727,52 @@ export class Assembler {
 			}
 		}
 
-		if (encodedOperandValue2 !== null) {
-
-			switch (typeOperand2) {
-				case EncodedOperandTypes.REGISTER_DIRECT:
-				case EncodedOperandTypes.REGISTER_INDIRECT:
-					embeddedOperand2 = encodedOperandValue2;
-					encodedOperandValue2 = null
-					break;
-				case EncodedOperandTypes.IMMEDIATE:
-				case EncodedOperandTypes.MEMORY_ADDRESS:
-					if (encodedOperandValue2 < 2**Byte.NUMBER_OF_BITS && allowSecondOperandPacking)
-					{
-						embeddedOperand2 = encodedOperandValue2;
-						encodedOperandValue2 = null;
+		switch (typeOperand2) {
+			case EncodedOperandTypes.NO:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
 						typeOperand2 ^= 0b1000;
-					}
-					break;
-				default:
-					break;
-			}
+						encodedOperandValue2 = DoubleWord.ZERO;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						break;
+				}
+				break;
+			case EncodedOperandTypes.REGISTER_DIRECT:
+			case EncodedOperandTypes.REGISTER_INDIRECT:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						typeOperand2 ^= 0b1000;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						embeddedOperand2 = encodedOperandValue2!;
+						encodedOperandValue2 = null
+						break;
+				}
+				break;
+			case EncodedOperandTypes.IMMEDIATE:
+			case EncodedOperandTypes.MEMORY_ADDRESS:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						if (encodedOperandValue2! < 2**Byte.NUMBER_OF_BITS && allowSecondOperandPacking)
+						{
+							typeOperand2 ^= 0b1000;
+							embeddedOperand2 = encodedOperandValue2!;
+							encodedOperandValue2 = null;
+						}
+						break;
+				}
+				break;
+			default:
+				break;
 		}
 
-		const finalInstruction: DoubleWord = DoubleWord.fromNumber(
+		const finalInstruction: DoubleWord = DoubleWord.fromNumber(0
 			+ (opcode << (8 * 3))
 			+ (typeOperand1 << (8 * 2 + 4))
 			+ (typeOperand2 << (8 * 2))
@@ -919,9 +941,22 @@ export class Assembler {
 	 * The order in which the instructions appear in the input program is preserved during the compilation process.
 	 * @param code File contents of an .asm file containing a computer program written in assembly language.
 	 * @param baseOffset Base address where the program will be in memory. Needed to adjust static addresses in jump labels. Default is 0.
+	 * @param [encodingType=ProgramMetadata.InstructionEncodingType.FIXED_SIZE] 
+	 * @param [instructionAlignment=Byte.fromNumber(3)] Instruction alignment in doublewords (must be >= 3 or 0). If 0, no alignment is enforced.
 	 * @returns An array of DoubleWords representing the binary encoded instructions of the given computer program.
 	 */
-	public assemble(code: string, baseOffset: number = 0): DoubleWord[] {
+	public assemble(code: string, 
+		baseOffset: number = 0, 
+		encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.FIXED_SIZE,
+		instructionAlignment: Byte = Byte.fromNumber(3)): DoubleWord[] {
+
+		this.encodingType = encodingType;
+		this.instructionAlignment = instructionAlignment * DoubleWord.NUMBER_OF_BYTES;
+
+		if (instructionAlignment !== Byte.ZERO && instructionAlignment < Byte.fromNumber(3)) {
+			throw new Error(`An alignment of only ${instructionAlignment} doublewords is not possible. Must be 0 or >= 3.`);
+		}
+
 		this.metadata = [] as ProgramMetadata;
 		this.jumpLabels = new Map();
 		this.aliases = new Map();
