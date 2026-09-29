@@ -281,11 +281,9 @@ export class SimulationController {
             buffer.writeUInt32BE(compiledProgram[index], index * 4);
         }
 
-        pathToProgramCode = pathToProgramCode.replace(".asm", "");
-
         if (name === null)
         {
-            name = pathToProgramCode.substring(pathToProgramCode.lastIndexOf('/'));
+            name = pathToProgramCode.substring(pathToProgramCode.lastIndexOf('/')).replace(".asm", "");
         }
 
         pathToProgramCode = this.pathToOSFilesystem + "/os/bin/" + name;

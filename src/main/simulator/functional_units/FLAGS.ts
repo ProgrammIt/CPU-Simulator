@@ -25,6 +25,14 @@ export class FLAGS extends Register<Byte> {
     }
 
     /**
+     * This method sets the parity flag bit
+     * @returns 
+     */
+    public setParityBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_PARITY_BIT, value);
+    }
+
+    /**
      * This method sets the parity flag bit to a binary 1.
      * @returns 
      */
@@ -38,6 +46,14 @@ export class FLAGS extends Register<Byte> {
      */
     public clearParity() {
         this._content = Byte.setBit(this._content, FLAGS.POS_PARITY_BIT, 0);
+    }
+
+    /**
+     * This method sets the carry flag bit
+     * @returns 
+     */
+    public setCarryBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_CARRY_BIT, value);
     }
 
     /**
@@ -57,6 +73,14 @@ export class FLAGS extends Register<Byte> {
     }
 
     /**
+     * This method sets the zero flag bit
+     * @returns 
+     */
+    public setZeroBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_ZERO_BIT, value);
+    }
+
+    /**
      * This method sets the zero flag bit to a binary 1.
      * @returns 
      */
@@ -70,6 +94,14 @@ export class FLAGS extends Register<Byte> {
      */
     public clearZero() {
         this._content = Byte.setBit(this._content, FLAGS.POS_ZERO_BIT, 0);
+    }
+
+    /**
+     * This method sets the signed flag bit
+     * @returns 
+     */
+    public setSignedBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_SIGNED_BIT, value);
     }
 
     /**
@@ -89,6 +121,14 @@ export class FLAGS extends Register<Byte> {
     }
 
     /**
+     * This method sets the overflow flag bit
+     * @returns 
+     */
+    public setOverflowBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_OVERFLOW_BIT, value);
+    }
+
+    /**
      * This method sets the overflow flag bit to a binary 1.
      * @returns 
      */
@@ -102,6 +142,14 @@ export class FLAGS extends Register<Byte> {
      */
     public clearOverflow() {
         this._content = Byte.setBit(this._content, FLAGS.POS_OVERFLOW_BIT, 0);
+    }
+
+    /**
+     * This method sets the interrupt flag bit
+     * @returns 
+     */
+    public setInterruptBit(value: Bit) {
+       this._content = Byte.setBit(this._content, FLAGS.POS_INTERRUPT_BIT, value);
     }
 
     /**

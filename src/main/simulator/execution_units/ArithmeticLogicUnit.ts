@@ -27,11 +27,7 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value.
      */
     private checkForZero(operand: DoubleWord): void {
-        if (operand === 0) {
-            this._cpu.flags.setZero();
-        } else {
-            this._cpu.flags.clearZero();
-        }
+        this._cpu.flags.setZeroBit(operand === 0 ? 1 : 0)
     }
 
     /**
@@ -41,7 +37,6 @@ export class ArithmeticLogicUnit {
      */
     private checkForParity(operand: DoubleWord): void {
         let value: number = DoubleWord.getFourthByte(operand);
-
         let parity = 0;
 
         // count bits using bitwise ops
@@ -49,12 +44,8 @@ export class ArithmeticLogicUnit {
             parity ^= value & 0b1;
             value = value >>> 1;
         }
-        
-        if (parity === 0) {
-            this._cpu.flags.setParity();
-        } else {
-            this._cpu.flags.clearParity();
-        }
+
+        this._cpu.flags.setParityBit(parity === 0 ? 1 : 0)
     }
 
     /**
@@ -64,11 +55,7 @@ export class ArithmeticLogicUnit {
      * @param operand A binary value. 
      */
     private checkForSigned(operand: DoubleWord) {
-        if (DoubleWord.getMostSignificantBit(operand) === 1) {
-            this._cpu.flags.setSigned();
-        } else {
-            this._cpu.flags.clearSigned();
-        }
+        this._cpu.flags.setSignedBit(DoubleWord.getMostSignificantBit(operand))
     }
 
     /**
@@ -78,24 +65,7 @@ export class ArithmeticLogicUnit {
      * @param sign The sign of the result
      */
     private checkForOverflow(carry: boolean, sign: boolean) {
-        if (carry !== sign) {
-            this._cpu.flags.setOverflow();
-        } else {
-            this._cpu.flags.clearOverflow();
-        }
-        return;
-    }
-
-    /**
-     * This method checks whether to set or clear the **carry** flag after an operation.
-     * @param carry The carry bits to check.
-     */
-    private checkCarry(carry: boolean) {
-        if (carry === true) {
-            this._cpu.flags.setCarry();
-        } else {
-            this._cpu.flags.clearCarry();
-        }
+        this._cpu.flags.setOverflowBit(carry !== sign ? 1 : 0)
     }
 
     /**
@@ -232,7 +202,7 @@ export class ArithmeticLogicUnit {
         this.checkForZero(result);
 
         this.checkForOverflow(carry, this._cpu.flags.sign === 1);
-        this.checkCarry(carry);
+        this._cpu.flags.setCarryBit(carry ? 1 : 0)
         return result;
     }
 
@@ -256,7 +226,7 @@ export class ArithmeticLogicUnit {
         this.checkForSigned(result);
 
         this.checkForOverflow(carry, this._cpu.flags.sign === 1);
-        this.checkCarry(carry);
+        this._cpu.flags.setCarryBit(carry ? 1 : 0)
         return result;
     }
 
@@ -283,13 +253,8 @@ export class ArithmeticLogicUnit {
             DoubleWord.getMostSignificantBit(minuend) !== DoubleWord.getMostSignificantBit(subtrahend) &&
             DoubleWord.getMostSignificantBit(minuend) !== DoubleWord.getMostSignificantBit(result);
 
-        if (overflow) {
-            this._cpu.flags.setOverflow();
-        } else {
-            this._cpu.flags.clearOverflow();
-        }
-
-        this.checkCarry(barrow);
+        this._cpu.flags.setOverflowBit(overflow ? 1 : 0);
+        this._cpu.flags.setCarryBit(barrow ? 1 : 0)
 
         return result;
     }
@@ -317,13 +282,8 @@ export class ArithmeticLogicUnit {
             DoubleWord.getMostSignificantBit(minuend) !== DoubleWord.getMostSignificantBit(subtrahend) &&
             DoubleWord.getMostSignificantBit(minuend) !== DoubleWord.getMostSignificantBit(result);
 
-        if (overflow) {
-            this._cpu.flags.setOverflow();
-        } else {
-            this._cpu.flags.clearOverflow();
-        }
-
-        this.checkCarry(barrow);
+        this._cpu.flags.setOverflowBit(overflow ? 1 : 0);
+        this._cpu.flags.setCarryBit(barrow ? 1 : 0)
 
         return result;
     }
@@ -346,20 +306,10 @@ export class ArithmeticLogicUnit {
             const overflow =
                 count === 1 &&
                 DoubleWord.getMostSignificantBit(value) !== DoubleWord.getBit(value, 1);
-
-            if (overflow) {
-                this._cpu.flags.setOverflow();
-            } else {
-                this._cpu.flags.clearOverflow();
-            }
+            this._cpu.flags.setOverflowBit(overflow ? 1 : 0);
 
             const carry = DoubleWord.getBit(value, count - 1 as DoubleWord.BitIndex) == 1;
-
-            if (carry) {
-                this._cpu.flags.setCarry();
-            } else {
-                this._cpu.flags.clearCarry();
-            }
+            this._cpu.flags.setCarryBit(carry ? 1 : 0);
         }
 
         this.checkForZero(result);
@@ -389,20 +339,10 @@ export class ArithmeticLogicUnit {
             const overflow =
                 count === 1 &&
                 DoubleWord.getMostSignificantBit(value) !== DoubleWord.getBit(value, 1);
-
-            if (overflow) {
-                this._cpu.flags.setOverflow();
-            } else {
-                this._cpu.flags.clearOverflow();
-            }
+            this._cpu.flags.setOverflowBit(overflow ? 1 : 0);
 
             const carry = DoubleWord.getBit(value, DoubleWord.NUMBER_OF_BITS - count as DoubleWord.BitIndex) == 1;
-
-            if (carry) {
-                this._cpu.flags.setCarry();
-            } else {
-                this._cpu.flags.clearCarry();
-            }
+            this._cpu.flags.setCarryBit(carry ? 1 : 0);
         }
 
         this.checkForZero(result);
@@ -428,12 +368,7 @@ export class ArithmeticLogicUnit {
         if (DoubleWord.NUMBER_OF_BITS >= count && count > 0) {
             result = DoubleWord.fromNumber(value >> count);
             const carry = DoubleWord.getBit(value, DoubleWord.NUMBER_OF_BITS - count as DoubleWord.BitIndex) == 1;
-
-            if (carry) {
-                this._cpu.flags.setCarry();
-            } else {
-                this._cpu.flags.clearCarry();
-            }
+            this._cpu.flags.setCarryBit(carry ? 1 : 0);
         }
 
         this._cpu.flags.clearOverflow();
@@ -471,14 +406,8 @@ export class ArithmeticLogicUnit {
 
         const overflow = !properSignExtension;
 
-        if (overflow) {
-            this._cpu.flags.setOverflow();
-            this._cpu.flags.setCarry();
-        } else {
-            this._cpu.flags.clearOverflow();
-            this._cpu.flags.clearCarry();
-        }
-
+        this._cpu.flags.setOverflowBit(overflow ? 1 : 0);
+        this._cpu.flags.setCarryBit(overflow ? 1 : 0);
 
         return result;
     }

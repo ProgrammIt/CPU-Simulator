@@ -25,6 +25,7 @@ import { OpCode } from "../../../types/enumerations/OpCode";
 import { DecodedOperandTypes } from "../../../types/enumerations/DecodedOperandTypes";
 import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandTypes";
 import { VirtualAddress } from "../../../types/binary/VirtualAddress";
+import { Bit } from "../../../types/binary/Bit";
 
 /**
  * This class represents a CPU core which is capable of executing InstructionSet.
@@ -176,6 +177,9 @@ export class CPUCore {
     public readonly periodicTimer: PeriodicTimer;
 
     public mainMemory: RAM;
+
+    private readonly firstOperandInstructionValue: InstructionOperand = new InstructionOperand();
+    private readonly secondOperandInstructionValue: InstructionOperand = new InstructionOperand();
 
     /**
      * Constructs an instance of a CPU core.
@@ -379,26 +383,23 @@ export class CPUCore {
                 // fallthrough
             case EncodedOperandTypes.REGISTER_DIRECT:
             case EncodedOperandTypes.REGISTER_INDIRECT:
-                decodedFirstOperand = new InstructionOperand(
-                    decodedFirstOperandType as DecodedOperandTypes,
-                    DoubleWord.fromNumber(DoubleWord.getThirdByte(this.eir.content))
-                );
+                this.firstOperandInstructionValue.type = decodedFirstOperandType as DecodedOperandTypes;
+                this.firstOperandInstructionValue.value = DoubleWord.getThirdByte(this.eir.content) as DoubleWord;
+                decodedFirstOperand = this.firstOperandInstructionValue;
                 break;
             case EncodedOperandTypes.MEMORY_ADDRESS:
             case EncodedOperandTypes.IMMEDIATE:
-                decodedFirstOperand = new InstructionOperand(
-                    decodedFirstOperandType,
-                    this.mmu.readDoublewordFrom(this.eip.content, true)
-                );
+                this.firstOperandInstructionValue.type = decodedFirstOperandType as DecodedOperandTypes;
+                this.firstOperandInstructionValue.value = this.mmu.readDoublewordFrom(this.eip.content, true);
+                decodedFirstOperand = this.firstOperandInstructionValue;
                 this.eip.content = DoubleWord.fromNumber(this.eip.content + 4);
                 break;
             case EncodedOperandTypes.EXTERNAL_REGISTER_DIRECT:
             case EncodedOperandTypes.EXTERNAL_REGISTER_INDIRECT:
                 decodedFirstOperandType ^= 0b1000; 
-                decodedFirstOperand = new InstructionOperand(
-                    decodedFirstOperandType as DecodedOperandTypes,
-                    this.mmu.readDoublewordFrom(this.eip.content, true)
-                );
+                this.firstOperandInstructionValue.type = decodedFirstOperandType as DecodedOperandTypes;
+                this.firstOperandInstructionValue.value = this.mmu.readDoublewordFrom(this.eip.content, true);
+                decodedFirstOperand = this.firstOperandInstructionValue;
                 this.eip.content = DoubleWord.fromNumber(this.eip.content + 4);
                 break;
             default:
@@ -420,26 +421,23 @@ export class CPUCore {
                 // fallthrough
             case EncodedOperandTypes.REGISTER_DIRECT:
             case EncodedOperandTypes.REGISTER_INDIRECT:
-                decodedSecondOperand = new InstructionOperand(
-                    decodedSecondOperandType as DecodedOperandTypes,
-                    DoubleWord.fromNumber(DoubleWord.getFourthByte(this.eir.content))
-                );
+                this.secondOperandInstructionValue.type = decodedSecondOperandType as DecodedOperandTypes;
+                this.secondOperandInstructionValue.value = DoubleWord.getFourthByte(this.eir.content) as DoubleWord;
+                decodedSecondOperand = this.secondOperandInstructionValue;
                 break;
             case EncodedOperandTypes.MEMORY_ADDRESS:
             case EncodedOperandTypes.IMMEDIATE:
-                decodedSecondOperand = new InstructionOperand(
-                    decodedSecondOperandType,
-                    this.mmu.readDoublewordFrom(this.eip.content, true)
-                );
+                this.secondOperandInstructionValue.type = decodedSecondOperandType as DecodedOperandTypes;
+                this.secondOperandInstructionValue.value = this.mmu.readDoublewordFrom(this.eip.content, true);
+                decodedSecondOperand = this.secondOperandInstructionValue;
                 this.eip.content = DoubleWord.fromNumber(this.eip.content + 4);
                 break;
             case EncodedOperandTypes.EXTERNAL_REGISTER_DIRECT:
             case EncodedOperandTypes.EXTERNAL_REGISTER_INDIRECT:
                 decodedSecondOperandType ^= 0b1000; 
-                decodedSecondOperand = new InstructionOperand(
-                    decodedSecondOperandType as DecodedOperandTypes,
-                    this.mmu.readDoublewordFrom(this.eip.content, true)
-                );
+                this.secondOperandInstructionValue.type = decodedSecondOperandType as DecodedOperandTypes;
+                this.secondOperandInstructionValue.value = this.mmu.readDoublewordFrom(this.eip.content, true);
+                decodedSecondOperand = this.secondOperandInstructionValue;
                 this.eip.content = DoubleWord.fromNumber(this.eip.content + 4);
                 break;
             default:
@@ -459,35 +457,35 @@ export class CPUCore {
     private execute(): void {
         const operation: OpCode = this._decodedInstruction.instruction;
 
-        let logText = "";
-
         if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode())
         {
+            let logText = "";
+
             const currentOperation:string = OpCode[operation];
             logText = this.getLogText(currentOperation);
-        }
 
-        if (DebugLogger.isLoggingEnabled()) {
+            if (DebugLogger.isLoggingEnabled()) {
 
-            if (OpCode.CALL === operation || OpCode.INT === operation)
-            {
-                DebugLogger.log("");
+                if (OpCode.CALL === operation || OpCode.INT === operation)
+                {
+                    DebugLogger.log("");
+                }
+
+                if (OpCode.RET === operation || OpCode.IRET === operation)
+                {
+                    DebugLogger.removeIndentation()
+                }
+
+                DebugLogger.log(logText);
             }
 
-            if (OpCode.RET === operation || OpCode.IRET === operation)
-            {
-                DebugLogger.removeIndentation()
+            if (this.flags.isInUserMode()) {
+                let log = "Executing:    ";
+                log += logText;
+                
+                this.logToLogger(" ");
+                this.logToLogger(log);
             }
-
-            DebugLogger.log(logText);
-        }
-
-        if (this.flags.isInUserMode()) {
-            let log = "Executing:    ";
-            log += logText;
-            
-            this.logToLogger(" ");
-            this.logToLogger(log);
         }
 
         switch (operation) {
@@ -1769,7 +1767,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jz(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1782,9 +1779,9 @@ export class CPUCore {
         if (this.flags.zero === 1) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1815,7 +1812,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jnz(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1828,9 +1824,9 @@ export class CPUCore {
         if (this.flags.zero === 0) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1860,7 +1856,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private ja(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1877,9 +1872,9 @@ export class CPUCore {
         if (this.flags.carry === 0 && this.flags.zero === 0) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1893,7 +1888,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jae(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1909,9 +1903,9 @@ export class CPUCore {
         if (this.flags.carry === 0) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1925,7 +1919,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jb(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1941,9 +1934,9 @@ export class CPUCore {
         if (this.flags.carry === 1) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1957,7 +1950,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jbe(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -1974,9 +1966,9 @@ export class CPUCore {
         if (this.flags.carry === 1 && this.flags.zero === 1) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -1991,7 +1983,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jg(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2008,9 +1999,9 @@ export class CPUCore {
         if (this.flags.zero === 0 && this.flags.overflow === this.flags.sign) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -2025,7 +2016,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jge(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2038,9 +2028,9 @@ export class CPUCore {
         if (this.flags.sign === this.flags.overflow) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true
+            return true
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -2055,7 +2045,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jl(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2068,9 +2057,9 @@ export class CPUCore {
         if (this.flags.sign !== this.flags.overflow) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /**
@@ -2085,7 +2074,6 @@ export class CPUCore {
      * @returns True, if a jump was performed, false otherwise.
      */
     private jle(target: InstructionOperand): boolean {
-        let jumpPerformed = false;
         // Check if the target operand is of type IMMEDIATE.
         if (target.type === EncodedOperandTypes.IMMEDIATE) {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
@@ -2102,9 +2090,9 @@ export class CPUCore {
         if (this.flags.zero === 1 && this.flags.sign !== this.flags.overflow) {
             // Load the given virtual address into the instruction pointer in order to perform the jump.
             this.eip.content = target.value;
-            jumpPerformed = true;
+            return true;
         }
-        return jumpPerformed;
+        return false;
     }
 
     /*
@@ -2119,33 +2107,39 @@ export class CPUCore {
      * @throws {ExceptionError} If an exception was generated
      */
     private mov(source: InstructionOperand, target: InstructionOperand): void {
-        // Check if the source and target operands are both of type memory address.
-        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS && target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-        // Check if the target operand is of type IMMEDIATE.
-        if (target.type === EncodedOperandTypes.IMMEDIATE) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-        // Check if exactly two operands are present.
-        if (source.type === EncodedOperandTypes.NO || target.type === EncodedOperandTypes.NO) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
         // Define variable to write the operands value to.
         let valueToMove: DoubleWord;
         // Read the binary value from the location defined by the first operand.
-        if (source.type === EncodedOperandTypes.IMMEDIATE) {
-            valueToMove = source.value;
-        } else if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-            valueToMove = this.mmu.readDoublewordFrom(source.value, false);
-        } else {
-            valueToMove = this.readRegister(source);
+        switch (source.type) {
+            case EncodedOperandTypes.IMMEDIATE:
+                valueToMove = source.value;
+                break;
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                // Check if the source and target operands are both of type memory address.
+                if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+                    throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+                }
+                valueToMove = this.mmu.readDoublewordFrom(source.value, false);
+                break;
+            case EncodedOperandTypes.REGISTER_DIRECT:
+            case EncodedOperandTypes.REGISTER_INDIRECT:
+                valueToMove = this.readRegister(source);
+                break;
+            default:
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
+
         // Write the value to the location defined by the second operand.
-        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-            this.mmu.writeDoublewordTo(target.value, valueToMove, false);
-        } else {
-            this.writeRegister(valueToMove, target);
+        switch (target.type) {
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                this.mmu.writeDoublewordTo(target.value, valueToMove, false);
+                break;
+            case EncodedOperandTypes.REGISTER_DIRECT:
+            case EncodedOperandTypes.REGISTER_INDIRECT:
+                this.writeRegister(valueToMove, target);
+                break;
+            default:
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
     }
 
@@ -2205,11 +2199,7 @@ export class CPUCore {
      * If the carry flag is set, it is cleared. If the carry flag is cleared, it is set.
      */
     private cmc(): void {
-        if (this.flags.carry === 1) {
-            this.flags.clearCarry();
-        } else {
-            this.flags.setCarry();
-        }
+        this.flags.setCarryBit(Bit.invert(this.flags.carry));
     }
 
     /**
@@ -2291,8 +2281,6 @@ export class CPUCore {
         // Read contents of flags register from STACK into flags register.
         const content = this.mmu.readDoublewordFrom(this.esp.content, false);
         // Deallocate four bytes from STACK by incrementing the value in ESP.
-        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
-
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
 
         this.flags.content = DoubleWord.getFourthByte(content);
@@ -2305,30 +2293,24 @@ export class CPUCore {
      * @throws {ExceptionError} If an exception was generated
      */
     public pop(target: InstructionOperand): void {
-        // Check whether ESP reached highest address (bottom) of STACK segment.
-        // if (this.esp.content.equal(Doubleword.fromInteger(this._highestAddressOfStackDec))) {
-        //     // ESP reached highest address (bottom) of STACK segment.
-        //     throw new StackUnderflowError("Could not perform POP operation. STACK pointer reached bottom of the STACK.");
-        // }
-        // Check if the target operand is of type IMMEDIATE.
-        if (target.type === EncodedOperandTypes.IMMEDIATE) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
-        // Check if exactly one operand is present.
-        if (target.type === EncodedOperandTypes.NO) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
+
         // Read the binary value from the STACK.
         const value: DoubleWord = this.mmu.readDoublewordFrom(this.esp.content, false);
-        // Write the value to the location defined by the operand.
-        if (target.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-            const address: DoubleWord = target.value;
-            this.mmu.writeDoublewordTo(address, value, false);
-        } else {
-            this.writeRegister(value, target);
+
+        switch (target.type) {
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                const address: DoubleWord = target.value;
+                this.mmu.writeDoublewordTo(address, value, false);
+                break;
+            case EncodedOperandTypes.REGISTER_DIRECT:
+            case EncodedOperandTypes.REGISTER_INDIRECT:
+                this.writeRegister(value, target);
+                break;
+            default:
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
+
         // Deallocate one doubleword from STACK by incrementing the value in ESP.
-        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
     }
 
@@ -2339,30 +2321,25 @@ export class CPUCore {
      * @throws {ExceptionError} If an exception was generated
      */
     public push(source: InstructionOperand): void {
-        // Check whether ESP reached lowest address (top) of STACK segment.
-        // if (this.esp.content.equal(Doubleword.fromInteger(this._lowestAddressOfStackDec))) {
-        //     // ESP reached lowest address (top) of STACK segment.
-        //     throw new StackOverflowError("Could not perform PUSH operation. STACK pointer reached top of the STACK.");
-        // }
-        // Check if exactly one operand is present.
-        if (source.type === EncodedOperandTypes.NO) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        let value: DoubleWord;
+
+        switch (source.type) {
+            case EncodedOperandTypes.MEMORY_ADDRESS:
+                value = this.mmu.readDoublewordFrom(source.value, false); 
+                break;
+            case EncodedOperandTypes.REGISTER_DIRECT:
+            case EncodedOperandTypes.REGISTER_INDIRECT:
+                value = this.readRegister(source);
+                break;
+            case EncodedOperandTypes.IMMEDIATE:
+                value = source.value;
+                break;
+            default:
+                throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
+
         // Allocate one doubleword (4 byte) on STACK by decrementing ESP.
         this.esp.content = DoubleWord.fromNumber(this.esp.content - 4);
-        // Create a variable to store the value to write on STACK.
-        let value: DoubleWord;
-        // Depending on the operand type, the value is read from the main memory or a register.
-        if (source.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-            // Read the binary value from the (virtual) memory address defined by the given operand.
-            value = this.mmu.readDoublewordFrom(source.value, false);            
-        } else if (source.type === EncodedOperandTypes.REGISTER_DIRECT || source.type === EncodedOperandTypes.REGISTER_INDIRECT) {
-            // Read the binary value from the register defined by the given operand.
-            value = this.readRegister(source);
-        } else {
-            // Read the binary value from the immediate operand.
-            value = source.value;
-        }
         // Write the value to the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, value, false);
     }
@@ -2420,9 +2397,6 @@ export class CPUCore {
     private ret(): void {
         // Read the return address from the STACK.
         this.eip.content = this.mmu.readDoublewordFrom(this.esp.content, false);
-        // Deallocate one doubleword from the STACK by incrementing ESP.
-        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
-
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
     }
 
@@ -2515,7 +2489,6 @@ export class CPUCore {
         this.ret();
         // Restore the old EFLAGS contents from the STACK.
         const eflagsValue = this.mmu.readDoublewordFrom(this.esp.content, false);
-        this.mmu.writeDoublewordTo(this.esp.content, DoubleWord.ZERO, false);
         this.esp.content = DoubleWord.fromNumber(this.esp.content + 4);
 
         // Restore the old STACK value.
@@ -2640,19 +2613,22 @@ export class CPUCore {
     private writeRegisterDirect(value: DoubleWord, registerNumber: number): void {
         // Decode the register defined by the operand.
         const register: Register<DoubleWord> = this.decodeWritableRegister(registerNumber);
-        // Check if the decoded register is writable in user mode.
-        if (register === this.eir && !this.flags.isInKernelMode()) {
-            // Writing to the EIP register is only allowed in kernel mode.
-            throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-        } else if (register === this.ptp && !this.flags.isInKernelMode()) {
-            // Writing to the GPTP register is only allowed in kernel mode.
-            throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-        } else if (register === this.nptp && !this.flags.isInKernelMode()) {
-            // Writing to the NPTP register is only allowed in kernel mode.
-            throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
-        } else if (register === this.vmtpr && !this.flags.isInKernelMode()) {
-            // Writing to the VMPTR register is only allowed in kernel mode.
-            throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
+
+        if (this.flags.isInUserMode()) {
+            // Check if the decoded register is writable in user mode.
+            if (register === this.eir) {
+                // Writing to the EIP register is only allowed in kernel mode.
+                throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
+            } else if (register === this.ptp) {
+                // Writing to the GPTP register is only allowed in kernel mode.
+                throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
+            } else if (register === this.nptp) {
+                // Writing to the NPTP register is only allowed in kernel mode.
+                throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
+            } else if (register === this.vmtpr) {
+                // Writing to the VMPTR register is only allowed in kernel mode.
+                throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
+            }
         }
         // Write the doubleword to the register.
         register.content = value;
@@ -2775,7 +2751,7 @@ export class CPUCore {
 
             for (let index = 0; index < 4; index++) {
                 const byte = DoubleWord.getBitsStartingAt(currentDoubleWord, index * Byte.NUMBER_OF_BITS as DoubleWord.BitIndex, Byte.NUMBER_OF_BITS as DoubleWord.BitCount)
-                if (byte == 0)
+                if (byte === 0)
                 {
                     return str
                 }
