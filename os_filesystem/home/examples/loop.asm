@@ -1,6 +1,6 @@
 .LOOP_START:
 
-MOV $100, %eax      ; Kopiere den Wert 100 in das Register eax.
+MOV $10, %eax      ; Kopiere den Wert 100 in das Register eax.
 
 .loop: 
     SUB $1, %eax     ; Subtrahiere den Wert 1 vom Wert im Register eax.

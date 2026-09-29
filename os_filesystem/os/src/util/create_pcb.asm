@@ -80,7 +80,7 @@
         SHL $24, %ecx ; move the id to the msb
         AND $0xFFFFFF, *%eax
         OR %ecx, *%eax ;set pid
-        SHR $24, %ecx
+        ;SHR $24, %ecx
         ADD $1, %eax
 
         AND $0xFFFFFF, *%eax
@@ -89,10 +89,20 @@
         OR %ebx, *%eax ; set status to to Waiting 
         ADD $1, %eax
 
-        ; allocate Page Table
-        SHL $CONST_OS_PAGE_TABLE_BIT_SIZE, %ecx
-        ADD $CONST_OS_PAGE_TABLE_LIST_START, %ecx
 
+        ; find free page table
+        PUSH %eax ; save eax
+        
+        ; Searches for a free page table, marks it as used and returns the base address
+        ; UTIL_ALLOCATE_PAGE_TABLE
+        ; Parameters 
+        ;   none
+        ; Return value (immediate value):
+        ;   eax     page table base address (0xFFFFFFFF = invalid)
+        CALL UTIL_ALLOCATE_PAGE_TABLE
+
+        MOV %eax, %ecx
+        POP %eax ; restore eax
 
         MOV %ecx, *%eax  ; set page table pointer
         ADD $4, %eax
@@ -100,7 +110,7 @@
         MOV %ecx, %ebx ; ebx = pointer to the Page Table
 
         PUSH %eax ; save eax
-
+        PUSH %ecx ; save pointer to page table
 
         CMP $CONST_OS_PAGE_TABLE_LIST_START, %ebx
         JB _UTIL_CREATE_PCB_INVALID_PAGE_TABLE_POINTER
@@ -110,7 +120,7 @@
         JMP _UTIL_CREATE_PCB_VALID_PAGE_TABLE_POINTER
 
         ._UTIL_CREATE_PCB_INVALID_PAGE_TABLE_POINTER:
-
+            POP %eax ; clear pointer to page table from stack
             POP %eax ; eax
             POP %eax ; pcb
             ADD $1, *%eax ; status bit 
@@ -121,13 +131,14 @@
             RET
         ._UTIL_CREATE_PCB_VALID_PAGE_TABLE_POINTER:
 
-        ; UTIL_INITIALIZE_PAGE_TABLE
-        ; Parameters 
+
+        POP %ebx
+        ; UTIL_INITIALIZE_PAGE_DIRECTORY_TABLE
         ; Parameters (ebx is a pointer to the start of the Page Table):
-        ;   (ebx)     Pointer to the Page Table
+        ;   (ebx)     Pointer to the Page Table base address
         ; Return value (immediate value):
         ;   none
-        CALL UTIL_INITIALIZE_PAGE_TABLE
+        CALL UTIL_INITIALIZE_PAGE_DIRECTORY_TABLE
 
         POP %eax ; restore eax
 

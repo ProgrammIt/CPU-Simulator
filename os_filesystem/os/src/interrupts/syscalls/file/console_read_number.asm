@@ -25,6 +25,8 @@
     
     CALL UTIL_SCHEDULER ; reschedule
 
+    JMP SYSCALLS_CONSOLE_READ_NUMBER ; check again if buffer contains data race condition protection
+
     ._SKIP_BLOCKING:
     ;   9   0b00001001 console_read_number (op2=none)
     DEV $CONST_DEV_COMMAND_CONSOLE_READ_NUMBER, %eax

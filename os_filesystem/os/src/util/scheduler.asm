@@ -99,7 +99,7 @@
     CMP $CONST_OS_PROCESS_STATUS_RUNNING, %ebx ; is the process running ?
     JE _UTIL_SCHEDULER_PROCESS_RUNNING
 
-    CMP $CONST_OS_PROCESS_STATUS_BLOCKED, %ebx  ; is the process blocked ?
+    CMP $CONST_OS_PROCESS_STATUS_TIMER_BLOCKED, %ebx  ; is the process blocked ?
     JE _UTIL_SCHEDULER_PROCESS_BLOCKED
 
     CMP $CONST_OS_PROCESS_STATUS_IO_BLOCKED, %ebx ; is the process blocked waiting for IO?
@@ -151,7 +151,7 @@
     ._UTIL_SCHEDULER_PROCESS_BLOCKED:
 
 
-    MOV $CONST_OS_PROCESS_BLOCKED_QUEUE_START, %ecx
+    MOV $CONST_OS_PROCESS_BLOCKED_TIMER_QUEUE_START, %ecx
 
     ; ecx = process blocked queue start
 

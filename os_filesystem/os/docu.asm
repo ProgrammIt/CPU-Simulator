@@ -1,5 +1,30 @@
 ; os documentation
 
+; Program binary
+; Metadata Layout
+
+; ICE header 32 byte (8 dwords)
+; byte 0x0-0x4 magic number
+; byte 0x5-0x8 program header byte offset
+; 6 dwords free
+; 
+; Program header (16 dwords)
+; 1 DWORD Total_L2_Tables
+; 
+; 1 DWORD Text segment virtual start address
+; 1 DWORD Text segment file offset
+; 1 DWORD Text segment size
+; 
+; 1 DWORD RoData segment virtual start address
+; 1 DWORD RoData segment file offset
+; 1 DWORD RoData segment size
+; 
+; 1 DWORD Data segment virtual start address
+; 1 DWORD Data segment file offset
+; 1 DWORD Data segment size
+; 6 dwords free
+
+
 ; Kernel
 
 ; Memory layout (32 bit architecture, 4 GiB total)
@@ -31,7 +56,10 @@
 ; 0xE0100400 - 0xE01007FF - Interrupt Table     (256 Entries * 4 Bytes = 1 KiB)                   |
 ; 0xE0100000 - 0xE01003FF - PCB Table Mapping   (256 Entries * 4 Bytes = 1 KiB)                  /
 ; 0xE00C0000 - 0xE00FFFFF - PCB List            (256 Entries * 1 KiB = 256 KiB)                     - 64    Page Frames
-; 0xE0000000 - 0xE00BFFFF - Memory Map          (786432 Entries * 1 Byte = 786432 Bytes)            - 192   Page Frames   
+; 0xE0000000 - 0xE00BFFFF - Memory Map          (deprecated) (786432 Entries * 1 Byte = 786432 Bytes)            - 192   Page Frames
+; 0xE001A000 - 0xE00BFFFF - Free                (679936 Entries * 1 Byte = 679936 Byte = 166 page tables spare possibly)
+; 0xE0002000 - 0xE0019FFF - User Frame Bitmap   (98304 Byte * 8 = 786432 bit / entries) 786432 * 4KiB = 3 GiB trackable
+; 0xE0000000 - 0xE0001FFF - Page Table Bitmap   (8192 Byte * 8 = 65536 bit / entries) 65536 * 4KiB = 256 MiB trackable
 ; 0xD0000000 - 0xDFFFFFFF - Page Tables         (64 * 2²⁰ * 4 = 256 MiB)                            - 65536 Page Frames  
 ; 0xC0000000 - 0xCFFFFFFF - OS Code             (256 MiB / 4 = 67_108_864 32 bit Instructions)      - 65536 Page Frames 
 

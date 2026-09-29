@@ -1,7 +1,3 @@
-; enter kernel mode because of broken page table
-NOP
-
-
 ; print '42'
 MOV $42, %ebx
 ; SYSCALL_CONSOLE_READ_NUMBER

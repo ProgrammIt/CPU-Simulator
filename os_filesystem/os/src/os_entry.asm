@@ -99,8 +99,17 @@ JMP _OS_ENTRY ; start of the os
 
     ; --- Finished with the External interrupts---
 
-
 ; Interrupt Table Is Set Up
+
+; UTIL_SETUP_KERNEL_L2_MAPPING
+; Parameters:
+;   none
+; Return value (immediate value):
+;   none
+CALL UTIL_SETUP_KERNEL_L2_MAPPING
+
+; L2 page tables that map the kernel space have been created
+; These L2 maps later get linked into the page directory of new processes
 
 ; Create the init process
     
@@ -153,7 +162,6 @@ JMP _OS_ENTRY ; start of the os
     ; TODO stop the simulator
 
     ._OS_ENTRY_IDLE_PROCESS_CREATED:
-
 
     ; set the init process to the running process
     MOV $CONST_OS_CURRENT_PCB_POINTER, %eax

@@ -42,7 +42,7 @@
     JA _INTERRUPTS_TIMER_RETURN ; error invalid id
 
 
-    MOV $CONST_OS_PROCESS_BLOCKED_QUEUE_START, %ebx
+    MOV $CONST_OS_PROCESS_BLOCKED_TIMER_QUEUE_START, %ebx
 
     ADD %eax, %ebx
 

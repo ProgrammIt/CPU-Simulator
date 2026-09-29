@@ -380,7 +380,7 @@ export class ArithmeticLogicUnit {
      */
     public shr(value: DoubleWord, count: DoubleWord.BitCount): DoubleWord {
 
-        let result: DoubleWord = DoubleWord.ZERO;
+        let result: DoubleWord = value;
 
         this._cpu.flags.clearCarry()
 

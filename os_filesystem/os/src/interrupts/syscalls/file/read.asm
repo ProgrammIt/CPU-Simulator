@@ -54,6 +54,7 @@
     OR %ecx, *%eax ; apply the process status
  
     CALL UTIL_SCHEDULER ; reschedule
+    JMP SYSCALLS_FILE_READ ; check again if buffer contains data race condition protection
 
 ._SYSCALLS_FILE_READ_FILE:
     ; move user-provided arguments onto stack (required for DEV instruction)

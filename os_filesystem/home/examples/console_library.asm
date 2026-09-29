@@ -6,7 +6,7 @@
 .INCLUDE "os/include/console"
 
 ; A four byte large buffer of the name "test" is reserved to later save the string to
-.CONST BUF 4 test
+.BUF 4 test
 MOV $4, %eax ; number of bytes to read
 MOV $test, %ebx ; buffer to store the string
 

@@ -12,7 +12,6 @@ import { InstructionOperand } from "../../types/binary/InstructionOperand";
 import { Instruction } from "../../types/binary/Instruction";
 import { Byte } from "../../types/binary/Byte";
 import { Register } from "../functional_units/Register";
-import { Instructions } from "../../types/enumerations/Instructions";
 import { InstructionTypes } from "../../types/enumerations/InstructionTypes";
 import { OperandTypeCodes } from "../../types/enumerations/OperandTypes";
 import { DevOperations } from "../../types/enumerations/DevOperations";
@@ -24,8 +23,8 @@ import { ExceptionError } from "../../types/errors/ExceptionError";
 import { RegisterNumbers } from "../../types/enumerations/RegisterNumbers";
 import { applicationWindow } from "./../../main";
 import { PeriodicTimer } from "./PeriodicTimer";
-import { FrameNumber } from "../../types/binary/FrameNumber";
 import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
+import { VirtualAddress } from "../../types/binary/VirtualAddress";
 import { InstructionSet } from "../../types/enumerations/InstructionSet";
 
 /**
@@ -897,12 +896,6 @@ export class CPUCore {
                 } else {
                     if (bytesRead > 0) {
 
-                        if (bytesRead > 0 && this.fs.fd_map.get(op2)?.filename === "os/util/empty_frame.bin")
-                        {
-                            this.mainMemory.clearFrame(FrameNumber.fromPhysicalAddress(PhysicalAddress.fromNumber(bufferAddress)));
-                            break;
-                        }
-                        
                         for (let index = 0; index < doubleWordbytesRead; index += 4) {
                             this.mainMemory.writeDoubleWordTo(PhysicalAddress.fromNumber(bufferAddress + index), buffer.getUint32(index) as DoubleWord);
                         }
@@ -999,6 +992,30 @@ export class CPUCore {
                 this.ebx.content = DoubleWord.fromNumber(this.fs.getStdinBufferStringCount());
                 break;
             }
+            case DevOperations.FRAME_MAP_SIGNAL:{
+                const processId: DoubleWord = this.internal_pop();
+                const framePhysicalAddress: PhysicalAddress = PhysicalAddress.fromNumber(this.internal_pop());
+                const virtualAddress: VirtualAddress = VirtualAddress.fromNumber(this.internal_pop());
+                this.mmu.insertReverseMemoryMapping(framePhysicalAddress, virtualAddress, processId);
+                break;
+            }
+            case DevOperations.FRAME_UNMAP_SIGNAL:{
+                const processId: DoubleWord = this.internal_pop();
+                const framePhysicalAddress: PhysicalAddress = PhysicalAddress.fromNumber(this.internal_pop());
+                const virtualAddress: VirtualAddress = VirtualAddress.fromNumber(this.internal_pop());
+                this.mmu.insertReverseMemoryMapping(framePhysicalAddress, virtualAddress, processId);
+                break;
+            }
+            case DevOperations.PERFORMANCE_TIMER_START:{
+                const id: number = op2;
+                this.performanceTimerStart(id);
+                break;
+            }
+            case DevOperations.PERFORMANCE_TIMER_STOP:{
+                const id: number = op2;
+                this.performanceTimerStop(id);
+                break;
+            }
             default:{
                 throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
             }
@@ -1007,6 +1024,25 @@ export class CPUCore {
         return;
     }
 
+    /**
+     * This method starts a simple timer for OS performance measurements in form oof
+     * execution time.
+     * The method can be called from the simulator itself as well.
+     * @param id The id of the timer.
+     */
+    public performanceTimerStart(id: number): void {
+        console.time("Timer id: " + id);
+    }
+
+    /**
+     * This method stops a simple timer for OS performance measurements in form oof
+     * execution time.
+     * The method can be called from the simulator itself as well.
+     * @param id The id of the timer.
+     */
+    public performanceTimerStop(id: number): void {
+        console.timeEnd("Timer id: " + id);
+    }
 
     /*
      * -------------------- Arithmetic operations --------------------
@@ -2494,7 +2530,7 @@ export class CPUCore {
         // Add the number of the interrupt handler to the interrupt tables base address, which is stored in the ITP register.
         const interruptHandlerTableEntry: DoubleWord = DoubleWord.fromNumber(this.itp.content + target.value*4);
         // Load interrupt handler address
-        const interruptHandler = this.mmu.readDoublewordFrom(interruptHandlerTableEntry, true)
+        const interruptHandler = this.mmu.readDoublewordFrom(interruptHandlerTableEntry, false);
         /*
          * Before calling a subroutine, the caller needs to push the return address onto the STACK.
          * The return address is necessary to hand over control to the caller again after the subroutine 

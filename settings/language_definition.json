@@ -5,15 +5,15 @@
         "declarationDecimal" :      "^\\.[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+$",
         "declarationHexadecimal" :  "^\\.[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?0x(?:0(?![0-9A-Fa-f]+)|(?:[1-9A-Fa-f][0-9A-Fa-f]*))$",
         "declarationBinary" :       "^\\.[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?0b[01]+$",
-        "declarationString" :       "^\\.[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+\"[a-zA-Z\\-_/.0-9]*\"$",
+        "declarationString" :       "^\\.[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+\"[^\"]*\"$",
+        "declarationBuffer" :       "^.BUF[ ][1-9]+[0-9]*[ ][a-zA-Z\\-_][a-zA-Z\\-_0-9]*$",
         "usage" : "[$%@][a-zA-Z\\-_][a-zA-Z\\-_0-9]*"
     },
     "constant_formats" : {
         "declarationDecimal" :      "^.CONST[ ]+[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?(?<!0[\\w])\\b(?:0(?![1-9])|[1-9]\\d*)+$",
         "declarationHexadecimal" :  "^.CONST[ ]+[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?0x(?:0(?![0-9A-Fa-f]+)|(?:[1-9A-Fa-f][0-9A-Fa-f]*))$",
         "declarationBinary" :       "^.CONST[ ]+[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+-?0b[01]+$",
-        "declarationString" :       "^.CONST[ ]+[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+\"[a-zA-Z\\-_/.0-9]*\"$",
-        "declarationBuffer" :       "^.CONST[ ]BUF[ ][1-9]+[0-9]*[ ][a-zA-Z\\-_][a-zA-Z\\-_0-9]+$",
+        "declarationString" :       "^.CONST[ ]+[a-zA-Z\\-_][a-zA-Z\\-_0-9]*[ ]+\"[^\"]*\"$",
         "usage" : "[$%@][a-zA-Z\\-_][a-zA-Z\\-_0-9]*"
     },
     "comment_format" : "[ ]*;.*",

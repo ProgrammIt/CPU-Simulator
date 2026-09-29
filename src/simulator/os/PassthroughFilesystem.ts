@@ -46,34 +46,35 @@ export class PassthroughFilesystem {
         }
         const vfd = this.fd_map.get(fd)!
 
-        let new_seek_postion = 0;
+        let new_seek_position = 0;
         switch (mode) {
             case 0: // 0 - Seek from current position
-                new_seek_postion = vfd.seek_position + offset;
+                new_seek_position = vfd.seek_position + offset;
                 break;
             case 1: // 1 - Seek from start of file
-                new_seek_postion = offset;
+                new_seek_position = offset;
                 break;
             case 2: // 2 - Seek from end of file
                 this.file_stat(vfd.filename)
                 // TODO error handling if file_stat fails due to race condition
-                new_seek_postion = this.file_stat(vfd.filename) - offset;
+                new_seek_position = this.file_stat(vfd.filename) - offset;
                 break;
             default:
                 // unkown mode
                 return -4;
         }
 
-        if (this.file_stat(vfd.filename) < vfd.seek_position) {
+        if (this.file_stat(vfd.filename) < new_seek_position) {
             // seek position out of bounds
             return -2;
         }
-        if (vfd.seek_position + offset < 0) {
+        
+        if (new_seek_position < 0) {
             // negative seek position
             return -3;
         }
         // node:fs doesnt support seek() on file descriptors, but allows it on write commands. Seek is emulated on each write command.
-        vfd.seek_position += new_seek_postion;
+        vfd.seek_position = new_seek_position;
         return 0;
     }
 
@@ -94,6 +95,7 @@ export class PassthroughFilesystem {
             }
             const vfd = this.fd_map.get(fd)!
             if (this.file_stat(vfd.filename) < vfd.seek_position) {
+                console.log(vfd.filename + " size: " + this.file_stat(vfd.filename) + " Seek position: " + vfd.seek_position)
                 // invalid seek position
                 return -2;
             }
