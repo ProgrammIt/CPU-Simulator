@@ -1,5 +1,4 @@
 import { Byte } from "../../types/binary/Byte";
-import { DataSizes } from "../../types/enumerations/DataSizes";
 import { DoubleWord } from "../../types/binary/DoubleWord";
 import { PageTableEntry } from "../../types/binary/PageTableEntry";
 import { TranslationLookasideBuffer } from "../functional_units/TranslationLookasideBuffer";
@@ -8,10 +7,9 @@ import { InterruptNumbers } from "../../types/enumerations/InterruptNumbers";
 import { ExceptionError } from "../../types/errors/ExceptionError";
 import { PageNumber } from "../../types/binary/PageNumber";
 import { PageTableEntryFlags } from "../../types/binary/PageTableEntryFlags";
-import { VirtualAddress } from "../../../types/binary/VirtualAddress";
-import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
-import { PageTableEntry } from "../../../types/binary/PageTableEntry";
-import { FrameNumber } from "../../../types/binary/FrameNumber";
+import { VirtualAddress } from "../../types/binary/VirtualAddress";
+import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
+import { FrameNumber } from "../../types/binary/FrameNumber";
 
 interface memoryMapEntry {
         pageTableId: number;
