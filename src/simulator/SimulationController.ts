@@ -5,9 +5,8 @@ import { DoubleWord } from "../types/binary/DoubleWord";
 import { DataSizes } from "../types/enumerations/DataSizes";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { DebugLogger } from "./Logger";
-import { Byte } from "../../types/binary/Byte";
-import { getMainWindow } from "../index";
-import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
+import { Byte } from "../types/binary/Byte";
+import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
