@@ -2,7 +2,7 @@ import { DoubleWord } from "../../types/binary/DoubleWord";
 import { CPUCore } from "./CPUCore";
 import { InterruptNumbers } from "../../types/enumerations/InterruptNumbers";
 import { ExceptionError } from "../../types/errors/ExceptionError";
-import { Byte } from "../../../types/binary/Byte";
+import { Byte } from "../../types/binary/Byte";
 
 /**
  * @author Erik Burmester <erik.burmester@nextbeam.net>
