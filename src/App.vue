@@ -3,155 +3,55 @@
         <div class="top-bar">
             <menu class="controls">
                 <li>
-                    <button v-if="isProgramLoaded" class="btn-next-cycle" @click="triggerNextCycle">
+                    <button class="btn-next-cycle" @click="triggerNextCycle">
                         <img :src="cycleSvgUrl" id="next_cycle" title="Triggers execution of the next instruction"
                             alt="Button for triggering the next instruction cycle">
                         <span>Next instruction (F5)</span>
                     </button>
                 </li>
             </menu>
-            <nav class="tabs">
-                <button class="tab-btn" :class="{ active: activeTab === 'simulator' }" @click="activeTab = 'simulator'">
-                    Simulator
-                </button>
-                <button class="tab-btn" :class="{ active: activeTab === 'editor' }" @click="activeTab = 'editor'">
-                    Code-Editor
-                </button>
-            </nav>
         </div>
     </header>
-
     <main>
         <KeepAlive>
-            <div class="tab-wrapper">
-
-                <!-- SIMULATOR TAB CONTENT -->
-                <div class="tab-content" v-show="activeTab === 'simulator'">
-                    <div class="simulator-widgets">
-                        <!-- Registers -->
-                        <section class="registers">
-                            <h1 class="header sticky-top">Registers</h1>
-                            <div class="grid">
-                                <RegisterWidget v-for="reg in registers" :key="reg.name" :register-id="reg.id"
-                                    :name="reg.name as RegisterNames" :subtitle="reg.subtitle" :content="reg.content"
-                                    :hidden="reg.hidden" :show-select="reg.showSelect" :loading="registersLoading"
-                                    :radix="reg.representation" 
-                                    @representation-change="handleRegisterRepresentationChange" />
-                            </div>
-                        </section>
-
-                        <!-- Virtual RAM -->
-                        <section class="virtual-ram">
-                            <h1 class="header sticky-top">Virtual RAM</h1>
-                            <RAMView ref="virtualRAMRef" type="virtual"
-                                :auto-scroll-enabled="autoScrollForVirtualRAMEnabled"
-                                :program-loaded="isProgramLoaded" />
-                        </section>
-
-                        <!-- Physical RAM -->
-                        <section class="physical-ram">
-                            <h1 class="header sticky-top">Physical RAM</h1>
-                            <RAMView ref="physicalRAMRef" type="physical"
-                                :auto-scroll-enabled="autoScrollForPhysicalRAMEnabled"
-                                :program-loaded="isProgramLoaded" />
-                        </section>
-                    </div>
-
-                    <!-- Log output & RAM Search -->
-                    <div class="output">
-                        <LogPanel ref="logPanelRef" :visible="logVisible" />
-
-                        <div class="search-module widget" id="ram-search">
-                            <div class="lg-text">RAM-Cell Search</div>
-                            <div class="search-form-group">
-                                <input type="text" class="ram-searchfield" v-model="searchInput"
-                                    placeholder="Address (e.g. 0x0)">
-                                <select v-model="searchLocation">
-                                    <option :value="RAMSearchLocation.PHYSICAL">Physical RAM</option>
-                                    <option :value="RAMSearchLocation.VIRTUAL">Virtual RAM</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EDITOR TAB -->
-                <div class="tab-content" v-show="activeTab === 'editor'">
-                    <CodeEditor :path="pathToLoadedProgram" :file-name="loadedFileName" :file-content="loadedFileContents"/>
-                </div>
-            </div>
+            <TabLayout ref="tabLayout">
+                <Tab title="Simulator">
+                    <Simulator />
+                </Tab>
+                <Tab title="Editor">
+                    <CodeEditor :path="pathToLoadedProgram" :file-name="loadedFileName"
+                        :file-content="loadedFileContents" />
+                </Tab>
+                <Tab v-for="tab in dynamicTabs" :key="tab.id" :title="tab.title">
+                    <component :is="tab.component" v-bind="tab.props" />
+                </Tab>
+            </TabLayout>
         </KeepAlive>
     </main>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, shallowRef } from 'vue';
 import cycleSvgUrl from './../assets/icons/web/cycle.svg';
-import RegisterWidget from './components/RegisterWidget.vue';
-import RAMView from './components/RAMView.vue';
-import LogPanel from './components/LogPanel.vue';
 import CodeEditor from './components/CodeEditor.vue';
-import { NumberSystems } from './../src/types/enumerations/NumberSystems';
-import { RegisterNames } from './types/enumerations/RegisterNumbers';
+import Simulator from './components/Simulator.vue';
+import TabLayout from './components/TabLayout.vue';
+import Tab from './components/Tab.vue';
+import ConsoleComponent from './components/ConsoleComponent.vue';
 
-// --- Tab State ---
-const activeTab = ref<'simulator' | 'editor'>('simulator');
-
-// --- Search locations ---
-enum RAMSearchLocation { PHYSICAL = 'PHYSICAL', VIRTUAL = 'VIRTUAL' }
-
-// --- Register definitions ---
-interface RegisterDef {
-    id: string; name: string; subtitle: string; content: string;
-    hidden: boolean; showSelect: boolean; representation: NumberSystems;
-}
-
-enum Register {
-    EAX = 'eax',
-    EBX = 'ebx',
-    ECX = 'ecx',
-    EDX = 'edx',
-    FLAGS = 'flags',
-    EIP = 'eip',
-    EIR = 'eir',
-    ESP = 'esp',
-    PTP = 'ptp',
-    GPTP = 'gptp',
-    ITP = 'itp',
-    NPTP = 'nptp',
-    VMPTR = 'vmptr'
-}
-
-// --- State ---
+// --- Refs ---
+const tabLayout = ref<InstanceType<typeof TabLayout> | null>(null);
+const dynamicTabs = ref<Array<{
+    id: string;
+    title: string;
+    component: any;
+    props?: Record<string, any>;
+}>>([]);
+const numberTabs = ref(2);
 const isProgramLoaded = ref(false);
 const pathToLoadedProgram = ref<string>('');
 const loadedFileName = ref<string>('Untitled.asm');
 const loadedFileContents = ref<string>('; Your code here.\n.DATA\n\n.CODE\n.START:\n');
-const autoScrollForPhysicalRAMEnabled = ref(true);
-const autoScrollForVirtualRAMEnabled = ref(true);
-const logVisible = ref(true);
-const registersLoading = ref(false);
-const searchInput = ref('0x0');
-const searchLocation = ref<RAMSearchLocation>(RAMSearchLocation.PHYSICAL);
-
-const virtualRAMRef = ref<InstanceType<typeof RAMView> | null>(null);
-const physicalRAMRef = ref<InstanceType<typeof RAMView> | null>(null);
-const logPanelRef = ref<InstanceType<typeof LogPanel> | null>(null);
-
-const registers = reactive<RegisterDef[]>([
-    { id: RegisterNames.EAX, name: 'EAX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.EBX, name: 'EBX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.ECX, name: 'ECX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.EDX, name: 'EDX', subtitle: 'General Purpose Register', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.FLAGS, name: 'FLAGS', subtitle: 'State Register', content: '11000000', hidden: false, showSelect: false, representation: NumberSystems.BIN },
-    { id: RegisterNames.EIP, name: 'EIP', subtitle: 'Instruction Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.EIR, name: 'EIR', subtitle: 'Instruction Register', content: '00000000 00000000 00000000 00000000', hidden: true, showSelect: false, representation: NumberSystems.BIN },
-    { id: RegisterNames.ESP, name: 'ESP', subtitle: 'STACK Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.PTP, name: 'PTP', subtitle: 'Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.ITP, name: 'ITP', subtitle: 'Interrupt Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.NPTP, name: 'NPTP', subtitle: 'Nested Page Table Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-    { id: RegisterNames.VMPTR, name: 'VMPTR', subtitle: 'Virtual Machine Pointer', content: '00000000 00000000 00000000 00000000', hidden: false, showSelect: true, representation: NumberSystems.BIN },
-]);
 
 /**
  * Triggers the execution of the next instruction cycle in the simulator.
@@ -172,47 +72,323 @@ function handleGlobalKeydown(event: KeyboardEvent) {
 }
 
 /**
- * Handles the change of the value representation in a register.
- * @param registerName The name of the register.
- * @param newRadix The new representation's radix.
+ * Adds a new tab to the tab layout.
+ * @param tabTitle The title of the new tab.
+ * @param tabComponent The Vue component to be rendered inside the new tab.
+ * @param tabProps Optional props to be passed to the tab component.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-function handleRegisterRepresentationChange(registerName: RegisterNames, newRadix: NumberSystems) {
-    console.log(`Register ${registerName} representation changed to:`, newRadix);
-    window.simulator.readRegister(registerName, newRadix).then((value) => {
-        const register = registers.find((reg) => reg.name === registerName);
-        if (register) {
-            register.representation = newRadix;
-            register.content = value;
-        }
-    }).catch((error) => {
-        console.error(`Failed to read register ${registerName}:`, error);
+function addTab(tabTitle: string, tabComponent: any, tabProps: Record<string, any> = {}) {
+    const newTabId = numberTabs.value++;
+    dynamicTabs.value.push({
+        id: `${newTabId}`,
+        title: tabTitle,
+        component: shallowRef(tabComponent), 
+        props: tabProps
     });
 }
 
+/**
+ * Removes a tab from the tab layout.
+ * @param tabName The name of the tab to be removed.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+function removeTab(tabId: string) {
+    const tabIndex = dynamicTabs.value.findIndex(tab => tab.id === tabId);
+    if (tabIndex !== -1) {
+        dynamicTabs.value.splice(tabIndex, 1);
+    }
+}
+
+/**
+ * Handles the creation of a new console.
+ * @param consoleId The ID of the newly created console.
+ * @param consoleName The name of the newly created console.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+function handleCreateConsole(consoleId: number, consoleName: string) {
+    addTab(`${consoleName}`, ConsoleComponent);
+    window.simulator.createdConsole(consoleId);
+}
+
+/**
+ * Handles the closure of an existing console.
+ * @param consoleId The ID of the console that was closed.
+ * @author Erik Burmester <erik.burmester@nextbeam.net>
+ */
+function handleClosedConsole(consoleId: number, consoleName: string) {
+    removeTab(`${consoleName}`);
+    window.simulator.closedConsole(consoleId);
+}
+
 onMounted(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
     window.addEventListener('keydown', handleGlobalKeydown);
+    window.simulator.onCreateConsole(handleCreateConsole);
+    window.simulator.onCloseConsole(handleClosedConsole);
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleGlobalKeydown);
+    window.simulator.onCreateConsole(handleCreateConsole);
+    window.simulator.onCloseConsole(handleClosedConsole);
 });
 </script>
 
-<style lang="css" scoped>
-header {
-    padding: 1rem 2rem 0 2rem;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-    z-index: 10;
+<style lang="css">
+:root {
+    --br-small: 5px;
+    --br-large: 15px;
+    --br-medium: 10px;
 }
 
-.top-bar {
+:root[data-theme="light"] {
+  --text-50: #ecf1f8;
+  --text-100: #d9e3f2;
+  --text-200: #b3c8e5;
+  --text-300: #8dacd8;
+  --text-400: #6791cb;
+  --text-500: #4175be;
+  --text-600: #345e98;
+  --text-700: #274672;
+  --text-800: #1a2f4c;
+  --text-900: #0d1726;
+  --text-950: #070c13;
+
+  --background-50: #eef1f6;
+  --background-100: #dde4ee;
+  --background-200: #bbc8dd;
+  --background-300: #99adcc;
+  --background-400: #7791bb;
+  --background-500: #5576aa;
+  --background-600: #445e88;
+  --background-700: #334766;
+  --background-800: #222f44;
+  --background-900: #111822;
+  --background-950: #090c11;
+
+  --primary-50: #e6f0ff;
+  --primary-100: #cce1ff;
+  --primary-200: #9ac4fe;
+  --primary-300: #67a6fe;
+  --primary-400: #3488fe;
+  --primary-500: #016afe;
+  --primary-600: #0155cb;
+  --primary-700: #014098;
+  --primary-800: #012b65;
+  --primary-900: #001533;
+  --primary-950: #000b19;
+
+  --secondary-50: #eeecf8;
+  --secondary-100: #ddd9f2;
+  --secondary-200: #bbb3e5;
+  --secondary-300: #9a8dd8;
+  --secondary-400: #7867cb;
+  --secondary-500: #5641be;
+  --secondary-600: #453498;
+  --secondary-700: #342772;
+  --secondary-800: #221a4c;
+  --secondary-900: #110d26;
+  --secondary-950: #090713;
+
+  --accent-50: #ffede6;
+  --accent-100: #fedbcd;
+  --accent-200: #feb69a;
+  --accent-300: #fd9268;
+  --accent-400: #fd6e35;
+  --accent-500: #fc4903;
+  --accent-600: #ca3b02;
+  --accent-700: #972c02;
+  --accent-800: #651d01;
+  --accent-900: #320f01;
+  --accent-950: #190700;
+
+}
+:root[data-theme="dark"] {
+  --text-50: #060c13;
+  --text-100: #0d1826;
+  --text-200: #19304d;
+  --text-300: #264973;
+  --text-400: #336199;
+  --text-500: #4079bf;
+  --text-600: #6694cc;
+  --text-700: #8cafd9;
+  --text-800: #b3c9e6;
+  --text-900: #d9e4f2;
+  --text-950: #ecf2f9;
+
+  --background-50: #090c11;
+  --background-100: #111822;
+  --background-200: #222f44;
+  --background-300: #334766;
+  --background-400: #445e88;
+  --background-500: #5576aa;
+  --background-600: #7791bb;
+  --background-700: #99adcc;
+  --background-800: #bbc8dd;
+  --background-900: #dde4ee;
+  --background-950: #eef1f6;
+
+  --primary-50: #000b19;
+  --primary-100: #001533;
+  --primary-200: #012b65;
+  --primary-300: #014098;
+  --primary-400: #0155cb;
+  --primary-500: #016afe;
+  --primary-600: #3488fe;
+  --primary-700: #67a6fe;
+  --primary-800: #9ac4fe;
+  --primary-900: #cce1ff;
+  --primary-950: #e6f0ff;
+
+  --secondary-50: #090713;
+  --secondary-100: #110d26;
+  --secondary-200: #221a4c;
+  --secondary-300: #342772;
+  --secondary-400: #453498;
+  --secondary-500: #5641be;
+  --secondary-600: #7867cb;
+  --secondary-700: #9a8dd8;
+  --secondary-800: #bbb3e5;
+  --secondary-900: #ddd9f2;
+  --secondary-950: #eeecf8;
+
+  --accent-50: #190700;
+  --accent-100: #320f01;
+  --accent-200: #651d01;
+  --accent-300: #972c02;
+  --accent-400: #ca3b02;
+  --accent-500: #fc4903;
+  --accent-600: #fd6e35;
+  --accent-700: #fd9268;
+  --accent-800: #feb69a;
+  --accent-900: #fedbcd;
+  --accent-950: #ffede6;
+
+}
+
+@font-face {
+    font-family: "BDO Grotesk";
+    src: url("./../../assets/fonts/BDOGrotesk-VF.woff2") format("woff2");
+}
+
+* {
+    font-family: "BDO Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-950);
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+body {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    background-color: var(--background-300);
 }
 
+header {
+    padding: 1rem;
+    background: var(--background-200);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    z-index: 1;
+}
+
+input[type="text"],
+select {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--inset-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-family: inherit;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+select option {
+    background-color: var(--bg-gradient-end);
+    color: var(--text-main);
+    font-weight: normal;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Custom classes. */
+.widget {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+}
+
+/* Animations and highlights */
+.highlighted {
+    border: 1px solid var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-glow), inset 0 0 10px var(--accent-glow);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
+
+<style lang="css" scoped>
 menu.controls {
     margin: 0;
     padding: 0;
@@ -220,41 +396,6 @@ menu.controls {
     display: flex;
     align-items: center;
     height: auto;
-}
-
-.tabs {
-    display: flex;
-    gap: 0.25rem;
-    align-items: flex-end;
-    padding-top: 0.5rem;
-}
-
-.tab-btn {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    border-bottom: none;
-    color: var(--text-muted);
-    padding: 0.6rem 1.75rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
-    position: relative;
-    top: 1px;
-}
-
-.tab-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-main);
-}
-
-.tab-btn.active {
-    background: rgba(15, 23, 42, 0.6);
-    color: var(--accent-primary);
-    border-color: var(--glass-border);
-    font-weight: bold;
-    padding-top: 0.7rem;
 }
 
 .btn-next-cycle {
@@ -287,99 +428,5 @@ main {
     height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
-}
-
-.tab-wrapper {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.tab-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 1rem;
-    overflow: hidden;
-}
-
-.simulator-widgets {
-    display: flex;
-    flex-direction: row;
-    height: calc(100% - 200px);
-    gap: 1.5rem;
-}
-
-.registers {
-    display: flex;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    flex: 2;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.virtual-ram,
-.physical-ram {
-    display: flex;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.header.sticky-top {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    display: block;
-    margin: 0;
-}
-
-.grid {
-    padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
-    align-content: start;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-}
-
-.output {
-    display: flex;
-    flex-direction: row;
-    gap: 1.5rem;
-    align-items: stretch;
-    height: 200px;
-    min-height: 150px;
-}
-
-.search-module {
-    width: 320px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 1.25rem;
-}
-
-.search-form-group {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
 }
 </style>
