@@ -15,11 +15,13 @@ import { applicationWindow } from "../main";
 export class SimulationController {
     /**
      * The main CPU core of the simulator.
+     * @readonly
      */
     public readonly core: CPUCore;
 
     /**
      * The main memory of the simulator.
+     * @readonly
      */
     public readonly mainMemory: RAM;
 
