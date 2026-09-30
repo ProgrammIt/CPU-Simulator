@@ -1,8 +1,8 @@
 import { DoubleWord } from "../types/binary/DoubleWord";
 import { Byte } from "../types/binary/Byte";
 import { InstructionTypes } from "../types/enumerations/InstructionTypes";
-import { OperandTypes } from "../types/enumerations/OperandTypes";
-import { RegisterNumbers } from "../types/enumerations/RegisterNumbers";
+import { OperandTypeCodes } from "../types/enumerations/OperandTypes";
+import { RegisterNames, RegisterNumbers } from "../types/enumerations/RegisterNumbers";
 import { AddressingModes } from "../types/enumerations/AdressingModes";
 import { InterruptNumbers } from "../types/enumerations/InterruptNumbers";
 import { DevOperations } from "../types/enumerations/DevOperations";
@@ -846,7 +846,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readEAX(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EAX, NumberSystem.HEX);
             if (this._eax !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -863,7 +863,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readEBX(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EBX, NumberSystem.HEX);
             if (this._ebx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -880,7 +880,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readECX(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ECX, NumberSystem.HEX);
             if (this._ecx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -897,7 +897,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readEDX(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EDX, NumberSystem.HEX);
             if (this._edx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -914,7 +914,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readESP(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ESP, NumberSystem.HEX);
             if (this._esp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -931,7 +931,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readEIP(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystem.HEX);
             if (this._eip !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -948,7 +948,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readITP(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ITP, NumberSystem.HEX);
             if (this._itp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -965,7 +965,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readPTP(NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.PTP, NumberSystem.HEX);
             if (this._ptp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -1367,7 +1367,7 @@ export class Renderer {
      * This method reads the content of the EAX register.
      */
     public async readEAX(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readEAX(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EAX, radix);
         if (this._eax !== null) {
             this._eax.children.namedItem("register-content")!.textContent = content;
         }
@@ -1378,7 +1378,7 @@ export class Renderer {
      * This method reads the content of the EBX register.
      */
     public async readEBX(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readEBX(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EBX, radix);
         if (this._ebx !== null) {
             this._ebx.children.namedItem("register-content")!.textContent = content;
         }
@@ -1389,7 +1389,7 @@ export class Renderer {
      * This method reads the content of the ECX register.
      */
     public async readECX(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readECX(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.ECX, radix);
         if (this._ecx !== null) {
             this._ecx.children.namedItem("register-content")!.textContent = content;
         }
@@ -1400,7 +1400,7 @@ export class Renderer {
      * This method reads the content of the ECX register.
      */
     public async readEDX(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readEDX(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EDX, radix);
         if (this._edx !== null) {
             this._edx.children.namedItem("register-content")!.textContent = content;
         }
@@ -1411,7 +1411,7 @@ export class Renderer {
      * This method reads the content of the FLAGS register.
      */
     public async readFLAGS(): Promise<void> {
-        const content: string = await this._window.simulator.readFLAGS();
+        const content: string = await this._window.simulator.readRegister(RegisterNames.FLAGS, NumberSystem.BIN);
         if (this._flags !== null) {
             this._flags.children.namedItem("register-content")!.textContent = content;
         }
@@ -1431,7 +1431,7 @@ export class Renderer {
      * This method reads the content of the EIR register.
      */
     public async readEIR(): Promise<void> {
-        const content: string = await this._window.simulator.readEIR();
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EIR, NumberSystem.BIN);
         if (this._eir !== null) {
             this._eir.children.namedItem("register-content")!.textContent = content;
         }
@@ -1442,7 +1442,7 @@ export class Renderer {
      * This method reads the content of the NPTP register.
      */
     public async readNPTP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readNPTP(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.NPTP, radix);
         if (this._nptp !== null) {
             this._nptp.children.namedItem("register-content")!.textContent = content;
         }
@@ -1453,7 +1453,7 @@ export class Renderer {
      * This method reads the content of the VMPTR register.
      */
     public async readVMPTR(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readVMPTR(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.VMPTR, radix);
         if (this._vmptr !== null) {
             this._vmptr.children.namedItem("register-content")!.textContent = content;
         }
@@ -1464,7 +1464,7 @@ export class Renderer {
      * This method reads the content of the ESP register.
      */
     public async readESP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readESP(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.ESP, radix);
         if (this._esp !== null) {
             this._esp.children.namedItem("register-content")!.textContent = content;
         }
@@ -1475,7 +1475,7 @@ export class Renderer {
      * This method reads the content of the ITP register.
      */
     public async readITP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readITP(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.ITP, radix);
         if (this._itp !== null) {
             this._itp.children.namedItem("register-content")!.textContent = content;
         }
@@ -1486,7 +1486,7 @@ export class Renderer {
      * This method reads the content of the GPTP register.
      */
     public async readGPTP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readGPTP(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.GPTP, radix);
         if (this._gptp !== null) {
             this._gptp.children.namedItem("register-content")!.textContent = content;
         }
@@ -1497,7 +1497,7 @@ export class Renderer {
      * This method reads the content of the PTP register.
      */
     public async readPTP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readPTP(radix);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.PTP, radix);
         if (this._ptp !== null) {
             this._ptp.children.namedItem("register-content")!.textContent = content;
         }
@@ -1545,8 +1545,8 @@ export class Renderer {
      * This method reads the content of the EIP register.
      */
     public async readEIP(radix: NumberSystem): Promise<void> {
-        const content: string = await this._window.simulator.readEIP(radix);
-        const hexContent: string = await this._window.simulator.readEIP(NumberSystem.HEX);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EIP, radix);
+        const hexContent: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystem.HEX);
         if (this._eip !== null) {
             this._eip.children.namedItem("register-content")!.textContent = content;
             if (this.ramViewFollowEip) {
@@ -1895,7 +1895,7 @@ export class Renderer {
 
         if (addrModeFirstOp === undefined || firstOpType === undefined) {
             return "UNKNOWN";
-        } else if (firstOpType === OperandTypes.NO) {
+        } else if (firstOpType === OperandTypeCodes.NO) {
             return assemblyString;
         }
 
@@ -1905,9 +1905,9 @@ export class Renderer {
             assemblyString += " " + InterruptNumbers[firstOperand];
         } else if (operation === "DEV") {
             assemblyString += " " + DevOperations[firstOperand];
-        } else if (firstOpType === OperandTypes.IMMEDIATE ) {
+        } else if (firstOpType === OperandTypeCodes.IMMEDIATE ) {
             assemblyString += " $0x" + firstOperand.toString(16);
-        } else if (firstOpType === OperandTypes.MEMORY_ADDRESS) {
+        } else if (firstOpType === OperandTypeCodes.MEMORY_ADDRESS) {
             assemblyString += " @0x" + firstOperand.toString(16);
         } else {
             const registerName: string = RegisterNumbers[firstOperand];
@@ -1926,15 +1926,15 @@ export class Renderer {
 
         if (addrModeSecondOp === undefined || secondOpType === undefined) {
             return "UNKNOWN";
-        } else if (secondOpType === OperandTypes.NO) {
+        } else if (secondOpType === OperandTypeCodes.NO) {
             return assemblyString;
         }
 
         const secondOperand = DoubleWord.fromBytes(instructions[8], instructions[9], instructions[10], instructions[11]);
         
-        if (secondOpType === OperandTypes.IMMEDIATE ) {
+        if (secondOpType === OperandTypeCodes.IMMEDIATE ) {
             assemblyString += ", $0x" + secondOperand.toString(16);
-        } else if (secondOpType === OperandTypes.MEMORY_ADDRESS) {
+        } else if (secondOpType === OperandTypeCodes.MEMORY_ADDRESS) {
             assemblyString += ", @0x" + secondOperand.toString(16);
         } else {
             const registerName: string = RegisterNumbers[secondOperand];
