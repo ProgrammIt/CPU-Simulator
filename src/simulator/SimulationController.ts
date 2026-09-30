@@ -13,11 +13,34 @@ import { applicationWindow } from "../main";
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
  */
 export class SimulationController {
+    /**
+     * The main CPU core of the simulator.
+     */
     public readonly core: CPUCore;
+
+    /**
+     * The main memory of the simulator.
+     */
     public readonly mainMemory: RAM;
+
+    /**
+     * The singleton instance of the SimulationController.
+     */
     private static _instance: SimulationController | null = null;
+
+    /**
+     * The assembler instance responsible for translating assembly code into machine code.
+     */
     private _assembler: Assembler;
+
+    /**
+     * Indicates whether an assembly program is currently loaded into the main memory.
+     */
     private _programmLoaded: boolean;
+
+    /**
+     * Stores the mapping of console IDs to their corresponding process IDs.
+     */
     private _consoles: Map<number, number>; // Maps consoleId to processId
 
     /**
