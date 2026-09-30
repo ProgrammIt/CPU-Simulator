@@ -60,6 +60,7 @@ if (process.env.NODE_ENV !== "test") {
 			!app.isPackaged
 		).then(simulator => {
 			registerSimulatorHandlers(simulator);
+			registerGUIHandlers(simulator);
 			applicationWindow.createMenu(applicationWindow.mainWindow!, simulator);
 		}).catch(error => {
 			console.error("Failed to initialize the simulator:", error);
@@ -81,6 +82,17 @@ if (process.env.NODE_ENV !== "test") {
 		if (BrowserWindow.getAllWindows().length === 0) {
 			applicationWindow = new ApplicationWindow(1280, 720, "IhmeCoreX1 Simulator");
 		}
+	});
+}
+
+function registerGUIHandlers(simulator: SimulationController) {
+	ipcMain.removeHandler("createdNewConsole");
+	ipcMain.removeHandler("closedConsole");
+	ipcMain.handle("closedConsole", async (_, consoleId: number) => {
+		simulator.removeConsole(consoleId);
+	});
+	ipcMain.handle("createdNewConsole", async (_, consoleId: number, processId: number) => {
+		simulator.addConsole(consoleId, processId);
 	});
 }
 
