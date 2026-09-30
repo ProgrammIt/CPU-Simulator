@@ -18,6 +18,7 @@ export class SimulationController {
     private static _instance: SimulationController | null = null;
     private _assembler: Assembler;
     private _programmLoaded: boolean;
+    private _consoles: Map<number, number>; // Maps consoleId to processId
 
     /**
      * This class member stores the highest available memory address of physical memory.
@@ -61,8 +62,34 @@ export class SimulationController {
         this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem);
         this._assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
         this._programmLoaded = true;
+        this._consoles = new Map<number, number>();
         this.autoScrollForPageTableEnabled = true;
         this.inDevMode = devMode;
+    }
+
+    /**
+     * Returns a map of console IDs to their corresponding process IDs.
+     * @returns A map where the keys are console IDs and the values are process IDs.
+     */
+    public get consoles(): Map<number, number> {
+        return this._consoles;
+    }
+
+    /**
+     * Adds a new console to the simulator.
+     * @param consoleId The ID of the console to be added.
+     * @param processId The ID of the process associated with the console.
+     */
+    public addConsole(consoleId: number, processId: number): void {
+        this._consoles.set(consoleId, processId);
+    }
+
+    /**
+     * Removes a console from the simulator.
+     * @param consoleId The ID of the console to be removed.
+     */
+    public removeConsole(consoleId: number): void {
+        this._consoles.delete(consoleId);
     }
 
     /**
