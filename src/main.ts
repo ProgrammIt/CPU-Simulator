@@ -10,6 +10,7 @@ import { PageNumber } from './types/binary/PageNumber';
 import { PageTableEntry } from './types/binary/PageTableEntry';
 import { NumberSystems } from './types/enumerations/NumberSystems';
 import { RegisterNames } from './types/enumerations/RegisterNumbers';
+import { FrameNumber } from './types/binary/FrameNumber';
 
 export let applicationWindow: ApplicationWindow;
 
@@ -211,7 +212,7 @@ function registerSimulatorHandlers(simulator: SimulationController) {
 	 * IPC Handler for retrieving all cells from the main memory.
 	 * @returns A map of physical addresses to their corresponding byte values.
 	 */
-	ipcMain.handle("retrieveMainMemoryCells", async (): Promise<Map<DoubleWord, Byte>> => {
+	ipcMain.handle("retrieveMainMemoryCells", async (): Promise< Map<FrameNumber, DataView<ArrayBufferLike>>> => {
 		return simulator.mainMemory.cells;
 	});
 
@@ -228,7 +229,7 @@ function registerSimulatorHandlers(simulator: SimulationController) {
 		let currentPageFrameNumber: PageNumber = firstPageNumberToRead;
 		let currentPhysicalAddressDec: number = fromPhysicalAddressDec;
 		while (currentPhysicalAddressDec <= toPhysicalAddressDec) {
-			const pageTableEntry: PageTableEntry = PageTableEntry.fromDoubleWord(simulator.mainMemory.readDoublewordFrom(DoubleWord.fromNumber(currentPhysicalAddressDec)));
+			const pageTableEntry: PageTableEntry = simulator.mainMemory.readDoublewordFrom(DoubleWord.fromNumber(currentPhysicalAddressDec));
 			tmp.set(currentPageFrameNumber, pageTableEntry);
 			currentPhysicalAddressDec += 4;
 			currentPageFrameNumber++;
@@ -318,29 +319,11 @@ function registerSimulatorHandlers(simulator: SimulationController) {
 	});
 
 	/**
-	 * IPC Handler for disabling auto-scroll for physical RAM.
-	 * @returns A promise that resolves when the operation is complete.
-	 */
-	ipcMain.handle("on_disable_auto_scroll_physical_ram", async (): Promise<void> => {
-		simulator.autoScrollForPhysicalRAMEnabled = false;
-		return;
-	});
-
-	/**
-	 * IPC Handler for enabling auto-scroll for physical RAM.
-	 * @returns A promise that resolves when the operation is complete.
-	 */
-	ipcMain.handle("on_enable_auto_scroll_physical_ram", async (): Promise<void> => {
-		simulator.autoScrollForPhysicalRAMEnabled = true;
-		return;
-	});
-
-	/**
 	 * IPC Handler for disabling auto-scroll for virtual RAM.
 	 * @returns A promise that resolves when the operation is complete.
 	 */
 	ipcMain.handle("on_disable_auto_scroll_virtual_ram", async (): Promise<void> => {
-		simulator.autoScrollForVirtualRAMEnabled = false;
+		simulator.autoScrollForPageTableEnabled = false;
 		return;
 	});
 
@@ -349,7 +332,7 @@ function registerSimulatorHandlers(simulator: SimulationController) {
 	 * @returns A promise that resolves when the operation is complete.
 	 */
 	ipcMain.handle("on_enable_auto_scroll_virtual_ram", async (): Promise<void> => {
-		simulator.autoScrollForVirtualRAMEnabled = true;
+		simulator.autoScrollForPageTableEnabled = true;
 		return;
 	});
 
