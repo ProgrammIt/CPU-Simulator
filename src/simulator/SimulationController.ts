@@ -111,27 +111,47 @@ export class SimulationController {
     /**
      * Returns a map of console IDs to their corresponding process IDs.
      * @returns A map where the keys are console IDs and the values are process IDs.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
      */
     public get consoles(): Map<number, number> {
         return this._consoles;
     }
 
     /**
-     * Adds or opens a new console to the simulator.
+     * Opens a new console by notifying the GUI to create the console window.
      * @param consoleId The ID of the console to be added.
      * @param processId The ID of the process associated with the console.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
      */
     public openConsole(consoleId: number, processId: number): void {
         this._applicationWindow?.mainWindow?.webContents.send("create_console", consoleId);
+    }
+
+    /**
+     * Adds a console to the simulator after GUI has opened it.
+     * @param consoleId The ID of the console to be added.
+     * @param processId The ID of the process associated with the console.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
+     */
+    public addConsole(consoleId: number, processId: number): void {
         this._consoles.set(consoleId, processId);
     }
 
     /**
-     * Removes or closes a console from the simulator.
+     * Closes a console by notifying the GUI to close the specified console window.
      * @param consoleId The ID of the console to be removed.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
      */
     public closeConsole(consoleId: number): void {
         this._applicationWindow?.mainWindow?.webContents.send("close_console", consoleId);
+    }
+
+    /**
+     * Removes a console from the simulator after it has been closed in the GUI.
+     * @param consoleId The ID of the console to be removed.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
+     */
+    public removeConsole(consoleId: number): void {
         this._consoles.delete(consoleId);
     }
 
@@ -144,12 +164,14 @@ export class SimulationController {
     }
 
     /**
-     * This method returns the SimulatorController instance or creates one if not present
-     * @param capacityOfMainMemory
-     * @param pathToLanguageDefinition
-     * @param pathToOSFilesystem
-     * @param [devMode=false] 
-     * @returns 
+     * This method returns the SimulatorController instance or creates one if not present.
+     * @param capacityOfMainMemory The capacity of the main memory.
+     * @param pathToLanguageDefinition The path to the language definition file.
+     * @param pathToOSFilesystem The path to the operating system filesystem.
+     * @param applicationWindow The application window instance.
+     * @param [devMode=false] Whether to enable developer mode.
+     * @returns The SimulatorController instance.
+     * @author Erik Burmester <erik.burmester@nextbeam.net>
      */
     public static async getInstanceOrCreate(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, applicationWindow: ApplicationWindow, devMode: boolean = false): Promise<SimulationController> {
         if (SimulationController._instance === null) {
