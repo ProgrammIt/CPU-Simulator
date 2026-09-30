@@ -12,7 +12,7 @@ import { NumberSystems } from './types/enumerations/NumberSystems';
 import { RegisterNames } from './types/enumerations/RegisterNumbers';
 import { FrameNumber } from './types/binary/FrameNumber';
 
-export let applicationWindow: ApplicationWindow;
+let applicationWindow: ApplicationWindow;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -57,6 +57,7 @@ if (process.env.NODE_ENV !== "test") {
 			DoubleWord.SIZE,
 			pathToLanguageDefinition,
 			pathToOSFilesystem,
+			applicationWindow,
 			!app.isPackaged
 		).then(simulator => {
 			registerSimulatorHandlers(simulator);
@@ -85,14 +86,27 @@ if (process.env.NODE_ENV !== "test") {
 	});
 }
 
+/**
+ * Registers IPC handlers for GUI-related events such as creating and closing consoles.
+ * @param simulator The instance of the SimulationController to register GUI handlers for.
+ */
 function registerGUIHandlers(simulator: SimulationController) {
-	ipcMain.removeHandler("createdNewConsole");
+	/**
+	 * Handles the event when a console was closed in the GUI.
+	 * @author Erik Burmester <erik.burmester@nextbeam.net>
+	 */
 	ipcMain.removeHandler("closedConsole");
-	ipcMain.handle("closedConsole", async (_, consoleId: number) => {
-		simulator.removeConsole(consoleId);
+	ipcMain.handle("closedConsole", (_, consoleId: number) => {
+		simulator.closeConsole(consoleId);
 	});
-	ipcMain.handle("createdNewConsole", async (_, consoleId: number, processId: number) => {
-		simulator.addConsole(consoleId, processId);
+
+	/**
+	 * Handles the event when a new console was created in the GUI.
+	 * @author Erik Burmester <erik.burmester@nextbeam.net>
+	 */
+	ipcMain.removeHandler("createdNewConsole");
+	ipcMain.handle("createdNewConsole", (_, consoleId: number, processId: number) => {
+		simulator.openConsole(consoleId, processId);
 	});
 }
 
