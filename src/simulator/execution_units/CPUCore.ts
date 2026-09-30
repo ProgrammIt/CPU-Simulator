@@ -21,11 +21,11 @@ import { Timer } from "./Timer";
 import { DebugLogger } from "../Logger";
 import { ExceptionError } from "../../types/errors/ExceptionError";
 import { RegisterNumbers } from "../../types/enumerations/RegisterNumbers";
-import { applicationWindow } from "./../../main";
 import { PeriodicTimer } from "./PeriodicTimer";
 import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../../types/binary/VirtualAddress";
 import { InstructionSet } from "../../types/enumerations/InstructionSet";
+import { ApplicationWindow } from "../../ApplicationWindow";
 
 /**
  * This class represents a CPU core which is capable of executing InstructionSet.
@@ -178,13 +178,16 @@ export class CPUCore {
 
     public mainMemory: RAM;
 
+    private readonly _applicationWindow: ApplicationWindow;
+
     /**
      * Constructs an instance of a CPU core.
      * @param mainMemory The main memory of the system.
      * @param processingWidth The maximum number of bits that can be processed in one cycle. Defaults to 32 bits (a doubleword).
-     * @param pathToOSFilesystem 
+     * @param pathToOSFilesystem The path to the operating system's filesystem.
+     * @param applicationWindow The application window instance.
      */
-    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string) {
+    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string, applicationWindow: ApplicationWindow) {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
@@ -204,7 +207,8 @@ export class CPUCore {
         // TODO: Adopt MMU to be able to use different processing widths.
         this.mainMemory = mainMemory;
         this.mmu = new MemoryManagementUnit(this);
-        this.fs = new PassthroughFilesystem(pathToOSFilesystem);
+        this.fs = new PassthroughFilesystem(pathToOSFilesystem, applicationWindow);
+        this._applicationWindow = applicationWindow;
         this.timer = new Timer(this);
         this.periodicTimer = new PeriodicTimer(this);
         this._decodedInstruction = null;
@@ -2939,7 +2943,7 @@ export class CPUCore {
      * @param message The message that gets appended to the log-widget.
      */
     public logToLogger(message: string): void {
-        applicationWindow?.mainWindow?.webContents.send('update_log', message);
+        this._applicationWindow?.mainWindow?.webContents.send('update_log', message);
         DebugLogger.log("  " + message);
     }
 }
