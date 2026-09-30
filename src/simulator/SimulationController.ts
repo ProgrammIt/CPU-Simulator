@@ -260,7 +260,7 @@ export class SimulationController {
 
     /**
      * This method is used to initialize a process and prepare its execution.
-     * @param pathToProgramCode 
+     * @param pathToProgramCode The path to the program code to create a process for.
      */
     public createProcess(pathToProgramCode: string): void {
 
@@ -292,7 +292,7 @@ export class SimulationController {
 
     /**
      * This method is used to assemble a program
-     * @param pathToProgramCode 
+     * @param pathToProgramCode The path to the program code to assemble.
      */
     public assembleProgram(pathToProgramCode: string): void {
         
@@ -314,10 +314,10 @@ export class SimulationController {
     }
 
     /**
-     * This method is used to assemble os code
-     * @param pathToProgramCode 
-     * @param [name=null] 
-     * @param [baseOffeset=0] 
+     * This method is used to assemble os code.
+     * @param pathToProgramCode The path to the OS program code to assemble.
+     * @param [name=null] The name of the output binary file. If null, it will be derived from the input file name.
+     * @param [baseOffeset=0] The base offset to use during assembly.
      */
     public assembleOSCode(pathToProgramCode: string, name: string | null = null, baseOffeset: number = 0): void {
         
