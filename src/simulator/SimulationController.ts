@@ -7,7 +7,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 import { DebugLogger } from "./Logger";
 import { Byte } from "../types/binary/Byte";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
-import { applicationWindow } from "../main";
+import { ApplicationWindow } from "../ApplicationWindow";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
@@ -69,19 +69,34 @@ export class SimulationController {
      */
     public autoScrollForPageTableEnabled: boolean;
 
+    /**
+     * The path to the operating system's filesystem used by the simulator.
+     * @readonly
+     */
     public readonly pathToOSFilesystem: string;
 
+    /**
+     * Indicates whether the simulator is running in development mode.
+     * @readonly
+     */
     public readonly inDevMode: boolean;
+
+    /**
+     * The application window associated with the simulator.
+     * @readonly
+     */
+    private readonly _applicationWindow: ApplicationWindow;
 
     /**
      * Creates a new instance.
      * @param capacityOfMainMemory The initial capacity of the main memory. This value can not be modified after the simulator started.
      * @param pathToLanguageDefinition The path to the language definition file.
-     * @param pathToOSFilesystem The path to the language definition file.
+     * @param pathToOSFilesystem The path to the operating system's filesystem used by the simulator.
+     * @param applicationWindow The application window associated with the simulator.
      * @param [processingWidth=DataSizes.DOUBLEWORD] The processing width of the simulated CPU.
-     * @param [devMode=false] 
+     * @param [devMode=false] Indicates whether the simulator is running in development mode.
      */
-    private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, processingWidth: DataSizes = DataSizes.DOUBLEWORD, devMode: boolean = false) {
+    private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, applicationWindow: ApplicationWindow, processingWidth: DataSizes = DataSizes.DOUBLEWORD, devMode: boolean = false) {
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.pathToOSFilesystem = pathToOSFilesystem;
         this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem);
@@ -90,6 +105,7 @@ export class SimulationController {
         this._consoles = new Map<number, number>();
         this.autoScrollForPageTableEnabled = true;
         this.inDevMode = devMode;
+        this._applicationWindow = applicationWindow;
     }
 
     /**
@@ -101,19 +117,21 @@ export class SimulationController {
     }
 
     /**
-     * Adds a new console to the simulator.
+     * Adds or opens a new console to the simulator.
      * @param consoleId The ID of the console to be added.
      * @param processId The ID of the process associated with the console.
      */
-    public addConsole(consoleId: number, processId: number): void {
+    public openConsole(consoleId: number, processId: number): void {
+        this._applicationWindow?.mainWindow?.webContents.send("create_console", consoleId);
         this._consoles.set(consoleId, processId);
     }
 
     /**
-     * Removes a console from the simulator.
+     * Removes or closes a console from the simulator.
      * @param consoleId The ID of the console to be removed.
      */
-    public removeConsole(consoleId: number): void {
+    public closeConsole(consoleId: number): void {
+        this._applicationWindow?.mainWindow?.webContents.send("close_console", consoleId);
         this._consoles.delete(consoleId);
     }
 
@@ -133,9 +151,9 @@ export class SimulationController {
      * @param [devMode=false] 
      * @returns 
      */
-    public static async getInstanceOrCreate(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, devMode: boolean = false): Promise<SimulationController> {
+    public static async getInstanceOrCreate(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, applicationWindow: ApplicationWindow, devMode: boolean = false): Promise<SimulationController> {
         if (SimulationController._instance === null) {
-            SimulationController._instance = new SimulationController(capacityOfMainMemory, pathToLanguageDefinition, pathToOSFilesystem, DataSizes.DOUBLEWORD, devMode);
+            SimulationController._instance = new SimulationController(capacityOfMainMemory, pathToLanguageDefinition, pathToOSFilesystem, applicationWindow, DataSizes.DOUBLEWORD, devMode);
             await SimulationController._instance.bootKernel();
         }
         return SimulationController._instance;
@@ -224,9 +242,8 @@ export class SimulationController {
 
         this.core.cycle();       
         
-        applicationWindow?.mainWindow?.webContents.send('clear_log');
-
-        applicationWindow?.mainWindow?.webContents.send('update_log', "OS Initialized");
+        this._applicationWindow?.mainWindow?.webContents.send('clear_log');
+        this._applicationWindow?.mainWindow?.webContents.send('update_log', "OS Initialized");
 
         return;
     }
