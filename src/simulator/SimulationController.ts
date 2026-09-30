@@ -7,6 +7,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 import { DebugLogger } from "./Logger";
 import { Byte } from "../types/binary/Byte";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
+import { applicationWindow } from "../main";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
