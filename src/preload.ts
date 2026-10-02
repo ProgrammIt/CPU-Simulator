@@ -8,6 +8,8 @@ import type { Byte } from './types/binary/Byte';
 import type { PageNumber } from './types/binary/PageNumber';
 import type { PageTableEntry } from './types/binary/PageTableEntry';
 import { RegisterNames } from './types/enumerations/RegisterNumbers';
+import { VirtualAddress } from './types/binary/VirtualAddress';
+import { PhysicalAddress } from './types/binary/PhysicalAddress';
 
 declare global {
 	interface Window {
@@ -36,8 +38,11 @@ declare global {
 			onUpdateLog: (callback: (message: string) => void) => void,
 			onHideLog: (callback: () => void) => void,
 			onShowLog: (callback: () => void) => void,
-			openFile: (filePath?: string) => Promise<{ content: string, filePath: string, fileName: string } | null>;
-			saveFile: (content: string, filePath?: string) => Promise<{ success: boolean, filePath: string, fileName: string } | null>;
+			openFile: (filePath?: string) => Promise<{ content: string, filePath: string, fileName: string } | null>,
+			saveFile: (content: string, filePath?: string) => Promise<{ success: boolean, filePath: string, fileName: string } | null>,
+			translateVirtualAddress: (virtualAddress: DoubleWord) => Promise<number>,
+			keyboardInterrupt: (consoleInput: string) => void,
+			findVirtualAddresses: (physicalAddress: PhysicalAddress) => Promise<VirtualAddress[]>,
 		},
 		electron: {
 			getPreloadPath: () => string
