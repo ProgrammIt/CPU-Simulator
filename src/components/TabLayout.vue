@@ -35,8 +35,19 @@ const registerTab = (title: string) => {
   }
 };
 
+const unregisterTab = (title: string) => {
+  const index = tabTitles.value.indexOf(title);
+  if (index !== -1) {
+    tabTitles.value.splice(index, 1);
+  }
+  if (selectedTitle.value === title) {
+    selectedTitle.value = tabTitles.value[0] || '';
+  }
+};
+
 provide('selectedTitle', selectedTitle);
 provide('registerTab', registerTab);
+provide('unregisterTab', unregisterTab);
 </script>
 
 <style scoped lang="css">
