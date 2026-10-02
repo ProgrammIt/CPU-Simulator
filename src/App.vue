@@ -14,12 +14,12 @@
     </header>
     <main>
         <KeepAlive>
-            <TabLayout ref="tabLayout">
+            <TabLayout ref="tabLayoutRef">
                 <Tab title="Simulator">
                     <Simulator />
                 </Tab>
                 <Tab title="Editor">
-                    <CodeEditor :path="pathToLoadedProgram" :file-name="loadedFileName"
+                    <CodeEditorComponent :path="pathToLoadedProgram" :file-name="loadedFileName"
                         :file-content="loadedFileContents" />
                 </Tab>
                 <Tab v-for="tab in dynamicTabs" :key="tab.id" :title="tab.title">
@@ -33,14 +33,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, shallowRef } from 'vue';
 import cycleSvgUrl from './../assets/icons/web/cycle.svg';
-import CodeEditor from './components/CodeEditor.vue';
+import CodeEditorComponent from './components/CodeEditorComponent.vue';
 import Simulator from './components/Simulator.vue';
 import TabLayout from './components/TabLayout.vue';
 import Tab from './components/Tab.vue';
 import ConsoleComponent from './components/ConsoleComponent.vue';
 
 // --- Refs ---
-const tabLayout = ref<InstanceType<typeof TabLayout> | null>(null);
 const dynamicTabs = ref<Array<{
     id: string;
     title: string;
@@ -116,7 +115,7 @@ function handleCreateConsole(consoleId: number, consoleName: string) {
  * @param consoleId The ID of the console that was closed.
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
-function handleClosedConsole(consoleId: number, consoleName: string) {
+function handleCloseConsole(consoleId: number, consoleName: string) {
     removeTab(`${consoleName}`);
     window.simulator.closedConsole(consoleId);
 }
@@ -125,13 +124,11 @@ onMounted(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
     window.addEventListener('keydown', handleGlobalKeydown);
     window.simulator.onCreateConsole(handleCreateConsole);
-    window.simulator.onCloseConsole(handleClosedConsole);
+    window.simulator.onCloseConsole(handleCloseConsole);
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleGlobalKeydown);
-    window.simulator.onCreateConsole(handleCreateConsole);
-    window.simulator.onCloseConsole(handleClosedConsole);
 });
 </script>
 
