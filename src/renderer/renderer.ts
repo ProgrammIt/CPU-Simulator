@@ -1,4 +1,5 @@
 import { DoubleWord } from "../types/binary/DoubleWord";
+import { PageNumber } from "../types/binary/PageNumber";
 import { Byte } from "../types/binary/Byte";
 import { InstructionTypes } from "../types/enumerations/InstructionTypes";
 import { OperandTypeCodes } from "../types/enumerations/OperandTypes";
@@ -9,18 +10,7 @@ import { DevOperations } from "../types/enumerations/DevOperations";
 import { InstructionSet } from "../types/enumerations/InstructionSet";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
-
-/**
- * This enumeration is a duplicate of the one, that can be
- * found in src/types/types.ts. This is intended, as imports
- * are problematic to use in frontend. Maybe there is a solution.
- * @author Erik Burmester <erik.burmester@nextbeam.net>
- */
-export enum NumberSystem {
-    HEX = 16,
-    DEC = 10,
-    BIN = 2,
-}
+import { NumberSystems } from "../types/enumerations/NumberSystems";
 
 /**
  * This class encapsulates the logic needed to initialize and sync the GUI
@@ -65,7 +55,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the EAX register.
      */
-    public dataRepresentationEAX: NumberSystem; // Replace with actual type or import if available
+    public dataRepresentationEAX: NumberSystems; // Replace with actual type or import if available
 
     /**
      * This field stores a reference to the HTMLElement representing the EBX register.
@@ -76,7 +66,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the EBX register.
      */
-    public dataRepresentationEBX: NumberSystem;
+    public dataRepresentationEBX: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the ECX register.
@@ -87,7 +77,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the ECX register.
      */
-    public dataRepresentationECX: NumberSystem;
+    public dataRepresentationECX: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the EDX register.
@@ -98,7 +88,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the EDX register.
      */
-    public dataRepresentationEDX: NumberSystem;
+    public dataRepresentationEDX: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the EIP register.
@@ -109,7 +99,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the EIP register.
      */
-    public dataRepresentationEIP: NumberSystem;
+    public dataRepresentationEIP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the FLAGS register.
@@ -130,7 +120,7 @@ export class Renderer {
      * 
      * This field stores the currently selected representation of the data for the EIR register.
      */
-    public dataRepresentationEIR: NumberSystem;
+    public dataRepresentationEIR: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the NPTP register.
@@ -141,7 +131,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the NPTP register.
      */
-    public dataRepresentationNPTP: NumberSystem;
+    public dataRepresentationNPTP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the VMPTR register.
@@ -152,7 +142,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the VMPTR register.
      */
-    public dataRepresentationVMPTR: NumberSystem;
+    public dataRepresentationVMPTR: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the ESP register.
@@ -163,7 +153,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the ESP register.
      */
-    public dataRepresentationESP: NumberSystem;
+    public dataRepresentationESP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the ITP register.
@@ -174,7 +164,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the ITP register.
      */
-    public dataRepresentationITP: NumberSystem;
+    public dataRepresentationITP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the GPTP register.
@@ -185,7 +175,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the GPTP register.
      */
-    public dataRepresentationGPTP: NumberSystem;
+    public dataRepresentationGPTP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the PTP register.
@@ -196,7 +186,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the data for the PTP register.
      */
-    public dataRepresentationPTP: NumberSystem;
+    public dataRepresentationPTP: NumberSystems;
 
     /**
      * This field stores a reference to the HTMLElement representing the RAM search widget.
@@ -207,7 +197,7 @@ export class Renderer {
     /**
      * This field stores the currently selected representation of the memory address for the RAM search.
      */
-    public dataRepresentationRAMSearch: NumberSystem;
+    public dataRepresentationRAMSearch: NumberSystems;
 
     /**
      * This field is used to observe the visibility of the GUI elements representing Page Table entries.
@@ -279,7 +269,7 @@ export class Renderer {
                     if (nextHigherPageNumberDec >= (Math.pow(2, 32) / numberAddressesPerPageDec) - 1) {
                         return;
                     }
-                    const pageTableEntries: Map<number, number> = await this._window.mainMemory.readPageTableEntries(nextHigherPageNumberDec, nextHigherPageNumberDec);
+                    const pageTableEntries: Map<number, number> = await this._window.simulator.readPageTableEntries(PageNumber.fromNumber(nextHigherPageNumberDec), PageNumber.fromNumber(nextHigherPageNumberDec));
                     for (const [pageNumber, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
                         const presentFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(0, 1) === "1") ? true : false;
                         const writableFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(1, 2) === "1") ? true : false;
@@ -315,7 +305,7 @@ export class Renderer {
                     if (nextLowerPageNumberDec < 0) {
                         return;
                     }
-                    const pageTableEntries: Map<number, number> = await this._window.mainMemory.readPageTableEntries(nextLowerPageNumberDec, nextLowerPageNumberDec);
+                    const pageTableEntries: Map<number, number> = await this._window.simulator.readPageTableEntries(PageNumber.fromNumber(nextLowerPageNumberDec), PageNumber.fromNumber(nextLowerPageNumberDec));
                     for (const [pageNumber, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
                         const presentFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(0, 1) === "1") ? true : false;
                         const writableFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(1, 2) === "1") ? true : false;
@@ -362,13 +352,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationEAX = NumberSystem.DEC;
+                this.dataRepresentationEAX = NumberSystems.DEC;
                 this.readEAX(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationEAX = NumberSystem.HEX;
+                this.dataRepresentationEAX = NumberSystems.HEX;
                 this.readEAX(16);
             } else {
-                this.dataRepresentationEAX = NumberSystem.BIN;
+                this.dataRepresentationEAX = NumberSystems.BIN;
                 this.readEAX(2);
             }
         }
@@ -389,13 +379,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationEBX = NumberSystem.DEC;
+                this.dataRepresentationEBX = NumberSystems.DEC;
                 this.readEBX(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationEBX = NumberSystem.HEX;
+                this.dataRepresentationEBX = NumberSystems.HEX;
                 this.readEBX(16);
             } else {
-                this.dataRepresentationEBX = NumberSystem.BIN;
+                this.dataRepresentationEBX = NumberSystems.BIN;
                 this.readEBX(2);
             }
         }
@@ -416,13 +406,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationECX = NumberSystem.DEC;
+                this.dataRepresentationECX = NumberSystems.DEC;
                 this.readECX(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationECX = NumberSystem.HEX;
+                this.dataRepresentationECX = NumberSystems.HEX;
                 this.readECX(16);
             } else {
-                this.dataRepresentationECX = NumberSystem.BIN;
+                this.dataRepresentationECX = NumberSystems.BIN;
                 this.readECX(2);
             }
         }
@@ -443,13 +433,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationECX = NumberSystem.DEC;
+                this.dataRepresentationECX = NumberSystems.DEC;
                 this.readEDX(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationECX = NumberSystem.HEX;
+                this.dataRepresentationECX = NumberSystems.HEX;
                 this.readEDX(16);
             } else {
-                this.dataRepresentationECX = NumberSystem.BIN;
+                this.dataRepresentationECX = NumberSystems.BIN;
                 this.readEDX(2);
             }
         }
@@ -471,13 +461,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationEIP = NumberSystem.DEC;
+                this.dataRepresentationEIP = NumberSystems.DEC;
                 this.readEIP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationEIP = NumberSystem.HEX;
+                this.dataRepresentationEIP = NumberSystems.HEX;
                 this.readEIP(16);
             } else {
-                this.dataRepresentationEIP = NumberSystem.BIN;
+                this.dataRepresentationEIP = NumberSystems.BIN;
                 this.readEIP(2);
             }
         }
@@ -522,13 +512,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationNPTP = NumberSystem.DEC;
+                this.dataRepresentationNPTP = NumberSystems.DEC;
                 this.readNPTP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationNPTP = NumberSystem.HEX;
+                this.dataRepresentationNPTP = NumberSystems.HEX;
                 this.readNPTP(16);
             } else {
-                this.dataRepresentationNPTP = NumberSystem.BIN;
+                this.dataRepresentationNPTP = NumberSystems.BIN;
                 this.readNPTP(2);
             }
         }
@@ -549,13 +539,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationVMPTR = NumberSystem.DEC;
+                this.dataRepresentationVMPTR = NumberSystems.DEC;
                 this.readVMPTR(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationVMPTR = NumberSystem.HEX;
+                this.dataRepresentationVMPTR = NumberSystems.HEX;
                 this.readVMPTR(16);
             } else {
-                this.dataRepresentationVMPTR = NumberSystem.BIN;
+                this.dataRepresentationVMPTR = NumberSystems.BIN;
                 this.readVMPTR(2);
             }
         }
@@ -576,13 +566,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationESP = NumberSystem.DEC;
+                this.dataRepresentationESP = NumberSystems.DEC;
                 this.readESP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationESP = NumberSystem.HEX;
+                this.dataRepresentationESP = NumberSystems.HEX;
                 this.readESP(16);
             } else {
-                this.dataRepresentationESP = NumberSystem.BIN;
+                this.dataRepresentationESP = NumberSystems.BIN;
                 this.readESP(2);
             }
         }
@@ -603,13 +593,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationITP = NumberSystem.DEC;
+                this.dataRepresentationITP = NumberSystems.DEC;
                 this.readITP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationITP = NumberSystem.HEX;
+                this.dataRepresentationITP = NumberSystems.HEX;
                 this.readITP(16);
             } else {
-                this.dataRepresentationITP = NumberSystem.BIN;
+                this.dataRepresentationITP = NumberSystems.BIN;
                 this.readITP(2);
             }
         }
@@ -630,13 +620,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationGPTP = NumberSystem.DEC;
+                this.dataRepresentationGPTP = NumberSystems.DEC;
                 this.readGPTP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationGPTP = NumberSystem.HEX;
+                this.dataRepresentationGPTP = NumberSystems.HEX;
                 this.readGPTP(16);
             } else {
-                this.dataRepresentationGPTP = NumberSystem.BIN;
+                this.dataRepresentationGPTP = NumberSystems.BIN;
                 this.readGPTP(2);
             }
         }
@@ -657,13 +647,13 @@ export class Renderer {
             if (currentRepresentation === demandedRepresentation) {
                 return;
             } else if (demandedRepresentation === "DECIMAL") {
-                this.dataRepresentationPTP = NumberSystem.DEC;
+                this.dataRepresentationPTP = NumberSystems.DEC;
                 this.readPTP(10);
             } else if (demandedRepresentation === "HEXADECIMAL") {
-                this.dataRepresentationPTP = NumberSystem.HEX;
+                this.dataRepresentationPTP = NumberSystems.HEX;
                 this.readPTP(16);
             } else {
-                this.dataRepresentationPTP = NumberSystem.BIN;
+                this.dataRepresentationPTP = NumberSystems.BIN;
                 this.readPTP(2);
             }
         }
@@ -846,7 +836,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.EAX, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EAX, NumberSystems.HEX);
             if (this._eax !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -863,7 +853,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.EBX, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EBX, NumberSystems.HEX);
             if (this._ebx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -880,7 +870,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.ECX, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ECX, NumberSystems.HEX);
             if (this._ecx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -897,7 +887,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.EDX, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EDX, NumberSystems.HEX);
             if (this._edx !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -914,7 +904,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.ESP, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ESP, NumberSystems.HEX);
             if (this._esp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -931,7 +921,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystems.HEX);
             if (this._eip !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -948,7 +938,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.ITP, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.ITP, NumberSystems.HEX);
             if (this._itp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -965,7 +955,7 @@ export class Renderer {
         const parent: HTMLElement | null = target.parentElement;
         if (parent !== null) {
             if (target.getAttribute("name") === "register-select-representation") return;
-            const content: string = await this._window.simulator.readRegister(RegisterNames.PTP, NumberSystem.HEX);
+            const content: string = await this._window.simulator.readRegister(RegisterNames.PTP, NumberSystems.HEX);
             if (this._ptp !== null) {
                 this.highlightRamElement(Number(content));
             }
@@ -1024,32 +1014,32 @@ export class Renderer {
     public constructor(document: Document, window: Window & typeof globalThis) {
         this._document = document;
         this._eax = document.getElementById("eax");
-        this.dataRepresentationEAX = NumberSystem.BIN;
+        this.dataRepresentationEAX = NumberSystems.BIN;
         this._ebx = document.getElementById("ebx");
-        this.dataRepresentationEBX = NumberSystem.BIN;
+        this.dataRepresentationEBX = NumberSystems.BIN;
         this._ecx = document.getElementById("ecx");
-        this.dataRepresentationECX = NumberSystem.BIN;
+        this.dataRepresentationECX = NumberSystems.BIN;
         this._edx = document.getElementById("edx");
-        this.dataRepresentationEDX = NumberSystem.BIN;
+        this.dataRepresentationEDX = NumberSystems.BIN;
         this._flags = document.getElementById("flags");
         this._eip = document.getElementById("eip");
-        this.dataRepresentationEIP = NumberSystem.BIN;
+        this.dataRepresentationEIP = NumberSystems.BIN;
         this._eir = document.getElementById("eir");
-        this.dataRepresentationEIR = NumberSystem.BIN;
+        this.dataRepresentationEIR = NumberSystems.BIN;
         this._esp = document.getElementById("esp");
-        this.dataRepresentationESP = NumberSystem.BIN;
+        this.dataRepresentationESP = NumberSystems.BIN;
         this._gptp = document.getElementById("gptp");
-        this.dataRepresentationGPTP = NumberSystem.BIN;
+        this.dataRepresentationGPTP = NumberSystems.BIN;
         this._itp = document.getElementById("itp");
-        this.dataRepresentationITP = NumberSystem.BIN;
+        this.dataRepresentationITP = NumberSystems.BIN;
         this._nptp = document.getElementById("nptp");
-        this.dataRepresentationNPTP = NumberSystem.BIN;
+        this.dataRepresentationNPTP = NumberSystems.BIN;
         this._ptp = document.getElementById("ptp");
-        this.dataRepresentationPTP = NumberSystem.BIN;
+        this.dataRepresentationPTP = NumberSystems.BIN;
         this._vmptr = document.getElementById("vmptr");
-        this.dataRepresentationVMPTR = NumberSystem.BIN;
+        this.dataRepresentationVMPTR = NumberSystems.BIN;
         this._ramSearch = document.getElementById("ram-search");
-        this.dataRepresentationRAMSearch = NumberSystem.HEX;
+        this.dataRepresentationRAMSearch = NumberSystems.HEX;
         this._pageTableObserver = new IntersectionObserver(this._pageTableObserverCallback, {
             root: null,             // Viewport is root element.
             rootMargin: "0px",      // Margin for root element.
@@ -1099,7 +1089,7 @@ export class Renderer {
             console.addEventListener("keyup", this.onKeyUpConsole);
         }
     }
-
+    
     /**
      * This method registers all the listener for the RAM-Cell search-module
      */
@@ -1288,7 +1278,7 @@ export class Renderer {
             this._listOfVisiblePageTableEntries = new Array<Element>();
         }
         const pageTableEntries: Map<number, number> =
-            await this._window.mainMemory.readPageTableEntries(firstPageNumberToRead, lastPageNumberToRead);
+            await this._window.simulator.readPageTableEntries(PageNumber.fromNumber(firstPageNumberToRead), PageNumber.fromNumber(lastPageNumberToRead));
         for (const [pageNumber, pageTableEntry] of Array.from(pageTableEntries).reverse()) {
             const presentFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(0, 1) === "1") ? true : false;
             const writableFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(1, 2) === "1") ? true : false;
@@ -1335,7 +1325,7 @@ export class Renderer {
         // Read physical memory address from the first element, which should have the highest visible memory adress.
         const lastPageNumberToRead: number = parseInt(this._listOfVisiblePageTableEntries.at(0)!.getAttribute("data-page-number")!);
         const ramCells: Map<number, number> =
-            await this._window.mainMemory.readPageTableEntries(firstPageNumberToRead, lastPageNumberToRead);
+            await this._window.simulator.readPageTableEntries(PageNumber.fromNumber(firstPageNumberToRead), PageNumber.fromNumber(lastPageNumberToRead));
         for (const [pageNumber, pageTableEntry] of Array.from(ramCells).reverse()) {
             const presentFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(0, 1) === "1") ? true : false;
             const writableFlag: boolean = (pageTableEntry.toString(2).padStart(32, "0").slice(1, 2) === "1") ? true : false;
@@ -1366,7 +1356,7 @@ export class Renderer {
     /**
      * This method reads the content of the EAX register.
      */
-    public async readEAX(radix: NumberSystem): Promise<void> {
+    public async readEAX(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.EAX, radix);
         if (this._eax !== null) {
             this._eax.children.namedItem("register-content")!.textContent = content;
@@ -1377,7 +1367,7 @@ export class Renderer {
     /**
      * This method reads the content of the EBX register.
      */
-    public async readEBX(radix: NumberSystem): Promise<void> {
+    public async readEBX(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.EBX, radix);
         if (this._ebx !== null) {
             this._ebx.children.namedItem("register-content")!.textContent = content;
@@ -1388,7 +1378,7 @@ export class Renderer {
     /**
      * This method reads the content of the ECX register.
      */
-    public async readECX(radix: NumberSystem): Promise<void> {
+    public async readECX(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.ECX, radix);
         if (this._ecx !== null) {
             this._ecx.children.namedItem("register-content")!.textContent = content;
@@ -1399,7 +1389,7 @@ export class Renderer {
     /**
      * This method reads the content of the ECX register.
      */
-    public async readEDX(radix: NumberSystem): Promise<void> {
+    public async readEDX(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.EDX, radix);
         if (this._edx !== null) {
             this._edx.children.namedItem("register-content")!.textContent = content;
@@ -1411,7 +1401,7 @@ export class Renderer {
      * This method reads the content of the FLAGS register.
      */
     public async readFLAGS(): Promise<void> {
-        const content: string = await this._window.simulator.readRegister(RegisterNames.FLAGS, NumberSystem.BIN);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.FLAGS, NumberSystems.BIN);
         if (this._flags !== null) {
             this._flags.children.namedItem("register-content")!.textContent = content;
         }
@@ -1431,7 +1421,7 @@ export class Renderer {
      * This method reads the content of the EIR register.
      */
     public async readEIR(): Promise<void> {
-        const content: string = await this._window.simulator.readRegister(RegisterNames.EIR, NumberSystem.BIN);
+        const content: string = await this._window.simulator.readRegister(RegisterNames.EIR, NumberSystems.BIN);
         if (this._eir !== null) {
             this._eir.children.namedItem("register-content")!.textContent = content;
         }
@@ -1441,7 +1431,7 @@ export class Renderer {
     /**
      * This method reads the content of the NPTP register.
      */
-    public async readNPTP(radix: NumberSystem): Promise<void> {
+    public async readNPTP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.NPTP, radix);
         if (this._nptp !== null) {
             this._nptp.children.namedItem("register-content")!.textContent = content;
@@ -1452,7 +1442,7 @@ export class Renderer {
     /**
      * This method reads the content of the VMPTR register.
      */
-    public async readVMPTR(radix: NumberSystem): Promise<void> {
+    public async readVMPTR(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.VMPTR, radix);
         if (this._vmptr !== null) {
             this._vmptr.children.namedItem("register-content")!.textContent = content;
@@ -1463,7 +1453,7 @@ export class Renderer {
     /**
      * This method reads the content of the ESP register.
      */
-    public async readESP(radix: NumberSystem): Promise<void> {
+    public async readESP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.ESP, radix);
         if (this._esp !== null) {
             this._esp.children.namedItem("register-content")!.textContent = content;
@@ -1474,7 +1464,7 @@ export class Renderer {
     /**
      * This method reads the content of the ITP register.
      */
-    public async readITP(radix: NumberSystem): Promise<void> {
+    public async readITP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.ITP, radix);
         if (this._itp !== null) {
             this._itp.children.namedItem("register-content")!.textContent = content;
@@ -1485,7 +1475,7 @@ export class Renderer {
     /**
      * This method reads the content of the GPTP register.
      */
-    public async readGPTP(radix: NumberSystem): Promise<void> {
+    public async readGPTP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.GPTP, radix);
         if (this._gptp !== null) {
             this._gptp.children.namedItem("register-content")!.textContent = content;
@@ -1496,7 +1486,7 @@ export class Renderer {
     /**
      * This method reads the content of the PTP register.
      */
-    public async readPTP(radix: NumberSystem): Promise<void> {
+    public async readPTP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.PTP, radix);
         if (this._ptp !== null) {
             this._ptp.children.namedItem("register-content")!.textContent = content;
@@ -1517,7 +1507,7 @@ export class Renderer {
         
         let physicalAddress = targetAddress;
         if (isVirtualAddress) {
-            physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(Number(targetAddress)));
+            physicalAddress = await this._window.simulator.translateVirtualAddress(DoubleWord.fromNumber(Number(targetAddress)));
         }
 
         const blocksBefore: number = this.ramDataRepresentation === "UTF-8" ? 5 : Math.min(5, Math.floor(physicalAddress / this.ramBlockSize));
@@ -1544,9 +1534,9 @@ export class Renderer {
     /**
      * This method reads the content of the EIP register.
      */
-    public async readEIP(radix: NumberSystem): Promise<void> {
+    public async readEIP(radix: NumberSystems): Promise<void> {
         const content: string = await this._window.simulator.readRegister(RegisterNames.EIP, radix);
-        const hexContent: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystem.HEX);
+        const hexContent: string = await this._window.simulator.readRegister(RegisterNames.EIP, NumberSystems.HEX);
         if (this._eip !== null) {
             this._eip.children.namedItem("register-content")!.textContent = content;
             if (this.ramViewFollowEip) {
@@ -1564,9 +1554,7 @@ export class Renderer {
             alert("No programm is currently loaded!");
             return;
         }
-        if (!await this._window.simulator.nextCycle()) {
-            //alert("Programm finished execution.");
-        }
+        await this._window.simulator.nextCycle();
         // TODO: Fix bug!
         // await this.reloadPageTableView();
         await this.readEAX(this.dataRepresentationEAX);
@@ -1669,7 +1657,7 @@ export class Renderer {
         let physicalAddressColumn = tableRow.insertCell();
         let virtualAddressColumn = tableRow.insertCell();
 
-        const ramCells: Map<number, number> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
+        const ramCells: Map<number, number> = await this._window.simulator.readRangeFromPhysicalMemory(DoubleWord.fromNumber(physicalAddressStart), DoubleWord.fromNumber(physicalAddressEnd));
 
         for (const [index,[physicalAddress, ramCellContent]] of Array.from(ramCells).entries()) {
             //Create Byte cells in the row and fill with data.
@@ -1721,7 +1709,7 @@ export class Renderer {
     public async createRamViewRowsUtf8(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement, targetAddress: number = 0): Promise<number> {
         const masks = [0b1000_0000, 0b1110_0000, 0b1111_0000, 0b1111_1000];
         const templates = [0b0000_0000, 0b1100_0000, 0b1110_0000, 0b1111_0000];
-        const ramCells: Map<number, number> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
+        const ramCells: Map<number, number> = await this._window.simulator.readRangeFromPhysicalMemory(DoubleWord.fromNumber(physicalAddressStart), DoubleWord.fromNumber(physicalAddressEnd));
         const ramContent = Uint8Array.from(ramCells.values());
         const utf8decoder = new TextDecoder("UTF-8");
         let targetAddressIndex:number = 0;
@@ -1789,7 +1777,7 @@ export class Renderer {
      * @param ramTableBody The table body element that is used to display the RAM view.
      */
     public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement): Promise<void> {
-        const ramCells: Map<number, Byte> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
+        const ramCells: Map<number, Byte> = await this._window.simulator.readRangeFromPhysicalMemory(DoubleWord.fromNumber(physicalAddressStart), DoubleWord.fromNumber(physicalAddressEnd));
         const ramContent: Array<Byte> = Array.from(ramCells.values());
         for (let i = 0; i < ramContent.length;) {
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
@@ -1959,7 +1947,7 @@ export class Renderer {
     public async reverseMemoryMapSearch(physicalAddress: number): Promise<VirtualAddress[]> {
         const kernelSpaceStart: number = 0xC0000000;
         const kernelSpaceEnd: number = 0xFFFFFFFF;
-        const virtualAddresses: VirtualAddress[] = await this._window.mainMemory.findVirtualAddresses(PhysicalAddress.fromNumber(physicalAddress));
+        const virtualAddresses: VirtualAddress[] = await this._window.simulator.findVirtualAddresses(PhysicalAddress.fromNumber(physicalAddress));
         if (physicalAddress <= kernelSpaceEnd && physicalAddress >= kernelSpaceStart) {
             virtualAddresses.push(VirtualAddress.fromNumber(physicalAddress));
         }
