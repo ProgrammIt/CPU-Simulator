@@ -4,7 +4,7 @@
         <section class="registers">
             <h1 class="header sticky-top">Registers</h1>
             <div class="grid">
-                <RegisterWidget v-for="reg in registers" :key="reg.name" :register-id="reg.id"
+                <RegisterComponent v-for="reg in registers" :key="reg.name" :register-id="reg.id"
                     :name="reg.name as RegisterNames" :subtitle="reg.subtitle" :content="reg.content"
                     :hidden="reg.hidden" :show-select="reg.showSelect" :loading="registersLoading"
                     :radix="reg.representation" @representation-change="handleRegisterRepresentationChange" />
@@ -14,21 +14,21 @@
         <!-- Virtual RAM -->
         <section class="virtual-ram">
             <h1 class="header sticky-top">Virtual RAM</h1>
-            <RAMView ref="virtualRAMRef" type="virtual" :auto-scroll-enabled="autoScrollForVirtualRAMEnabled"
+            <RAMComponent ref="virtualRAMRef" type="virtual" :auto-scroll-enabled="autoScrollForVirtualRAMEnabled"
                 :program-loaded="isProgramLoaded" />
         </section>
 
         <!-- Physical RAM -->
         <section class="physical-ram">
             <h1 class="header sticky-top">Physical RAM</h1>
-            <RAMView ref="physicalRAMRef" type="physical" :auto-scroll-enabled="autoScrollForPhysicalRAMEnabled"
+            <RAMComponent ref="physicalRAMRef" type="physical" :auto-scroll-enabled="autoScrollForPhysicalRAMEnabled"
                 :program-loaded="isProgramLoaded" />
         </section>
     </div>
 
     <!-- Log output & RAM Search -->
     <div class="output">
-        <LogPanel ref="logPanelRef" :visible="logVisible" />
+        <LogPanelComponent ref="logPanelRef" :visible="logVisible" />
 
         <div class="search-module widget" id="ram-search">
             <div class="lg-text">RAM-Cell Search</div>
@@ -44,11 +44,12 @@
 </template>
 
 <script lang="ts" setup>
+import RegisterComponent from './RegisterComponent.vue';
 import { onMounted, onUnmounted, reactive, ref } from 'vue';
 import { NumberSystems } from '../types/enumerations/NumberSystems';
 import { RegisterNames } from '../types/enumerations/RegisterNumbers';
-import RAMWidget from './RAMWidget.vue';
-import LogPanel from './LogPanel.vue';
+import RAMComponent from './RAMComponent.vue';
+import LogPanelComponent from './LogPanelComponent.vue';
 
 // --- Search locations ---
 enum RAMSearchLocation { PHYSICAL = 'PHYSICAL', VIRTUAL = 'VIRTUAL' }
@@ -60,9 +61,9 @@ interface RegisterDef {
 }
 
 const isProgramLoaded = ref(false);
-const virtualRAMRef = ref<InstanceType<typeof RAMWidget> | null>(null);
-const physicalRAMRef = ref<InstanceType<typeof RAMWidget> | null>(null);
-const logPanelRef = ref<InstanceType<typeof LogPanel> | null>(null);
+const virtualRAMRef = ref<InstanceType<typeof RAMComponent> | null>(null);
+const physicalRAMRef = ref<InstanceType<typeof RAMComponent> | null>(null);
+const logPanelRef = ref<InstanceType<typeof LogPanelComponent> | null>(null);
 const autoScrollForPhysicalRAMEnabled = ref(true);
 const autoScrollForVirtualRAMEnabled = ref(true);
 const logVisible = ref(true);
