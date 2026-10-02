@@ -1,29 +1,75 @@
 <template>
-    <div class="tab-wrapper">
-        <slot v-for="(tab, index) in $slots.default" :key="index" class="tab-content"></slot>
+    <div class="tabs-container">
+        <!-- Tab navigation -->
+        <ul class="tabs-nav">
+            <li
+                v-for="title in tabTitles"
+                :key="title"
+                :class="{ active: title === selectedTitle }"
+                @click="selectedTitle = title"
+                class="tab-btn"
+            >
+                {{ title }}
+            </li>
+        </ul>
+        
+        <!-- Tab contents -->
+        <div class="tab-wrapper">
+            <slot />
+        </div>
     </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, provide } from 'vue';
 
-export default defineComponent({
-    name: 'TabLayout',
-});
+const tabTitles = ref(Array<string>());
+const selectedTitle = ref('');
+
+const registerTab = (title: string) => {
+  if (!tabTitles.value.includes(title)) {
+    tabTitles.value.push(title);
+  }
+  if (!selectedTitle.value) {
+    selectedTitle.value = title;
+  }
+};
+
+provide('selectedTitle', selectedTitle);
+provide('registerTab', registerTab);
 </script>
 
-<style scoped>
-.tab-wrapper {
-    height: 100%;
+<style scoped lang="css">
+.tabs-nav {
     display: flex;
-    flex-direction: column;
+    gap: 2px;
+    padding: 4px 4px 0 4px;
+    border-bottom: 1px solid #333;
+    list-style: none;
 }
 
-.tab-content {
-    display: flex;
-    flex-direction: column;
+.tab-btn {
+    padding: 6px 16px;
+    background-color: var(--background-200);
+    color: #888;
+    border: none;
+    border-radius: var(--br-small) var(--br-small) 0 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tab-btn:hover {
+    background-color: var(--background-100);
+    color: var(--text-950);
+}
+
+.tab-btn.active {
+    background-color: var(--background-100);
+    color: var(--text-950);
+    border-top: 2px solid rgba(234, 115, 23, 0.8);
+}
+
+.tab-wrapper {
     height: 100%;
-    gap: 1rem;
-    overflow: hidden;
 }
 </style>
