@@ -323,41 +323,11 @@ export class Assembler {
 	private locateSymbols(lines: Map<number, string>) : void {
 		for (const [lineNo, line] of lines.entries()) {
 
-			if (line.match(new RegExp(this.languageDefinition.alias_formats.declarationBinary, "gim"))) {
-				const regexExp = new RegExp(this.languageDefinition.alias_formats.declarationBinary, "gim");
-				const regexMatch = regexExp.exec(line);
-				if (regexMatch !== null) {
-					this.aliases.set(regexMatch[1], this.encodeBinaryValue(regexMatch[2]));
-					lines.delete(lineNo);
-				}
-				continue;
-			}
-			
-			if (line.match(new RegExp(this.languageDefinition.alias_formats.declarationDecimal, "gim"))) {
-				const regexExp = new RegExp(this.languageDefinition.alias_formats.declarationDecimal, "gim");
-				const	regexMatch = regexExp.exec(line);
-				if (regexMatch !== null) {
-					this.aliases.set(regexMatch[1], this.encodeDecimalValue(regexMatch[2]));
-					lines.delete(lineNo);
-				}
-				continue;
-			} 
-			
-			if (line.match(new RegExp(this.languageDefinition.alias_formats.declarationHexadecimal, "gim"))) {
-				const regexExp = new RegExp(this.languageDefinition.alias_formats.declarationHexadecimal, "gim");
-				const	regexMatch = regexExp.exec(line);
-				if (regexMatch !== null) {
-					this.aliases.set(regexMatch[1], this.encodeHexadecimalValue(regexMatch[2]));
-					lines.delete(lineNo);
-				}
-				continue;
-			}
-
 			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationBinary, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationBinary, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					this.constants.set(regexMatch[1], [this.encodeBinaryValue(regexMatch[2])]);
+					this.aliases.set(regexMatch[1], this.encodeBinaryValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
 				continue;
@@ -367,7 +337,7 @@ export class Assembler {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationDecimal, "gim");
 				const	regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					this.constants.set(regexMatch[1], [this.encodeDecimalValue(regexMatch[2])]);
+					this.aliases.set(regexMatch[1], this.encodeDecimalValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
 				continue;
@@ -377,7 +347,7 @@ export class Assembler {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationHexadecimal, "gim");
 				const	regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					this.constants.set(regexMatch[1], [this.encodeHexadecimalValue(regexMatch[2])]);
+					this.aliases.set(regexMatch[1], this.encodeHexadecimalValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
 				continue;

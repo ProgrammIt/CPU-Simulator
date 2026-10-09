@@ -16,13 +16,6 @@ export interface AssemblyLanguageDefinition {
         usage: string;
     };
 
-    alias_formats: {
-        declarationDecimal: string;
-        declarationHexadecimal: string;
-        declarationBinary: string;
-        usage: string;
-    };
-
     comment_format: string;
     include_format: string;
     

@@ -2298,10 +2298,11 @@ export class CPUCore {
         const value: DoubleWord = this.mmu.readDoublewordFrom(this.esp.content, false);
 
         switch (target.type) {
-            case EncodedOperandTypes.MEMORY_ADDRESS:
+            case EncodedOperandTypes.MEMORY_ADDRESS: {
                 const address: DoubleWord = target.value;
                 this.mmu.writeDoublewordTo(address, value, false);
                 break;
+            }
             case EncodedOperandTypes.REGISTER_DIRECT:
             case EncodedOperandTypes.REGISTER_INDIRECT:
                 this.writeRegister(value, target);

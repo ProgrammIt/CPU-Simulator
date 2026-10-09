@@ -58,9 +58,7 @@ INT $0x80
 `;
 
 
-        const output = `.CONST CONSTANT_1 1952805748
-.CONST CONSTANT_2 544437362
-.CONST CONSTANT_3 1768843008
+        const output = `.CONST RO_DATA_CONTENT "test string"
 MOV $0x64, %EAX
 SUB $0x1, %EAX
 CMP $0x0, %EAX

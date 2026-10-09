@@ -13,8 +13,21 @@ export function disassembleProgram(program: DoubleWord[]): string {
 
     const metadata: ProgramMetadata = ProgramMetadata.fromFileArray(program);
 
+    let roDataSegmentContent = "";
+
     for (let i = 0; i < ProgramMetadata.getRoDataSegmentSize(metadata) / DoubleWord.NUMBER_OF_BYTES; i++) {
-        disassembledCode += ".CONST CONSTANT_" + (i + 1) + " " + program[ProgramMetadata.getRoDataSegmentFileOffset(metadata) / DoubleWord.NUMBER_OF_BYTES + i] + "\n";
+
+        const value = program[ProgramMetadata.getRoDataSegmentFileOffset(metadata) / DoubleWord.NUMBER_OF_BYTES + i];
+        roDataSegmentContent += String.fromCharCode(
+            value >>> 24,
+            value >>> 16 & 255,
+            value >>> 8 & 255,
+            value & 255
+        );
+    }
+
+    if (roDataSegmentContent !== "") {
+        disassembledCode += ".CONST RO_DATA_CONTENT \"" + roDataSegmentContent.replace(/\0+$/, "") + "\"\n";
     }
 
     for (let i = 0; i < ProgramMetadata.getDataSegmentSize(metadata) / DoubleWord.NUMBER_OF_BYTES; i++) {
