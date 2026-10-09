@@ -1,10 +1,3 @@
----
-title: Developers
-group: Documents
-category: Guides
-children:
----
-
 > 🚧! Under construction ! 🚧 This document is subject to changes.
 
 # Documentation for Developers

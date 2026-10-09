@@ -21,9 +21,9 @@ export class Instruction {
 
 	/**
 	 * Constructs a new instance from the given arguments.
-	 * @param type The instructions type.
 	 * @param instruction The instruction.
-	 * @param operands The instructions operands.
+	 * @param operand1 The first instructions operands.
+	 * @param operand2 The second instructions operands.
 	 */
     public constructor(instruction: OpCode, operand1: InstructionOperand | null, operand2: InstructionOperand | null) {
         this.instruction = instruction;

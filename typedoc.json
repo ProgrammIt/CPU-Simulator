@@ -7,7 +7,7 @@
         },
     ],
     "projectDocuments": [
-        "docs/static/*.md"
+        "documentation/*.md"
     ],
     "basePath": "./",
     "hostedBaseUrl": "https://programmit.github.io/CPU-Simulator/html",

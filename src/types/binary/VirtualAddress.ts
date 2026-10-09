@@ -22,7 +22,7 @@ export namespace VirtualAddress {
 
     /**
      * This method gets the PageNumber from a number.
-     * @param number 
+     * @param virtualAddress 
      * @returns
      */
     export function getPageNumber(virtualAddress: VirtualAddress): PageNumber {
