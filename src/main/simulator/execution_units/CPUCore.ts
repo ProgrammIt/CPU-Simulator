@@ -190,11 +190,6 @@ export class CPUCore {
     public executionStepping: ProgramExecutionStepping;
 
     /**
-     * This field is used to remember if the simulator already stopped on the previous breakpoint once.
-     */
-    private _wasHalted: boolean;
-
-    /**
      * This field is used to determine if the stop points should also be considered in kernel mode.
      * This field is set by the GUI.
      */
@@ -258,7 +253,6 @@ export class CPUCore {
         this._decodedInstruction = null;
         this._processingWidth = processingWidth;
         this.executionStepping = ProgramExecutionStepping.SINGLE;
-        this._wasHalted = false;
         this.debugKernel = true;
         this._isHandlingInterrupt = false;
         this.tlbHasChanged = false;
@@ -373,11 +367,10 @@ export class CPUCore {
     }
 
     private determineProgramStatus(operation: InstructionSet | null | undefined): RunStatus {
-        if (!this._wasHalted && this.shouldHalt(operation)) {
-            this._wasHalted = true;
+        if (this.shouldHalt(operation)) {
             return RunStatus.Halted;
         }
-        this._wasHalted = false;
+        // Resets the boolean. This boolean is set by the mmu.
         this.tlbHasChanged = false;
         return RunStatus.Continue;
     }
@@ -389,7 +382,7 @@ export class CPUCore {
     public handleInterrupt(number: InterruptNumbers): RunStatus
     {
         const runStatus = this.determineProgramStatus(InstructionSet.INT);
-        if (runStatus === RunStatus.Halted) {
+        if (runStatus !== RunStatus.Continue) {
             return runStatus;
         }
 
@@ -434,14 +427,14 @@ export class CPUCore {
         try {
             this.fetch();
             this.decode();
-
             const runStatus = this.determineProgramStatus(this._decodedInstruction?.instruction);
-            if (runStatus === RunStatus.Halted) {
+            this.execute();
+
+            
+            if (runStatus !== RunStatus.Continue) {
                 return runStatus;
             }
-
-            this.execute();
-            return RunStatus.Continue;
+            
         } catch(error) {
             if (!(error instanceof ExceptionError)) {
                 DebugLogger.log(error);

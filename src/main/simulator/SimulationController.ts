@@ -168,13 +168,11 @@ export class SimulationController {
 
         DebugLogger.log("");
         DebugLogger.log("Starting Execution");
-        DebugLogger.log("");
-
-        this.core.cycle();       
+        DebugLogger.log("");     
         
         getMainWindow()?.webContents.send('clear_log');
 
-        getMainWindow()?.webContents.send('update_log', "OS Initialized");
+        getMainWindow()?.webContents.send('update_log', "Simulator Initialized");
 
         return;
     }
