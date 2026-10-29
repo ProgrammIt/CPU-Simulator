@@ -95,12 +95,26 @@ export class MemoryManagementUnit {
      */
     public reverseMemoryMap: memoryMapEntry[][] = [];
 
+    private _tlbHasChanged: boolean = false;
+
     /**
      * Constructs a new instance from the given references of the RAM, Page Table Pointer (PTP) register, the ALU and the EFLAGS register.
      * @param cpu A reference to the cpu.
      */
     public constructor(cpu: CPUCore) {
         this._cpu = cpu;
+    }
+
+    /**
+     * This method checks if the tlb entries have been changed by checking the appropriate boolean and then resets the state.
+     * @returns The change state of the TLB.
+     */
+    public consumeTLBChangeState(): boolean {
+        if (this._tlbHasChanged) {
+            this._tlbHasChanged = false;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -130,7 +144,7 @@ export class MemoryManagementUnit {
      */
     public invalidateTLB(): void {
         this._tlb.clear();
-        this._cpu.tlbHasChanged = true;
+        this._tlbHasChanged = true;
         console.log("TLB Clear")
     }
 
@@ -246,7 +260,7 @@ export class MemoryManagementUnit {
         if (!disableTlb && (!this._tlb.has(pageNumber) || attemptsToWrite)) {
             console.log("TLB Insert number: " + pageNumber + " Write: " + attemptsToWrite + " New Entry: " + !this._tlb.has(pageNumber))
             this._tlb.insert([pageNumber, pageTableEntry]);
-            this._cpu.tlbHasChanged = true;
+            this._tlbHasChanged = true;
         }
 
         return PhysicalAddress.fromPageTableEntryAndVirtualAddress(pageTableEntry, virtualAddress);

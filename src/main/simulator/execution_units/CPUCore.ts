@@ -202,11 +202,6 @@ export class CPUCore {
     private _isHandlingInterrupt: boolean;
 
     /**
-     * This field is used to check if the content of the tlb has changed.
-     */
-    public tlbHasChanged: boolean;
-
-    /**
      * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
      */
     private readonly _haltConditions: Record<ProgramExecutionStepping, Set<InstructionSet>> = {
@@ -255,7 +250,6 @@ export class CPUCore {
         this.executionStepping = ProgramExecutionStepping.SINGLE;
         this.debugKernel = true;
         this._isHandlingInterrupt = false;
-        this.tlbHasChanged = false;
     }
 
     /**
@@ -315,10 +309,6 @@ export class CPUCore {
             // run one internal cycle handling one instruction
             const status = this.internalCycle();
 
-            // If a breakpoint was reached, stop executing program immediately
-            if (status !== RunStatus.Continue) {
-                return;
-            }
 
             // If the previous instruction was executed in user mode, then count down the timers
             // Must be after the check if a breakpoint was reached, because the instruction gets re-executed otherwise the timer would count down twice
@@ -331,6 +321,12 @@ export class CPUCore {
             executedInstructions++;
             if (executedInstructions >= MAX_INSTRUCTIONS_PER_CYCLE) {
                 this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
+                return;
+            }
+
+
+            // If a breakpoint was reached, stop executing program immediately
+            if (status !== RunStatus.Continue) {
                 return;
             }
         }
@@ -360,7 +356,7 @@ export class CPUCore {
         }
 
         if (this.executionStepping === ProgramExecutionStepping.TLB_CHANGE) {
-            return this.tlbHasChanged;
+            return this.mmu.consumeTLBChangeState();
         }
 
         return this._haltConditions[this.executionStepping].has(operation);
@@ -370,8 +366,6 @@ export class CPUCore {
         if (this.shouldHalt(operation)) {
             return RunStatus.Halted;
         }
-        // Resets the boolean. This boolean is set by the mmu.
-        this.tlbHasChanged = false;
         return RunStatus.Continue;
     }
 
