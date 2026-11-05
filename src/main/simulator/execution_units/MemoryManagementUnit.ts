@@ -145,7 +145,6 @@ export class MemoryManagementUnit {
     public invalidateTLB(): void {
         this._tlb.clear();
         this._tlbHasChanged = true;
-        console.log("TLB Clear")
     }
 
     /**
@@ -258,7 +257,6 @@ export class MemoryManagementUnit {
 
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
         if (!disableTlb && (!this._tlb.has(pageNumber) || attemptsToWrite)) {
-            console.log("TLB Insert number: " + pageNumber + " Write: " + attemptsToWrite + " New Entry: " + !this._tlb.has(pageNumber))
             this._tlb.insert([pageNumber, pageTableEntry]);
             this._tlbHasChanged = true;
         }
