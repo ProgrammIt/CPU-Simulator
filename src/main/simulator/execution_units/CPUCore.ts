@@ -292,8 +292,7 @@ export class CPUCore {
         while (true) {
             if (this.flags.interrupt && this.interruptQueue.length !== 0 && !this._isHandlingInterrupt) {
 
-                // Only copy interrupt to not lose it if a breakpoint is reached in handleInterrupt
-                const nextInterrupt = this.interruptQueue[0] as InterruptNumbers;
+                const nextInterrupt = this.interruptQueue.shift()!;
                 const interruptStatus = this.handleInterrupt(nextInterrupt);
 
                 // A breakpoint has been reached, stop execution
@@ -301,8 +300,6 @@ export class CPUCore {
                     return;
                 }
 
-                // Now remove interrupt after it got fully handled
-                this.interruptQueue.shift();
             }
 
             const wasInUserMode = this.flags.isInUserMode();
@@ -339,16 +336,13 @@ export class CPUCore {
      * @param operation The opcode that gets evaluated against the current program stepping mode.
      * @returns Returns true if the program should get halted.
      */
-    private shouldHalt(operation: InstructionSet | null | undefined) {
+    private shouldHalt(operation: InstructionSet | null | undefined): boolean {
         if (operation == null) {
             return false;
         }
         
-        // Check if the simulator should stop at breakpoints when in kernel mode as well
         if (this.flags.isInKernelMode() && !this.debugKernel) {
-            // If IRET is selected as mode then break even if kernel debug is not set
-            // Needed because IRET is executed in kernel mode
-            return this.executionStepping === ProgramExecutionStepping.IRET && operation === InstructionSet.IRET;
+            return false;
         }
 
         if (this.executionStepping === ProgramExecutionStepping.SINGLE) {
@@ -359,7 +353,12 @@ export class CPUCore {
             return this.mmu.consumeTLBChangeState();
         }
 
-        return this._haltConditions[this.executionStepping].has(operation);
+        const conditions = this._haltConditions[this.executionStepping];
+        if (conditions) {
+            return conditions.has(operation);
+        }
+
+        return false;
     }
 
     private determineProgramStatus(operation: InstructionSet | null | undefined): RunStatus {
@@ -375,10 +374,13 @@ export class CPUCore {
      */
     public handleInterrupt(number: InterruptNumbers): RunStatus
     {
-        const runStatus = this.determineProgramStatus(InstructionSet.INT);
-        if (runStatus !== RunStatus.Continue) {
-            return runStatus;
+        let runStatus;
+        if (!this.debugKernel) {
+           runStatus = RunStatus.Continue;
+        } else {
+            runStatus = this.determineProgramStatus(InstructionSet.INT);
         }
+        
 
         if (this.flags.interrupt == 0) {
             this.reset(); //A CPU exception while interrupt are disabled -> panic, reset system
@@ -409,6 +411,10 @@ export class CPUCore {
             this.esp.content = DoubleWord.fromNumber(this.esp.content - 4);
             this.mmu.writeDoublewordTo(this.esp.content, this.mmu.pageFaultAddress, false);
             this.mmu.pageFaultAddress = undefined;
+        }
+        
+        if (runStatus !== RunStatus.Continue) {
+            return runStatus;
         }
         return RunStatus.Continue;
     }
