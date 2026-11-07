@@ -214,6 +214,7 @@ export class CPUCore {
             InstructionSet.JZ]),
         [ProgramExecutionStepping.INT]: new Set([InstructionSet.INT]),
         [ProgramExecutionStepping.TLB_CHANGE]: new Set(),
+        [ProgramExecutionStepping.PROCESS_EXIT]: new Set(),
     };
 
     /**
@@ -427,9 +428,8 @@ export class CPUCore {
         try {
             this.fetch();
             this.decode();
-            const runStatus = this.determineProgramStatus(this._decodedInstruction?.instruction);
             this.execute();
-
+            const runStatus = this.determineProgramStatus(this._decodedInstruction?.instruction);
             
             if (runStatus !== RunStatus.Continue) {
                 return runStatus;

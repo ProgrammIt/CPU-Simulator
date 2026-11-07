@@ -261,6 +261,7 @@ export class Renderer {
         "Next Jump",
         "Next Interrupt",
         "Next TLB Change",
+        "Process Exit",
     ];
 
     /**
