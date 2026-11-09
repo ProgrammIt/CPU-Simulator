@@ -294,7 +294,7 @@ export class CPUCore {
     public cycle(): void {
 
         let executedInstructions = 0;
-        const MAX_INSTRUCTIONS_PER_CYCLE = 10_000_000_000;
+        const MAX_INSTRUCTIONS_PER_CYCLE = 1_000;
 
         while (true) {
             if (this.flags.interrupt && this.interruptQueue.length !== 0 && !this._isHandlingInterrupt) {
@@ -321,16 +321,17 @@ export class CPUCore {
                 this.periodicTimer.countDown();
             }
 
-            // Failsafe to prevent loop if no breakpoint exists
-            executedInstructions++;
-            if (executedInstructions >= MAX_INSTRUCTIONS_PER_CYCLE) {
-                this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
+            // If a breakpoint was reached, stop executing program immediately
+            if (status !== RunStatus.Continue) {
                 return;
             }
 
-
-            // If a breakpoint was reached, stop executing program immediately
-            if (status !== RunStatus.Continue) {
+            // Failsafe to prevent loop if no breakpoint exists
+            if (this.debugKernel || this.flags.isInUserMode()) {
+                executedInstructions++;
+            }
+            if (executedInstructions >= MAX_INSTRUCTIONS_PER_CYCLE) {
+                this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
                 return;
             }
         }
