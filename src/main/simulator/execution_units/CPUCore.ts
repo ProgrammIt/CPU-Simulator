@@ -202,6 +202,11 @@ export class CPUCore {
     private _isHandlingInterrupt: boolean;
 
     /**
+     * This boolean is used to track if a program exited. It is used in combination with the ProgramExecutionStepping to determine if the simulator should halt.
+     */
+    private _programExited: boolean;
+
+    /**
      * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
      */
     private readonly _haltConditions: Record<ProgramExecutionStepping, Set<InstructionSet>> = {
@@ -251,6 +256,7 @@ export class CPUCore {
         this.executionStepping = ProgramExecutionStepping.SINGLE;
         this.debugKernel = true;
         this._isHandlingInterrupt = false;
+        this._programExited = false;
     }
 
     /**
@@ -352,6 +358,11 @@ export class CPUCore {
 
         if (this.executionStepping === ProgramExecutionStepping.TLB_CHANGE) {
             return this.mmu.consumeTLBChangeState();
+        }
+
+        if (this.executionStepping === ProgramExecutionStepping.PROCESS_EXIT && this._programExited) {
+            this._programExited = false;
+            return true;
         }
 
         const conditions = this._haltConditions[this.executionStepping];
@@ -1142,6 +1153,10 @@ export class CPUCore {
             case DevOperations.PERFORMANCE_TIMER_STOP:{
                 const id: number = op2;
                 this.performanceTimerStop(id);
+                break;
+            }
+            case DevOperations.PROGRAM_EXIT_SIGNAL:{
+                this._programExited = true;
                 break;
             }
             default:{
