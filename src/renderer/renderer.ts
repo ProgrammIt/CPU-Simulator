@@ -251,6 +251,11 @@ export class Renderer {
     public ramViewEndAddress: number;
 
     /**
+     * This field stores the maximum allowed amount of lines for the log widget.
+     */
+    private readonly _maxLogLines: number = 1000;
+
+    /**
      * This field stores the labels for the cycle button.
      */
     private readonly _buttonLabels: string[] = [
@@ -1678,12 +1683,31 @@ export class Renderer {
      * This method updates the log-widget with a message.
      * @param message The message that gets appended to the log-widget. 
      */
-    public async updateLog(message: string): Promise<void> {
+    public async updateLog(messageBatch: string[]): Promise<void> {
         const log: HTMLElement | null = document.getElementById("log");
         if (log !== null) {
-            log.children.namedItem("log-content")!.insertAdjacentElement("beforeend", document.createElement("br"));
-            log.children.namedItem("log-content")!.insertAdjacentText("beforeend", message);
-            log.children.namedItem("log-content")!.scrollTop = log.children.namedItem("log-content")!.scrollHeight;
+            const logContent: Element = log.children.namedItem("log-content")!;
+            const fragment = document.createDocumentFragment();
+            const shortenedLines = messageBatch.slice(-this._maxLogLines)
+            for (const line of shortenedLines) {
+                if (line === " ") {
+                    const br = document.createElement("br");
+                    fragment.appendChild(br);
+                } else {
+                    const div = document.createElement("div");
+                    div.textContent = line;
+                    fragment.appendChild(div);
+                }
+                
+            }
+            logContent.appendChild(fragment);
+
+            while (logContent.children.length > this._maxLogLines) {
+                logContent.removeChild(logContent.firstElementChild!);
+            }
+            //log.children.namedItem("log-content")!.insertAdjacentElement("beforeend", document.createElement("br"));
+            //log.children.namedItem("log-content")!.insertAdjacentText("beforeend", message);
+            logContent.scrollTop = logContent.scrollHeight;
         }
         return;
     }

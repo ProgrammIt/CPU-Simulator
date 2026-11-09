@@ -18,15 +18,15 @@ import { DevOperations } from "../../../types/enumerations/DevOperations";
 import { PassthroughFilesystem } from "../os/PassthroughFilesystem";
 import { InterruptNumbers } from "../../../types/enumerations/InterruptNumbers";
 import { Timer } from "./Timer";
-import { DebugLogger } from "../Logger";
+import { DebugLogger } from "../DebugLogger";
 import { ExceptionError } from "../../../types/errors/ExceptionError";
 import { RegisterNumbers } from "../../../types/enumerations/RegisterNumbers";
-import { getMainWindow } from "../../index";
 import { PeriodicTimer } from "./PeriodicTimer";
 import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 import { InstructionSet } from "../../../types/enumerations/InstructionSet";
 import { VirtualAddress } from "../../../types/binary/VirtualAddress";
 import { ProgramExecutionStepping } from "../../../types/enumerations/ProgramExecutionStepping";
+import { GUILogger } from "../GUILogger";
 
 export enum RunStatus {
     Continue,
@@ -207,6 +207,17 @@ export class CPUCore {
     private _programExited: boolean;
 
     /**
+     * This field stores a DebugLogger instance to log to the typescript console.
+     */
+    private readonly _debugLogger: DebugLogger;
+
+    /**
+     * This field stores a GUILogger instance to log to the log widget in the gui.
+     */
+    private readonly _guiLogger: GUILogger;
+
+
+    /**
      * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
      */
     private readonly _haltConditions: Record<ProgramExecutionStepping, Set<InstructionSet>> = {
@@ -228,7 +239,7 @@ export class CPUCore {
      * @param processingWidth The maximum number of bits that can be processed in one cycle. Defaults to 32 bits (a doubleword).
      * @param pathToOSFilesystem 
      */
-    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string) {
+    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string, debugLogger: DebugLogger, guiLogger: GUILogger) {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
@@ -257,6 +268,8 @@ export class CPUCore {
         this.debugKernel = true;
         this._isHandlingInterrupt = false;
         this._programExited = false;
+        this._debugLogger = debugLogger;
+        this._guiLogger = guiLogger;
     }
 
     /**
@@ -294,7 +307,7 @@ export class CPUCore {
     public cycle(): void {
 
         let executedInstructions = 0;
-        const MAX_INSTRUCTIONS_PER_CYCLE = 1_000;
+        const MAX_INSTRUCTIONS_PER_CYCLE = 100_000;
 
         while (true) {
             if (this.flags.interrupt && this.interruptQueue.length !== 0 && !this._isHandlingInterrupt) {
@@ -331,6 +344,7 @@ export class CPUCore {
                 executedInstructions++;
             }
             if (executedInstructions >= MAX_INSTRUCTIONS_PER_CYCLE) {
+                this.logToLogger(" ");
                 this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
                 return;
             }
@@ -412,7 +426,7 @@ export class CPUCore {
         // Overwrite the return address on the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, returnValue, false);
 
-        DebugLogger.log("Interrupt: " + InterruptNumbers[number]);
+        this._debugLogger.push("Interrupt: " + InterruptNumbers[number]);
 
         if (number === InterruptNumbers.PAGE_FAULT) {
 
@@ -449,7 +463,7 @@ export class CPUCore {
             
         } catch(error) {
             if (!(error instanceof ExceptionError)) {
-                DebugLogger.log(error);
+                this._debugLogger.push(this.errorToString(error));
             }
             else
             {
@@ -595,15 +609,15 @@ export class CPUCore {
 
             if (InstructionSet.CALL === operation || InstructionSet.INT === operation)
             {
-                DebugLogger.log("");
+                this._debugLogger.push(" ");
             }
 
             if (InstructionSet.RET === operation || InstructionSet.IRET === operation)
             {
-                DebugLogger.removeIndentation()
+                this._debugLogger.removeIndentation();
             }
 
-            DebugLogger.log(logText);
+            this._debugLogger.push(logText);
         }
 
         if (this.flags.isInUserMode() || this.debugKernel) {
@@ -840,27 +854,27 @@ export class CPUCore {
 
             if (InstructionSet.CALL === operation || InstructionSet.INT === operation)
             {
-                DebugLogger.addIndentation()
+                this._debugLogger.addIndentation();
             }
 
             try {
                 if (this.esp.content <= 0xFFFFFFFC) {
                     const physicalAddress: DoubleWord = this.mmu.translate(this.esp.content, false, false, true);
                     const value = this.mainMemory.readDoublewordFrom(physicalAddress);
-                    DebugLogger.log("Stack value: 0x" + value.toString(16));
+                    this._debugLogger.push("Stack value: 0x" + value.toString(16));
                 }
                 else {
-                    DebugLogger.log("Stack empty");
+                    this._debugLogger.push("Stack empty");
                 }
             }
             catch {
-                DebugLogger.log("Stack value: Not Mapped");
+                this._debugLogger.push("Stack value: Not Mapped");
             }
             
             if (InstructionSet.RET === operation || InstructionSet.IRET === operation)
             {
-                DebugLogger.log("");
-                DebugLogger.removeIndentation()
+                this._debugLogger.push(" ");
+                this._debugLogger.removeIndentation();
             }
         }
     }
@@ -2650,7 +2664,7 @@ export class CPUCore {
 
         if (this.flags.isInUserMode())
         {
-            this.logToLogger("");
+            this.logToLogger(" ");
             this.logToLogger("Interrupted: " + InterruptNumbers[target.value]);
         }
 
@@ -3080,7 +3094,7 @@ export class CPUCore {
      */
     public reset(): void {
         // TODO implement
-        this.logToLogger("");
+        this.logToLogger(" ");
         this.logToLogger("KERNEL PANIC! RESETING SIMULATOR");
     }
 
@@ -3089,7 +3103,33 @@ export class CPUCore {
      * @param message The message that gets appended to the log-widget.
      */
     public logToLogger(message: string): void {
-        getMainWindow()?.webContents.send('update_log', message);
-        DebugLogger.log("  " + message);
+        this._guiLogger.push(message);
+        this._debugLogger.push(" " + message);
+    }
+
+
+    /**
+     * This function is used to help convert an error into a string for logging.
+     * @param error Ther error that should be turned into a string.
+     * @returns The error in string format.
+     */
+    private errorToString(error: unknown): string {
+        if (error instanceof Error) {
+            return error.message;
+        }
+
+        if (typeof error === "string") {
+            return error;
+        }
+
+        if (typeof error === "number" || typeof error === "boolean") {
+            return String(error);
+        }
+
+        try {
+            return JSON.stringify(error);
+        } catch {
+            return "Unknown error type";
+        }
     }
 }

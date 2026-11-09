@@ -99,7 +99,7 @@ window.windowUpdate.onClearLog(() => {
 });
 
 
-window.windowUpdate.onUpdateLog((value: string) => {
+window.windowUpdate.onUpdateLog((value: string[]) => {
 	renderer.updateLog(value);
 });
 
