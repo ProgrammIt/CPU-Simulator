@@ -755,6 +755,7 @@ export class Renderer {
     private readonly onChangeListenerExecutionStepping: EventListenerOrEventListenerObject = (event: Event): void => {
         const target: HTMLSelectElement = event.target as HTMLSelectElement;
         const parent: HTMLElement | null = target.parentElement;
+        const breakModeSelector: HTMLSelectElement = this._document.getElementById("breakMode-selector") as HTMLSelectElement;
         if (parent !== null && this._cycleButtonText !== null) {
             const currentStepping: string = parent.getAttribute("stepping-mode")!;
             const demandedStepping: string = target.value;
@@ -762,6 +763,15 @@ export class Renderer {
             if (currentStepping === demandedStepping) {
                 return;
             } else {
+                const disableUserModeGUI: boolean = (demandedStepping === "IRET" || demandedStepping === "INT");
+                breakModeSelector.disabled = disableUserModeGUI;
+
+                if (disableUserModeGUI) {
+                    // Allow to break in kernel mode too
+                    parent.setAttribute("break-mode", "breakOnKernel");
+                    breakModeSelector.value = "breakOnKernel";
+                    this._window.simulator.changeBreakMode(true);
+                }
                 const newStepping: ProgramExecutionStepping = ProgramExecutionStepping[demandedStepping as keyof typeof ProgramExecutionStepping];
                 this._cycleButtonText.textContent = this._buttonLabels[newStepping]
                 this._window.simulator.changeExecutionStepping(newStepping);
