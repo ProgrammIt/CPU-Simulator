@@ -579,6 +579,23 @@ const registerHandlers = (simulator: SimulationController, win: BrowserWindow): 
 		simulator.core.debugKernel = debugKernel;
 		return;
 	})
+
+	ipcMain.removeHandler("add_breakpoint");
+	ipcMain.on("add_breakpoint", async (event: IpcMainInvokeEvent, breakpoint: PhysicalAddress): Promise<void> => {
+		simulator.core.addBreakpoint(breakpoint);
+		return;
+	})
+
+	ipcMain.removeHandler("remove_breakpoint");
+	ipcMain.on("remove_breakpoint", async (event: IpcMainInvokeEvent, breakpoint: PhysicalAddress): Promise<void> => {
+		simulator.core.removeBreakpoint(breakpoint);
+		return;
+	})
+
+	ipcMain.removeHandler("get_breakpoints");
+	ipcMain.handle("get_breakpoints", async (): Promise<number[]> => {
+		return [...simulator.core.getBreakpoints()];
+	})
 };
 
 // This method will be called when Electron has finished

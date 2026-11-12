@@ -216,7 +216,6 @@ export class CPUCore {
      */
     private readonly _guiLogger: GUILogger;
 
-
     /**
      * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
      */
@@ -231,7 +230,18 @@ export class CPUCore {
         [ProgramExecutionStepping.INT]: new Set([InstructionSet.INT]),
         [ProgramExecutionStepping.TLB_CHANGE]: new Set(),
         [ProgramExecutionStepping.PROCESS_EXIT]: new Set(),
+        [ProgramExecutionStepping.BREAKPOINT]: new Set(),
     };
+
+    /**
+     * This field stores a set of breakpoints to stop on, if the execution stepping mode is set to breakpoint.
+     */
+    private _breakpoints: Set<PhysicalAddress> = new Set<PhysicalAddress>();
+
+    /**
+     * This field stores the current physical address of the instruction that is being executed.
+     */
+    private _currentPhysicalAddress: PhysicalAddress = PhysicalAddress.fromNumber(0);
 
     /**
      * Constructs an instance of a CPU core.
@@ -380,6 +390,10 @@ export class CPUCore {
             return true;
         }
 
+        if (this.executionStepping === ProgramExecutionStepping.BREAKPOINT && this._breakpoints.has(this._currentPhysicalAddress)) {
+            return true;
+        }
+
         const conditions = this._haltConditions[this.executionStepping];
         if (conditions) {
             return conditions.has(operation);
@@ -452,6 +466,12 @@ export class CPUCore {
      */
     private internalCycle(): RunStatus {
         try {
+            try {
+                this._currentPhysicalAddress = this.mmu.translate(this.eip.content, false, false, true, true);
+            } catch {
+                this._currentPhysicalAddress = PhysicalAddress.fromNumber(0);
+            }
+            
             this.fetch();
             this.decode();
             this.execute();
@@ -3131,5 +3151,29 @@ export class CPUCore {
         } catch {
             return "Unknown error type";
         }
+    }
+
+    /**
+     * This function is used to add a breakpoint to the breakpoint set.
+     * @param breakpoint New breakpoint to stop the simulator on.
+     */
+    public addBreakpoint(breakpoint: PhysicalAddress) {
+        this._breakpoints.add(breakpoint);
+    }
+
+    /**
+     * This function is used to query all currently set breakpoints.
+     * @returns All currently set breakpoints.
+     */
+    public getBreakpoints(): Set<PhysicalAddress> {
+        return this._breakpoints;
+    }
+
+    /**
+     * This function is used to remove a spewcific breakpoint from the breakpoint set.
+     * @param breakpoint The breakpoint to be removed from the breakpoint set.
+     */
+    public removeBreakpoint(breakpoint: PhysicalAddress) {
+        this._breakpoints.delete(breakpoint);
     }
 }

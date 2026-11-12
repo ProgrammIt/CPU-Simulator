@@ -267,6 +267,7 @@ export class Renderer {
         "Next Interrupt",
         "Next TLB Change",
         "Process Exit",
+        "Next Breakpoint",
     ];
 
     /**
@@ -1086,6 +1087,30 @@ export class Renderer {
     }
 
     /**
+     * This callback is used as listener logic for the breakpoint cells in the ram view. If the cell is clicked a new breakpoint will get set.
+     * If the cell already contains a breakpoint, the breakpoint will be removed.
+     * @param event An object, which represents the event fired, whenever a key is pressed while focused on the console input field.
+     * @returns 
+     */
+    private readonly onClickListenerBreakpointCell: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLElement = event.currentTarget as HTMLElement;
+        const physicalAddressBreakpoint = target.dataset.physicalAddress;
+        const breakpointStatus = target.dataset.breakpointStatus;
+        const physicalAddress = PhysicalAddress.fromNumber(Number(physicalAddressBreakpoint));
+
+        if (breakpointStatus === "false") {
+            target.innerHTML = "X";
+            this._window.simulator.addBreakpoint(physicalAddress);
+            target.dataset.breakpointStatus = "true";
+        } else {
+            target.innerHTML = "";
+            this._window.simulator.removeBreakpoint(physicalAddress);
+            target.dataset.breakpointStatus = "false";
+        }
+        return;
+    }
+
+    /**
      * This field represents a flag, which enables automatic scroll for the GUIs Page Table widget.
      */
     public autoScrollForPageTableEnabled: boolean;
@@ -1698,7 +1723,10 @@ export class Renderer {
         if (log !== null) {
             const logContent: Element = log.children.namedItem("log-content")!;
             const fragment = document.createDocumentFragment();
-            const shortenedLines = messageBatch.slice(-this._maxLogLines)
+            const shortenedLines = messageBatch.slice(-this._maxLogLines);
+            if (messageBatch.length >= this._maxLogLines) {
+                logContent.innerHTML = "";
+            }
             for (const line of shortenedLines) {
                 if (line === " ") {
                     const br = document.createElement("br");
@@ -1715,8 +1743,6 @@ export class Renderer {
             while (logContent.children.length > this._maxLogLines) {
                 logContent.removeChild(logContent.firstElementChild!);
             }
-            //log.children.namedItem("log-content")!.insertAdjacentElement("beforeend", document.createElement("br"));
-            //log.children.namedItem("log-content")!.insertAdjacentText("beforeend", message);
             logContent.scrollTop = logContent.scrollHeight;
         }
         return;
@@ -1901,6 +1927,8 @@ export class Renderer {
     public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement): Promise<void> {
         const ramCells: Map<number, Byte> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
         const ramContent: Array<Byte> = Array.from(ramCells.values());
+        const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
+        const breakpoints: Set<number> = new Set<number>(breakpointArray);
         for (let i = 0; i < ramContent.length;) {
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
             const binary = ramContent.slice(i, (i + this.ramBlockSize));
@@ -1909,6 +1937,9 @@ export class Renderer {
             const physicalAddressColumn = tableRow.insertCell();
             const virtualAddressColumn = tableRow.insertCell();
             const assemblyInstruction = tableRow.insertCell();
+            const breakpointCell = tableRow.insertCell();
+
+            breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
 
             const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i);
             const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i + (this.ramBlockSize - 1));
@@ -1923,6 +1954,16 @@ export class Renderer {
 
             const addressFrom = "0x" + (physicalAddressStart + i).toString(16);
             const addressTo = "0x" + (physicalAddressStart + i + (this.ramBlockSize - 1)).toString(16);
+            breakpointCell.dataset.physicalAddress = addressFrom;
+
+            if (breakpoints.has(physicalAddressStart + i)) {
+                breakpointCell.innerHTML = "x";
+                breakpointCell.dataset.breakpointStatus = "true";
+            } else {
+                breakpointCell.innerHTML = "";
+                breakpointCell.dataset.breakpointStatus = "false";
+            }
+            
             physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
             assemblyInstruction.innerHTML = instructionString;
             ramTableBody.appendChild(tableRow);
@@ -1955,6 +1996,8 @@ export class Renderer {
         } else if (dataMode === "ASSEMBLY") {
             const instructionHead = tableRow.insertCell();
             instructionHead.innerHTML = "Assembly Instruction";
+            const breakpointHead = tableRow.insertCell();
+            breakpointHead. innerHTML = "Breakpoint";
         }
         
     }

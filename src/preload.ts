@@ -8,6 +8,7 @@ import { Byte } from './types/binary/Byte';
 import { PageNumber } from './types/binary/PageNumber';
 import { PageTableEntry } from './types/binary/PageTableEntry';
 import { ProgramExecutionStepping } from './types/enumerations/ProgramExecutionStepping';
+import { PhysicalAddress } from './types/binary/PhysicalAddress';
 
 declare global {
 	interface Window {
@@ -76,6 +77,12 @@ contextBridge.exposeInMainWorld("simulator", {
 		ipcRenderer.send("change_execution_stepping", executionStepping),
 	changeBreakMode: (debugKernel: boolean) =>
 		ipcRenderer.send("change_break_mode", debugKernel),
+	addBreakpoint: (breakpoint: PhysicalAddress) =>
+		ipcRenderer.send("add_breakpoint", breakpoint),
+	removeBreakpoint: (breakpoint: PhysicalAddress) =>
+		ipcRenderer.send("remove_breakpoint", breakpoint),
+	getBreakpoints: () =>
+		ipcRenderer.invoke("get_breakpoints"),
 });
 
 contextBridge.exposeInMainWorld("windowUpdate", {

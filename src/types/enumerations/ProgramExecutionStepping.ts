@@ -7,4 +7,5 @@ export enum ProgramExecutionStepping {
     INT,
     TLB_CHANGE,
     PROCESS_EXIT,
+    BREAKPOINT,
 }
