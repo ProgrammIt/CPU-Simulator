@@ -3,6 +3,8 @@ import { DoubleWord } from "../types/binary/DoubleWord";
 import { CPUCore } from "../main/simulator/execution_units/CPUCore";
 import { RAM } from "../main/simulator/functional_units/RAM";
 import { DataSizes } from "../types/enumerations/DataSizes";
+import { GUILogger } from "../main/simulator/GUILogger";
+import { DebugLogger } from "../main/simulator/DebugLogger";
 
 describe("Create doubleword from decimal integer values", () => {
     test("Create doubleword from decimal -6", () => {
@@ -38,8 +40,10 @@ describe("Create doubleword from decimal integer values", () => {
     });
 
     test("Measure toNumber() performance", () => {
+        const debugLogger: DebugLogger = new DebugLogger(100,10);
+        const guiLogger: GUILogger = new GUILogger(1000, 100, true);
         const mainMemory = new RAM(DoubleWord.SIZE);
-        const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem");
+        const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
         const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(cpu);
         const repetitions = 100_000;
         let dword = DoubleWord.ZERO

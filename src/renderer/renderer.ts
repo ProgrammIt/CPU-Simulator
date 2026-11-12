@@ -9,6 +9,7 @@ import { DevOperations } from "../types/enumerations/DevOperations";
 import { InstructionSet } from "../types/enumerations/InstructionSet";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
+import { ProgramExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
 
 /**
  * This enumeration is a duplicate of the one, that can be
@@ -248,6 +249,31 @@ export class Renderer {
      * This field stores the memory end address from the input box in the detailed RAM view.
      */
     public ramViewEndAddress: number;
+
+    /**
+     * This field stores the maximum allowed amount of lines for the log widget.
+     */
+    private readonly _maxLogLines: number = 1000;
+
+    /**
+     * This field stores the labels for the cycle button.
+     */
+    private readonly _buttonLabels: string[] = [
+        "Next Instruction",
+        "Next Call",
+        "Next Return",
+        "Next Interrupt Return",
+        "Next Jump",
+        "Next Interrupt",
+        "Next TLB Change",
+        "Process Exit",
+        "Next Breakpoint",
+    ];
+
+    /**
+     * This field stores a reference to the cycle button.
+     */
+    private readonly _cycleButtonText: HTMLElement | null
 
     /**
      * This field stores a callback used to observe the GUI elements representing the entries of the Page Table.
@@ -724,6 +750,60 @@ export class Renderer {
     }
 
     /**
+     * This callback is used as change listener logic for the select element that allows the user to select the breakpoint at which to halt the program.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerExecutionStepping: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        const breakModeSelector: HTMLSelectElement = this._document.getElementById("breakMode-selector") as HTMLSelectElement;
+        if (parent !== null && this._cycleButtonText !== null) {
+            const currentStepping: string = parent.getAttribute("stepping-mode")!;
+            const demandedStepping: string = target.value;
+            parent.setAttribute("stepping-mode", demandedStepping);
+            if (currentStepping === demandedStepping) {
+                return;
+            } else {
+                const disableUserModeGUI: boolean = (demandedStepping === "IRET" || demandedStepping === "INT");
+                breakModeSelector.disabled = disableUserModeGUI;
+
+                if (disableUserModeGUI) {
+                    // Allow to break in kernel mode too
+                    parent.setAttribute("break-mode", "breakOnKernel");
+                    breakModeSelector.value = "breakOnKernel";
+                    this._window.simulator.changeBreakMode(true);
+                }
+                const newStepping: ProgramExecutionStepping = ProgramExecutionStepping[demandedStepping as keyof typeof ProgramExecutionStepping];
+                this._cycleButtonText.textContent = this._buttonLabels[newStepping]
+                this._window.simulator.changeExecutionStepping(newStepping);
+            }
+        }
+        return;
+    }
+
+    /**
+     * This callback is used as change listener logic for the select element that controls the mode in which breakpoints should be respected.
+     * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
+     */
+    private readonly onChangeListenerBreakMode: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLSelectElement = event.target as HTMLSelectElement;
+        const parent: HTMLElement | null = target.parentElement;
+        if (parent !== null) {
+            const currentBreakMode: string = parent.getAttribute("break-mode")!;
+            const demandedBreakMode: string = target.value;
+            parent.setAttribute("break-mode", demandedBreakMode);
+            if (currentBreakMode === demandedBreakMode) {
+                return;
+            } else {
+                const kernelDebug = demandedBreakMode === "breakOnKernel"
+                this._window.simulator.changeBreakMode(kernelDebug);
+            }
+        }
+        return;
+    }
+
+
+    /**
      * This callback is used as the change listeners logic for the GUI element, which visualizes the RAM-Cell search module.
      * @param event An object, which represents the event fired, whenever a change occurs on the <select> element contained in the GUI element.
      */
@@ -1007,6 +1087,30 @@ export class Renderer {
     }
 
     /**
+     * This callback is used as listener logic for the breakpoint cells in the ram view. If the cell is clicked a new breakpoint will get set.
+     * If the cell already contains a breakpoint, the breakpoint will be removed.
+     * @param event An object, which represents the event fired, whenever a key is pressed while focused on the console input field.
+     * @returns 
+     */
+    private readonly onClickListenerBreakpointCell: EventListenerOrEventListenerObject = (event: Event): void => {
+        const target: HTMLElement = event.currentTarget as HTMLElement;
+        const physicalAddressBreakpoint = target.dataset.physicalAddress;
+        const breakpointStatus = target.dataset.breakpointStatus;
+        const physicalAddress = PhysicalAddress.fromNumber(Number(physicalAddressBreakpoint));
+
+        if (breakpointStatus === "false") {
+            target.innerHTML = "X";
+            this._window.simulator.addBreakpoint(physicalAddress);
+            target.dataset.breakpointStatus = "true";
+        } else {
+            target.innerHTML = "";
+            this._window.simulator.removeBreakpoint(physicalAddress);
+            target.dataset.breakpointStatus = "false";
+        }
+        return;
+    }
+
+    /**
      * This field represents a flag, which enables automatic scroll for the GUIs Page Table widget.
      */
     public autoScrollForPageTableEnabled: boolean;
@@ -1066,6 +1170,18 @@ export class Renderer {
         this.ramBlockSize = 1;
         this.ramViewStartAddress = 0x0;
         this.ramViewEndAddress = 0xb;
+        this._cycleButtonText = document.getElementById("cycle-btn-text")
+    }
+
+    /**
+    * This method registers the select listener for the execution stepping control element.
+    */
+    public registerExecutionSteppingSelectElement(): void {
+        const steppingModeSelect: HTMLSelectElement = this._document.getElementById("stepping-selector") as HTMLSelectElement;
+        steppingModeSelect.addEventListener("change", this.onChangeListenerExecutionStepping);
+
+        const breakModeSelect: HTMLSelectElement = this._document.getElementById("breakMode-selector") as HTMLSelectElement;
+        breakModeSelect.addEventListener("change", this.onChangeListenerBreakMode);
     }
 
     /**
@@ -1602,12 +1718,32 @@ export class Renderer {
      * This method updates the log-widget with a message.
      * @param message The message that gets appended to the log-widget. 
      */
-    public async updateLog(message: string): Promise<void> {
+    public async updateLog(messageBatch: string[]): Promise<void> {
         const log: HTMLElement | null = document.getElementById("log");
         if (log !== null) {
-            log.children.namedItem("log-content")!.insertAdjacentElement("beforeend", document.createElement("br"));
-            log.children.namedItem("log-content")!.insertAdjacentText("beforeend", message);
-            log.children.namedItem("log-content")!.scrollTop = log.children.namedItem("log-content")!.scrollHeight;
+            const logContent: Element = log.children.namedItem("log-content")!;
+            const fragment = document.createDocumentFragment();
+            const shortenedLines = messageBatch.slice(-this._maxLogLines);
+            if (messageBatch.length >= this._maxLogLines) {
+                logContent.innerHTML = "";
+            }
+            for (const line of shortenedLines) {
+                if (line === " ") {
+                    const br = document.createElement("br");
+                    fragment.appendChild(br);
+                } else {
+                    const div = document.createElement("div");
+                    div.textContent = line;
+                    fragment.appendChild(div);
+                }
+                
+            }
+            logContent.appendChild(fragment);
+
+            while (logContent.children.length > this._maxLogLines) {
+                logContent.removeChild(logContent.firstElementChild!);
+            }
+            logContent.scrollTop = logContent.scrollHeight;
         }
         return;
     }
@@ -1791,6 +1927,8 @@ export class Renderer {
     public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement): Promise<void> {
         const ramCells: Map<number, Byte> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
         const ramContent: Array<Byte> = Array.from(ramCells.values());
+        const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
+        const breakpoints: Set<number> = new Set<number>(breakpointArray);
         for (let i = 0; i < ramContent.length;) {
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
             const binary = ramContent.slice(i, (i + this.ramBlockSize));
@@ -1799,6 +1937,9 @@ export class Renderer {
             const physicalAddressColumn = tableRow.insertCell();
             const virtualAddressColumn = tableRow.insertCell();
             const assemblyInstruction = tableRow.insertCell();
+            const breakpointCell = tableRow.insertCell();
+
+            breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
 
             const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i);
             const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i + (this.ramBlockSize - 1));
@@ -1813,6 +1954,16 @@ export class Renderer {
 
             const addressFrom = "0x" + (physicalAddressStart + i).toString(16);
             const addressTo = "0x" + (physicalAddressStart + i + (this.ramBlockSize - 1)).toString(16);
+            breakpointCell.dataset.physicalAddress = addressFrom;
+
+            if (breakpoints.has(physicalAddressStart + i)) {
+                breakpointCell.innerHTML = "x";
+                breakpointCell.dataset.breakpointStatus = "true";
+            } else {
+                breakpointCell.innerHTML = "";
+                breakpointCell.dataset.breakpointStatus = "false";
+            }
+            
             physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
             assemblyInstruction.innerHTML = instructionString;
             ramTableBody.appendChild(tableRow);
@@ -1845,6 +1996,8 @@ export class Renderer {
         } else if (dataMode === "ASSEMBLY") {
             const instructionHead = tableRow.insertCell();
             instructionHead.innerHTML = "Assembly Instruction";
+            const breakpointHead = tableRow.insertCell();
+            breakpointHead. innerHTML = "Breakpoint";
         }
         
     }

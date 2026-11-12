@@ -97,3 +97,7 @@ out/
 
 # Ignore transpiled TypeScript files
 dist/
+
+# Ignore compiled user programs
+os_filesystem/bin/*
+!os_filesystem/bin/.gitkeep

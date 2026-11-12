@@ -12,9 +12,31 @@
                 <li>
                     <button id="cycle-btn">
                         <img id="next_cycle" title="Triggers execution of the next instruction" src="" alt="Button for triggering the next instruction cycle">
-                        Next instruction
+                        <span id="cycle-btn-text">Next instruction</span>
                     </button>
+                    
                 </li>
+                <div class="control-module" stepping-mode="SINGLE" break-mode="breakOnKernel">
+                    <div class="lg-text">Execution Stepping</div>
+                    <div class="sm-text subtitle">Breakpoint</div>
+                    <select id="stepping-selector" title="Stepping mode for program execution">
+                        <option selected value="SINGLE">Single Instruction</option>
+                        <option value="CALL">Next Call</option>
+                        <option value="RET">Next Return</option>
+                        <option value="IRET">Next Interrupt Return</option>
+                        <option value="JMP">Next Jump</option>
+                        <option value="INT">Next Interrupt</option>
+                        <option value="TLB_CHANGE">Next TLB Change</option>
+                        <option value="PROCESS_EXIT">Process Exit</option>
+                        <option value="BREAKPOINT">Breakpoint</option>
+                    </select>
+
+                    <div class="sm-text subtitle">Break Mode</div>
+                    <select id="breakMode-selector" title="Select in which mode the breakpoints get respected">
+                        <option selected value="breakOnKernel">Kernel and User</option>
+                        <option value="breakOnUser">User Only</option>
+                    </select>
+                </div>
                 <div class="search-module control-module" id="ram-search" search-location="PHYSICAL">
                         <div class="lg-text">RAM-Cell Search</div>
                         <input type="text" class="ram-searchfield" name="searchbox" id="ramsearch-input" value="0x0" maxlength="10">

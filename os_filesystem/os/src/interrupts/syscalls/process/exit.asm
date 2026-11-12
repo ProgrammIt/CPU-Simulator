@@ -27,6 +27,11 @@
     ;   none
     CALL UTIL_CLEAR_PAGE_DIRECTORY_TABLE
     
+    ; Let the simulator know the program exited and the memory has been cleaned up.
+    ; This is needed to make sure the simulator can halt on program exit once all the clean up is done.
+    ; Otherwise the simulator would halt while the program technically has not exited fully yet.
+    DEV $CONST_DEV_COMMAND_PROGRAM_EXIT_SIGNAL, $0
+
     ; UTIL_SCHEDULER
     ; Parameters:
     ;   none     
