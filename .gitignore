@@ -99,4 +99,5 @@ out/
 dist/
 
 # Ignore compiled user programs
-os_filesystem/bin/
+os_filesystem/bin/*
+!os_filesystem/bin/.gitkeep
