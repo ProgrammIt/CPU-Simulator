@@ -320,11 +320,8 @@ export class CPUCore {
 
         while (true) {
             if (this.flags.interrupt && this.interruptQueue.length !== 0) {
-
-                const nextInterrupt = this.interruptQueue.shift()!;
-
                 try {            
-                    this.handleInterrupt(nextInterrupt);
+                    this.handleInterrupt(this.interruptQueue.shift()!);
                 } catch(error) {
                     if (error instanceof BreakpointError) {
                         return;
@@ -355,10 +352,10 @@ export class CPUCore {
             }
 
             // Failsafe to prevent loop if no breakpoint exists
-            executedInstructions += this.flags.isInUserMode() || this.debugKernel ? 1 : 0 
+            executedInstructions += wasInUserMode || this.debugKernel ? 1 : 0 
 
             if (executedInstructions >= this.MAX_INSTRUCTIONS_PER_CYCLE) {
-                this.logToLogger("\n + Cycle limit reached. No breakpoint found for the selected stepping mode!");
+                this.logToLogger("\nCycle limit reached. No breakpoint found for the selected stepping mode!");
                 return;
             }
         }
@@ -432,7 +429,7 @@ export class CPUCore {
         }
 
         // Check for breakpoints triggered by the current instruction
-        if (this.flags.isInUserMode() || this.debugKernel) {
+        if (this.debugKernel || this.flags.isInUserMode()) {
             switch (this.executionStepping) {
                 case ProgramExecutionStepping.PROCESS_EXIT:
                     if (this._programExited) {
@@ -477,7 +474,7 @@ export class CPUCore {
         const decodedOpCode: OpCode = encodedOpCode as OpCode;
 
         // Check for breakpoints on the current instruction.
-        if (this._runStatus === RunStatus.Running && (this.flags.isInUserMode() || this.debugKernel)) {
+        if ((this.debugKernel || this.flags.isInUserMode()) && this._runStatus === RunStatus.Running) {
             switch (this.executionStepping) {
                 case ProgramExecutionStepping.SINGLE:
                     throw new BreakpointError();
@@ -604,46 +601,31 @@ export class CPUCore {
      * This method executes the instruction found in the EIR register.
      */
     private execute(): void {
-        if (this._decodedInstruction === null) {
-            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
-        }
         const operation: OpCode = this._decodedInstruction.instruction;
 
-        let logText = "";
-
-        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel)
-        {
+        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel) {
             const currentOperation:string = OpCode[operation];
-            logText = this.getLogText(currentOperation)
-        }
+            let logText = this.getLogText(currentOperation)
 
-        if (DebugLogger.isLoggingEnabled()) {
+            if (DebugLogger.isLoggingEnabled()) {
+                if (OpCode.CALL === operation || OpCode.INT === operation) {
+                    this._debugLogger.push(" ");
+                } else if (OpCode.RET === operation || OpCode.IRET === operation) {
+                    this._debugLogger.removeIndentation();
+                }
 
-            if (OpCode.CALL === operation || OpCode.INT === operation)
-            {
-                this._debugLogger.push(" ");
+                this._debugLogger.push(logText);
             }
 
-            if (OpCode.RET === operation || OpCode.IRET === operation)
-            {
-                this._debugLogger.removeIndentation();
+            if (this.flags.isInUserMode() || this.debugKernel) {
+                if (this.flags.isInKernelMode()) {
+                    logText = "\nKernel Executing:    " + logText;
+                } else {
+                    logText = "\nExecuting:    " + logText;
+                }
+                                
+                this.logToLogger(logText);
             }
-
-            this._debugLogger.push(logText);
-        }
-
-        if (this.flags.isInUserMode() || this.debugKernel) {
-            let log;
-            if (this.flags.isInKernelMode()) {
-                log = "Kernel Executing:    ";
-            } else {
-                log = "Executing:    ";
-            }
-            
-            log += logText;
-            
-            this.logToLogger(" ");
-            this.logToLogger(log);
         }
 
         switch (operation) {
