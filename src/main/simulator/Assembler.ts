@@ -362,6 +362,16 @@ export class Assembler {
 				}
 				continue;
 			} 
+
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationUninitialized, "gim"))) {
+				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationUninitialized, "gim");
+				const regexMatch = regexExp.exec(line);
+				if (regexMatch !== null) {
+					this.uninitializedData.set(regexMatch[1], 4);
+					lines.delete(lineNo);
+				}
+				continue;
+			} 
 			
 			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim");

@@ -26,3 +26,6 @@
 .INCLUDE "os/src/util/setup_kernel_L2_mapping"
 
 .INCLUDE "os/src/util/load_segment"
+
+.INCLUDE "os/src/util/load_uninitialized_segment"
+

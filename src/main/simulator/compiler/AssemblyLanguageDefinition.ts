@@ -1,5 +1,6 @@
 export interface AssemblyLanguageDefinition {
     variable_formats: {
+        declarationUninitialized: string;
         declarationDecimal: string;
         declarationHexadecimal: string;
         declarationBinary: string;

@@ -483,8 +483,7 @@ export class CPUCore {
                 let log = "Executing:    ";
                 log += logText;
                 
-                this.logToLogger(" ");
-                this.logToLogger(log);
+                this.logToLogger("\n" + log);
             }
         }
 
@@ -730,7 +729,7 @@ export class CPUCore {
                 if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
                     text += " 0x" + this._decodedInstruction.operand1!.value.toString(16);
                 } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    text += " @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, true).toString(16) + ")";
+                    text += " @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
                 } else {
                     const register = this.decodeReadableRegister(this._decodedInstruction.operand1!.value);
 
@@ -746,7 +745,7 @@ export class CPUCore {
                 if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
                     operand = this._decodedInstruction.operand1!.value;
                 } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    operand = this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, true);
+                    operand = this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false);
                 } else {
                     operand = this.readRegister(this._decodedInstruction.operand1!);
                 }
@@ -756,7 +755,7 @@ export class CPUCore {
                 if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.IMMEDIATE) {
                     text += ", 0x" + this._decodedInstruction.operand2!.value.toString(16);
                 } else if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    text += ", @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, true).toString(16) + ")";
+                    text += ", @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
                 } else {
                     const register = this.decodeReadableRegister(this._decodedInstruction.operand2!.value);
 
