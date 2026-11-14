@@ -7,6 +7,8 @@ import { DoubleWord } from './types/binary/DoubleWord';
 import { Byte } from './types/binary/Byte';
 import { PageNumber } from './types/binary/PageNumber';
 import { PageTableEntry } from './types/binary/PageTableEntry';
+import { ProgramExecutionStepping } from './types/enumerations/ProgramExecutionStepping';
+import { PhysicalAddress } from './types/binary/PhysicalAddress';
 
 declare global {
 	interface Window {
@@ -71,13 +73,23 @@ contextBridge.exposeInMainWorld("simulator", {
 		ipcRenderer.on("enable_auto_scroll_page_table", () => callback()),
 	keyboardInterrupt: (consoleInput: string) =>
 		ipcRenderer.send("keyboard_interrupt", consoleInput),
+	changeExecutionStepping: (executionStepping: ProgramExecutionStepping) =>
+		ipcRenderer.send("change_execution_stepping", executionStepping),
+	changeBreakMode: (debugKernel: boolean) =>
+		ipcRenderer.send("change_break_mode", debugKernel),
+	addBreakpoint: (breakpoint: PhysicalAddress) =>
+		ipcRenderer.send("add_breakpoint", breakpoint),
+	removeBreakpoint: (breakpoint: PhysicalAddress) =>
+		ipcRenderer.send("remove_breakpoint", breakpoint),
+	getBreakpoints: () =>
+		ipcRenderer.invoke("get_breakpoints"),
 });
 
 contextBridge.exposeInMainWorld("windowUpdate", {
 	onClearLog: (callback: () => void) => 
 		ipcRenderer.on('clear_log', () => callback()),
-	onUpdateLog: (callback: (message: string) => void) => 
-		ipcRenderer.on('update_log', (_event, message) => callback(message)),
+	onUpdateLog: (callback: (messageBatch: string[]) => void) => 
+		ipcRenderer.on('update_log', (_event, messageBatch) => callback(messageBatch)),
 	onHideLog: (callback: () => void) =>
 		ipcRenderer.on("hide_log", () => callback()),
 	onShowLog: (callback: () => void) =>

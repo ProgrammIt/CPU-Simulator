@@ -4,10 +4,11 @@ import { RAM } from "./functional_units/RAM";
 import { DoubleWord } from "../../types/binary/DoubleWord";
 import { DataSizes } from "../../types/enumerations/DataSizes";
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { DebugLogger } from "./Logger";
+import { DebugLogger } from "./DebugLogger";
 import { Byte } from "../../types/binary/Byte";
 import { getMainWindow } from "../index";
 import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
+import { GUILogger } from "./GUILogger";
 import { ProgramMetadata } from "../../types/enumerations/ProgramMetadata";
 
 /**
@@ -19,6 +20,8 @@ export class SimulationController {
     private static _instance: SimulationController | null = null;
     private _assembler: Assembler;
     private _programmLoaded: boolean;
+    private _debugLogger: DebugLogger;
+    private _guiLogger: GUILogger;
 
     /**
      * This class member stores the highest available memory address of physical memory.
@@ -59,13 +62,20 @@ export class SimulationController {
      * @param [devMode=false] 
      */
     private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, processingWidth: DataSizes = DataSizes.DOUBLEWORD, devMode: boolean = false) {
+        this._debugLogger = new DebugLogger(1000, 50);
+        this._guiLogger = new GUILogger(2000, 200, true);
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.pathToOSFilesystem = pathToOSFilesystem;
-        this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem);
+        this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem, this._debugLogger, this._guiLogger);
         this._assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
         this._programmLoaded = true;
         this.autoScrollForPageTableEnabled = true;
         this.inDevMode = devMode;
+    }
+
+    public dispose(): void {
+        this._debugLogger.dispose();
+        this._guiLogger.dispose();
     }
 
     /**
@@ -162,17 +172,15 @@ export class SimulationController {
             //Assemble the idle program (needed by the os)
             this.assembleOSCode(this.pathToOSFilesystem + "/os/user/idle.asm");
         }
-        this.createUtilityFiles();
+        this.createUtilityFiles(); 
+        
+        this._debugLogger.push("");
+        this._debugLogger.push("Starting Execution")
+        this._debugLogger.push("");
 
-        DebugLogger.log("");
-        DebugLogger.log("Starting Execution");
-        DebugLogger.log("");
-
-        this.core.cycle();    
-                
         getMainWindow()?.webContents.send('clear_log');
 
-        getMainWindow()?.webContents.send('update_log', "OS Initialized");
+        this._guiLogger.push("Simulator Initialized")
 
         return;
     }

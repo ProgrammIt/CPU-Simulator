@@ -4,11 +4,27 @@ import { ArithmeticLogicUnit } from "../main/simulator/execution_units/Arithmeti
 import { RAM } from "../main/simulator/functional_units/RAM";
 import { CPUCore } from "../main/simulator/execution_units/CPUCore";
 import { DataSizes } from "../types/enumerations/DataSizes";
+import { DebugLogger } from "../main/simulator/DebugLogger";
+import { GUILogger } from "../main/simulator/GUILogger";
 
 describe("Test ALU", () => {
+    let debugLogger: DebugLogger;
+    let guiLogger: GUILogger;
     const mainMemory = new RAM(DoubleWord.SIZE);
-    const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem");
-    const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(cpu);
+    let cpu: CPUCore;
+    let alu: ArithmeticLogicUnit;;
+
+    beforeAll(() => {
+        debugLogger = new DebugLogger(100, 10);
+        guiLogger = new GUILogger(1000, 100, true);
+        cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
+        alu = new ArithmeticLogicUnit(cpu);
+    });
+
+    afterAll(() => {
+        debugLogger.dispose();
+        guiLogger.dispose();
+    });
 
     test("Perform logical NOT on binary representation of decimal 255", () => {
         const testDoubleword: DoubleWord = DoubleWord.fromNumber(255);

@@ -1,6 +1,7 @@
 
 import { SimulationController } from "../main/simulator/SimulationController";
 import { DoubleWord } from "../types/binary/DoubleWord";
+import { ProgramExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
 
 describe('Test Simulator', () => {
   test('loop program', () => {
@@ -21,14 +22,18 @@ describe('Test Simulator', () => {
 
     console.time("execution");
 
-    while (simulator.core.edx.content !== 0x12345678 as DoubleWord) {
-      simulator.core.cycle();
-    }
+    simulator.core.MAX_INSTRUCTIONS_PER_CYCLE = Infinity;
+    simulator.core.executionStepping = ProgramExecutionStepping.INT;
+    simulator.core.debugKernel = false;
+
+    simulator.core.cycle();
 
     console.timeEnd("execution");
 
     console.timeEnd("total");
 
-    expect(simulator.core.eax.content).toEqual(DoubleWord.ZERO);
+    expect(simulator.core.edx.content).toEqual(DoubleWord.fromNumber(0x12345678));
+
+    simulator.dispose();
   });
 });

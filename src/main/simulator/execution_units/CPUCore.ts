@@ -15,10 +15,9 @@ import { DevOperations } from "../../../types/enumerations/DevOperations";
 import { PassthroughFilesystem } from "../os/PassthroughFilesystem";
 import { InterruptNumbers } from "../../../types/enumerations/InterruptNumbers";
 import { Timer } from "./Timer";
-import { DebugLogger } from "../Logger";
+import { DebugLogger } from "../DebugLogger";
 import { ExceptionError } from "../../../types/errors/ExceptionError";
 import { RegisterNumbers } from "../../../types/enumerations/RegisterNumbers";
-import { getMainWindow } from "../../index";
 import { PeriodicTimer } from "./PeriodicTimer";
 import { PhysicalAddress } from "../../../types/binary/PhysicalAddress";
 import { OpCode } from "../../../types/enumerations/OpCode";
@@ -26,6 +25,14 @@ import { DecodedOperandTypes } from "../../../types/enumerations/DecodedOperandT
 import { EncodedOperandTypes } from "../../../types/enumerations/EncodedOperandTypes";
 import { VirtualAddress } from "../../../types/binary/VirtualAddress";
 import { Bit } from "../../../types/binary/Bit";
+import { ProgramExecutionStepping } from "../../../types/enumerations/ProgramExecutionStepping";
+import { GUILogger } from "../GUILogger";
+import { BreakpointError } from "../../../types/errors/BreakpointError";
+
+export enum RunStatus {
+    Running,
+    Halted
+}
 
 /**
  * This class represents a CPU core which is capable of executing InstructionSet.
@@ -182,12 +189,69 @@ export class CPUCore {
     private readonly secondOperandInstructionValue: InstructionOperand = new InstructionOperand();
 
     /**
+     * This field stores the program execution stepping.
+     */
+    public executionStepping: ProgramExecutionStepping;
+
+    /**
+     * This field is used to determine if the stop points should also be considered in kernel mode.
+     * This field is set by the GUI.
+     */
+    public debugKernel: boolean;
+
+    /**
+     * This boolean is used to track if a program exited. It is used in combination with the ProgramExecutionStepping to determine if the simulator should halt.
+     */
+    private _programExited: boolean;
+
+    /**
+     * This field stores a DebugLogger instance to log to the typescript console.
+     */
+    private readonly _debugLogger: DebugLogger;
+
+    /**
+     * This field stores a GUILogger instance to log to the log widget in the gui.
+     */
+    private readonly _guiLogger: GUILogger;
+
+    /**
+     * This record is used as lookup to determine if an OpCode is a breakpoint in the defined program stepping mode.
+     */
+    private readonly _haltConditions: Record<ProgramExecutionStepping, Set<OpCode> | undefined> = {
+        [ProgramExecutionStepping.SINGLE]: undefined,
+        [ProgramExecutionStepping.CALL]: new Set([OpCode.CALL]),
+        [ProgramExecutionStepping.RET]: new Set([OpCode.RET]),
+        [ProgramExecutionStepping.IRET]: new Set([OpCode.IRET]),
+        [ProgramExecutionStepping.JMP]: new Set([OpCode.JA,OpCode.JAE,OpCode.JB,OpCode.JBE,OpCode.JE,
+            OpCode.JG,OpCode.JGE,OpCode.JL,OpCode.JLE,OpCode.JMP,OpCode.JNE,OpCode.JNZ,OpCode.JZ]),
+        [ProgramExecutionStepping.INT]: new Set([OpCode.INT]),
+        [ProgramExecutionStepping.TLB_CHANGE]: undefined,
+        [ProgramExecutionStepping.PROCESS_EXIT]: undefined,
+        [ProgramExecutionStepping.BREAKPOINT]: undefined,
+    };
+
+    /**
+     * This field stores a set of breakpoints to stop on, if the execution stepping mode is set to breakpoint.
+     */
+    private _breakpoints: Set<PhysicalAddress> = new Set<PhysicalAddress>();
+
+    /**
+     * This field stores the current physical address of the instruction that is being executed.
+     */
+    private _currentPhysicalAddress: PhysicalAddress = PhysicalAddress.fromNumber(0);
+
+    public MAX_INSTRUCTIONS_PER_CYCLE = 100_000;
+
+    private _runStatus: RunStatus = RunStatus.Running;
+
+
+    /**
      * Constructs an instance of a CPU core.
      * @param mainMemory The main memory of the system.
      * @param processingWidth The maximum number of bits that can be processed in one cycle. Defaults to 32 bits (a doubleword).
      * @param pathToOSFilesystem 
      */
-    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string) {
+    public constructor(mainMemory: RAM, processingWidth: DataSizes, pathToOSFilesystem: string, debugLogger: DebugLogger, guiLogger: GUILogger) {
         this._virtualizationEnabled = false;
         this.eax = new GeneralPurposeRegister("EAX");
         this.ebx = new GeneralPurposeRegister("EBX");
@@ -211,6 +275,11 @@ export class CPUCore {
         this.timer = new Timer(this);
         this.periodicTimer = new PeriodicTimer(this);
         this._processingWidth = processingWidth;
+        this.executionStepping = ProgramExecutionStepping.SINGLE;
+        this.debugKernel = true;
+        this._programExited = false;
+        this._debugLogger = debugLogger;
+        this._guiLogger = guiLogger;
     }
 
     /**
@@ -247,38 +316,73 @@ export class CPUCore {
      */
     public cycle(): void {
 
-        if (this.flags.isInUserMode()) {
-            this.internalCycle();
-            this.timer.countDown();
-            this.periodicTimer.countDown();
-        }
+        let executedInstructions = 0;
 
-        while (this.flags.isInKernelMode()) {
-            this.internalCycle();
-        }
+        while (true) {
+            if (this.flags.interrupt && this.interruptQueue.length !== 0) {
 
-        //Now handle all pending interrupts
-        while (this.flags.interrupt && this.interruptQueue.length !== 0) {
+                const nextInterrupt = this.interruptQueue.shift()!;
 
-            this.handleInterrupt(this.interruptQueue.shift() as InterruptNumbers)
+                try {            
+                    this.handleInterrupt(nextInterrupt);
+                } catch(error) {
+                    if (error instanceof BreakpointError) {
+                        return;
+                    } else {
+                        throw error;
+                    }
+                }
+            }
 
-            while (this.flags.isInKernelMode()) {
+            const wasInUserMode = this.flags.isInUserMode();
+
+            // run one internal cycle handling one instruction
+            try {
                 this.internalCycle();
+            } catch {
+                 // Intruction will not be re-executed so count down the timers if in user mode
+                if (wasInUserMode && this._runStatus === RunStatus.Running) {
+                    this.timer.countDown();
+                    this.periodicTimer.countDown();
+                }
+                return;
+            }
+
+            // If the previous instruction was executed in user mode, then count down the timers
+            if (wasInUserMode) {
+                this.timer.countDown();
+                this.periodicTimer.countDown();
+            }
+
+            // Failsafe to prevent loop if no breakpoint exists
+            executedInstructions += this.flags.isInUserMode() || this.debugKernel ? 1 : 0 
+
+            if (executedInstructions >= this.MAX_INSTRUCTIONS_PER_CYCLE) {
+                this.logToLogger("\n + Cycle limit reached. No breakpoint found for the selected stepping mode!");
+                return;
             }
         }
     }
-
 
     /**
      * Handle an Interrupt
      * @param number Interrupt number to handle
      */
-    public handleInterrupt(number: InterruptNumbers)
+    public handleInterrupt(number: InterruptNumbers): void
     {
         if (this.flags.interrupt == 0) {
+            this._runStatus === RunStatus.Running;
             this.reset(); //A CPU exception while interrupt are disabled -> panic, reset system
             throw new Error("Kernel Panic");
         }
+
+        if (this._runStatus === RunStatus.Running && this.debugKernel) {
+            this._runStatus = RunStatus.Halted;
+            this.interruptQueue.unshift(number);
+            throw new BreakpointError();
+        }
+
+        this._runStatus === RunStatus.Running;
 
         const returnValue = this.eip.content;
 
@@ -291,7 +395,7 @@ export class CPUCore {
         // Overwrite the return address on the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, returnValue, false);
 
-        DebugLogger.log("Interrupt: " + InterruptNumbers[number]);
+        this._debugLogger.push("Interrupt: " + InterruptNumbers[number]);
 
         if (number === InterruptNumbers.PAGE_FAULT) {
 
@@ -308,17 +412,39 @@ export class CPUCore {
 
     /**
      * This method performs a single instruction cycle.
+     * @returns The run status.
      */
     private internalCycle(): void {
-        try {
+        try {            
             this.fetch();
             this.decode();
             this.execute();
         } catch(error) {
-            if (!(error instanceof ExceptionError)) {
-                DebugLogger.log(error);
+            if (error instanceof ExceptionError) {
+                this.handleInterrupt(error.interruptNumber);
+            } else if (error instanceof BreakpointError) {
+                this._runStatus = RunStatus.Halted;
+                this.eip.content = DoubleWord.fromNumber(this.eip.content - 4);
+                throw error;
             } else {
-                this.handleInterrupt(error.interruptNumber)
+                this._debugLogger.push(this.errorToString(error));
+            }
+        }
+
+        // Check for breakpoints triggered by the current instruction
+        if (this.flags.isInUserMode() || this.debugKernel) {
+            switch (this.executionStepping) {
+                case ProgramExecutionStepping.PROCESS_EXIT:
+                    if (this._programExited) {
+                        this._programExited = false;
+                        throw new BreakpointError();
+                    }
+                    break;
+                case ProgramExecutionStepping.TLB_CHANGE:
+                    if (this._breakpoints.has(this._currentPhysicalAddress)) {
+                        throw new BreakpointError();
+                    }
+                    break;
             }
         }
     }
@@ -329,7 +455,8 @@ export class CPUCore {
      * The command pointer always points to the instruction to be executed.
      */
     private fetch(): void {
-        this.eir.content = this.mmu.readDoublewordFrom(this.eip.content, true);
+        this._currentPhysicalAddress = this.mmu.translate(this.eip.content, false, true);
+        this.eir.content = this.mainMemory.readDoublewordFrom(this._currentPhysicalAddress);
         this.eip.content = DoubleWord.fromNumber(this.eip.content + 4);
     }
 
@@ -339,16 +466,38 @@ export class CPUCore {
     private decode(): void {
         // Split instruction into its components.
         const encodedOpCode: Byte =  DoubleWord.getFirstByte(this.eir.content);
-        const encodedFirstOperandType: number =  DoubleWord.getBitRange(this.eir.content, 8, 12);
-        const encodedSecondOperandType: number =  DoubleWord.getBitRange(this.eir.content, 12, 16);
-        // Decode instruction.
-        // Decode instruction type.
-
+        
         if (!(encodedOpCode in OpCode)) {
+            this._runStatus = RunStatus.Running;
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
 
+        // Decode instruction type.
+
         const decodedOpCode: OpCode = encodedOpCode as OpCode;
+
+        // Check for breakpoints on the current instruction.
+        if (this._runStatus === RunStatus.Running && (this.flags.isInUserMode() || this.debugKernel)) {
+            switch (this.executionStepping) {
+                case ProgramExecutionStepping.SINGLE:
+                    throw new BreakpointError();
+                case ProgramExecutionStepping.BREAKPOINT:
+                    if (this._breakpoints.has(this._currentPhysicalAddress)) {
+                        throw new BreakpointError();
+                    }
+                    break;
+                default:
+                    if (this._haltConditions[this.executionStepping]?.has(decodedOpCode)) {
+                        throw new BreakpointError();
+                    }
+                    break;
+            }
+        }
+        
+        this._runStatus = RunStatus.Running;
+
+        const encodedFirstOperandType: number =  DoubleWord.getBitRange(this.eir.content, 8, 12);
+        const encodedSecondOperandType: number =  DoubleWord.getBitRange(this.eir.content, 12, 16);
 
         // Decode type of first operand.
 
@@ -455,36 +604,46 @@ export class CPUCore {
      * This method executes the instruction found in the EIR register.
      */
     private execute(): void {
+        if (this._decodedInstruction === null) {
+            throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
+        }
         const operation: OpCode = this._decodedInstruction.instruction;
 
-        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode())
+        let logText = "";
+
+        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel)
         {
-            let logText = "";
-
             const currentOperation:string = OpCode[operation];
-            logText = this.getLogText(currentOperation);
+            logText = this.getLogText(currentOperation)
+        }
 
-            if (DebugLogger.isLoggingEnabled()) {
+        if (DebugLogger.isLoggingEnabled()) {
 
-                if (OpCode.CALL === operation || OpCode.INT === operation)
-                {
-                    DebugLogger.log("");
-                }
-
-                if (OpCode.RET === operation || OpCode.IRET === operation)
-                {
-                    DebugLogger.removeIndentation()
-                }
-
-                DebugLogger.log(logText);
+            if (OpCode.CALL === operation || OpCode.INT === operation)
+            {
+                this._debugLogger.push(" ");
             }
 
-            if (this.flags.isInUserMode()) {
-                let log = "Executing:    ";
-                log += logText;
-                
-                this.logToLogger("\n" + log);
+            if (OpCode.RET === operation || OpCode.IRET === operation)
+            {
+                this._debugLogger.removeIndentation();
             }
+
+            this._debugLogger.push(logText);
+        }
+
+        if (this.flags.isInUserMode() || this.debugKernel) {
+            let log;
+            if (this.flags.isInKernelMode()) {
+                log = "Kernel Executing:    ";
+            } else {
+                log = "Executing:    ";
+            }
+            
+            log += logText;
+            
+            this.logToLogger(" ");
+            this.logToLogger(log);
         }
 
         switch (operation) {
@@ -696,27 +855,27 @@ export class CPUCore {
 
             if (OpCode.CALL === operation || OpCode.INT === operation)
             {
-                DebugLogger.addIndentation()
+                this._debugLogger.addIndentation();
             }
 
             try {
                 if (this.esp.content <= 0xFFFFFFFC) {
                     const physicalAddress: DoubleWord = this.mmu.translate(this.esp.content, false, false, true);
                     const value = this.mainMemory.readDoublewordFrom(physicalAddress);
-                    DebugLogger.log("Stack value: 0x" + value.toString(16));
+                    this._debugLogger.push("Stack value: 0x" + value.toString(16));
                 }
                 else {
-                    DebugLogger.log("Stack empty");
+                    this._debugLogger.push("Stack empty");
                 }
             }
             catch {
-                DebugLogger.log("Stack value: Not Mapped");
+                this._debugLogger.push("Stack value: Not Mapped");
             }
             
             if (OpCode.RET === operation || OpCode.IRET === operation)
             {
-                DebugLogger.log("");
-                DebugLogger.removeIndentation()
+                this._debugLogger.push(" ");
+                this._debugLogger.removeIndentation();
             }
         }
     }
@@ -1009,6 +1168,10 @@ export class CPUCore {
             case DevOperations.PERFORMANCE_TIMER_STOP:{
                 const id: number = op2;
                 this.performanceTimerStop(id);
+                break;
+            }
+            case DevOperations.PROGRAM_EXIT_SIGNAL:{
+                this._programExited = true;
                 break;
             }
             default:{
@@ -2429,7 +2592,7 @@ export class CPUCore {
 
         if (this.flags.isInUserMode())
         {
-            this.logToLogger("");
+            this.logToLogger(" ");
             this.logToLogger("Interrupted: " + InterruptNumbers[target.value]);
         }
 
@@ -2787,7 +2950,7 @@ export class CPUCore {
      */
     public reset(): void {
         // TODO implement
-        this.logToLogger("");
+        this.logToLogger(" ");
         this.logToLogger("KERNEL PANIC! RESETING SIMULATOR");
     }
 
@@ -2796,7 +2959,57 @@ export class CPUCore {
      * @param message The message that gets appended to the log-widget.
      */
     public logToLogger(message: string): void {
-        getMainWindow()?.webContents.send('update_log', message);
-        DebugLogger.log("  " + message);
+        this._guiLogger.push(message);
+        this._debugLogger.push(" " + message);
+    }
+
+
+    /**
+     * This function is used to help convert an error into a string for logging.
+     * @param error Ther error that should be turned into a string.
+     * @returns The error in string format.
+     */
+    private errorToString(error: unknown): string {
+        if (error instanceof Error) {
+            return error.message;
+        }
+
+        if (typeof error === "string") {
+            return error;
+        }
+
+        if (typeof error === "number" || typeof error === "boolean") {
+            return String(error);
+        }
+
+        try {
+            return JSON.stringify(error);
+        } catch {
+            return "Unknown error type";
+        }
+    }
+
+    /**
+     * This function is used to add a breakpoint to the breakpoint set.
+     * @param breakpoint New breakpoint to stop the simulator on.
+     */
+    public addBreakpoint(breakpoint: PhysicalAddress) {
+        this._breakpoints.add(breakpoint);
+    }
+
+    /**
+     * This function is used to query all currently set breakpoints.
+     * @returns All currently set breakpoints.
+     */
+    public getBreakpoints(): Set<PhysicalAddress> {
+        return this._breakpoints;
+    }
+
+    /**
+     * This function is used to remove a spewcific breakpoint from the breakpoint set.
+     * @param breakpoint The breakpoint to be removed from the breakpoint set.
+     */
+    public removeBreakpoint(breakpoint: PhysicalAddress) {
+        this._breakpoints.delete(breakpoint);
     }
 }

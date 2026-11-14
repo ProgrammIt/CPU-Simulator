@@ -95,12 +95,26 @@ export class MemoryManagementUnit {
      */
     public reverseMemoryMap: memoryMapEntry[][] = [];
 
+    private _tlbHasChanged: boolean = false;
+
     /**
      * Constructs a new instance from the given references of the RAM, Page Table Pointer (PTP) register, the ALU and the EFLAGS register.
      * @param cpu A reference to the cpu.
      */
     public constructor(cpu: CPUCore) {
         this._cpu = cpu;
+    }
+
+    /**
+     * This method checks if the tlb entries have been changed by checking the appropriate boolean and then resets the state.
+     * @returns The change state of the TLB.
+     */
+    public consumeTLBChangeState(): boolean {
+        if (this._tlbHasChanged) {
+            this._tlbHasChanged = false;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -130,6 +144,7 @@ export class MemoryManagementUnit {
      */
     public invalidateTLB(): void {
         this._tlb.clear();
+        this._tlbHasChanged = true;
     }
 
     /**
@@ -209,7 +224,7 @@ export class MemoryManagementUnit {
         }
 
         const pageNumber = PageNumber.fromVirtualAddress(virtualAddress);
-        const pageTableEntry: PageTableEntry = disableTlb ? this.findPageTableEntry(virtualAddress) : this._tlb.get(pageNumber) ?? this.findPageTableEntry(virtualAddress);
+        let pageTableEntry: PageTableEntry = disableTlb ? this.findPageTableEntry(virtualAddress) : this._tlb.get(pageNumber) ?? this.findPageTableEntry(virtualAddress);
         const pageTableEntryFlags: PageTableEntryFlags = PageTableEntry.getFlags(pageTableEntry);
 
         // Check if a page frame is connected to the page to which the specified virtual address refers.
@@ -232,17 +247,22 @@ export class MemoryManagementUnit {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
         }
+
+        let updatedPageTable = false;
         
         if (attemptsToWrite && !PageTableEntryFlags.hasChanged(pageTableEntryFlags)) {
             // Set changed flag bit.
             PageTableEntryFlags.setChangedFlagBit(pageTableEntryFlags, 1);
+            pageTableEntry = PageTableEntry.fromFlagAndFrameNumber(pageTableEntryFlags, PageTableEntry.getFrameNumber(pageTableEntry));
             // Update flag bits of page table entry in memory as well.
             this._cpu.mainMemory.writeDoubleWordTo(this.findPageTableEntryPhysicalAddress(virtualAddress), pageTableEntry);
+            updatedPageTable = true;
         }
 
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
-        if (!disableTlb) {
+        if (!disableTlb && (!this._tlb.has(pageNumber) || updatedPageTable)) {
             this._tlb.insert(pageNumber, pageTableEntry);
+            this._tlbHasChanged = true;
         }
 
         return PhysicalAddress.fromPageTableEntryAndVirtualAddress(pageTableEntry, virtualAddress);

@@ -1,6 +1,8 @@
+import { DebugLogger } from "../main/simulator/DebugLogger";
 import { CPUCore } from "../main/simulator/execution_units/CPUCore";
 import { MemoryManagementUnit } from "../main/simulator/execution_units/MemoryManagementUnit";
 import { RAM } from "../main/simulator/functional_units/RAM";
+import { GUILogger } from "../main/simulator/GUILogger";
 import { Byte } from "../types/binary/Byte";
 import { DoubleWord } from "../types/binary/DoubleWord";
 import { FrameNumber } from "../types/binary/FrameNumber";
@@ -10,9 +12,23 @@ import { VirtualAddress } from "../types/binary/VirtualAddress";
 import { DataSizes } from "../types/enumerations/DataSizes";
 
 describe("Read from and write to main memory using MMU as proxy", () => {
+    let debugLogger: DebugLogger;
+    let guiLogger: GUILogger;
     const mainMemory = new RAM(DoubleWord.SIZE);
-    const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem");
-    const mmu = new MemoryManagementUnit(cpu);
+    let cpu: CPUCore;
+    let mmu: MemoryManagementUnit;
+
+    beforeAll(() => {
+        debugLogger = new DebugLogger(100, 10);
+        guiLogger = new GUILogger(1000, 100, true);
+        cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
+        mmu = new MemoryManagementUnit(cpu);
+    });
+
+    afterAll(() => {
+        debugLogger.dispose();
+        guiLogger.dispose();
+    });
 
     test("Write byte to main memory", () => {
 
