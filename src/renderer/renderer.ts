@@ -1621,7 +1621,9 @@ export class Renderer {
         const detailedRAMViewTable = this._document.getElementById("ram-table") as HTMLTableCellElement;
         const tableBody = detailedRAMViewTable.getElementsByTagName('tbody')[0];
         
-        let physicalAddress = targetAddress;
+        targetAddress = targetAddress - targetAddress % this.ramBlockSize;
+
+        let physicalAddress = DoubleWord.fromNumber(targetAddress);
         if (isVirtualAddress) {
             physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(Number(targetAddress)));
         }

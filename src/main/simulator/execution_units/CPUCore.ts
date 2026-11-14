@@ -421,7 +421,6 @@ export class CPUCore {
                 this.handleInterrupt(error.interruptNumber);
             } else if (error instanceof BreakpointError) {
                 this._runStatus = RunStatus.Halted;
-                this.eip.content = DoubleWord.fromNumber(this.eip.content - 4);
                 throw error;
             } else {
                 this._debugLogger.push(this.errorToString(error));
@@ -461,6 +460,7 @@ export class CPUCore {
      * This method decodes or analyses the instruction found in the EIR register and prepares execution.
      */
     private decode(): void {
+        const resetPointer = DoubleWord.fromNumber(this.eip.content - 4);
         // Split instruction into its components.
         const encodedOpCode: Byte =  DoubleWord.getFirstByte(this.eir.content);
         
@@ -473,32 +473,13 @@ export class CPUCore {
 
         const decodedOpCode: OpCode = encodedOpCode as OpCode;
 
-        // Check for breakpoints on the current instruction.
-        if ((this.debugKernel || this.flags.isInUserMode()) && this._runStatus === RunStatus.Running) {
-            switch (this.executionStepping) {
-                case ProgramExecutionStepping.SINGLE:
-                    throw new BreakpointError();
-                case ProgramExecutionStepping.BREAKPOINT:
-                    if (this._breakpoints.has(this._currentPhysicalAddress)) {
-                        throw new BreakpointError();
-                    }
-                    break;
-                default:
-                    if (this._haltConditions[this.executionStepping]?.has(decodedOpCode)) {
-                        throw new BreakpointError();
-                    }
-                    break;
-            }
-        }
-        
-        this._runStatus = RunStatus.Running;
-
         const encodedFirstOperandType: number =  DoubleWord.getBitRange(this.eir.content, 8, 12);
         const encodedSecondOperandType: number =  DoubleWord.getBitRange(this.eir.content, 12, 16);
 
         // Decode type of first operand.
 
         if (!(encodedFirstOperandType in EncodedOperandTypes)) {
+            this._runStatus = RunStatus.Running;
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
 
@@ -507,6 +488,7 @@ export class CPUCore {
         // Decode type of second operand.
 
         if (!(encodedSecondOperandType in EncodedOperandTypes)) {
+            this._runStatus = RunStatus.Running;
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
 
@@ -595,22 +577,14 @@ export class CPUCore {
         this._decodedInstruction.instruction = decodedOpCode;
         this._decodedInstruction.operand1 = decodedFirstOperand;
         this._decodedInstruction.operand2 = decodedSecondOperand;
-    }
 
-    /**
-     * This method executes the instruction found in the EIR register.
-     */
-    private execute(): void {
-        const operation: OpCode = this._decodedInstruction.instruction;
-
-        if (DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel) {
-            const currentOperation:string = OpCode[operation];
-            let logText = this.getLogText(currentOperation)
+        if ((DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel) && this._runStatus === RunStatus.Running) {
+            let logText = this.getLogText(OpCode[decodedOpCode])
 
             if (DebugLogger.isLoggingEnabled()) {
-                if (OpCode.CALL === operation || OpCode.INT === operation) {
+                if (OpCode.CALL === decodedOpCode || OpCode.INT === decodedOpCode) {
                     this._debugLogger.push(" ");
-                } else if (OpCode.RET === operation || OpCode.IRET === operation) {
+                } else if (OpCode.RET === decodedOpCode || OpCode.IRET === decodedOpCode) {
                     this._debugLogger.removeIndentation();
                 }
 
@@ -628,6 +602,38 @@ export class CPUCore {
             }
         }
 
+        // Check for breakpoints on the current instruction.
+        if ((this.debugKernel || this.flags.isInUserMode()) && this._runStatus === RunStatus.Running) {
+            let reachedBreakpoint = false;
+            switch (this.executionStepping) {
+                case ProgramExecutionStepping.SINGLE:
+                    reachedBreakpoint = true;
+                    break;
+                case ProgramExecutionStepping.BREAKPOINT:
+                    if (this._breakpoints.has(this._currentPhysicalAddress)) {
+                        reachedBreakpoint = true;
+                    }
+                    break;
+                default:
+                    if (this._haltConditions[this.executionStepping]?.has(decodedOpCode)) {
+                        reachedBreakpoint = true;
+                    }
+                    break;
+            }
+            if (reachedBreakpoint) {
+                this.eip.content = resetPointer;
+                throw new BreakpointError();
+            }
+        }
+        
+        this._runStatus = RunStatus.Running;
+    }
+
+    /**
+     * This method executes the instruction found in the EIR register.
+     */
+    private execute(): void {
+        const operation: OpCode = this._decodedInstruction.instruction;
         switch (operation) {
             case OpCode.NOT:
                 this.not(
