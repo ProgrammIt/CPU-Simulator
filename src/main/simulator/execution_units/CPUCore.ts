@@ -368,7 +368,7 @@ export class CPUCore {
     public handleInterrupt(number: InterruptNumbers): void
     {
         if (this.flags.interrupt == 0) {
-            this._runStatus === RunStatus.Running;
+            this._runStatus = RunStatus.Running;
             this.reset(); //A CPU exception while interrupt are disabled -> panic, reset system
             throw new Error("Kernel Panic");
         }
@@ -379,7 +379,7 @@ export class CPUCore {
             throw new BreakpointError();
         }
 
-        this._runStatus === RunStatus.Running;
+        this._runStatus = RunStatus.Running;
 
         const returnValue = this.eip.content;
 
