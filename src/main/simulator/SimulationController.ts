@@ -62,8 +62,8 @@ export class SimulationController {
      * @param [devMode=false] 
      */
     private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, processingWidth: DataSizes = DataSizes.DOUBLEWORD, devMode: boolean = false) {
-        this._debugLogger = new DebugLogger(1000, 50);
-        this._guiLogger = new GUILogger(2000, 200, true);
+        this._debugLogger = new DebugLogger(2000, 500);
+        this._guiLogger = new GUILogger(2000, 100, true);
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.pathToOSFilesystem = pathToOSFilesystem;
         this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem, this._debugLogger, this._guiLogger);

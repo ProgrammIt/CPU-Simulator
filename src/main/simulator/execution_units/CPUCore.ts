@@ -355,7 +355,7 @@ export class CPUCore {
             executedInstructions += wasInUserMode || this.debugKernel ? 1 : 0 
 
             if (executedInstructions >= this.MAX_INSTRUCTIONS_PER_CYCLE) {
-                this.logToLogger("\nCycle limit reached. No breakpoint found for the selected stepping mode!");
+                this.logToLogger("Cycle limit reached. No breakpoint found for the selected stepping mode!");
                 return;
             }
         }
@@ -391,8 +391,6 @@ export class CPUCore {
         //Make sure the current instruction is re-executed
         // Overwrite the return address on the STACK.
         this.mmu.writeDoublewordTo(this.esp.content, returnValue, false);
-
-        this._debugLogger.push("Interrupt: " + InterruptNumbers[number]);
 
         if (number === InterruptNumbers.PAGE_FAULT) {
 
@@ -581,24 +579,17 @@ export class CPUCore {
         if ((DebugLogger.isLoggingEnabled() || this.flags.isInUserMode() || this.debugKernel) && this._runStatus === RunStatus.Running) {
             let logText = this.getLogText(OpCode[decodedOpCode])
 
-            if (DebugLogger.isLoggingEnabled()) {
-                if (OpCode.CALL === decodedOpCode || OpCode.INT === decodedOpCode) {
-                    this._debugLogger.push(" ");
-                } else if (OpCode.RET === decodedOpCode || OpCode.IRET === decodedOpCode) {
-                    this._debugLogger.removeIndentation();
-                }
-
-                this._debugLogger.push(logText);
+            if (this.flags.isInKernelMode()) {
+                logText = "Kernel Executing:    " + logText;
+            } else {
+                logText = "Executing:    " + logText;
             }
 
-            if (this.flags.isInUserMode() || this.debugKernel) {
-                if (this.flags.isInKernelMode()) {
-                    logText = "\nKernel Executing:    " + logText;
-                } else {
-                    logText = "\nExecuting:    " + logText;
-                }
-                                
+
+            if (this.flags.isInUserMode() || this.debugKernel) {                                
                 this.logToLogger(logText);
+            } else if (DebugLogger.isLoggingEnabled()) {
+                this._debugLogger.push(logText);
             }
         }
 
@@ -841,11 +832,6 @@ export class CPUCore {
 
         if (DebugLogger.isLoggingEnabled()) {
 
-            if (OpCode.CALL === operation || OpCode.INT === operation)
-            {
-                this._debugLogger.addIndentation();
-            }
-
             try {
                 if (this.esp.content <= 0xFFFFFFFC) {
                     const physicalAddress: DoubleWord = this.mmu.translate(this.esp.content, false, false, true);
@@ -859,10 +845,10 @@ export class CPUCore {
             catch {
                 this._debugLogger.push("Stack value: Not Mapped");
             }
-            
-            if (OpCode.RET === operation || OpCode.IRET === operation)
-            {
-                this._debugLogger.push(" ");
+
+            if (OpCode.CALL === operation || OpCode.INT === operation) {
+                this._debugLogger.addIndentation();
+            } else if (OpCode.RET === operation || OpCode.IRET === operation) {
                 this._debugLogger.removeIndentation();
             }
         }
@@ -871,46 +857,44 @@ export class CPUCore {
     private getLogText(currentOperation: string): string {
         let text = currentOperation;
 
-        if (this._decodedInstruction.operandCount !== 0) {
-            if (this._decodedInstruction.operandCount === 1) {
-                if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
-                    text += " 0x" + this._decodedInstruction.operand1!.value.toString(16);
-                } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    text += " @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
-                } else {
-                    const register = this.decodeReadableRegister(this._decodedInstruction.operand1!.value);
+        if (this._decodedInstruction.operandCount === 1) {
+            if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
+                text += " 0x" + this._decodedInstruction.operand1!.value.toString(16);
+            } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+                text += " @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
+            } else {
+                const register = this.decodeReadableRegister(this._decodedInstruction.operand1!.value);
 
-                    if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.REGISTER_INDIRECT) {
-                        text += " *%" + register.name + " (*0x" + register.content.toString(16) + ")" + " (0x" + this.mmu.readDoublewordFrom(register.content, false).toString(16) + ")";
-                    } else {
-                        text += " %" + register.name + " (0x" + register.content.toString(16) + ")";
-                    }
+                if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.REGISTER_INDIRECT) {
+                    text += " *%" + register.name + " (*0x" + register.content.toString(16) + ")" + " (0x" + this.mmu.readDoublewordFrom(register.content, false).toString(16) + ")";
+                } else {
+                    text += " %" + register.name + " (0x" + register.content.toString(16) + ")";
                 }
-            } else if (this._decodedInstruction.operandCount === 2) {
-                let operand: DoubleWord;
+            }
+        } else if (this._decodedInstruction.operandCount === 2) {
+            let operand: DoubleWord;
 
-                if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
-                    operand = this._decodedInstruction.operand1!.value;
-                } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    operand = this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false);
+            if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.IMMEDIATE) {
+                operand = this._decodedInstruction.operand1!.value;
+            } else if (this._decodedInstruction.operand1!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+                operand = this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false);
+            } else {
+                operand = this.readRegister(this._decodedInstruction.operand1!);
+            }
+            const hexOperand = operand.toString(16);
+            text += " 0x" + hexOperand;
+
+            if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.IMMEDIATE) {
+                text += ", 0x" + this._decodedInstruction.operand2!.value.toString(16);
+            } else if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
+                text += ", @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
+            } else {
+                const register = this.decodeReadableRegister(this._decodedInstruction.operand2!.value);
+
+                if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.REGISTER_INDIRECT) {
+                    text += ", *%" + register.name + " (*0x" + register.content.toString(16) + ")" + " (0x" + this.mmu.readDoublewordFrom(register.content, false).toString(16) + ")";
                 } else {
-                    operand = this.readRegister(this._decodedInstruction.operand1!);
-                }
-                const hexOperand = operand.toString(16);
-                text += " 0x" + hexOperand;
-
-                if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.IMMEDIATE) {
-                    text += ", 0x" + this._decodedInstruction.operand2!.value.toString(16);
-                } else if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.MEMORY_ADDRESS) {
-                    text += ", @0x" + this._decodedInstruction.operand1!.value.toString(16) + " ($0x" + this.mmu.readDoublewordFrom(this._decodedInstruction.operand1!.value, false).toString(16) + ")";
-                } else {
-                    const register = this.decodeReadableRegister(this._decodedInstruction.operand2!.value);
-
-                    if (this._decodedInstruction.operand2!.type === EncodedOperandTypes.REGISTER_INDIRECT) {
-                        text += ", *%" + register.name + " (*0x" + register.content.toString(16) + ")" + " (0x" + this.mmu.readDoublewordFrom(register.content, false).toString(16) + ")";
-                    } else {
-                        text += ", %" + register.name + " (0x" + register.content.toString(16) + ")";
-                    }
+                    text += ", %" + register.name + " (0x" + register.content.toString(16) + ")";
                 }
             }
         }
@@ -2578,9 +2562,8 @@ export class CPUCore {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
 
-        if (this.flags.isInUserMode())
+        if (this.debugKernel || this.flags.isInUserMode())
         {
-            this.logToLogger(" ");
             this.logToLogger("Interrupted: " + InterruptNumbers[target.value]);
         }
 
@@ -2938,7 +2921,6 @@ export class CPUCore {
      */
     public reset(): void {
         // TODO implement
-        this.logToLogger(" ");
         this.logToLogger("KERNEL PANIC! RESETING SIMULATOR");
     }
 
@@ -2948,7 +2930,7 @@ export class CPUCore {
      */
     public logToLogger(message: string): void {
         this._guiLogger.push(message);
-        this._debugLogger.push(" " + message);
+        this._debugLogger.push(message);
     }
 
 

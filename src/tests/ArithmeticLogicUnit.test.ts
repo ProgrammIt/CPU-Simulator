@@ -15,7 +15,7 @@ describe("Test ALU", () => {
     let alu: ArithmeticLogicUnit;;
 
     beforeAll(() => {
-        debugLogger = new DebugLogger(100, 10);
+        debugLogger = new DebugLogger(500, 500);
         guiLogger = new GUILogger(1000, 100, true);
         cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
         alu = new ArithmeticLogicUnit(cpu);
