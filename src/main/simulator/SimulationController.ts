@@ -18,7 +18,7 @@ export class SimulationController {
     public readonly core: CPUCore;
     public readonly mainMemory: RAM;
     private static _instance: SimulationController | null = null;
-    private _assembler: Assembler;
+    public readonly assembler: Assembler;
     private _programmLoaded: boolean;
     private _debugLogger: DebugLogger;
     private _guiLogger: GUILogger;
@@ -67,7 +67,7 @@ export class SimulationController {
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.pathToOSFilesystem = pathToOSFilesystem;
         this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem, this._debugLogger, this._guiLogger);
-        this._assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
+        this.assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
         this._programmLoaded = true;
         this.autoScrollForPageTableEnabled = true;
         this.inDevMode = devMode;
@@ -256,7 +256,7 @@ export class SimulationController {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<DoubleWord> = this._assembler.assemble(fileContents);
+        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents);
 
         const buffer = Buffer.allocUnsafe(compiledProgram.length * 4);
 
@@ -281,7 +281,7 @@ export class SimulationController {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<DoubleWord> = this._assembler.assemble(fileContents, baseOffeset);
+        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents, baseOffeset);
 
         const buffer = Buffer.allocUnsafe(compiledProgram.length * 4);
 

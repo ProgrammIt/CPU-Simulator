@@ -231,11 +231,21 @@ export function disassemble(program: DoubleWord[],
     return disassembledCode;
 };
 
-export function disassembleIfPossble(program: DoubleWord[]): string {
+export function disassembleIfPossble(program: DoubleWord[]): [string, number][] {
 
-    let disassembledCode = "";
+    let disassembledCode = [];
+    let instructionLenght = 1;
 
-    for (let i = 0; i < program.length; i++) {
+    for (let i = 0; i < program.length; i+=instructionLenght) {
+
+        let disassembledInstruction = "";
+        instructionLenght = 1;
+
+        if (program[i] === 0)
+        {
+            disassembledCode.push(["Invalid", 1] as [string, number]);
+            continue;
+        }
 
         const operationHeader = program[i];
         
@@ -247,7 +257,7 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
         // Decode instruction type.
 
         if (!(encodedOpCode in OpCode)) {
-            disassembledCode = "Invalid\n";
+            disassembledCode.push(["Invalid", 1] as [string, number]);
             continue;
         }
 
@@ -256,7 +266,7 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
         // Decode type of first operand.
 
         if (!(encodedFirstOperandType in EncodedOperandTypes)) {
-            disassembledCode = "Invalid\n";
+            disassembledCode.push(["Invalid", 1] as [string, number]);
             continue;
         }
 
@@ -265,7 +275,7 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
         // Decode type of second operand.
 
         if (!(encodedSecondOperandType in EncodedOperandTypes)) {
-            disassembledCode = "Invalid\n";
+            disassembledCode.push(["Invalid", 1] as [string, number]);
             continue;        
         }
 
@@ -277,7 +287,7 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
         switch (decodedFirstOperandType) {
             case EncodedOperandTypes.PADDING:
                 decodedFirstOperandType ^= 0b1000; 
-                i++;
+                instructionLenght++;
                 // fallthrough
             case EncodedOperandTypes.NO:
                 decodedFirstOperand = null;
@@ -297,18 +307,18 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
             case EncodedOperandTypes.IMMEDIATE:
                 decodedFirstOperand = new InstructionOperand(
                     decodedFirstOperandType,
-                    program[i+1]
+                    program[instructionLenght+i]
                 );
-                i++;
+                instructionLenght++;
                 break;
             case EncodedOperandTypes.EXTERNAL_REGISTER_DIRECT:
             case EncodedOperandTypes.EXTERNAL_REGISTER_INDIRECT:
                 decodedFirstOperandType ^= 0b1000; 
                 decodedFirstOperand = new InstructionOperand(
                     decodedFirstOperandType as DecodedOperandTypes,
-                    program[i+1]
+                    program[instructionLenght+i]
                 );
-                i++;
+                instructionLenght++;
                 break;
             default:
                 decodedFirstOperand = null;
@@ -318,7 +328,7 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
         switch (decodedSecondOperandType) {
             case EncodedOperandTypes.PADDING:
                 decodedSecondOperandType ^= 0b1000; 
-                i++
+                instructionLenght++
                 // fallthrough
             case EncodedOperandTypes.NO:
                 decodedSecondOperand = null;
@@ -338,64 +348,64 @@ export function disassembleIfPossble(program: DoubleWord[]): string {
             case EncodedOperandTypes.IMMEDIATE:
                 decodedSecondOperand = new InstructionOperand(
                     decodedSecondOperandType,
-                    program[i+1]
+                    program[instructionLenght+i]
                 );
-                i++;
+                instructionLenght++;
                 break;
             case EncodedOperandTypes.EXTERNAL_REGISTER_DIRECT:
             case EncodedOperandTypes.EXTERNAL_REGISTER_INDIRECT:
                 decodedSecondOperandType ^= 0b1000; 
                 decodedSecondOperand = new InstructionOperand(
                     decodedSecondOperandType as DecodedOperandTypes,
-                    program[i+1]
+                    program[instructionLenght+i]
                 );
-                i++;
+                instructionLenght++;
                 break;
             default:
                 decodedSecondOperand = null;
                 break;
         }
 
-        disassembledCode += OpCode[decodedOpCode];
+        disassembledInstruction += OpCode[decodedOpCode];
 
         if (decodedFirstOperand !== null) {
             if (decodedFirstOperand.value === undefined) {
-                disassembledCode += "Invalid\n";
+                disassembledCode.push(["Decoding Error", instructionLenght] as [string, number]);
                 continue;        
             }
             if (decodedFirstOperandType === EncodedOperandTypes.IMMEDIATE) {
-                disassembledCode += " $0x" + decodedFirstOperand.value.toString(16);
+                disassembledInstruction += " $0x" + decodedFirstOperand.value.toString(16);
             } else if (decodedFirstOperandType === EncodedOperandTypes.MEMORY_ADDRESS) {
-                disassembledCode += " @0x" + decodedFirstOperand.value.toString(16);
+                disassembledInstruction += " @0x" + decodedFirstOperand.value.toString(16);
             } else {
 
                 if (decodedFirstOperandType === EncodedOperandTypes.REGISTER_INDIRECT) {
-                    disassembledCode += " *%" + RegisterNumbers[decodedFirstOperand.value];
+                    disassembledInstruction += " *%" + RegisterNumbers[decodedFirstOperand.value];
                 } else {
-                    disassembledCode += " %" + RegisterNumbers[decodedFirstOperand.value];
+                    disassembledInstruction += " %" + RegisterNumbers[decodedFirstOperand.value];
                 }
             }
         }
 
         if (decodedSecondOperand !== null) {
             if (decodedSecondOperand.value === undefined) {
-                disassembledCode = "Invalid\n";
+                disassembledCode.push(["Decoding Error", instructionLenght] as [string, number]);
                 continue;        
             }
             if (decodedSecondOperandType === EncodedOperandTypes.IMMEDIATE) {
-                disassembledCode += ", $0x" + decodedSecondOperand.value.toString(16);
+                disassembledInstruction += ", $0x" + decodedSecondOperand.value.toString(16);
             } else if (decodedSecondOperandType === EncodedOperandTypes.MEMORY_ADDRESS) {
-                disassembledCode += ", @0x" + decodedSecondOperand.value.toString(16);
+                disassembledInstruction += ", @0x" + decodedSecondOperand.value.toString(16);
             } else {
                 if (decodedSecondOperandType === EncodedOperandTypes.REGISTER_INDIRECT) {
-                    disassembledCode += ", *%" + RegisterNumbers[decodedSecondOperand.value];
+                    disassembledInstruction += ", *%" + RegisterNumbers[decodedSecondOperand.value];
                 } else {
-                    disassembledCode += ", %" + RegisterNumbers[decodedSecondOperand.value];
+                    disassembledInstruction += ", %" + RegisterNumbers[decodedSecondOperand.value];
                 }
             }
         }
             
-        disassembledCode += "\n";
+        disassembledCode.push([disassembledInstruction, instructionLenght] as [string, number]);
     }
 
     return disassembledCode;

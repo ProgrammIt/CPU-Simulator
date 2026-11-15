@@ -715,7 +715,7 @@ export class Renderer {
                 const previousBlockSize: string = parent.getAttribute("block-size")!;
                 this.ramBlockSize = parseInt(previousBlockSize);
             }
-            this.checkAddressRangeInput();
+            this.checkAddressRangeInput(null);
             this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
         }
         return;
@@ -736,7 +736,7 @@ export class Renderer {
                 return;
             } else {
                 this.ramBlockSize = parseInt(demandedBlockSize);
-                this.checkAddressRangeInput();
+                this.checkAddressRangeInput(null);
                 this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
             }
         }
@@ -871,7 +871,7 @@ export class Renderer {
             target.value = target.value.slice(0, -1);
         }
         if (keyboardEvent.key === 'Enter') {
-            this.checkAddressRangeInput();
+            this.checkAddressRangeInput(target);
             this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
         }
     }
@@ -884,7 +884,7 @@ export class Renderer {
      * @param endAddress The address that will be used as the last memory address to display
      * @returns Returns true or false depending on if the address range and format is valid
      */
-    private checkAddressRangeInput(): void {
+    private checkAddressRangeInput(target: HTMLInputElement | null): void {
         const inputBoxStart: HTMLInputElement = this._document.getElementById("ram-input-box-start") as HTMLInputElement;
         const inputBoxEnd: HTMLInputElement = this._document.getElementById("ram-input-box-end") as HTMLInputElement;
         const startAddress = inputBoxStart.value;
@@ -892,9 +892,28 @@ export class Renderer {
         const regExEnter = /(0[x])?[a-fA-F0-9]+$/;
         const inputStartValidFormat = regExEnter.test(startAddress);
         const inputEndValidFormat = regExEnter.test(endAddress);
-        const startAddressDec = parseInt(startAddress,16) - parseInt(startAddress,16) % this.ramBlockSize;
-        const endAddressDec = parseInt(endAddress, 16) + (this.ramBlockSize - (parseInt(endAddress, 16) % this.ramBlockSize)) % this.ramBlockSize - 1;
-        if (inputStartValidFormat && inputEndValidFormat && startAddressDec <= endAddressDec) {
+        let startAddressDec = parseInt(startAddress,16);
+        let endAddressDec = parseInt(endAddress, 16);
+        if (inputStartValidFormat && inputEndValidFormat) {
+
+            if (startAddressDec > endAddressDec) {
+                endAddressDec = startAddressDec + 0xFFF;
+            }
+                    
+            if (endAddressDec - startAddressDec > 0xFFF) { //Set max size to 0xFFF
+                if (target === null || target === inputBoxStart) {
+                    endAddressDec = startAddressDec + 0xFFF;
+                } else {
+                    startAddressDec = endAddressDec - 0xFFF;
+                }
+            }
+
+            startAddressDec = startAddressDec - startAddressDec % this.ramBlockSize;
+            endAddressDec = endAddressDec + (this.ramBlockSize - (endAddressDec % this.ramBlockSize)) % this.ramBlockSize - 1;
+
+            startAddressDec = Math.max(0, endAddressDec - 0xFFF);
+            endAddressDec = Math.min(startAddressDec + 0xFFF, DoubleWord.MAX_POSITIVE_NUMBER)
+
             this.ramViewStartAddress = startAddressDec;
             this.ramViewEndAddress = endAddressDec;
             inputBoxStart.value =  "0x" + this.ramViewStartAddress.toString(16);
@@ -1621,11 +1640,9 @@ export class Renderer {
         const detailedRAMViewTable = this._document.getElementById("ram-table") as HTMLTableCellElement;
         const tableBody = detailedRAMViewTable.getElementsByTagName('tbody')[0];
         
-        targetAddress = targetAddress - targetAddress % this.ramBlockSize;
-
-        let physicalAddress = DoubleWord.fromNumber(targetAddress);
+        let physicalAddress = DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize);
         if (isVirtualAddress) {
-            physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(Number(targetAddress)));
+            physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize));
         }
 
         const blocksBefore: number = this.ramDataRepresentation === "UTF-8" ? 5 : Math.min(5, Math.floor(physicalAddress / this.ramBlockSize));
@@ -1640,12 +1657,12 @@ export class Renderer {
         inputBoxEnd.value = "0x" + endAddress.toString(16);
         this.ramViewStartAddress = startAddress;
         this.ramViewEndAddress = endAddress;
-        const targetAddressIndex: number = await this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress, physicalAddress);
-        const rowIndex = this.ramDataRepresentation === "UTF-8" ? targetAddressIndex : blocksBefore;
+        const targetAddressIndex: number = await this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress, targetAddress);
+        const rowIndex = this.ramDataRepresentation === "UTF-8" || this.ramDataRepresentation === "ASSEMBLY" ? targetAddressIndex : blocksBefore;
         const tableRow = tableBody.rows[rowIndex];
         for (const cell of tableRow.cells) {
             cell.classList.add("highlighted");
-            cell.scrollIntoView();
+            tableBody.rows[rowIndex - 1 < 0 ? 0 : rowIndex - 1].scrollIntoView();
         }
     }
 
@@ -1854,6 +1871,7 @@ export class Renderer {
         const utf8decoder = new TextDecoder("UTF-8");
         let targetAddressIndex:number = 0;
         let characterCounter: number = 0;
+        targetAddress = targetAddress - targetAddress % this.ramBlockSize
 
         for (let i = 0; i < ramContent.length;) {
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
@@ -1915,53 +1933,71 @@ export class Renderer {
      * @param physicalAddressStart The start address of the display range.
      * @param physicalAddressEnd The end address of the display range.
      * @param ramTableBody The table body element that is used to display the RAM view.
+     * @param targetAddress An address to find the row index for inside the table body.
+     * @returns The row index of the target address in the table body.
      */
-    public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement): Promise<void> {
+    public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement, targetAddress: number = 0): Promise<number> {
         const ramCells: Map<number, Byte> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
         const ramContent: Array<Byte> = Array.from(ramCells.values());
         const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
         const breakpoints: Set<number> = new Set<number>(breakpointArray);
+        let rowIndex = 0;
         for (let i = 0; i < ramContent.length; i += this.ramBlockSize) {
-            const tableRow: HTMLTableRowElement = this._document.createElement("tr");
             const binary = ramContent.slice(i, (i + this.ramBlockSize));
-            const instructionString = await this.getInstructionText(binary);
+            const instructions = await this.getInstructionText(binary);
 
-            const physicalAddressColumn = tableRow.insertCell();
-            const virtualAddressColumn = tableRow.insertCell();
-            const assemblyInstruction = tableRow.insertCell();
-            const breakpointCell = tableRow.insertCell();
+            let instructionOffset = i;
 
-            breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
+            for (let j = 0; j < instructions.length; j++) {
 
-            const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i);
-            const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i + (this.ramBlockSize - 1));
+                const tableRow: HTMLTableRowElement = this._document.createElement("tr");
 
-            for (let i = 0; i < virtualAddressesStart.length; i++) {
-                const virtualAddressFrom = "0x" + virtualAddressesStart[i].toString(16);
-                const virtualAddressTo= "0x" + VirtualAddressesEnd[i].toString(16);
-                virtualAddressColumn.append(virtualAddressFrom + " - " + virtualAddressTo);
-                const rowBreak: HTMLBRElement = this._document.createElement("br");
-                virtualAddressColumn.appendChild(rowBreak);
+                const physicalAddressColumn = tableRow.insertCell();
+                const virtualAddressColumn = tableRow.insertCell();
+                const assemblyInstruction = tableRow.insertCell();
+                const breakpointCell = tableRow.insertCell();
+
+                breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
+
+                const physicalAddressFrom = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset);
+                instructionOffset += instructions[j][1] * DoubleWord.NUMBER_OF_BYTES;
+                const physicalAddressTo = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset - 1);
+
+                if (targetAddress > physicalAddressTo) {
+                    rowIndex++;
+                }
+
+                const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressFrom);
+                const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressTo);
+
+                for (let i = 0; i < virtualAddressesStart.length; i++) {
+                    const virtualAddressFrom = "0x" + virtualAddressesStart[i].toString(16);
+                    const virtualAddressTo= "0x" + VirtualAddressesEnd[i].toString(16);
+                    virtualAddressColumn.append(virtualAddressFrom + " - " + virtualAddressTo);
+                    const rowBreak: HTMLBRElement = this._document.createElement("br");
+                    virtualAddressColumn.appendChild(rowBreak);
+                }
+
+                const addressFrom = "0x" + physicalAddressFrom.toString(16);
+                const addressTo = "0x" + physicalAddressTo.toString(16);
+                breakpointCell.dataset.physicalAddress = addressFrom;
+
+                if (breakpoints.has(physicalAddressFrom)) {
+                    breakpointCell.innerHTML = "x";
+                    breakpointCell.dataset.breakpointStatus = "true";
+                } else {
+                    breakpointCell.innerHTML = "";
+                    breakpointCell.dataset.breakpointStatus = "false";
+                }
+                
+                physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
+
+                const html = instructions[j][0];
+                assemblyInstruction.innerHTML = html;
+                ramTableBody.appendChild(tableRow);
             }
-
-            const addressFrom = "0x" + (physicalAddressStart + i).toString(16);
-            const addressTo = "0x" + (physicalAddressStart + i + (this.ramBlockSize - 1)).toString(16);
-            breakpointCell.dataset.physicalAddress = addressFrom;
-
-            if (breakpoints.has(physicalAddressStart + i)) {
-                breakpointCell.innerHTML = "x";
-                breakpointCell.dataset.breakpointStatus = "true";
-            } else {
-                breakpointCell.innerHTML = "";
-                breakpointCell.dataset.breakpointStatus = "false";
-            }
-            
-            physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
-
-            const html = instructionString.split("\n").map(a => `<p>${a}</p>`).join("");
-            assemblyInstruction.innerHTML = html;
-            ramTableBody.appendChild(tableRow);
         }
+        return rowIndex;
     }
 
     /**
@@ -2015,7 +2051,7 @@ export class Renderer {
         } else if (dataMode === "UTF-8") {
             targetAddressIndex = await this.createRamViewRowsUtf8(physicalStartAddress, physicalEndAddress, tableBody, targetAddress);
         } else if (dataMode === "ASSEMBLY") {
-            await this.createRamViewRowsAssembly(physicalStartAddress, physicalEndAddress, tableBody);
+            targetAddressIndex = await this.createRamViewRowsAssembly(physicalStartAddress, physicalEndAddress, tableBody, targetAddress);
         }
         return targetAddressIndex;
     }
@@ -2025,7 +2061,7 @@ export class Renderer {
      * @param instructions Assembly instructions in form of a byte array.
      * @returns An array of human readable assembly instructions.
      */
-    public async getInstructionText(instructions: Array<Byte>): Promise<string> {
+    public async getInstructionText(instructions: Array<Byte>): Promise<[string, number][]> {
         
         const data: DoubleWord[] = [];
 
