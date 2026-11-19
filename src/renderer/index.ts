@@ -29,6 +29,7 @@ window.onload = async () => {
 	renderer.registerConsoleListener();
 	renderer.registerAddressRangeBoxListener();
 	renderer.registerDetailedRamViewSelectElement();
+	renderer.registerExecutionSteppingSelectElement();
 
 	await renderer.readEAX(renderer.dataRepresentationEAX);
 	await renderer.readEBX(renderer.dataRepresentationEBX);
@@ -98,7 +99,7 @@ window.windowUpdate.onClearLog(() => {
 });
 
 
-window.windowUpdate.onUpdateLog((value: string) => {
+window.windowUpdate.onUpdateLog((value: string[]) => {
 	renderer.updateLog(value);
 });
 
