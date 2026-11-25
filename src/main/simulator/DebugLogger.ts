@@ -1,4 +1,4 @@
-import { createWriteStream, mkdirSync, rmdirSync, WriteStream } from "node:fs";
+import { createWriteStream, mkdirSync, WriteStream } from "node:fs";
 import { AbstractBatchLogger } from "./AbstractBatchLogger";
 import { dirname } from "node:path";
 
@@ -10,8 +10,7 @@ export class DebugLogger extends AbstractBatchLogger {
 
     private stream: WriteStream | undefined;
 
-    private readonly filename: string = `./logs/debug-${process.pid}.log`;
-
+    private readonly filename: string = `./logs/debug-${new Date().toISOString().slice(0, 19).replace("T", "_").replace(/:/g, "-")}_pid-${process.pid}.log`;
 
 
     public static isLoggingEnabled(): boolean {
@@ -42,11 +41,10 @@ export class DebugLogger extends AbstractBatchLogger {
     protected sendBatchToLog(logBatch: string[]): void {
         if (DebugLogger.logging&& logBatch.length !== 0) {
             if (!this.stream) {
-                const filename = `./logs/debug-${new Date().toISOString().slice(0, 19).replace("T", "_").replace(/:/g, "-")}_pid-${process.pid}.log`;
 
-                mkdirSync(dirname(filename), { recursive: true });
+                mkdirSync(dirname(this.filename), { recursive: true });
 
-                this.stream = createWriteStream(filename, {
+                this.stream = createWriteStream(this.filename, {
                     flags: "w"
                 });
             }
@@ -57,26 +55,26 @@ export class DebugLogger extends AbstractBatchLogger {
     /**
      * Disposes the logger and closes the file stream.
      */
-public override async dispose(): Promise<void> {
-    super.dispose();
+    public override async dispose(): Promise<void> {
+        super.dispose();
 
-    if (!this.stream) {
-        return;
-    }
+        if (!this.stream) {
+            return;
+        }
 
-    const stream = this.stream;
-    this.stream = undefined;
+        const stream = this.stream;
+        this.stream = undefined;
 
-    await new Promise<void>((resolve, reject) => {
-        stream.end((error?: Error | null) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+        await new Promise<void>((resolve, reject) => {
+            stream.end((error?: Error | null) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
-}
+    }
 }
 
 

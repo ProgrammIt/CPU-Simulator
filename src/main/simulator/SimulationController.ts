@@ -281,7 +281,7 @@ export class SimulationController {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents, baseOffeset);
+        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents, baseOffeset, ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS);
 
         const buffer = Buffer.allocUnsafe(compiledProgram.length * 4);
 

@@ -47,11 +47,6 @@ export class Renderer {
     private readonly _document: Document;
 
     /**
-     * This field indicates, whether an assembly program is currently loaded.
-     */
-    public programLoaded: boolean;
-
-    /**
      * This field stores a reference to the HTMLElement representing the EAX register.
      * @readonly
      */
@@ -758,7 +753,7 @@ export class Renderer {
             if (currentStepping === demandedStepping) {
                 return;
             } else {
-                const disableUserModeGUI: boolean = (demandedStepping === "IRET" || demandedStepping === "INT");
+                const disableUserModeGUI: boolean = (demandedStepping === "IRET");
                 breakModeSelector.disabled = disableUserModeGUI;
 
                 if (disableUserModeGUI) {
@@ -895,9 +890,12 @@ export class Renderer {
         let startAddressDec = parseInt(startAddress,16);
         let endAddressDec = parseInt(endAddress, 16);
         if (inputStartValidFormat && inputEndValidFormat) {
-
             if (startAddressDec > endAddressDec) {
-                endAddressDec = startAddressDec + 0xFFF;
+                if (target === null || target === inputBoxStart) {
+                    endAddressDec = Math.min(startAddressDec + 0xFFF, DoubleWord.MAX_POSITIVE_NUMBER);
+                } else {
+                    startAddressDec = Math.max(0, endAddressDec - 0xFFF);
+                }
             }
                     
             if (endAddressDec - startAddressDec > 0xFFF) { //Set max size to 0xFFF
@@ -909,10 +907,10 @@ export class Renderer {
             }
 
             startAddressDec = startAddressDec - startAddressDec % this.ramBlockSize;
-            endAddressDec = endAddressDec + (this.ramBlockSize - (endAddressDec % this.ramBlockSize)) % this.ramBlockSize - 1;
+            endAddressDec = endAddressDec + (this.ramBlockSize - (endAddressDec % this.ramBlockSize)) - 1;
 
-            startAddressDec = Math.max(0, endAddressDec - 0xFFF);
-            endAddressDec = Math.min(startAddressDec + 0xFFF, DoubleWord.MAX_POSITIVE_NUMBER)
+            startAddressDec = Math.max(0, startAddressDec);
+            endAddressDec = Math.min(endAddressDec, DoubleWord.MAX_POSITIVE_NUMBER + (this.ramBlockSize - (DoubleWord.MAX_POSITIVE_NUMBER % this.ramBlockSize)) - 1)
 
             this.ramViewStartAddress = startAddressDec;
             this.ramViewEndAddress = endAddressDec;
@@ -937,7 +935,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEAX(NumberSystem.HEX);
             if (this._eax !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -954,7 +952,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEBX(NumberSystem.HEX);
             if (this._ebx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -971,7 +969,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readECX(NumberSystem.HEX);
             if (this._ecx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -988,7 +986,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEDX(NumberSystem.HEX);
             if (this._edx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1005,7 +1003,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readESP(NumberSystem.HEX);
             if (this._esp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1022,7 +1020,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEIP(NumberSystem.HEX);
             if (this._eip !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1039,7 +1037,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readITP(NumberSystem.HEX);
             if (this._itp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1056,7 +1054,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readPTP(NumberSystem.HEX);
             if (this._ptp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), false);
             }
         } 
         return;
@@ -1173,7 +1171,6 @@ export class Renderer {
         this._listOfVisiblePageTableEntries = new Array<Element>();
         this.autoScrollForPageTableEnabled = true;
         this.ramViewFollowEip = true;
-        this.programLoaded = true;
         this._window = window;
         this.ramDataRepresentation = "BIN";
         this.ramBlockSize = 1;
@@ -1640,19 +1637,16 @@ export class Renderer {
         const detailedRAMViewTable = this._document.getElementById("ram-table") as HTMLTableCellElement;
         const tableBody = detailedRAMViewTable.getElementsByTagName('tbody')[0];
         
-        let physicalAddress = DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize);
         if (isVirtualAddress) {
-            physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize));
+            targetAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(targetAddress));
         }
+        const physicalAddress = DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize);
 
         const blocksBefore: number = this.ramDataRepresentation === "UTF-8" ? 5 : Math.min(5, Math.floor(physicalAddress / this.ramBlockSize));
         const blocksAfter: number = this.ramDataRepresentation === "UTF-8" ? 12 : 6;
 
-        let startAddress = physicalAddress - (blocksBefore * this.ramBlockSize);
-        const endAddress = physicalAddress + (blocksAfter * this.ramBlockSize) - 1;
-        if (startAddress < 0) {
-            startAddress = 0;
-        }
+        const startAddress = Math.max(0, physicalAddress - (blocksBefore * this.ramBlockSize));
+        const endAddress = Math.min(physicalAddress + (blocksAfter * this.ramBlockSize) - 1,  DoubleWord.MAX_POSITIVE_NUMBER + (this.ramBlockSize - (DoubleWord.MAX_POSITIVE_NUMBER % this.ramBlockSize)) - 1);
         inputBoxStart.value = "0x" + startAddress.toString(16);
         inputBoxEnd.value = "0x" + endAddress.toString(16);
         this.ramViewStartAddress = startAddress;
@@ -1685,13 +1679,7 @@ export class Renderer {
      * Performs the next CPU cycle (fetch, decode, execute).
      */
     public async cycle(): Promise<void> {
-        if (!this.programLoaded) {
-            alert("No programm is currently loaded!");
-            return;
-        }
-        if (!await this._window.simulator.nextCycle()) {
-            //alert("Programm finished execution.");
-        }
+        await this._window.simulator.nextCycle();
         // TODO: Fix bug!
         // await this.reloadPageTableView();
         await this.readEAX(this.dataRepresentationEAX);
@@ -1871,7 +1859,6 @@ export class Renderer {
         const utf8decoder = new TextDecoder("UTF-8");
         let targetAddressIndex:number = 0;
         let characterCounter: number = 0;
-        targetAddress = targetAddress - targetAddress % this.ramBlockSize
 
         for (let i = 0; i < ramContent.length;) {
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
@@ -1942,11 +1929,12 @@ export class Renderer {
         const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
         const breakpoints: Set<number> = new Set<number>(breakpointArray);
         let rowIndex = 0;
+        let instructionOffset = 0;
         for (let i = 0; i < ramContent.length; i += this.ramBlockSize) {
             const binary = ramContent.slice(i, (i + this.ramBlockSize));
             const instructions = await this.getInstructionText(binary);
 
-            let instructionOffset = i;
+            instructionOffset = i;
 
             for (let j = 0; j < instructions.length; j++) {
 
@@ -1996,6 +1984,8 @@ export class Renderer {
                 assemblyInstruction.innerHTML = html;
                 ramTableBody.appendChild(tableRow);
             }
+
+            i += (instructionOffset - i) % this.ramBlockSize;
         }
         return rowIndex;
     }
@@ -2091,5 +2081,4 @@ export class Renderer {
         }
         return virtualAddresses;
     }
-
 }

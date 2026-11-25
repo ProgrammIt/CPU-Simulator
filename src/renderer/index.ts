@@ -46,14 +46,11 @@ window.onload = async () => {
 };
 
 window.simulator.onLoadedAssemblyProgram(async (path: string | Error) => {
-
-
 	if (path instanceof Error) {
 		alert("Program rejected. " + path.message);
 		return
 	}
 
-	renderer.programLoaded = true;
 	// TODO: Fix bug!
 	// await renderer.createPageTableView();
 	await renderer.readEAX(renderer.dataRepresentationEAX);

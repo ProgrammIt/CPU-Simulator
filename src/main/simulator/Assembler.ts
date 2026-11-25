@@ -16,7 +16,6 @@ export class Assembler {
 	private readonly nopInstruction: DoubleWord[];
 
 	private encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS;
-	private instructionAlignment: number = 0;
 	private metadata: ProgramMetadata = [] as ProgramMetadata;
 	private jumpLabels: Map<string, [number, number | null]> = new Map();
 	private aliases: Map<string, DoubleWord> = new Map();
@@ -108,7 +107,6 @@ export class Assembler {
 		this.locateSymbols(lines);
 
 		let instructionSize = 0;
-		let alignmentOffset = 0;
 
 		// Second pass (encode all possible lines)
 		let byteCount = 0;
@@ -134,23 +132,6 @@ export class Assembler {
 				instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
 			}
 
-			if (this.instructionAlignment !== Byte.ZERO && (instructionSize % this.instructionAlignment) + alignmentOffset > this.instructionAlignment) { //This breaks alignemnt
-				//Insert NOPs to preserve alignment
-				if (typeof encodedLine !== "number") {
-					const padding: DoubleWord[] = [];
-					for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
-						padding.push(...this.nopInstruction);
-					}
-					padding.push(...encodedLine);
-					encodedInstructionsWithSymbols.set(lineNo, padding);
-				}
-
-				instructionSize += this.instructionAlignment - alignmentOffset;
-			}
-
-			alignmentOffset += instructionSize;
-			alignmentOffset = this.instructionAlignment === Byte.ZERO ? 0 : alignmentOffset % this.instructionAlignment;
-
 			byteCount += instructionSize;
 		}
 
@@ -159,23 +140,12 @@ export class Assembler {
 				this.jumpLabels.set(jumpLabel, [jumpLineNo, byteCount + baseOffset]);
 			}
 		}
-
-		if (alignmentOffset !== 0)
-		{
-			const padding: DoubleWord[] = [];
-			for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
-				padding.push(...this.nopInstruction);
-			}
-			encodedInstructionsWithSymbols.set(Math.max(...encodedInstructionsWithSymbols.keys()) + 1, padding);
-			byteCount += padding.length * DoubleWord.NUMBER_OF_BYTES;
-		}
  
 		this.writeMetadata(baseOffset, byteCount);
 
 		// Third pass (decode all lines with unresolved dependencies)
 		if (Array.from(encodedInstructionsWithSymbols.values()).some(v => typeof v === "string")) {
 			byteCount = 0;
-			alignmentOffset = 0;
 			instructionSize = 0
 			for (const [lineNo, line] of encodedInstructionsWithSymbols.entries()) {
 
@@ -189,22 +159,7 @@ export class Assembler {
 						encodedInstructionsWithSymbols.set(lineNo, encodedLine);
 						instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
 					}
-					
-					if (this.instructionAlignment !== Byte.ZERO && (instructionSize % this.instructionAlignment) + alignmentOffset > this.instructionAlignment) { //This breaks alignemnt
-						//Insert NOPs to preserve alignment
-						const padding: DoubleWord[] = [];
-						for (let i = alignmentOffset; i < this.instructionAlignment; i += DoubleWord.NUMBER_OF_BYTES) {
-							padding.push(...this.nopInstruction);
-						}
-						padding.push(...encodedLine);
-						encodedInstructionsWithSymbols.set(lineNo, padding);
-
-						instructionSize += this.instructionAlignment - alignmentOffset;
-					}
 				}
-
-				alignmentOffset += instructionSize;
-				alignmentOffset = this.instructionAlignment === Byte.ZERO ? 0 : alignmentOffset % this.instructionAlignment;
 
 				byteCount += instructionSize
 			}
@@ -249,7 +204,7 @@ export class Assembler {
 
 		this.metadata.push(magicNumber);
 		this.metadata.push(programHeaderOffset);
-		this.metadata.push(DoubleWord.fromWords(ProgramMetadata.ISA_VERSION, Word.fromBytes(this.encodingType as Byte, this.instructionAlignment / DoubleWord.NUMBER_OF_BYTES as Byte)));
+		this.metadata.push(DoubleWord.fromWords(ProgramMetadata.ISA_VERSION, this.encodingType as Word));
 		this.metadata.push(DoubleWord.ZERO);
 
 
@@ -922,20 +877,13 @@ export class Assembler {
 	 * @param code File contents of an .asm file containing a computer program written in assembly language.
 	 * @param baseOffset Base address where the program will be in memory. Needed to adjust static addresses in jump labels. Default is 0.
 	 * @param [encodingType=ProgramMetadata.InstructionEncodingType.FIXED_SIZE] 
-	 * @param [instructionAlignment=Byte.fromNumber(3)] Instruction alignment in doublewords (must be >= 3 or 0). If 0, no alignment is enforced.
 	 * @returns An array of DoubleWords representing the binary encoded instructions of the given computer program.
 	 */
 	public assemble(code: string, 
 		baseOffset: number = 0, 
-		encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.FIXED_SIZE,
-		instructionAlignment: Byte = Byte.fromNumber(3)): DoubleWord[] {
+		encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.FIXED_SIZE): DoubleWord[] {
 
 		this.encodingType = encodingType;
-		this.instructionAlignment = instructionAlignment * DoubleWord.NUMBER_OF_BYTES;
-
-		if (instructionAlignment !== Byte.ZERO && instructionAlignment < Byte.fromNumber(3)) {
-			throw new Error(`An alignment of only ${instructionAlignment} doublewords is not possible. Must be 0 or >= 3.`);
-		}
 
 		this.metadata = [] as ProgramMetadata;
 		this.jumpLabels = new Map();

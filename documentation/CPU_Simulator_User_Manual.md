@@ -133,7 +133,7 @@
 > ```
 > **Description**
 >
-> Shifts the bits in `<destination>` by `<count>` positions to the left. During each shift, the MSB is set in the carry flag, whilst the LSB is filled with 0s.
+> Shifts the bits in `<destination>` by `<count>` positions to the left. During each shift, the MSB is set in the carry flag, whilst the LSB is filled with 0.
 >
 > The `<count>` operand can be a memory address, a register or a literal value.    
 > The `<destination>` operand can be a memory address or a register.
@@ -259,7 +259,7 @@
 
 
 
->> ### 1.3.4 JBE
+> ### 1.3.4 JBE
 >
 > `JBE` (Jump Below Equal) executes a jump if the comparison of two **unsigned numbers** (`X`, `Y` using ```CMP Y, X```) shows that `X <= Y`.
 >
@@ -299,7 +299,7 @@
 >
 > Before assembly, the `INCLUDE` directive replaces the declaration with the contents of the file located in the CPU simulator’s operating system file system at the path `<file_path>`.
 >
-> The file must be a valid assembler file. If this file contains further `INCLUDE` commands, these are resolved recursively before the content is inserted into >the current file.
+> The file must be a valid assembler file. If this file contains further `INCLUDE` commands, these are resolved recursively before the content is inserted into the current file.
 
 
 

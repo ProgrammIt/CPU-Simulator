@@ -7,8 +7,7 @@
 ; 0x00-0x03 magic number
 ; 0x04-0x07 program header file offset (in bytes, currently 32)
 ; 0x08-0x09 ISA version
-; 0x10-0x10 Program encoding type (0 = fixed-size instructions, 1 = variable-size instructions, 2 = embeddable variable-size instructions)
-; 0x11-0x11 program instruction alignment (in dwords, 0 = not aligned)
+; 0x10-0x11 Program encoding type (0 = fixed-size instructions, 1 = variable-size instructions, 2 = embeddable variable-size instructions)
 ; 0x12-0x15 padding
 ; 
 ; Program header (currently 12 dwords)

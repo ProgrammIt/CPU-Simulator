@@ -233,7 +233,7 @@ export function disassemble(program: DoubleWord[],
 
 export function disassembleIfPossble(program: DoubleWord[]): [string, number][] {
 
-    let disassembledCode = [];
+    const disassembledCode = [];
     let instructionLenght = 1;
 
     for (let i = 0; i < program.length; i+=instructionLenght) {
@@ -328,7 +328,7 @@ export function disassembleIfPossble(program: DoubleWord[]): [string, number][] 
         switch (decodedSecondOperandType) {
             case EncodedOperandTypes.PADDING:
                 decodedSecondOperandType ^= 0b1000; 
-                instructionLenght++
+                instructionLenght++;
                 // fallthrough
             case EncodedOperandTypes.NO:
                 decodedSecondOperand = null;

@@ -1,4 +1,3 @@
-import { Byte } from "../binary/Byte";
 import { DoubleWord } from "../binary/DoubleWord";
 import { Word } from "../binary/Word";
 
@@ -13,8 +12,7 @@ export type ProgramMetadata = DoubleWord[];
  * 0x00-0x03 magic number
  * 0x04-0x07 program header file offset (in bytes, currently 32)
  * 0x08-0x09 ISA version
- * 0x10-0x10 Program encoding type (0 = fixed-size instructions, 1 = variable-size instructions, 2 = embeddable variable-size instructions)
- * 0x11-0x11 program instruction alignment (in dwords, 0 = not aligned)
+ * 0x10-0x11 Program encoding type (0 = fixed-size instructions, 1 = variable-size instructions, 2 = embeddable variable-size instructions)
  * 0x12-0x15 padding
  * 
  * Program header (currently 12 dwords)
@@ -142,22 +140,13 @@ export namespace ProgramMetadata {
 	 */
 	export function getInstructionEncodingType(metadata: ProgramMetadata): InstructionEncodingType {
 
-		const value = DoubleWord.getThirdByte(metadata[2]);
+		const value = DoubleWord.getLowerWord(metadata[2]);
 
 		if (value > InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS) {
 			throw new Error(`Invalid instruction encoding type: ${value}`);
 		}
 
 		return value as InstructionEncodingType;
-	}
-
-	/**
-	 * This method instruction alignment in DoubleWords
-	 * @param metadata 
-	 * @returns
-	 */
-	export function getInstructionAlignment(metadata: ProgramMetadata): Byte {
-        return DoubleWord.getFourthByte(metadata[2]);
 	}
 
     /**

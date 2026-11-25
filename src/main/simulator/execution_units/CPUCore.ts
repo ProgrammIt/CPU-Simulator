@@ -373,13 +373,12 @@ export class CPUCore {
             throw new Error("Kernel Panic");
         }
 
-        if (this._runStatus === RunStatus.Running && this.debugKernel) {
+        if (ProgramExecutionStepping.INT === this.executionStepping && (this.debugKernel || this.flags.isInUserMode()) && this._runStatus === RunStatus.Running) {
+            this.logToLogger("Interrupted: " + InterruptNumbers[number]);
             this._runStatus = RunStatus.Halted;
             this.interruptQueue.unshift(number);
             throw new BreakpointError();
         }
-
-        this._runStatus = RunStatus.Running;
 
         const returnValue = this.eip.content;
 
@@ -387,6 +386,8 @@ export class CPUCore {
             EncodedOperandTypes.IMMEDIATE,
             DoubleWord.fromNumber(number)
         ));
+
+        this._runStatus = RunStatus.Running;
 
         //Make sure the current instruction is re-executed
         // Overwrite the return address on the STACK.
@@ -2562,7 +2563,7 @@ export class CPUCore {
             throw new ExceptionError(InterruptNumbers.INVALID_OPCODE);
         }
 
-        if (this.debugKernel || this.flags.isInUserMode())
+        if ((this.debugKernel || this.flags.isInUserMode()) && this._runStatus === RunStatus.Running)
         {
             this.logToLogger("Interrupted: " + InterruptNumbers[target.value]);
         }
