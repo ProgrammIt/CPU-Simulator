@@ -705,7 +705,7 @@ export class Renderer {
             const blockSizeDisable: boolean = (demandedByteRepresentation === "UTF-8" || demandedByteRepresentation === "ASSEMBLY");
             ramBlockSizeSelector.disabled = blockSizeDisable;
             if (demandedByteRepresentation === "ASSEMBLY") {
-                this.ramBlockSize = 3 * DoubleWord.NUMBER_OF_BYTES;
+                this.ramBlockSize = DoubleWord.NUMBER_OF_BYTES;
             } else {
                 const previousBlockSize: string = parent.getAttribute("block-size")!;
                 this.ramBlockSize = parseInt(previousBlockSize);
@@ -1929,63 +1929,64 @@ export class Renderer {
         const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
         const breakpoints: Set<number> = new Set<number>(breakpointArray);
         let rowIndex = 0;
-        let instructionOffset = 0;
-        for (let i = 0; i < ramContent.length; i += this.ramBlockSize) {
-            const binary = ramContent.slice(i, (i + this.ramBlockSize));
+        for (let i = 0; i < ramContent.length;) {
+            const binary = ramContent.slice(i, i + 12);
             const instructions = await this.getInstructionText(binary);
 
-            instructionOffset = i;
-
-            for (let j = 0; j < instructions.length; j++) {
-
-                const tableRow: HTMLTableRowElement = this._document.createElement("tr");
-
-                const physicalAddressColumn = tableRow.insertCell();
-                const virtualAddressColumn = tableRow.insertCell();
-                const assemblyInstruction = tableRow.insertCell();
-                const breakpointCell = tableRow.insertCell();
-
-                breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
-
-                const physicalAddressFrom = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset);
-                instructionOffset += instructions[j][1] * DoubleWord.NUMBER_OF_BYTES;
-                const physicalAddressTo = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset - 1);
-
-                if (targetAddress > physicalAddressTo) {
-                    rowIndex++;
-                }
-
-                const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressFrom);
-                const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressTo);
-
-                for (let i = 0; i < virtualAddressesStart.length; i++) {
-                    const virtualAddressFrom = "0x" + virtualAddressesStart[i].toString(16);
-                    const virtualAddressTo= "0x" + VirtualAddressesEnd[i].toString(16);
-                    virtualAddressColumn.append(virtualAddressFrom + " - " + virtualAddressTo);
-                    const rowBreak: HTMLBRElement = this._document.createElement("br");
-                    virtualAddressColumn.appendChild(rowBreak);
-                }
-
-                const addressFrom = "0x" + physicalAddressFrom.toString(16);
-                const addressTo = "0x" + physicalAddressTo.toString(16);
-                breakpointCell.dataset.physicalAddress = addressFrom;
-
-                if (breakpoints.has(physicalAddressFrom)) {
-                    breakpointCell.innerHTML = "x";
-                    breakpointCell.dataset.breakpointStatus = "true";
-                } else {
-                    breakpointCell.innerHTML = "";
-                    breakpointCell.dataset.breakpointStatus = "false";
-                }
-                
-                physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
-
-                const html = instructions[j][0];
-                assemblyInstruction.innerHTML = html;
-                ramTableBody.appendChild(tableRow);
+            if (instructions.length === 0) {
+                instructions.push(["Invalid", 1] as [string, number]);
             }
 
-            i += (instructionOffset - i) % this.ramBlockSize;
+            let instructionOffset = i;
+
+
+            const tableRow: HTMLTableRowElement = this._document.createElement("tr");
+
+            const physicalAddressColumn = tableRow.insertCell();
+            const virtualAddressColumn = tableRow.insertCell();
+            const assemblyInstruction = tableRow.insertCell();
+            const breakpointCell = tableRow.insertCell();
+
+            breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
+
+            const physicalAddressFrom = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset);
+            instructionOffset += instructions[0][1] * DoubleWord.NUMBER_OF_BYTES;
+            const physicalAddressTo = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset - 1);
+
+            if (targetAddress > physicalAddressTo) {
+                rowIndex++;
+            }
+
+            const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressFrom);
+            const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressTo);
+
+            for (let i = 0; i < virtualAddressesStart.length; i++) {
+                const virtualAddressFrom = "0x" + virtualAddressesStart[i].toString(16);
+                const virtualAddressTo= "0x" + VirtualAddressesEnd[i].toString(16);
+                virtualAddressColumn.append(virtualAddressFrom + " - " + virtualAddressTo);
+                const rowBreak: HTMLBRElement = this._document.createElement("br");
+                virtualAddressColumn.appendChild(rowBreak);
+            }
+
+            const addressFrom = "0x" + physicalAddressFrom.toString(16);
+            const addressTo = "0x" + physicalAddressTo.toString(16);
+            breakpointCell.dataset.physicalAddress = addressFrom;
+
+            if (breakpoints.has(physicalAddressFrom)) {
+                breakpointCell.innerHTML = "x";
+                breakpointCell.dataset.breakpointStatus = "true";
+            } else {
+                breakpointCell.innerHTML = "";
+                breakpointCell.dataset.breakpointStatus = "false";
+            }
+            
+            physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
+
+            const html = instructions[0][0];
+            assemblyInstruction.innerHTML = html;
+            ramTableBody.appendChild(tableRow);
+            
+            i = instructionOffset;
         }
         return rowIndex;
     }
