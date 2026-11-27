@@ -12,11 +12,23 @@ import { VirtualAddress } from "../types/binary/VirtualAddress";
 import { DataSizes } from "../types/enumerations/DataSizes";
 
 describe("Read from and write to main memory using MMU as proxy", () => {
-    const debugLogger: DebugLogger = new DebugLogger(100,10);
-    const guiLogger: GUILogger = new GUILogger(1000, 100, true);
+    let debugLogger: DebugLogger;
+    let guiLogger: GUILogger;
     const mainMemory = new RAM(DoubleWord.SIZE);
-    const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
-    const mmu = new MemoryManagementUnit(cpu);
+    let cpu: CPUCore;
+    let mmu: MemoryManagementUnit;
+
+    beforeAll(() => {
+        debugLogger = new DebugLogger(500, 500);
+        guiLogger = new GUILogger(1000, 100, true);
+        cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
+        mmu = new MemoryManagementUnit(cpu);
+    });
+
+    afterAll(() => {
+        debugLogger.dispose();
+        guiLogger.dispose();
+    });
 
     test("Write byte to main memory", () => {
 

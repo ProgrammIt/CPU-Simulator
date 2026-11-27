@@ -31,11 +31,11 @@ Symbolic string constants are treated a bit differently than symbolic integer co
 .CONST myStringConst "I am a string."
 ```
 
-The given string is stored as a UTF-8 encoded and null terminated array in the code segment of the CPU-Simulator.
+The given string is stored as a UTF-8 encoded and null terminated array in the readonly data segment of the CPU-Simulator.
 
 In case that the length of the encoded string is not divisible by four bytes, its storage is rounded up to a multiple of four bytes. This is due to the current CPU simulator design using fixed 32 bit instructions and operands. The unused rest of the four bytes storage at the end of such a string is filled by bytes with a zero value, so some memory overhead is expected.
 
-Being stored in the code segment makes the string constant as the code segment is write protected in user mode and only writeable in kernel mode. To not interrupt the code execution, a jump instruction is automatically placed in front of the string array. The target of the jump instruction is the first virtual memory address after the string array.
+Being stored in the readonly data segment makes the string constant as the readonly data segment is write protected in user mode and only writeable in kernel mode.
 
 The assembler replaces the symbolic name of the string constant with the virtual memory start address of the string array. The encoding of the first character in the string starts at the lowest virtual memory address.
 
@@ -46,13 +46,7 @@ Here is an example of writing the (start) virtual memory address of the previous
 MOV $myStringConst, %eax
 ```
 
-In the current implementation the constants can be misused as variables, see the warning [below](#12-symbolic-variables).
-
 ## 1.2 Symbolic Variables
-
-:warning:**Caution:** In the current implementation the symbolic integer and string variables are stored in the code segment. The code segment is write protected in user mode and only writeable in kernel mode. To assign different values to the variables during program runtime, the program has to switch into kernel mode. Under normal circumstances the program should not be able to switch into kernel mode directly. To make the variables work correctly, a modified NOP instruction has been implemented as a work-around, which switches the program into kernel mode. This NOP instruction has to be used once before variables can be assigned a new value (see the examples below). The modified NOP instruction is needed until a (writable) data segment or some other way of holding the variables in writable storage is implemented.
-
-Using the modified NOP instruction also makes constants behave like variables, so caution is advised.
 
 ### 1.2.1 Symbolic Integer Variables
 
@@ -66,7 +60,7 @@ NOP
 .CODE
 ```
 
-Defining and declaring symbolic integer variables always has to be done between the `.DATA` and the `.CODE` blocks. The variable is initialized with zero internally if no value is given, like shown for the first variable above, otherwise it is initialized with the given numerical value.  
+The variable is initialized with zero internally if no value is given, like shown for the first variable above, otherwise it is initialized with the given numerical value.  
 The assembler encodes the integer variable as a 32 bit integer and stores it in the code segment of the CPU simulator. To not interrupt the program flow, a jump instruction is automatically added by the assembler in front of the integer variable in virtual memory. The jump target is the first virtual memory address after the integer variable.  
 The assembler replaces all occurrences of the symbolic name of the integer variable with its virtual memory address.
 The `NOP` instruction switches the program into kernel mode, see the warning [above](#12-symbolic-variables).

@@ -1,6 +1,6 @@
-import { AddressingModes as AddressingMode } from "../enumerations/AdressingModes";
 import { DoubleWord } from "./DoubleWord";
-import { OperandTypes } from "../enumerations/OperandTypes";
+import { DecodedOperandTypes } from "../enumerations/DecodedOperandTypes";
+import { EncodedOperandTypes } from "../enumerations/EncodedOperandTypes";
 
 // Operand types: Immediate, Register, Memory address
 // Access types: Direct, Indirect
@@ -11,31 +11,23 @@ import { OperandTypes } from "../enumerations/OperandTypes";
  */
 export class InstructionOperand {
 	/**
-	 * The operands addressing mode. Can be either direct or indirect. Indirect mode is only valid for registers.
-	 * @readonly
-	 */
-	public readonly addressingMode: AddressingMode;
-
-	/**
 	 * The operands type. Can be either a constant/immediate, a memory address or a register.
 	 * @readonly
 	 */
-	public readonly type: OperandTypes;
+	public type: DecodedOperandTypes;
 
 	/**
 	 * The operands value in binary representation.
 	 * @readonly
 	 */
-	public readonly value: DoubleWord;
+	public value: DoubleWord;
 
 	/**
 	 * Creates a new instance from the given arguments.
-	 * @param addressingMode The operands addressing mode.
 	 * @param type The operands type.
 	 * @param value The operands value in binary representation.
 	 */
-    public constructor(addressingMode: AddressingMode, type: OperandTypes, value: DoubleWord) {
-        this.addressingMode = addressingMode;
+    public constructor(type: DecodedOperandTypes = EncodedOperandTypes.NO, value: DoubleWord = DoubleWord.ZERO) {
         this.type = type;
         this.value = value;
     }

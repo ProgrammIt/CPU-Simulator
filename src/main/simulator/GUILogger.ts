@@ -12,19 +12,4 @@ export class GUILogger extends AbstractBatchLogger {
     protected sendBatchToLog(logBatch: string[]): void {
         getMainWindow()?.webContents.send('update_log', logBatch);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

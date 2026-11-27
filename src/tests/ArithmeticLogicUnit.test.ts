@@ -8,11 +8,23 @@ import { DebugLogger } from "../main/simulator/DebugLogger";
 import { GUILogger } from "../main/simulator/GUILogger";
 
 describe("Test ALU", () => {
-    const debugLogger: DebugLogger = new DebugLogger(100,10);
-    const guiLogger: GUILogger = new GUILogger(1000, 100, true);
+    let debugLogger: DebugLogger;
+    let guiLogger: GUILogger;
     const mainMemory = new RAM(DoubleWord.SIZE);
-    const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
-    const alu: ArithmeticLogicUnit = new ArithmeticLogicUnit(cpu);
+    let cpu: CPUCore;
+    let alu: ArithmeticLogicUnit;;
+
+    beforeAll(() => {
+        debugLogger = new DebugLogger(500, 500);
+        guiLogger = new GUILogger(1000, 100, true);
+        cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
+        alu = new ArithmeticLogicUnit(cpu);
+    });
+
+    afterAll(() => {
+        debugLogger.dispose();
+        guiLogger.dispose();
+    });
 
     test("Perform logical NOT on binary representation of decimal 255", () => {
         const testDoubleword: DoubleWord = DoubleWord.fromNumber(255);

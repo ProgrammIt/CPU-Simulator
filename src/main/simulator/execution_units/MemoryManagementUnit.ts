@@ -224,7 +224,7 @@ export class MemoryManagementUnit {
         }
 
         const pageNumber = PageNumber.fromVirtualAddress(virtualAddress);
-        const pageTableEntry: PageTableEntry = disableTlb ? this.findPageTableEntry(virtualAddress) : this._tlb.get(pageNumber) ?? this.findPageTableEntry(virtualAddress);
+        let pageTableEntry: PageTableEntry = disableTlb ? this.findPageTableEntry(virtualAddress) : this._tlb.get(pageNumber) ?? this.findPageTableEntry(virtualAddress);
         const pageTableEntryFlags: PageTableEntryFlags = PageTableEntry.getFlags(pageTableEntry);
 
         // Check if a page frame is connected to the page to which the specified virtual address refers.
@@ -235,7 +235,7 @@ export class MemoryManagementUnit {
 
         if (!ignorePermissionFlags) {
             // Check if the page frame is accessable only in kernel mode.
-            if (!this._cpu.flags.isInKernelMode() && PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags)) {
+            if (this._cpu.flags.isInUserMode() && PageTableEntryFlags.isKernelModeOnly(pageTableEntryFlags)) {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
             // Check if the page frames contents are executable.
@@ -247,17 +247,21 @@ export class MemoryManagementUnit {
                 throw new ExceptionError(InterruptNumbers.GENERAL_PROTECTION_FAULT);
             }
         }
+
+        let updatedPageTable = false;
         
-        if (attemptsToWrite) {
+        if (attemptsToWrite && !PageTableEntryFlags.hasChanged(pageTableEntryFlags)) {
             // Set changed flag bit.
             PageTableEntryFlags.setChangedFlagBit(pageTableEntryFlags, 1);
+            pageTableEntry = PageTableEntry.fromFlagAndFrameNumber(pageTableEntryFlags, PageTableEntry.getFrameNumber(pageTableEntry));
             // Update flag bits of page table entry in memory as well.
             this._cpu.mainMemory.writeDoubleWordTo(this.findPageTableEntryPhysicalAddress(virtualAddress), pageTableEntry);
+            updatedPageTable = true;
         }
 
         // Update or insert the physical memory address into the Translation Lookaside Buffer.
-        if (!disableTlb && (!this._tlb.has(pageNumber) || attemptsToWrite)) {
-            this._tlb.insert([pageNumber, pageTableEntry]);
+        if (!disableTlb && (!this._tlb.has(pageNumber) || updatedPageTable)) {
+            this._tlb.insert(pageNumber, pageTableEntry);
             this._tlbHasChanged = true;
         }
 
@@ -300,8 +304,7 @@ export class MemoryManagementUnit {
      * @returns The page table entry that was searched for.
      */
     private findPageTableEntry(virtualAddress: VirtualAddress): PageTableEntry {
-        const pageTableEntry: DoubleWord = this._cpu.mainMemory.readDoublewordFrom(this.findPageTableEntryPhysicalAddress(virtualAddress)) as PageTableEntry;
-        return pageTableEntry;
+        return this._cpu.mainMemory.readDoublewordFrom(this.findPageTableEntryPhysicalAddress(virtualAddress)) as PageTableEntry;
     }
 
     /**

@@ -92,4 +92,13 @@ export abstract class AbstractBatchLogger {
      */
     protected abstract sendBatchToLog(logBatch: string[]): void;
 
+    public dispose(): void {
+        if (this._timer !== null) {
+            clearInterval(this._timer);
+            this._timer = null;
+        }
+
+        this.flush();
+    }
+
 }

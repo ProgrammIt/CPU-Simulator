@@ -1,21 +1,28 @@
 import { readFileSync } from "node:fs";
 import { UnrecognizedInstructionError } from "../../types/errors/UnrecognizedInstructionError";
-import { Bit } from "../../types/binary/Bit";
-import { AssemblyLanguageDefinition } from "./compiler/AssemblyLanguageDefinition";
-import { DataSizes } from "../../types/enumerations/DataSizes";
+import { AssemblyInstruction, AssemblyLanguageDefinition } from "./compiler/AssemblyLanguageDefinition";
 import { DoubleWord } from "../../types/binary/DoubleWord";
 import { Byte } from "../../types/binary/Byte";
+import { OpCode } from "../../types/enumerations/OpCode";
+import { EncodedOperandTypes } from "../../types/enumerations/EncodedOperandTypes";
+import { ProgramMetadata } from "../../types/enumerations/ProgramMetadata";
+import { Word } from "../../types/binary/Word";
 
 export class Assembler {
 	private static readonly NEW_LINE_REGEX: RegExp = /\r?\n|\r/gim;
 	public readonly languageDefinition: AssemblyLanguageDefinition;
  	public readonly pathToOSFilesystem: string
-	private encodedInstructions: DoubleWord[] = [];
-	private encodedConstants: DoubleWord[] = [];
-	private encodedVariables: DoubleWord[] = [];
-	private metadata: DoubleWord[] = [];
 
+	private readonly nopInstruction: DoubleWord[];
 
+	private encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS;
+	private metadata: ProgramMetadata = [] as ProgramMetadata;
+	private jumpLabels: Map<string, [number, number | null]> = new Map();
+	private aliases: Map<string, DoubleWord> = new Map();
+	private constants: Map<string, DoubleWord[]> = new Map();
+	private initializedData: Map<string, DoubleWord[]> = new Map();
+	private uninitializedData: Map<string, number> = new Map();
+	
 	/**
 	 * Constructs a new assembler object with the given processing width.
 	 * @param pathToLanguageDefinition The path to the language definition file of the assembly language used by this assembler.
@@ -24,6 +31,7 @@ export class Assembler {
 	public constructor(pathToLanguageDefinition: string, pathToOSFilesystem: string) {
 		this.languageDefinition = JSON.parse(readFileSync(pathToLanguageDefinition, "utf-8"));
 		this.pathToOSFilesystem = pathToOSFilesystem;
+		this.nopInstruction = this.encodeLine(0, "NOP", 1) as DoubleWord[];
 	}
 
 	/**
@@ -70,8 +78,7 @@ export class Assembler {
 			const regexMatch: RegExpMatchArray | null = includeRegex.exec(line);
 			if (regexMatch !== null) {
 				// Include found.
-				let fileName: string = regexMatch[0].toString();
-				fileName = fileName.substring(fileName.indexOf("\"") + 1, fileName.lastIndexOf("\""));
+				const fileName: string = regexMatch[1];
 
 				let fileContents: string = readFileSync(this.pathToOSFilesystem + "/" + fileName + ".asm", "utf-8");
 				fileContents = this.replaceIncludeLabels(fileContents)
@@ -93,88 +100,116 @@ export class Assembler {
 	 * @param baseOffset Base address where the program will be in memory. Default is 0.
 	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
 	 */
-	private encode(lines: Map<number, string>, baseOffset: number = 0): void {
-		const constants: Map<string, number> = new Map();
-		const variables: Map<string, number> = new Map();
-		const jumpLabels: Map<string, string> = new Map();
-		const numericalConstants: Map<string, string> = new Map();
-
-		const counters = this.locateSymbols(lines, jumpLabels, constants, variables, numericalConstants, baseOffset);
-		const textSizeBytes: number = counters[0];
-		const constantsSizeBytes: number = counters[1];
-		const variablesSizeBytes: number = counters[2];
+	private encode(lines: Map<number, string>, baseOffset: number = 0): DoubleWord[] {
 		
+		// First pass (Locate all symbols (constants, global variables, labels))
+
+		this.locateSymbols(lines);
+
+		let instructionSize = 0;
+
+		// Second pass (encode all possible lines)
+		let byteCount = 0;
+		const encodedInstructionsWithSymbols: Map<number, DoubleWord[] | string> = new Map();
+		for (const [lineNo, line] of lines.entries()) {
+
+			for (const [jumpLabel, [jumpLineNo, jumpAddress]] of this.jumpLabels.entries()) {
+				if (lineNo < jumpLineNo) {
+					break;
+				}
+				if (jumpAddress !== null) {
+					continue;
+				}
+				this.jumpLabels.set(jumpLabel, [jumpLineNo, byteCount + baseOffset]);
+			}
+
+			const encodedLine = this.encodeLine(lineNo, line, 1);
+			if (typeof encodedLine === "number") {
+				encodedInstructionsWithSymbols.set(lineNo, line);
+				instructionSize = encodedLine * DoubleWord.NUMBER_OF_BYTES;
+			} else {
+				encodedInstructionsWithSymbols.set(lineNo, encodedLine);
+				instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
+			}
+
+			byteCount += instructionSize;
+		}
+
+		for (const [jumpLabel, [jumpLineNo,]] of this.jumpLabels.entries()) {
+			if ([...lines.keys()].at(-1)! < jumpLineNo) {
+				this.jumpLabels.set(jumpLabel, [jumpLineNo, byteCount + baseOffset]);
+			}
+		}
+ 
+		this.writeMetadata(baseOffset, byteCount);
+
+		// Third pass (decode all lines with unresolved dependencies)
+		if (Array.from(encodedInstructionsWithSymbols.values()).some(v => typeof v === "string")) {
+			byteCount = 0;
+			instructionSize = 0
+			for (const [lineNo, line] of encodedInstructionsWithSymbols.entries()) {
+
+				if (typeof line !== "string") {
+					instructionSize = line.length * DoubleWord.NUMBER_OF_BYTES;
+				} else {
+					const encodedLine = this.encodeLine(lineNo, line, 2);
+					if (typeof encodedLine === "number") {
+						throw new Error("Could not encode the line:" + line);
+					} else {
+						encodedInstructionsWithSymbols.set(lineNo, encodedLine);
+						instructionSize = encodedLine.length * DoubleWord.NUMBER_OF_BYTES;
+					}
+				}
+
+				byteCount += instructionSize
+			}
+		}
+
+		if (byteCount !== ProgramMetadata.getTextSegmentSize(this.metadata)) {
+			throw new Error("The actual Program size differs from the precomputed size: " + byteCount + " vs " + this.metadata[11]);
+		}
+
+		return this.metadata.concat(Array.from(encodedInstructionsWithSymbols.values())
+				.filter((v): v is DoubleWord[] => Array.isArray(v))
+				.flat());
+	}
+
+	private writeMetadata(baseOffset: number, byteCount: number): void {
+
+		const textSizeBytes: number = byteCount;
+		const roDataSizeBytes: number = [...this.constants.values()].flat().length * DoubleWord.NUMBER_OF_BYTES;
+		const dataSizeBytes: number = [...this.initializedData.values()].flat().length * DoubleWord.NUMBER_OF_BYTES;
+		const uninitializedDataSizeBytes: number = [...this.uninitializedData.values()].reduce((sum, size) => sum + size, 0);
+
 		//calculate important offsets and sizes
 		const pageSize: number = 4096;
 		const pageTableEntries: number = 1024;
 		const numberOfPagesText: number = Math.ceil(textSizeBytes / pageSize);
-		const numberOfPagesRoData: number = Math.ceil(constantsSizeBytes / pageSize);
-		const numberOfPagesData: number = Math.ceil(variablesSizeBytes / pageSize);
+		const numberOfPagesRoData: number = Math.ceil(roDataSizeBytes / pageSize);
+		const numberOfPagesData: number = Math.ceil(dataSizeBytes / pageSize);
+		const numberOfPagesUninitializedData: number = Math.ceil(uninitializedDataSizeBytes / pageSize);
 
-		const totalNeededPages: number = numberOfPagesText + numberOfPagesRoData + numberOfPagesData;
+		const totalNeededPages: number = numberOfPagesText + numberOfPagesRoData + numberOfPagesData + numberOfPagesUninitializedData;
 
 		const neededL2PageTables: number = Math.ceil(totalNeededPages / pageTableEntries);
 
 		// calculate base addresses
 		const roDataBaseAddress: number = (numberOfPagesText * pageSize) + baseOffset;
 		const dataBaseAddress: number = ((numberOfPagesText + numberOfPagesRoData) * pageSize) + baseOffset;
+		const uninitializedDataBaseAddress: number = ((numberOfPagesText + numberOfPagesRoData + numberOfPagesData) * pageSize) + baseOffset;
 
+		// prepare elf header
+		const magicNumber: DoubleWord = ProgramMetadata.ICE_MAGIC_NUMBER;
+		const programHeaderOffset: DoubleWord = DoubleWord.fromNumber(ProgramMetadata.ICE_HEADER_SIZE_IN_DOUBLEWORDS * DoubleWord.NUMBER_OF_BYTES);
 
-		this.writeMetadata(neededL2PageTables, baseOffset, roDataBaseAddress, dataBaseAddress, counters);
-		this.replaceSymbols(lines, constants, variables, numericalConstants, roDataBaseAddress, dataBaseAddress);
-		
-		// Iterate lines of code.
-		for (const [lineNo, line] of lines.entries()) {
-			const encodedInstruction: DoubleWord[] = this.encodeLine(lineNo, line, jumpLabels, constants, variables);
-			if (encodedInstruction.length !== 0) {
-				this.encodedInstructions.push(...encodedInstruction);	
-			}
-		}
-	}
-
-	/**
-	 * Metadata Layout
-	 * ICE header 32 byte (8 dwords)
-	 * byte 0x0-0x4 magic number
-	 * byte 0x5-0x8 program header byte offset
-	 * 6 dwords free
-	 * 
-	 * Program header (16 dwords)
-	 * 1 DWORD Total_L2_Tables
-	 * 
-	 * 1 DWORD Text segment virtual start address
-	 * 1 DWORD Text segment file offset
-	 * 1 DWORD Text segment size
-	 * 
-	 * 1 DWORD RoData segment virtual start address
-	 * 1 DWORD RoData segment file offset
-	 * 1 DWORD RoData segment size
-	 * 
-	 * 1 DWORD Data segment virtual start address
-	 * 1 DWORD Data segment file offset
-	 * 1 DWORD Data segment size
-	 * 
-	 
-	 * 6 dwords free
-	 */
-	private writeMetadata(neededL2PageTables: number, baseOffset: number, roDataBaseAddress: number, dataBaseAddress: number, sizes: number[]): void {
-		const textSizeBytes: number = sizes[0];
-		const roDataSizeBytes: number = sizes[1];
-		const dataSizeBytes: number = sizes[2];
-
-		// prepare ice header
-		const magicNumber: DoubleWord = DoubleWord.fromNumber(0x7F_49_43_45) // 0x7F followed by ICE in ASCII
-		const programHeaderOffset: DoubleWord = DoubleWord.fromNumber(32);
 		this.metadata.push(magicNumber);
 		this.metadata.push(programHeaderOffset);
+		this.metadata.push(DoubleWord.fromWords(ProgramMetadata.ISA_VERSION, this.encodingType as Word));
+		this.metadata.push(DoubleWord.ZERO);
 
-		//fill unused space with zero
-		for (let i = 0; i < 6; ++i) {
-			this.metadata.push(DoubleWord.fromNumber(0));
-		}
 
 		// calculate file offsets
-		const textFileOffset: number = 96; //32 byte ice header + 64 byte program header
+		const textFileOffset: number = ProgramMetadata.SIZE_IN_BYTES;
 		const roDataFileOffset: number = textFileOffset + textSizeBytes;
 		const dataFileOffset: number = roDataFileOffset + roDataSizeBytes;
 
@@ -195,213 +230,38 @@ export class Assembler {
 		this.metadata.push(DoubleWord.fromNumber(dataBaseAddress));
 		this.metadata.push(DoubleWord.fromNumber(dataFileOffset));
 		this.metadata.push(DoubleWord.fromNumber(dataSizeBytes));
-		
-		for (let i = 0; i < 6; ++i) {
-			this.metadata.push(DoubleWord.fromNumber(0));
-		}
+
+		// uninitialized data metadata
+		this.metadata.push(DoubleWord.fromNumber(uninitializedDataBaseAddress));
+		this.metadata.push(DoubleWord.fromNumber(uninitializedDataSizeBytes));
+	
 	}
 
 	/**
 	 * This method encodes a single line of assembly code.
 	 * @param lineNo The original computer programs line number of code which is currently encoded.
 	 * @param line The original computer programs line of code which is currently encoded.
-	 * @param jumpLabels The jump labels found in the assembly code.
-	 * @param constants The constants found in the assembly code.
-	 * @param variables The constants found in the assembly code.
-	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program.
+	 * @returns An array of doublewords representing the encoded instructions and their operands of the assembly program or the number of required DoubleWords.
 	 */
-	private encodeLine(lineNo: number, line: string, jumpLabels: Map<string, string>, constants: Map<string, number>, variables: Map<string, number>) : DoubleWord[] {
-		const encodedInstructions: DoubleWord[] = [];
+	private encodeLine(lineNo: number, line: string, encodingPassCount: number) : DoubleWord[] | number {	
+		let encodedInstructions: DoubleWord[] | number = 0;
 		let lineEncoded = false;
-		lineEncoded = false;
-		
-		// For every line of code, search for a contained instruction.
+
 		for (const instruction of this.languageDefinition.instructions) {
-			const illegalCombosOfOperandTypes: {__SOURCE__: string, __TARGET__: string}[] | undefined 
-				= instruction.illegal_combinations_of_operand_types;
-			
-			if (instruction.operands !== undefined && instruction.operands.length === 2) {
-				const operand1: {name: string, allowed_types: string[]} = instruction.operands[0];
-				const operand2: {name: string, allowed_types: string[]} = instruction.operands[1];
-				/*
-					* The instruction expects two operands. Iterate over all possible combinations of operand types
-					* and check if the resulting regex matches the current line of code.
-					*/
-				for (const operand1TypeString of operand1.allowed_types) {
-					for (const operand2TypeString of operand2.allowed_types) {
-						const regexInstructionString: string = instruction.regex;
-						// Create a combination of operand types.
-						const typeCombination: { __SOURCE__: string, __TARGET__: string } 
-								= { __SOURCE__ : operand1TypeString, __TARGET__ : operand2TypeString };
-						// Check if the combination of operand types is forbidden for this instruction.
-						if (illegalCombosOfOperandTypes !== undefined && illegalCombosOfOperandTypes.includes(typeCombination)) {
-							continue;
-						}
-						// Locate the operand type of the first operand in the language definition.
-						const operand1TypeDefinition: {name: string; code: string; regex: string;}
-							= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
-						// Locate the operand type of the second operand in the language definition.
-						const operand2TypeDefinition: {name: string; code: string; regex: string;}
-							= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
-						// Create a regex for the current combination of operand types.
-						const regexInstruction = new RegExp(
-							regexInstructionString
-								.replace(operand1.name, operand1TypeDefinition.regex)
-								.replace(operand2.name, operand2TypeDefinition.regex), 
-							"gim"
-						);
-						// Check if the current line of code matches the created regex.
-						const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
-						if (regexMatchArrayInstruction !== null) {
-							// Instruction found. Encode it.							
-							const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
-							encodedInstructions.push(...encodedInstruction);
-							lineEncoded = true;
-							break;
-						}
-					}
-					if (lineEncoded) {
-						break;
-					}
-				}
-			} else if (instruction.operands !== undefined && instruction.operands.length === 1) {
-				const operand: {name: string, allowed_types: string[]} = instruction.operands[0];
-				/**
-				 * This instruction expects only one operand. Iterate over all possible types of the operand.
-				 */
-				for (const operandTypeString of operand.allowed_types) {
-					const regexInstructionString: string = instruction.regex;
-					// Locate the operand type of the first operand in the language definition.
-					const operandTypeDefinition: {name: string; code: string; regex: string;}
-						= this.languageDefinition.operand_types.find((current) => current.name === operandTypeString)!;
-					// Create a regex for the current operand type.
-					const regexInstruction = new RegExp(
-						regexInstructionString.replace(operand.name, operandTypeDefinition.regex), 
-						"gim"
-					);
-					// Check if the current line of code matches the created regex.
-					const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
-					if (regexMatchArrayInstruction !== null) {
-						// Instruction found. Encode it.
-						const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
-						encodedInstructions.push(...encodedInstruction);
-						lineEncoded = true;
-						break;
-					}
-				}
-					if (lineEncoded) {
-						break;
-					}
-			} else {
-				// Instruction has no operands.
-				const regexInstruction = new RegExp(instruction.regex, "gim");
-				const regexMatchArrayInstruction: RegExpMatchArray | null = regexInstruction.exec(line);
-				if (regexMatchArrayInstruction !== null) {
-					// Instruction found. Encode it.
-					const encodedInstruction: DoubleWord[] = this.encodeInstruction(regexMatchArrayInstruction, lineNo, jumpLabels);
-					encodedInstructions.push(...encodedInstruction);
-					lineEncoded = true;
-				}
+
+			if (!line.trim().startsWith(instruction.mnemonic + " ") && line.trim() !== instruction.mnemonic)
+			{
+				continue;
 			}
+			encodedInstructions = this.encodeInstruction(instruction, line, lineNo, encodingPassCount);
+			lineEncoded = true;
+			break;
 		}
-		if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationString, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const value: string = regexMatch[0].toString().trim();
-				const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
-				const constantName = stringParts[1];
-				const constantValue = value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")) + "\0";
-				if (constants.has(constantName)) {
-					const encodedInstruction: DoubleWord[] = this.encodeString(lineNo, line, constantValue);
-					this.encodedConstants.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
-				const bufferName = stringParts[2];
-				const bufferSize: number = parseInt(stringParts[1], 10);
-				if (variables.has(bufferName)) {
-					const encodedInstruction: DoubleWord[] = this.initializeBuffer(lineNo, line, bufferSize);
-					this.encodedVariables.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationString, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationString, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const value: string = regexMatch[0].toString().trim();
-				const variableName = value.substring(value.indexOf(".") + 1, value.indexOf(" ")).trim();
-				const variableValue = value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")) + "\0";
-				if (variables.has(variableName)) {
-					const encodedInstruction: DoubleWord[] = this.encodeString(lineNo, line, variableValue);
-					this.encodedVariables.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const value: string = regexMatch[0].toString().trim();
-				const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-				const variableValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-				if (variables.has(variableName)) {
-					const encodedInstruction: DoubleWord[] = [];
-					if (variableValue !== "") {
-						encodedInstruction.push(this.encodeBinaryValue(variableValue));
-					} else {
-						encodedInstruction.push(this.encodeDecimalValue("0"));
-					}
-					this.encodedVariables.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationDecimal, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationDecimal, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const value: string = regexMatch[0].toString().trim();
-				const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-				const variableValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-				if (variables.has(variableName)) {
-					const encodedInstruction: DoubleWord[] = [];
-					if (variableValue !== "") {
-						encodedInstruction.push(this.encodeDecimalValue(variableValue));
-					} else {
-						encodedInstruction.push(this.encodeDecimalValue("0"));
-					}
-					this.encodedVariables.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationHexadecimal, "gim"))) {
-			const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationHexadecimal, "gim");
-			const regexMatch = regexExp.exec(line);
-			if (regexMatch !== null) {
-				const value: string = regexMatch[0].toString().trim();
-				const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-				const variableValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-				if (variables.has(variableName)) {
-					const encodedInstruction: DoubleWord[] = [];
-					if (variableValue !== "") {
-						encodedInstruction.push(this.encodeHexadecimalValue(variableValue));
-					} else {
-						encodedInstruction.push(this.encodeDecimalValue("0"));
-					}
-					this.encodedVariables.push(...encodedInstruction);
-					lineEncoded = true;
-				}
-			}
-		}
+
 		if (!lineEncoded) {
 			throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${line}`);
 		}
+
 		return encodedInstructions;
 	}
 
@@ -414,242 +274,120 @@ export class Assembler {
 	 * The lines with symbolic integer constants get removed, since their symbolic name gets replaced by their value later.
 	 * For symbolic variables their (virtual) memory start address gets mapped to their symbolic name.
 	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
-	 * @param jumpLabels An empty map, which will be used to store jump labels and their associated (virtual) memory address.
-	 * @param constants An empty map, which will be used to store constants and their associated (virtual) memory address or value.
-	 * @param variables An empty map, which will be used to store variables and their associated (virtual) memory addresses.
-	 * @returns An array containing the programLocationCounter, constantCounter and variableCounter.
 	 */
-	private locateSymbols(lines: Map<number, string>, jumpLabels: Map<string, string>, constants: Map<string, number>, variables: Map<string, number>, numericalConstants: Map<string, string>, baseOffset: number = 0) : number[] {
-		/**
-		 * Use this variable in order to count the instructions, that need to be encoded
-		 * later, because the keys in the map do not have to be consecutive, as blank lines 
-		 * have been removed from the original source text.
-		 */
-		let programLocationCounter = 0;
-
-		/**
-		 * This variable is used to track the offset of variables to later calculate the actual virtual memory address.
-		 */
-		let constantCounter = 0;
-
-		/**
-		 * This variable is used to track the offset of constants to later calculate the actual virtual memory address.
-		 */
-		let variableCounter = 0;
-
+	private locateSymbols(lines: Map<number, string>) : void {
 		for (const [lineNo, line] of lines.entries()) {
-			if (line.match(new RegExp(this.languageDefinition.variable_formats.dataSegmentStart)) || line.match(new RegExp(this.languageDefinition.variable_formats.dataSegmentEnd))) {
-				lines.delete(lineNo);
-			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationBinary, "gim"))) {
+
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationBinary, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationBinary, "gim");
-				const	regexMatch = regexExp.exec(line);
+				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const constantName = value.substring(value.indexOf(".CONST") + 6, value.lastIndexOf(" ")).trim();
-					const constantValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-					numericalConstants.set(
-						constantName, 
-						constantValue
-					);
+					this.aliases.set(regexMatch[1], this.encodeBinaryValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationDecimal, "gim"))) {
+				continue;
+			}
+			
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationDecimal, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationDecimal, "gim");
 				const	regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const constantName = value.substring(value.indexOf(".CONST") + 6, value.lastIndexOf(" ")).trim();
-					const constantValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-					numericalConstants.set(
-						constantName, 
-						constantValue
-					);
+					this.aliases.set(regexMatch[1], this.encodeDecimalValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationHexadecimal, "gim"))) {
+				continue;
+			} 
+			
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationHexadecimal, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationHexadecimal, "gim");
 				const	regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const constantName = value.substring(value.indexOf(".CONST") + 6, value.lastIndexOf(" ")).trim();
-					const constantValue = value.substring(value.lastIndexOf(" ") + 1).trim();
-					numericalConstants.set(
-						constantName, 
-						constantValue
-					);
+					this.aliases.set(regexMatch[1], this.encodeHexadecimalValue(regexMatch[2]));
 					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
+				continue;
+			}
+			
+			if (line.match(new RegExp(this.languageDefinition.constant_formats.declarationString, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.constant_formats.declarationString, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
-					const constantName = stringParts[1];
-					const constantValue = value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")) + "\0";
-					constants.set(
-						constantName, 
-						constantCounter
-					);
-					//Calculate the size the string will use in memory including null termination and round up to the next size that
-					//is divisible by four. This insures the string always fits into multiple double words.
-					const stringMemSize = Math.ceil((Buffer.byteLength(constantValue) / 4)) * 4;
-					constantCounter += stringMemSize;
+					this.constants.set(regexMatch[1], this.encodeString(lineNo, line, regexMatch[2]));
+					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim"))) {
-				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim");
+				continue;
+			} 
+
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationUninitialized, "gim"))) {
+				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationUninitialized, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const stringParts: string[] = regexMatch[0].toString().trim().split(" ");
-					const bufferName = stringParts[2];
-					const bufferSize: number = parseInt(stringParts[1], 10);
-					variables.set(
-						bufferName, 
-						variableCounter
-					);
-					//Calculate the size the buffer will take up in memory. Since the system is based on fixed 32 bit instructions, the buffer size needs to fit into
-					//multiple of double words.
-					const bufferMemSize = Math.ceil((bufferSize / 4)) * 4;
-					variableCounter += bufferMemSize;
+					this.uninitializedData.set(regexMatch[1], 4);
+					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim"))) {
+				continue;
+			} 
+			
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBinary, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-					variables.set(
-						variableName, 
-						variableCounter
-					);
-					variableCounter += 4;
+					this.initializedData.set(regexMatch[1], [this.encodeBinaryValue(regexMatch[2])]);
+					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationDecimal, "gim"))) {
+				continue;
+			} 
+			
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationDecimal, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationDecimal, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-					variables.set(
-						variableName, 
-						variableCounter
-					);
-					variableCounter += 4;
+					this.initializedData.set(regexMatch[1], [this.encodeDecimalValue(regexMatch[2])]);
+					lines.delete(lineNo);
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationHexadecimal, "gim"))) {
+				continue;
+			} 
+			
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationHexadecimal, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationHexadecimal, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const variableName = value.substring(value.indexOf(".") + 1, value.lastIndexOf(" ")).trim();
-					variables.set(
-						variableName, 
-						variableCounter
-					);
-					variableCounter += 4;
+					this.initializedData.set(regexMatch[1], [this.encodeHexadecimalValue(regexMatch[2])]);
+					lines.delete(lineNo);			
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationString, "gim"))) {
+				continue;
+			} 
+			
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationString, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationString, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const variableName = value.substring(value.indexOf(".") + 1, value.indexOf(" ")).trim();
-					const variableValue = value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")) + "\0";
-					variables.set(
-						variableName, 
-						variableCounter
-					);
-					//Calculate the size the string will use in memory including null termination and round up to the next size that
-					//is divisible by four. This insures the string always fits into multiple double words.
-					const stringMemSize = Math.ceil((Buffer.byteLength(variableValue) / 4)) * 4;
-					variableCounter += stringMemSize;
+					this.initializedData.set(regexMatch[1], this.encodeString(lineNo, line, regexMatch[2]));
+					lines.delete(lineNo);						
 				}
-			} else if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
+				continue;
+			}
+									
+			if (line.match(new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim"))) {
+				const regexExp = new RegExp(this.languageDefinition.variable_formats.declarationBuffer, "gim");
+				const regexMatch = regexExp.exec(line);
+				if (regexMatch !== null) {
+					this.uninitializedData.set(regexMatch[2], this.encodeDecimalValue(regexMatch[1]));
+					lines.delete(lineNo);					
+				}
+				continue;
+			}
+			
+			if (line.match(new RegExp(this.languageDefinition.label_formats.declaration, "gim"))) {
 				const regexExp = new RegExp(this.languageDefinition.label_formats.declaration, "gim");
 				const regexMatch = regexExp.exec(line);
 				if (regexMatch !== null) {
-					const value: string = regexMatch[0].toString().trim();
-					const jumpLabel = value.substring(value.indexOf(".") + 1, value.lastIndexOf(":")).trim();
-					jumpLabels.set(
-						jumpLabel, 
-						(programLocationCounter + baseOffset).toString(2)
-					);
+					this.jumpLabels.set(regexMatch[1], [lineNo+1, null]);
 					lines.delete(lineNo);
 				}
-			} else {
-				programLocationCounter += 12;
+				continue;
 			}
 		}
-		return [programLocationCounter, constantCounter, variableCounter];
-	}
-
-	/**
-	 * This method replaces the symbolic names of variables or constants in the assembly code with their associated value or 
-	 * (virtual) memory address.
-	 * Symbolic integer constants get replaced by their value.
-	 * Symbolic strings and symbolic variables get replaced by their associated (virtual) memory address.
-	 * @param lines A map, which maps line numbers to strings representing the original programs lines of code.
-	 * @param constants A map, which maps the symbolic name of constants to their value or (virtual) memory offset.
-	 * @param variables A map, which maps the symbolic name of variables to their (virtual) memory offset.
-	 * @param numericalConstants A map, which maps the symbolic name of variables to their value.
-	 * @param constantBaseAddress The virtual memory base address oi constants.
-	 * @param variableBaseAddress The virtual memory base address of the data segment.
-	 * @returns 
-	 */
-	private replaceSymbols(lines: Map<number, string>, constants: Map<string, number>, variables: Map<string, number>, numericalConstants: Map<string, string>, constantBaseAddress: number, variableBaseAddress: number) : Map<number, string> {
-		for (const [lineNo, line] of lines.entries()) {	
-			if (line.match(new RegExp(this.languageDefinition.constant_formats.usage, "gim"))) {
-				//Test if constant name is included in line and replace it with its value
-				numericalConstants.forEach((constantValue, constantName) => {
-					const regex = new RegExp("[$%@]" + constantName , "m");
-					if (line.match(regex) !== null) {
-						const replacedLine = line.replace(constantName,constantValue);
-						lines.set(lineNo, replacedLine);
-					}
-				});
-				constants.forEach((constantLocalOffset, constantName) => {
-					const regex = new RegExp("[$%@]" + constantName , "m");
-					if (line.match(regex) !== null) {
-						const replacedLine = line.replace(constantName,"0b" + (constantLocalOffset + constantBaseAddress).toString(2).padStart(DataSizes.DOUBLEWORD, "0"));
-						lines.set(lineNo, replacedLine);
-					}
-				});
-			}
-			if (line.match(new RegExp(this.languageDefinition.variable_formats.usage, "gim"))) {
-				//Test if variable name is included in line and replace it with its value
-				variables.forEach((variableLocalOffset, variableName) => {
-					const regex = new RegExp("[$%@]" + variableName , "m");
-					if (line.match(regex) !== null) {
-						const replacedLine = line.replace(variableName,"0b" + (variableLocalOffset + variableBaseAddress).toString(2).padStart(DataSizes.DOUBLEWORD, "0"));
-						lines.set(lineNo, replacedLine);
-					}
-				});
-			}
-		}
-		return lines;
-	}
-
-	/**
-	 * This method reserves empty memory space for a buffer.
-	 * @param lineNo The original computer programs line number of code which is currently encoded.
-	 * @param line The original computer programs line of code which is currently encoded.
-	 * @returns 
-	 */
-	private initializeBuffer(lineNo: number, line: string, bufferSize: number) : DoubleWord[] {
-		const encodedInstructions: DoubleWord[] = [];
-		let bufferEncoded = false;
-		const bufferDoubleWordSize = Math.ceil(bufferSize / 4);
-		//Create empty double words to reserve space for the buffer
-		for (let i = 0; i < bufferDoubleWordSize; ++i) {
-			encodedInstructions.push(DoubleWord.fromNumber(0));
-		}
-
-		bufferEncoded = true;
-		
-		if (!bufferEncoded) {
-			throw new Error(`Error encoding string in line: ${lineNo + 1}: ${line}`);
-		}
-		return encodedInstructions;
 	}
 
 	/**
@@ -660,8 +398,13 @@ export class Assembler {
 	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
 	 */
 	private encodeString(lineNo: number, line: string, stringValue: string) : DoubleWord[] {
-		const encodedInstructions: DoubleWord[] = [];
+		const encodedString: DoubleWord[] = [];
 		let stringEncoded = false; 
+
+		if (!stringValue.endsWith("\0")) {
+			stringValue += "\0";
+		}
+
 		//Create a buffer from the string in utf8 encoding and calculate some important values.
 		const stringBuffer = Buffer.from(stringValue, "utf8");
 		const stringByteLength = stringBuffer.length;
@@ -676,7 +419,7 @@ export class Assembler {
 				const byte3 = Byte.fromNumber(stringBuffer[i+2]);
 				const byte4 = Byte.fromNumber(stringBuffer[i+3]);
 				const encodedStringPart = DoubleWord.fromBytes(byte1, byte2, byte3, byte4);
-				encodedInstructions.push(encodedStringPart);
+				encodedString.push(encodedStringPart);
 			}
 		}
 		//Get the last bytes from the buffer
@@ -686,108 +429,308 @@ export class Assembler {
 			const byte3 = Byte.fromNumber(restOfBufferSize > 2 ? stringBuffer[continuousBufferSegmentSize+2] : 0);
 			const byte4 = Byte.ZERO;
 			const encodedStringPart = DoubleWord.fromBytes(byte1, byte2, byte3, byte4);
-			encodedInstructions.push(encodedStringPart);
+			encodedString.push(encodedStringPart);
 		}
 		stringEncoded = true;
 		
 		if (!stringEncoded) {
 			throw new Error(`Error encoding string in line: ${lineNo + 1}: ${line}`);
 		}
-		return encodedInstructions;
+		return encodedString;
 	}
 
 	/**
 	 * This method binary encodes a given instruction and its operands values.
 	 * It is used for insructions that contain no indirect access to a register with an offset.
 	 * @param regexMatchArrayInstruction An array containing the results of a match of a regular expression on an instruction.
-	 * @param line The original computer programs line of code which is currently encoded.
-	 * @param jumpLabels The jump labels found in the assembly code.
-	 * @returns An array containing the binary equivalent of the given instruction and its operand values.
+	 * @param lineNo The original computer programs line of code which is currently encoded.
+	 * @returns An array containing the binary equivalent of the given instruction and its operand values or the number of required DoubleWords.
 	 */
-	private encodeInstruction(regexMatchArrayInstruction: RegExpMatchArray, line: number, jumpLabels: Map<string, string>): DoubleWord[] {
-		let addressingModeOperand1: Array<Bit> = new Array<Bit>(2);
-		let typeOperand1: Array<Bit> = new Array<Bit>(7);
-		let addressingModeOperand2: Array<Bit> = new Array<Bit>(2);
-		let typeOperand2: Array<Bit> = new Array<Bit>(7);
-		let encodedOperandValue1: DoubleWord;
-		let encodedOperandValue2: DoubleWord;
-		let instructionType: Array<Bit> = new Array<Bit>(3);
-		const opcode: Array<Bit> = new Array<Bit>(7);
-		const instructionMnemonic: string = regexMatchArrayInstruction[1];
-		const delimeter: Array<Bit> = new Array<Bit>(1, 1);
+	private encodeInstruction(instruction: AssemblyInstruction, line: string, lineNo: number, encodingPassCount: number): DoubleWord[] | number {
+		let allowFirstOperandPacking = true;
+		let allowSecondOperandPacking = true;
+		let unresolvable = false;
 
-		for (const instruction of this.languageDefinition.instructions) {
-			if (instructionMnemonic.toLowerCase() === instruction.mnemonic.toLowerCase()) {
-				instructionType = this.encodeInstructionType(instruction.type, line);
-				instruction.opcode.split("").forEach((bit, index) => {
-					opcode[index] = (bit === "0") ? 0 : 1;
-				});
+		if (line.match(new RegExp(this.languageDefinition.constant_formats.usage, "gim"))) {
+			const regexExp = new RegExp(this.languageDefinition.constant_formats.usage, "gim");
+			const regexMatch = regexExp.exec(line);
+
+			if (regexMatch !== null && this.aliases.has(regexMatch[2])) {
+				line = line.replace(regexMatch[2], this.aliases.get(regexMatch[2])!.toString());
+			} else if (regexMatch !== null && this.constants.has(regexMatch[2])) {
+				unresolvable = unresolvable || this.metadata.length === 0;
+				let address = unresolvable ? DoubleWord.ZERO : ProgramMetadata.getRoDataSegmentVirtualStartAddress(this.metadata);
+				for (const [name, data] of this.constants) {
+					if (regexMatch[2] === name || unresolvable)
+					{
+						break;
+					}
+					address = DoubleWord.fromNumber(address + data.length * DoubleWord.NUMBER_OF_BYTES);
+				}
+
+				const operands = line.replace(",", "").split(" ");
+				line = line.replace(regexMatch[2], address.toString());
+				allowFirstOperandPacking = allowFirstOperandPacking && operands.indexOf(regexMatch[0]) !== 1;
+				allowSecondOperandPacking = allowSecondOperandPacking && !allowFirstOperandPacking;
+			}
+		}
+
+		while (line.match(new RegExp(this.languageDefinition.variable_formats.usage, "gim"))) {
+			const regexExp = new RegExp(this.languageDefinition.variable_formats.usage, "gim");
+			const regexMatch = regexExp.exec(line);
+
+			if (regexMatch !== null && (this.initializedData.has(regexMatch[2]) || this.uninitializedData.has(regexMatch[2]))) {
+
+				let address = DoubleWord.ZERO;
+				if (this.initializedData.has(regexMatch[2])) {
+					unresolvable = unresolvable || this.metadata.length === 0;
+					address = unresolvable ? DoubleWord.ZERO : ProgramMetadata.getRoDataSegmentVirtualStartAddress(this.metadata);
+					for (const [name, data] of this.initializedData) {
+						if (regexMatch[2] === name || unresolvable)
+						{
+							break;
+						}
+						address = DoubleWord.fromNumber(address + data.length * DoubleWord.NUMBER_OF_BYTES);
+					}
+				} else if (this.uninitializedData.has(regexMatch[2])) {
+					unresolvable = unresolvable || this.metadata.length === 0;
+					address = unresolvable ? DoubleWord.ZERO : ProgramMetadata.getUninitializedDataSegmentVirtualStartAddress(this.metadata);
+					for (const [name, size] of this.uninitializedData) {
+						if (regexMatch[2] === name || unresolvable)
+						{
+							break;
+						}
+						address = DoubleWord.fromNumber(address + size);
+					}
+				}
+
+				const operands = line.replace(",", "").split(" ");
+				line = line.replace(regexMatch[2], address.toString());
+				allowFirstOperandPacking = allowFirstOperandPacking && operands.indexOf(regexMatch[0]) !== 1;
+				allowSecondOperandPacking = allowSecondOperandPacking && !allowFirstOperandPacking;
+			} else {
 				break;
 			}
 		}
-			
-		let handleLabelsAsImmediate = false;
-		if (instructionMnemonic == "MOV") {
-			handleLabelsAsImmediate = true;
+
+		const operand1: {name: string, allowed_types: string[]} | null = instruction.operands?.[0] ?? null;
+		const operand2: {name: string, allowed_types: string[]} | null = instruction.operands?.[1] ?? null;
+		let regexMatch: RegExpMatchArray | null = null;
+		if (operand1 !== null) {
+			/*
+			* Iterate over all possible combinations of operand types
+			* and check if the resulting regex matches the current line of code.
+			*/
+			outer: for (const operand1TypeString of operand1.allowed_types) {
+
+				if (operand2 === null) {
+					// Locate the operand type of the first operand in the language definition.
+					const operand1TypeDefinition: {name: string; code: string; regex: string;}
+						= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
+
+					const regexInstruction = new RegExp(
+						instruction.regex.replace(operand1.name, operand1TypeDefinition.regex),
+						"gim"
+					);
+					// Check if the current line of code matches the created regex.
+					regexMatch = regexInstruction.exec(line);
+					if (regexMatch !== null) {
+						break;
+					}
+					continue;
+				}
+
+				for (const operand2TypeString of operand2.allowed_types) {
+					// Create a combination of operand types.
+					const typeCombination: { __SOURCE__: string, __TARGET__: string } 
+							= { __SOURCE__ : operand1TypeString, __TARGET__ : operand2TypeString };
+					// Check if the combination of operand types is forbidden for this instruction.
+					if (instruction.illegal_combinations_of_operand_types !== undefined && instruction.illegal_combinations_of_operand_types.includes(typeCombination)) {
+						throw new UnrecognizedInstructionError(`Invalid instruction found in line ${lineNo + 1}: ${line}`);
+					}
+					// Locate the operand type of the first operand in the language definition.
+					const operand1TypeDefinition: {name: string; code: string; regex: string;}
+						= this.languageDefinition.operand_types.find((current) => current.name === operand1TypeString)!;
+					// Locate the operand type of the second operand in the language definition.
+					const operand2TypeDefinition: {name: string; code: string; regex: string;}
+						= this.languageDefinition.operand_types.find((current) => current.name === operand2TypeString)!;
+					// Create a regex for the current combination of operand types.
+					const regexInstruction = new RegExp(
+						instruction.regex
+							.replace(operand1.name, operand1TypeDefinition.regex)
+							.replace(operand2.name, operand2TypeDefinition.regex), 
+						"gim"
+					);
+					// Check if the current line of code matches the created regex.
+					regexMatch = regexInstruction.exec(line);
+					if (regexMatch !== null) {
+						break outer;
+					}
+					continue;
+				}
+			}
 		}
-
-		// Check for second operand
-		if (regexMatchArrayInstruction.length > 3) {
-			// A second operand given
-			addressingModeOperand2 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[3], line);
-			typeOperand2 = this.encodeOperandType(regexMatchArrayInstruction[3], line, handleLabelsAsImmediate);
-			encodedOperandValue2 = this.encodeOperandValue(regexMatchArrayInstruction[3], line, jumpLabels);
-		} else {
-			// No second operand given
-			addressingModeOperand2 = this.encodeOperandAddressingMode("", line);
-			typeOperand2 = this.encodeOperandType("", line);
-			encodedOperandValue2 = this.encodeOperandValue("", line, jumpLabels);
+		else {
+			regexMatch = new RegExp(instruction.regex, "gim").exec(line);
 		}
-
-		// Check for first operand
-		if (regexMatchArrayInstruction.length > 2) {
-			// A single operand given
-			addressingModeOperand1 = this.encodeOperandAddressingMode(regexMatchArrayInstruction[2], line);
-			typeOperand1 = this.encodeOperandType(regexMatchArrayInstruction[2], line, handleLabelsAsImmediate);
-			encodedOperandValue1 = this.encodeOperandValue(regexMatchArrayInstruction[2], line, jumpLabels);
-		} else {
-			// No operand given
-			addressingModeOperand1 = this.encodeOperandAddressingMode("", line);
-			typeOperand1 = this.encodeOperandType("", line);
-			encodedOperandValue1 = this.encodeOperandValue("", line, jumpLabels);
-		}
-
-		let finalInstruction: Array<Bit> = new Array<Bit>();
-		finalInstruction = [ 
-			...instructionType, ... delimeter, ... opcode, ... delimeter, 
-			... addressingModeOperand1, ... typeOperand1, 
-			... addressingModeOperand2, ... typeOperand2
-		];
-
-
-		const encodedInstruction = DoubleWord.fromNumber(parseInt(finalInstruction.join(""), 2));
 		
-		return [encodedInstruction, encodedOperandValue1, encodedOperandValue2];
-	}
-
-	/**
-	 * This method extracts the addressing mode from the given operand and returns the binary encoded version.
-	 * @param operand The operand to extract the addressing mode from.
-	 * @param line The original computer programs line of code which is currently encoded.
-	 * @returns The binary encoded addressing mode.
-	 */
-	private encodeOperandAddressingMode(operand: string, line: number): Array<Bit> {		
-		if (operand.startsWith("*%")) {
-			return new Array<Bit>(2).fill(1);
+		if (regexMatch === null) { 
+			throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${line}`);
 		}
 
-		if (operand.startsWith("*@") || operand.startsWith("*$")) {
-			throw new Error(
-				`In line ${line + 1}: Indirect addressing mode is only supported for usage with registers.`
-			);
+		const opcode: number = parseInt(instruction.opcode, 2);
+		if (!(opcode in OpCode)) {
+			throw new UnrecognizedInstructionError(`Unrecognized or invalid instruction found in line ${lineNo + 1}: ${regexMatch[1]}`);
+		}
+			
+		const handleLabelsAsImmediate = opcode === OpCode.MOV;
+
+		let typeOperand1: EncodedOperandTypes = EncodedOperandTypes.NO;
+		let encodedOperandValue1: DoubleWord | null = null;
+
+		if (regexMatch.length > 2) { // Check for first operand
+			typeOperand1 = this.encodeOperandType(regexMatch[2], lineNo, handleLabelsAsImmediate);
+			if (this.jumpLabels.has(regexMatch[2])) {
+				unresolvable = unresolvable || this.jumpLabels.get(regexMatch[2])![1] === null;
+				encodedOperandValue1 = unresolvable ? DoubleWord.ZERO : DoubleWord.fromNumber(this.jumpLabels.get(regexMatch[2])![1] as number);
+				allowFirstOperandPacking = encodingPassCount === 1 && !unresolvable;
+			} else {
+				encodedOperandValue1 = this.encodeOperandValue(regexMatch[2], lineNo);
+			}
 		}
 
-		return new Array<Bit>(1, 0);
+		let embeddedOperand1 = 0;
+		let embeddedOperand2 = 0;
+
+		switch (typeOperand1) {
+			case EncodedOperandTypes.NO:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+						typeOperand1 ^= 0b1000;
+						encodedOperandValue1 = DoubleWord.ZERO;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						break;
+				}
+				break;
+			case EncodedOperandTypes.REGISTER_DIRECT:
+			case EncodedOperandTypes.REGISTER_INDIRECT:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						typeOperand1 ^= 0b1000;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						embeddedOperand1 = encodedOperandValue1!;
+						encodedOperandValue1 = null
+						break;
+				}
+				break;
+			case EncodedOperandTypes.IMMEDIATE:
+			case EncodedOperandTypes.MEMORY_ADDRESS:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						if (encodedOperandValue1! < 2**Byte.NUMBER_OF_BITS && allowFirstOperandPacking)
+						{
+							typeOperand1 ^= 0b1000;
+							embeddedOperand1 = encodedOperandValue1!;
+							encodedOperandValue1 = null;
+						}
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+
+
+		let typeOperand2: EncodedOperandTypes = EncodedOperandTypes.NO;
+		let encodedOperandValue2: DoubleWord | null = null;
+
+		if (regexMatch.length > 3) { // Check for second operand
+			typeOperand2 = this.encodeOperandType(regexMatch[3], lineNo, handleLabelsAsImmediate);
+			if (this.jumpLabels.has(regexMatch[3])) {
+				unresolvable = unresolvable || this.jumpLabels.get(regexMatch[3])![1] === null;
+				encodedOperandValue2 = unresolvable ? DoubleWord.ZERO : DoubleWord.fromNumber(this.jumpLabels.get(regexMatch[3])![1] as number);
+				allowSecondOperandPacking = encodingPassCount === 1 && !unresolvable;
+			} else {
+				encodedOperandValue2 = this.encodeOperandValue(regexMatch[3], lineNo);
+			}
+		}
+
+		switch (typeOperand2) {
+			case EncodedOperandTypes.NO:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+						typeOperand2 ^= 0b1000;
+						encodedOperandValue2 = DoubleWord.ZERO;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						break;
+				}
+				break;
+			case EncodedOperandTypes.REGISTER_DIRECT:
+			case EncodedOperandTypes.REGISTER_INDIRECT:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						typeOperand2 ^= 0b1000;
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						embeddedOperand2 = encodedOperandValue2!;
+						encodedOperandValue2 = null
+						break;
+				}
+				break;
+			case EncodedOperandTypes.IMMEDIATE:
+			case EncodedOperandTypes.MEMORY_ADDRESS:
+				switch (this.encodingType) {
+					case ProgramMetadata.InstructionEncodingType.FIXED_SIZE:
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE:
+						break;
+					case ProgramMetadata.InstructionEncodingType.VARIABLE_SIZE_WITH_EMBEDDABLE_OPERANDS:
+						if (encodedOperandValue2! < 2**Byte.NUMBER_OF_BITS && allowSecondOperandPacking)
+						{
+							typeOperand2 ^= 0b1000;
+							embeddedOperand2 = encodedOperandValue2!;
+							encodedOperandValue2 = null;
+						}
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+
+		const finalInstruction: DoubleWord = DoubleWord.fromNumber(0
+			+ (opcode << (8 * 3))
+			+ (typeOperand1 << (8 * 2 + 4))
+			+ (typeOperand2 << (8 * 2))
+			+ (embeddedOperand1 << 8)
+			+ (embeddedOperand2)
+		);
+		
+  		const result: DoubleWord[] = [finalInstruction];
+
+		if (encodedOperandValue1 !== null) {
+			result.push(encodedOperandValue1);
+		}
+
+		if (encodedOperandValue2 !== null) {
+			result.push(encodedOperandValue2);
+		}
+
+		if (unresolvable)
+		{
+			return result.length;
+		}
+
+		return result;
 	}
 
 	/**
@@ -800,13 +743,10 @@ export class Assembler {
 	 * @param line The original computer programs line of code which is currently encoded.
 	 * @returns The binary encoded operand
 	 */
-	private encodeOperandValue(operand: string, line: number, jumpLabels: Map<string, string>): DoubleWord {
+	private encodeOperandValue(operand: string, line: number): DoubleWord {
 		let operand32BitEncoded: DoubleWord;
 		if (operand.length === 0) {
 			operand32BitEncoded = DoubleWord.ZERO;
-		} else if (jumpLabels.has(operand)) {
-			// Operand is jump label.
-			operand32BitEncoded = DoubleWord.fromNumber(parseInt(jumpLabels.get(operand)!, 2));
 		} else if (operand.startsWith("$0b") || operand.startsWith("$-0b")) {
 			// Binary immediate found.
 			operand32BitEncoded = this.encodeBinaryValue(operand.replace("$", ""));
@@ -818,13 +758,13 @@ export class Assembler {
 			operand32BitEncoded = this.encodeDecimalValue(operand.replace("$", ""));
 		} else if (operand.startsWith("@0b")) {
 			// Binary virtual memory address found.
-			operand32BitEncoded = this.encodeBinaryAddress(operand.replace("@0b", ""), line);
+			operand32BitEncoded = this.encodeBinaryValue(operand.replace("@", ""));
 		} else if (operand.startsWith("@0x")) {
 			// Hex virtual memory address found.
-			operand32BitEncoded = this.encodeHexadecimalAddress(operand.replace("@", ""), line);
+			operand32BitEncoded = this.encodeHexadecimalValue(operand.replace("@", ""),);
 		} else if (operand.startsWith("@")) {
 			// Decimal virtual memory address found.
-			operand32BitEncoded = this.encodeDecimalAddress(operand.replace("@", ""), line);
+			operand32BitEncoded = this.encodeDecimalValue(operand.replace("@", ""));
 		} else if (operand.startsWith("*%")) {
 			// Register used with indirect addressing mode
 			operand32BitEncoded = this.encodeRegister(operand.replace("*%", ""), line);
@@ -844,24 +784,14 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeBinaryValue(operand: string): DoubleWord {
-
-		let operandDec = 0;
 		operand = operand.replace("0b", "");
-
-		const negative = operand.startsWith("-");
-		operand = negative ? operand.replace("-", "") : operand;
-
-		// Sign extend binary value.
-		operand = operand.padStart(DataSizes.DOUBLEWORD, operand.charAt(0));
-		
-		if (negative) {
-			// Negative binary value.
-			operandDec = parseInt(operand, 2) * -1;
-		} else {
-			// Positive binary value.
-			operandDec = parseInt(operand, 2);
+		if (operand.startsWith("-")) {
+			// Negative value.
+			return DoubleWord.fromNumber(parseInt(operand.replace("-", ""), 2) * -1);
 		}
-		return DoubleWord.fromNumber(operandDec);
+	
+		// Positive value.
+		return DoubleWord.fromNumber(parseInt(operand, 2));
 	}
 
 	/**
@@ -870,16 +800,14 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeHexadecimalValue(operand: string): DoubleWord {
-		let operandDec = 0;
 		operand = operand.replace("0x", "");
 		if (operand.startsWith("-")) {
-			// Negative hex value.
-			operandDec = parseInt(operand.replace("-", ""), 16) * -1;
-		} else {
-			// Positive hex value.
-			operandDec = parseInt(operand, 16);
+			// Negative value.
+			return DoubleWord.fromNumber(parseInt(operand.replace("-", ""), 16) * -1);
 		}
-		return DoubleWord.fromNumber(operandDec);
+	
+		// Positive value.
+		return DoubleWord.fromNumber(parseInt(operand, 16));
 	}
 
 	/**
@@ -888,65 +816,13 @@ export class Assembler {
 	 * @returns The 32-bit binary representation of the given immediate operand.
 	 */
 	private encodeDecimalValue(operand: string): DoubleWord {
-		let operandDec = 0;
 		if (operand.startsWith("-")) {
-			// Negative dec value.
-			operandDec = parseInt(operand.replace("-", ""), 10) * -1;
-		} else {
-			// Positive dec value.
-			operandDec = parseInt(operand, 10);
+			// Negative value.
+			return DoubleWord.fromNumber(parseInt(operand.replace("-", ""), 10) * -1);
 		}
-		return DoubleWord.fromNumber(operandDec);
-	}
-
-	/**
-	 * This method encodes an operands virtual, binary memory address into its 32-bit binary representation.
-	 * @param operand The virtual memory address to encode.
-	 * @param line The line of code which this operand originates from.
-	 * @returns The 32-bit binary representation of the given virtual memory address.
-	 * @throws An error if the given operands binary memory address is invalid.
-	 */
-	private encodeBinaryAddress(operand: string, line: number): DoubleWord {
-		if (operand.length > DataSizes.DOUBLEWORD) {
-			throw Error(`In line ${line + 1}: Binary memory address consists of more than ${DataSizes.DOUBLEWORD} bits.`);
-		}
-		// Extend binary address with zeros if necessary.
-		operand = operand.padStart(DataSizes.DOUBLEWORD, "0");
-		return DoubleWord.fromNumber(parseInt(operand, 2));
-	}
-
-	/**
-	 * This method encodes an operands virtual, hexadecimal memory address into its 32-bit binary representation.
-	 * @param operand The virtual memory address to encode.
-	 * @param line The line of code which this operand originates from.
-	 * @returns The 32-bit binary representation of the given virtual memory address.
-	 * @throws An error if the given operands hexadecimal memory address is invalid.
-	 */
-	private encodeHexadecimalAddress(operand: string, line: number): DoubleWord {
-		let virtualAddress: DoubleWord;
-		try {
-			virtualAddress = DoubleWord.fromNumber(parseInt(operand, 16));
-		} catch {
-			throw Error(`In line ${line + 1}: Invalid hexadecimal memory address.`);
-		}
-		return virtualAddress;
-	}
-
-	/**
-	 * This method encodes an operands virtual, decimal memory address into its 32-bit binary representation.
-	 * @param operand The virtual memory address to encode.
-	 * @param line The line of code which this operand originates from.
-	 * @returns The 32-bit binary representation of the given virtual memory address.
-	 * @throws An error if the given operands decimal memory address is invalid.
-	 */
-	private encodeDecimalAddress(operand: string, line: number): DoubleWord {
-		let virtualAddress: DoubleWord;
-		try {
-			virtualAddress = DoubleWord.fromNumber(parseInt(operand, 10));
-		} catch {
-			throw Error(`In line ${line + 1}: Invalid hexadecimal memory address.`);
-		}
-		return virtualAddress;
+	
+		// Positive value.
+		return DoubleWord.fromNumber(parseInt(operand, 10));
 	}
 
 	/**
@@ -956,20 +832,23 @@ export class Assembler {
 	 * @param handleLabelsAsImmediate By default labels will be interpreted as addresses. Set to true to use the label address as immediate value.
 	 * @returns The binary encoded operands type.
 	 */
-	private encodeOperandType(operand: string, line: number, handleLabelsAsImmediate: boolean = false): Array<Bit> {
-		let encodedType: Array<Bit> = new Array<Bit>(7);
+	private encodeOperandType(operand: string, line: number, handleLabelsAsImmediate: boolean = false): EncodedOperandTypes {
 		if (operand.length === 0) {
-			encodedType = new Array<Bit>(7).fill(0);
-		} else if (operand.startsWith("*%") || operand.startsWith("%")) {
-			encodedType = new Array<Bit>(1, 1, 0, 0, 0, 0, 0);
-		} else if (operand.startsWith("$") || (operand.match(this.languageDefinition.label_formats.usage) && handleLabelsAsImmediate)) {
-			encodedType = new Array<Bit>(1, 0, 1, 0, 0, 0, 0);
-		} else if (operand.startsWith("@") || (operand.match(this.languageDefinition.label_formats.usage) && !handleLabelsAsImmediate)) {
-			encodedType = new Array<Bit>(1, 1, 1, 0, 0, 0, 0);
-		} else {
-			throw Error(`In line ${line + 1}: Unrecognized type of operand.`);
+			return EncodedOperandTypes.NO;
+		} 
+		if (operand.startsWith("%")) {
+			return EncodedOperandTypes.REGISTER_DIRECT;
+		} 
+		if (operand.startsWith("*%")) {
+			return EncodedOperandTypes.REGISTER_INDIRECT;
 		}
-		return encodedType;
+		if (operand.startsWith("$") || (operand.match(this.languageDefinition.label_formats.usage) && handleLabelsAsImmediate)) {
+			return EncodedOperandTypes.IMMEDIATE;
+		}
+		if (operand.startsWith("@") || (operand.match(this.languageDefinition.label_formats.usage) && !handleLabelsAsImmediate)) {
+			return EncodedOperandTypes.MEMORY_ADDRESS;
+		}
+		throw Error(`In line ${line + 1}: Unrecognized type of operand: ${operand}`);
 	}
 
 	/**
@@ -981,60 +860,44 @@ export class Assembler {
 	 * @throws An error if the given register is not recognized.
 	 */
 	private encodeRegister(register: string, line: number): DoubleWord {
-		register = register.replace("%", "").toLowerCase().trim();
-		for (const reg of this.languageDefinition.addressable_registers) {
-			if (register === reg.name.toLowerCase()) {
-				const tmp: string = reg.code.padStart(DataSizes.DOUBLEWORD, "0");
-				let encodedRegister: DoubleWord = DoubleWord.ZERO;
-				tmp.split("").forEach((bit, index) => {
-					encodedRegister = DoubleWord.setBit(encodedRegister, index as DoubleWord.BitIndex, (bit === "0") ? 0 : 1);
-				});
-				return encodedRegister;
-			}
-		}
-		throw Error(`In line ${line}: Unrecognized register.`);
-	}
+		const reg = this.languageDefinition.addressable_registers
+			.find(e => e.name.toLowerCase() === register.trim().toLowerCase());
 
-	/**
-	 * This method encodes a command type as a sequence of bits. Throws
-	 * @param type The type of the instruction. Can be either "R", "I" or "J".
-	 * @param line The original computer programs line of code which is currently encoded.
-	 * @returns A string of zeros and ones representing the instructions type.
-	 */
-	private encodeInstructionType(type: string, line: number): Array<Bit> {
-		let encodedType: Array<Bit> = new Array<Bit>(3).fill(0);
-		switch (type.toUpperCase()) {
-		case "R":
-			encodedType = new Array<Bit>(1, 0, 0);
-			break;
-		case "I":
-			encodedType = new Array<Bit>(1, 1, 0);
-			break;
-		case "J":
-			encodedType = new Array<Bit>(1, 1, 1);
-			break;
-		default:
-			throw Error(`In line ${line}: Unrecognized instruction type.`);
+		if (reg === undefined) {
+			throw Error(`In line ${line}: Unrecognized register: ${register}`);
 		}
-		return encodedType;
+
+		return DoubleWord.fromNumber(parseInt(reg.code, 2));
 	}
 
 	/**
 	 * This method assembles a given computer program written in assembly language into its binary representation.
 	 * The instructions will be encoded using the opcodes defined in the language definition.
 	 * The order in which the instructions appear in the input program is preserved during the compilation process.
-	 * @param s File contents of an .asm file containing a computer program written in assembly language.
+	 * @param code File contents of an .asm file containing a computer program written in assembly language.
 	 * @param baseOffset Base address where the program will be in memory. Needed to adjust static addresses in jump labels. Default is 0.
+	 * @param [encodingType=ProgramMetadata.InstructionEncodingType.FIXED_SIZE] 
 	 * @returns An array of DoubleWords representing the binary encoded instructions of the given computer program.
 	 */
-	public assemble(s: string, baseOffset: number = 0): DoubleWord[] {
-		this.encodedInstructions = [];
-		this.encodedVariables = [];
-		this.encodedConstants = [];
-		this.metadata = [];
-		const lines: Map<number, string> = this.preprocess(s);
-		this.encode(lines, baseOffset);
-		const encodedInstructions: DoubleWord[] = this.metadata.concat(this.encodedInstructions, this.encodedConstants, this.encodedVariables);
-		return encodedInstructions;
+	public assemble(code: string, 
+		baseOffset: number = 0, 
+		encodingType: ProgramMetadata.InstructionEncodingType = ProgramMetadata.InstructionEncodingType.FIXED_SIZE): DoubleWord[] {
+
+		this.encodingType = encodingType;
+
+		this.metadata = [] as ProgramMetadata;
+		this.jumpLabels = new Map();
+		this.aliases = new Map();
+		this.constants = new Map();
+		this.initializedData = new Map();
+		this.uninitializedData = new Map();
+
+		let machineCode: DoubleWord[] = [];
+
+		const lines: Map<number, string> = this.preprocess(code);
+		machineCode = machineCode.concat(this.encode(lines, baseOffset));
+		machineCode = machineCode.concat([...this.constants.values()].flat());
+		machineCode = machineCode.concat([...this.initializedData.values()].flat());
+		return machineCode;
 	}
 }

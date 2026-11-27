@@ -130,10 +130,7 @@ describe('PassthroughFilesystem', () => {
             const filename = 'read_beyond.txt';
             writeFileSync(join(tmp, filename), 'abc');
             const fd = fs.file_open(filename);
-            fs.io_seek(fd, 4, 0); // Seek beyond file size
-            const buffer = new DataView(new ArrayBuffer(1));
-            const result = fs.io_read_buffer(fd, buffer, 1);
-            expect(result).toBe(-2);
+            expect(fs.io_seek(fd, 4, 0)).toBe(-2);
             fs.io_close(fd);
         });
 
@@ -155,8 +152,7 @@ describe('PassthroughFilesystem', () => {
             const filename = 'write_beyond.txt';
             writeFileSync(join(tmp, filename), 'abc');
             const fd = fs.file_open(filename);
-            fs.io_seek(fd, 4, 0); // Seek beyond file size
-            expect(fs.io_write_buffer(fd, new DataView(new Uint8Array([1]).buffer), 1)).toBe(-2);
+            expect(fs.io_seek(fd, 4, 0)).toBe(-2);
             fs.io_close(fd);
         });
 

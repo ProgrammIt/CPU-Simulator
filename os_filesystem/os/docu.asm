@@ -3,12 +3,14 @@
 ; Program binary
 ; Metadata Layout
 
-; ICE header 32 byte (8 dwords)
-; byte 0x0-0x4 magic number
-; byte 0x5-0x8 program header byte offset
-; 6 dwords free
+; ICE header 16 bytes (4 dwords)
+; 0x00-0x03 magic number
+; 0x04-0x07 program header file offset (in bytes, currently 32)
+; 0x08-0x09 ISA version
+; 0x0A-0x0B Program encoding type (0 = fixed-size instructions, 1 = variable-size instructions, 2 = embeddable variable-size instructions)
+; 0x0C-0x0F padding
 ; 
-; Program header (16 dwords)
+; Program header (currently 12 dwords)
 ; 1 DWORD Total_L2_Tables
 ; 
 ; 1 DWORD Text segment virtual start address
@@ -22,7 +24,9 @@
 ; 1 DWORD Data segment virtual start address
 ; 1 DWORD Data segment file offset
 ; 1 DWORD Data segment size
-; 6 dwords free
+; 	 
+; 1 DWORD Uninitialized Data segment virtual start address
+; 1 DWORD Uninitialized Data segment size
 
 
 ; Kernel

@@ -9,6 +9,7 @@ import { Byte } from "../../types/binary/Byte";
 import { getMainWindow } from "../index";
 import { PhysicalAddress } from "../../types/binary/PhysicalAddress";
 import { GUILogger } from "./GUILogger";
+import { ProgramMetadata } from "../../types/enumerations/ProgramMetadata";
 
 /**
  * The main logic of the simulator. Trough this class, the CPU cores and execution is controlled.
@@ -17,7 +18,7 @@ export class SimulationController {
     public readonly core: CPUCore;
     public readonly mainMemory: RAM;
     private static _instance: SimulationController | null = null;
-    private _assembler: Assembler;
+    public readonly assembler: Assembler;
     private _programmLoaded: boolean;
     private _debugLogger: DebugLogger;
     private _guiLogger: GUILogger;
@@ -50,6 +51,8 @@ export class SimulationController {
 
     public readonly inDevMode: boolean;
 
+    public static instructionCount = 0;
+
     /**
      * Creates a new instance.
      * @param capacityOfMainMemory The initial capacity of the main memory. This value can not be modified after the simulator started.
@@ -59,15 +62,20 @@ export class SimulationController {
      * @param [devMode=false] 
      */
     private constructor(capacityOfMainMemory: number, pathToLanguageDefinition: string, pathToOSFilesystem: string, processingWidth: DataSizes = DataSizes.DOUBLEWORD, devMode: boolean = false) {
-        this._debugLogger = new DebugLogger(1000, 50);
-        this._guiLogger = new GUILogger(2000, 200, true);
+        this._debugLogger = new DebugLogger(2000, 500);
+        this._guiLogger = new GUILogger(2000, 100, true);
         this.mainMemory = new RAM(capacityOfMainMemory);
         this.pathToOSFilesystem = pathToOSFilesystem;
         this.core = new CPUCore(this.mainMemory, processingWidth, pathToOSFilesystem, this._debugLogger, this._guiLogger);
-        this._assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
+        this.assembler = new Assembler(pathToLanguageDefinition, pathToOSFilesystem);
         this._programmLoaded = true;
         this.autoScrollForPageTableEnabled = true;
         this.inDevMode = devMode;
+    }
+
+    public dispose(): void {
+        this._debugLogger.dispose();
+        this._guiLogger.dispose();
     }
 
     /**
@@ -126,34 +134,29 @@ export class SimulationController {
 
         const buffer = readFileSync(this.pathToOSFilesystem + "/os/bin/ihmeOS.bin");
 
-        const magicNumber: DoubleWord = DoubleWord.fromNumber(buffer.readUint32BE(0));
-
-        if (buffer.length < 96) {
-            throw new Error(this.pathToOSFilesystem + "/os/bin/ihmeOS.bin is not a valid executable. File too small.")
-        }
-        if (magicNumber != 0x7F_49_43_45) {
-            throw new Error(this.pathToOSFilesystem + "/os/bin/ihmeOS.bin is not a valid executable.")
-        }
-
-        const programHeaderOffset = buffer.readUint32BE(1 * 4) //ice header position for program header offset
+        const metatdata: ProgramMetadata = ProgramMetadata.fromBuffer(buffer);
         
         // load text segment
-        const codeFileOffset = buffer.readUint32BE(programHeaderOffset + 2 * 4); //header position for code offset in binary
-        const programLength = buffer.readUint32BE(programHeaderOffset + 3 * 4); //header position for program size
+        const codeFileOffset = ProgramMetadata.getTextSegmentFileOffset(metatdata); //header position for code offset in binary
+        const programLength = ProgramMetadata.getTextSegmentSize(metatdata); //header position for program size
         this.loadSegment(codeFileOffset, programLength, SimulationController.KERNEL_SPACE_START, buffer);
 
         // load roData segment
-        const roDataStartAddress = buffer.readUint32BE(programHeaderOffset + 4 * 4);
-        const roDataFileOffset = buffer.readUint32BE(programHeaderOffset + 5 * 4);
-        const roDataSize = buffer.readUint32BE(programHeaderOffset + 6 * 4);
+        const roDataStartAddress = ProgramMetadata.getRoDataSegmentVirtualStartAddress(metatdata);
+        const roDataFileOffset = ProgramMetadata.getRoDataSegmentFileOffset(metatdata);
+        const roDataSize = ProgramMetadata.getRoDataSegmentSize(metatdata);
         this.loadSegment(roDataFileOffset, roDataSize, roDataStartAddress, buffer);
 
         // load data segment
-        const dataSegmentStartAddress = buffer.readUint32BE(programHeaderOffset + 7 * 4); //header position for data segment start address
-        const dataFileOffset = buffer.readUint32BE(programHeaderOffset + 8 * 4); //header position for data offset in binary
-        const dataSegmentLength = buffer.readUint32BE(programHeaderOffset + 9 * 4); //header position for data size
+        const dataSegmentStartAddress = ProgramMetadata.getDataSegmentVirtualStartAddress(metatdata); //header position for data segment start address
+        const dataFileOffset = ProgramMetadata.getDataSegmentFileOffset(metatdata); //header position for data offset in binary
+        const dataSegmentLength = ProgramMetadata.getDataSegmentSize(metatdata); //header position for data size
         this.loadSegment(dataFileOffset, dataSegmentLength,dataSegmentStartAddress, buffer);
 
+        // load uninitialized data segment
+        const uninitializeDataSegmentStartAddress = ProgramMetadata.getUninitializedDataSegmentVirtualStartAddress(metatdata); //header position for uninitialized data segment start address
+        const uninitializeDataSegmentLength = ProgramMetadata.getUninitializedDataSegmentSize(metatdata); //header position for data size
+        this.loadSegment(0, uninitializeDataSegmentLength, uninitializeDataSegmentStartAddress, Buffer.alloc(uninitializeDataSegmentLength));
         
         this.core.eip.content = SimulationController.KERNEL_SPACE_START;
 
@@ -200,8 +203,8 @@ export class SimulationController {
         if (remainder !== 0) {
             const value: DoubleWord = DoubleWord.fromBytes(
                 Byte.fromNumber(buffer[fileOffset + doubleWordAlignedLength]), 
-                Byte.fromNumber(remainder >= 2 ? buffer[fileOffset + doubleWordAlignedLength + 1] : 0), 
-                Byte.fromNumber(remainder === 3 ? buffer[fileOffset + doubleWordAlignedLength + 2] : 0), 
+                Byte.fromNumber(remainder > 1 ? buffer[fileOffset + doubleWordAlignedLength + 1] : 0), 
+                Byte.fromNumber(remainder > 2 ? buffer[fileOffset + doubleWordAlignedLength + 2] : 0), 
                 Byte.ZERO
             );
 
@@ -231,6 +234,9 @@ export class SimulationController {
         const programName = pathToProgramCode.substring(pathToProgramCode.lastIndexOf("/"));
         let relativePathToCode = "/bin" + programName + "\0";
 
+        const buffer = readFileSync(this.pathToOSFilesystem + "/bin" + programName);
+        ProgramMetadata.fromBuffer(buffer);
+
         while (relativePathToCode.length % 4 != 0)
         {
             relativePathToCode = relativePathToCode.concat("\0");
@@ -250,7 +256,7 @@ export class SimulationController {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<DoubleWord> = this._assembler.assemble(fileContents);
+        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents);
 
         const buffer = Buffer.allocUnsafe(compiledProgram.length * 4);
 
@@ -275,7 +281,7 @@ export class SimulationController {
         // Read the program code.
         const fileContents: string = readFileSync(pathToProgramCode, "utf-8");
         // Compile the program code.
-        const compiledProgram: Array<DoubleWord> = this._assembler.assemble(fileContents, baseOffeset);
+        const compiledProgram: Array<DoubleWord> = this.assembler.assemble(fileContents, baseOffeset);
 
         const buffer = Buffer.allocUnsafe(compiledProgram.length * 4);
 
@@ -283,11 +289,9 @@ export class SimulationController {
             buffer.writeUInt32BE(compiledProgram[index], index * 4);
         }
 
-        pathToProgramCode = pathToProgramCode.replace(".asm", "");
-
         if (name === null)
         {
-            name = pathToProgramCode.substring(pathToProgramCode.lastIndexOf('/'));
+            name = pathToProgramCode.substring(pathToProgramCode.lastIndexOf('/')).replace(".asm", "");
         }
 
         pathToProgramCode = this.pathToOSFilesystem + "/os/bin/" + name;
@@ -307,13 +311,5 @@ export class SimulationController {
         {
             writeFileSync(newProcessNamePath, Buffer.from([0]));
         }
-    }
-
-    /**
-     * This method triggers execution of the next instruction
-     */
-    public cycle(): void {
-        
-        this.core.cycle();
     }
 }

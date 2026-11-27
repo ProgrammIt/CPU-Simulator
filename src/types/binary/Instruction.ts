@@ -1,5 +1,4 @@
-import { InstructionSet } from "../enumerations/InstructionSet";
-import { InstructionTypes } from "../enumerations/InstructionTypes";
+import { OpCode } from "../enumerations/OpCode";
 import { InstructionOperand } from "./InstructionOperand";
 
 /**
@@ -7,42 +6,32 @@ import { InstructionOperand } from "./InstructionOperand";
  * @author Erik Burmester <erik.burmester@nextbeam.net>
  */
 export class Instruction {
-	/**
-	 * The instructions type.
-	 */
-	private readonly _type: InstructionTypes;
-	
+
 	/**
 	 * The instructions operation.
 	 */
-	private readonly _instruction: InstructionSet;
+	public instruction: OpCode;
 
 	/**
 	 * A list of the operations operands or undefined, if no operand is present.
 	 */
-	private readonly _operands: [InstructionOperand | undefined, InstructionOperand | undefined];
+	public operand1: InstructionOperand | null;
+
+	public operand2: InstructionOperand | null;
 
 	/**
 	 * Constructs a new instance from the given arguments.
-	 * @param type The instructions type.
 	 * @param instruction The instruction.
-	 * @param operands The instructions operands.
+	 * @param operand1 The first instructions operands.
+	 * @param operand2 The second instructions operands.
 	 */
-    public constructor(type: InstructionTypes, instruction: InstructionSet, operands: [InstructionOperand | undefined, InstructionOperand | undefined] = [undefined, undefined]) {
-        this._type = type;
-        this._instruction = instruction;
-        this._operands = operands;
-    }
-
-	public get type(): InstructionTypes {
-		return this._type;
+    public constructor(instruction: OpCode, operand1: InstructionOperand | null, operand2: InstructionOperand | null) {
+        this.instruction = instruction;
+        this.operand1 = operand1;
+		this.operand2 = operand2;
 	}
 
-	public get instruction(): InstructionSet {
-		return this._instruction;
-	}
-
-	public get operands(): [InstructionOperand | undefined, InstructionOperand | undefined] {
-		return this._operands;
+	public get operandCount(): number {
+		return this.operand1 === null ? 0 : this.operand2 === null ? 1 : 2;
 	}
 }

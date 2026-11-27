@@ -25,16 +25,15 @@ export class Timer {
     }
 
     public countDown() {
-        
-        this.timers.forEach((v,k) => {
-            v--
-            this.timers.set(k, v);
-            if (v  === 0 ) {
+        for (const [k, v] of this.timers) {
+            if (v === 1) {
                 this.readyID = k;
                 this.timers.delete(k);
                 this.core.triggertExternalInterrupt(InterruptNumbers.TIMER);
+                continue;
             }
-        });
+            this.timers.set(k, v - 1);
+        }
     }
 
     public getReadyID():number {

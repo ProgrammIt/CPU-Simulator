@@ -1,15 +1,9 @@
 import { DoubleWord } from "../types/binary/DoubleWord";
 import { Byte } from "../types/binary/Byte";
-import { InstructionTypes } from "../types/enumerations/InstructionTypes";
-import { OperandTypes } from "../types/enumerations/OperandTypes";
-import { RegisterNumbers } from "../types/enumerations/RegisterNumbers";
-import { AddressingModes } from "../types/enumerations/AdressingModes";
-import { InterruptNumbers } from "../types/enumerations/InterruptNumbers";
-import { DevOperations } from "../types/enumerations/DevOperations";
-import { InstructionSet } from "../types/enumerations/InstructionSet";
 import { PhysicalAddress } from "../types/binary/PhysicalAddress";
 import { VirtualAddress } from "../types/binary/VirtualAddress";
 import { ProgramExecutionStepping } from "../types/enumerations/ProgramExecutionStepping";
+import { disassembleIfPossble } from "../main/simulator/Disassembler";
 
 /**
  * This enumeration is a duplicate of the one, that can be
@@ -51,11 +45,6 @@ export class Renderer {
      * This field stores a reference to the HTML document.
      */
     private readonly _document: Document;
-
-    /**
-     * This field indicates, whether an assembly program is currently loaded.
-     */
-    public programLoaded: boolean;
 
     /**
      * This field stores a reference to the HTMLElement representing the EAX register.
@@ -716,12 +705,12 @@ export class Renderer {
             const blockSizeDisable: boolean = (demandedByteRepresentation === "UTF-8" || demandedByteRepresentation === "ASSEMBLY");
             ramBlockSizeSelector.disabled = blockSizeDisable;
             if (demandedByteRepresentation === "ASSEMBLY") {
-                this.ramBlockSize = 12;
+                this.ramBlockSize = DoubleWord.NUMBER_OF_BYTES;
             } else {
                 const previousBlockSize: string = parent.getAttribute("block-size")!;
                 this.ramBlockSize = parseInt(previousBlockSize);
             }
-            this.checkAddressRangeInput();
+            this.checkAddressRangeInput(null);
             this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
         }
         return;
@@ -742,7 +731,7 @@ export class Renderer {
                 return;
             } else {
                 this.ramBlockSize = parseInt(demandedBlockSize);
-                this.checkAddressRangeInput();
+                this.checkAddressRangeInput(null);
                 this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
             }
         }
@@ -764,7 +753,7 @@ export class Renderer {
             if (currentStepping === demandedStepping) {
                 return;
             } else {
-                const disableUserModeGUI: boolean = (demandedStepping === "IRET" || demandedStepping === "INT");
+                const disableUserModeGUI: boolean = (demandedStepping === "IRET");
                 breakModeSelector.disabled = disableUserModeGUI;
 
                 if (disableUserModeGUI) {
@@ -877,7 +866,7 @@ export class Renderer {
             target.value = target.value.slice(0, -1);
         }
         if (keyboardEvent.key === 'Enter') {
-            this.checkAddressRangeInput();
+            this.checkAddressRangeInput(target);
             this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress);
         }
     }
@@ -890,7 +879,7 @@ export class Renderer {
      * @param endAddress The address that will be used as the last memory address to display
      * @returns Returns true or false depending on if the address range and format is valid
      */
-    private checkAddressRangeInput(): void {
+    private checkAddressRangeInput(target: HTMLInputElement | null): void {
         const inputBoxStart: HTMLInputElement = this._document.getElementById("ram-input-box-start") as HTMLInputElement;
         const inputBoxEnd: HTMLInputElement = this._document.getElementById("ram-input-box-end") as HTMLInputElement;
         const startAddress = inputBoxStart.value;
@@ -898,17 +887,35 @@ export class Renderer {
         const regExEnter = /(0[x])?[a-fA-F0-9]+$/;
         const inputStartValidFormat = regExEnter.test(startAddress);
         const inputEndValidFormat = regExEnter.test(endAddress);
-        const startAddressDec = parseInt(startAddress,16);
-        const endAddressDec = parseInt(endAddress,16);
-        const addressRange = endAddressDec - startAddressDec;
-        if (inputStartValidFormat && inputEndValidFormat && startAddressDec <= endAddressDec) {
+        let startAddressDec = parseInt(startAddress,16);
+        let endAddressDec = parseInt(endAddress, 16);
+        if (inputStartValidFormat && inputEndValidFormat) {
+            if (startAddressDec > endAddressDec) {
+                if (target === null || target === inputBoxStart) {
+                    endAddressDec = Math.min(startAddressDec + 0xFFF, DoubleWord.MAX_POSITIVE_NUMBER);
+                } else {
+                    startAddressDec = Math.max(0, endAddressDec - 0xFFF);
+                }
+            }
+                    
+            if (endAddressDec - startAddressDec > 0xFFF) { //Set max size to 0xFFF
+                if (target === null || target === inputBoxStart) {
+                    endAddressDec = startAddressDec + 0xFFF;
+                } else {
+                    startAddressDec = endAddressDec - 0xFFF;
+                }
+            }
+
+            startAddressDec = startAddressDec - startAddressDec % this.ramBlockSize;
+            endAddressDec = endAddressDec + (this.ramBlockSize - (endAddressDec % this.ramBlockSize)) - 1;
+
+            startAddressDec = Math.max(0, startAddressDec);
+            endAddressDec = Math.min(endAddressDec, DoubleWord.MAX_POSITIVE_NUMBER + (this.ramBlockSize - (DoubleWord.MAX_POSITIVE_NUMBER % this.ramBlockSize)) - 1)
+
             this.ramViewStartAddress = startAddressDec;
             this.ramViewEndAddress = endAddressDec;
-            const addressRangeRest = (addressRange + 1) % this.ramBlockSize;
-            if (addressRangeRest !== 0) {
-                this.ramViewEndAddress = endAddressDec + (this.ramBlockSize - addressRangeRest);
-                inputBoxEnd.value = "0x" + this.ramViewEndAddress.toString(16);
-            }
+            inputBoxStart.value =  "0x" + this.ramViewStartAddress.toString(16);
+            inputBoxEnd.value = "0x" + this.ramViewEndAddress.toString(16);
         } else {
             inputBoxStart.value = "0x0";
             inputBoxEnd.value = "0xb";
@@ -928,7 +935,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEAX(NumberSystem.HEX);
             if (this._eax !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -945,7 +952,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEBX(NumberSystem.HEX);
             if (this._ebx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -962,7 +969,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readECX(NumberSystem.HEX);
             if (this._ecx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -979,7 +986,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEDX(NumberSystem.HEX);
             if (this._edx !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -996,7 +1003,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readESP(NumberSystem.HEX);
             if (this._esp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1013,7 +1020,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readEIP(NumberSystem.HEX);
             if (this._eip !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1030,7 +1037,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readITP(NumberSystem.HEX);
             if (this._itp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), true);
             }
         } 
         return;
@@ -1047,7 +1054,7 @@ export class Renderer {
             if (target.getAttribute("name") === "register-select-representation") return;
             const content: string = await this._window.simulator.readPTP(NumberSystem.HEX);
             if (this._ptp !== null) {
-                this.highlightRamElement(Number(content));
+                this.highlightRamElement(Number(content), false);
             }
         } 
         return;
@@ -1164,7 +1171,6 @@ export class Renderer {
         this._listOfVisiblePageTableEntries = new Array<Element>();
         this.autoScrollForPageTableEnabled = true;
         this.ramViewFollowEip = true;
-        this.programLoaded = true;
         this._window = window;
         this.ramDataRepresentation = "BIN";
         this.ramBlockSize = 1;
@@ -1631,29 +1637,26 @@ export class Renderer {
         const detailedRAMViewTable = this._document.getElementById("ram-table") as HTMLTableCellElement;
         const tableBody = detailedRAMViewTable.getElementsByTagName('tbody')[0];
         
-        let physicalAddress = targetAddress;
         if (isVirtualAddress) {
-            physicalAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(Number(targetAddress)));
+            targetAddress = await this._window.mainMemory.translateVirtualAddress(DoubleWord.fromNumber(targetAddress));
         }
+        const physicalAddress = DoubleWord.fromNumber(targetAddress - targetAddress % this.ramBlockSize);
 
         const blocksBefore: number = this.ramDataRepresentation === "UTF-8" ? 5 : Math.min(5, Math.floor(physicalAddress / this.ramBlockSize));
         const blocksAfter: number = this.ramDataRepresentation === "UTF-8" ? 12 : 6;
 
-        let startAddress = physicalAddress - (blocksBefore * this.ramBlockSize);
-        const endAddress = physicalAddress + (blocksAfter * this.ramBlockSize) - 1;
-        if (startAddress < 0) {
-            startAddress = 0;
-        }
+        const startAddress = Math.max(0, physicalAddress - (blocksBefore * this.ramBlockSize));
+        const endAddress = Math.min(physicalAddress + (blocksAfter * this.ramBlockSize) - 1,  DoubleWord.MAX_POSITIVE_NUMBER + (this.ramBlockSize - (DoubleWord.MAX_POSITIVE_NUMBER % this.ramBlockSize)) - 1);
         inputBoxStart.value = "0x" + startAddress.toString(16);
         inputBoxEnd.value = "0x" + endAddress.toString(16);
         this.ramViewStartAddress = startAddress;
         this.ramViewEndAddress = endAddress;
-        const targetAddressIndex: number = await this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress, physicalAddress);
-        const rowIndex = this.ramDataRepresentation === "UTF-8" ? targetAddressIndex : blocksBefore;
+        const targetAddressIndex: number = await this.createUpdateDetailedRamViewTable(this.ramViewStartAddress, this.ramViewEndAddress, targetAddress);
+        const rowIndex = this.ramDataRepresentation === "UTF-8" || this.ramDataRepresentation === "ASSEMBLY" ? targetAddressIndex : blocksBefore;
         const tableRow = tableBody.rows[rowIndex];
         for (const cell of tableRow.cells) {
             cell.classList.add("highlighted");
-            cell.scrollIntoView();
+            tableBody.rows[rowIndex - 1 < 0 ? 0 : rowIndex - 1].scrollIntoView();
         }
     }
 
@@ -1676,13 +1679,7 @@ export class Renderer {
      * Performs the next CPU cycle (fetch, decode, execute).
      */
     public async cycle(): Promise<void> {
-        if (!this.programLoaded) {
-            alert("No programm is currently loaded!");
-            return;
-        }
-        if (!await this._window.simulator.nextCycle()) {
-            //alert("Programm finished execution.");
-        }
+        await this._window.simulator.nextCycle();
         // TODO: Fix bug!
         // await this.reloadPageTableView();
         await this.readEAX(this.dataRepresentationEAX);
@@ -1923,16 +1920,27 @@ export class Renderer {
      * @param physicalAddressStart The start address of the display range.
      * @param physicalAddressEnd The end address of the display range.
      * @param ramTableBody The table body element that is used to display the RAM view.
+     * @param targetAddress An address to find the row index for inside the table body.
+     * @returns The row index of the target address in the table body.
      */
-    public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement): Promise<void> {
+    public async createRamViewRowsAssembly(physicalAddressStart: number, physicalAddressEnd: number, ramTableBody: HTMLTableSectionElement, targetAddress: number = 0): Promise<number> {
         const ramCells: Map<number, Byte> = await this._window.mainMemory.readRangeFromPhysicalMemory(physicalAddressStart, physicalAddressEnd);
         const ramContent: Array<Byte> = Array.from(ramCells.values());
         const breakpointArray: number[] = await this._window.simulator.getBreakpoints();
         const breakpoints: Set<number> = new Set<number>(breakpointArray);
+        let rowIndex = 0;
         for (let i = 0; i < ramContent.length;) {
+            const binary = ramContent.slice(i, i + 12);
+            const instructions = await this.getInstructionText(binary);
+
+            if (instructions.length === 0) {
+                instructions.push(["Invalid", 1] as [string, number]);
+            }
+
+            let instructionOffset = i;
+
+
             const tableRow: HTMLTableRowElement = this._document.createElement("tr");
-            const binary = ramContent.slice(i, (i + this.ramBlockSize));
-            const instructionString = await this.getInstructionText(binary);
 
             const physicalAddressColumn = tableRow.insertCell();
             const virtualAddressColumn = tableRow.insertCell();
@@ -1941,8 +1949,16 @@ export class Renderer {
 
             breakpointCell.addEventListener("click", this.onClickListenerBreakpointCell);
 
-            const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i);
-            const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressStart + i + (this.ramBlockSize - 1));
+            const physicalAddressFrom = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset);
+            instructionOffset += instructions[0][1] * DoubleWord.NUMBER_OF_BYTES;
+            const physicalAddressTo = PhysicalAddress.fromNumber(physicalAddressStart + instructionOffset - 1);
+
+            if (targetAddress > physicalAddressTo) {
+                rowIndex++;
+            }
+
+            const virtualAddressesStart: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressFrom);
+            const VirtualAddressesEnd: VirtualAddress[] = await this.reverseMemoryMapSearch(physicalAddressTo);
 
             for (let i = 0; i < virtualAddressesStart.length; i++) {
                 const virtualAddressFrom = "0x" + virtualAddressesStart[i].toString(16);
@@ -1952,11 +1968,11 @@ export class Renderer {
                 virtualAddressColumn.appendChild(rowBreak);
             }
 
-            const addressFrom = "0x" + (physicalAddressStart + i).toString(16);
-            const addressTo = "0x" + (physicalAddressStart + i + (this.ramBlockSize - 1)).toString(16);
+            const addressFrom = "0x" + physicalAddressFrom.toString(16);
+            const addressTo = "0x" + physicalAddressTo.toString(16);
             breakpointCell.dataset.physicalAddress = addressFrom;
 
-            if (breakpoints.has(physicalAddressStart + i)) {
+            if (breakpoints.has(physicalAddressFrom)) {
                 breakpointCell.innerHTML = "x";
                 breakpointCell.dataset.breakpointStatus = "true";
             } else {
@@ -1965,10 +1981,14 @@ export class Renderer {
             }
             
             physicalAddressColumn.innerHTML = addressFrom + " - " + addressTo;
-            assemblyInstruction.innerHTML = instructionString;
+
+            const html = instructions[0][0];
+            assemblyInstruction.innerHTML = html;
             ramTableBody.appendChild(tableRow);
-            i += this.ramBlockSize;
+            
+            i = instructionOffset;
         }
+        return rowIndex;
     }
 
     /**
@@ -2022,7 +2042,7 @@ export class Renderer {
         } else if (dataMode === "UTF-8") {
             targetAddressIndex = await this.createRamViewRowsUtf8(physicalStartAddress, physicalEndAddress, tableBody, targetAddress);
         } else if (dataMode === "ASSEMBLY") {
-            await this.createRamViewRowsAssembly(physicalStartAddress, physicalEndAddress, tableBody);
+            targetAddressIndex = await this.createRamViewRowsAssembly(physicalStartAddress, physicalEndAddress, tableBody, targetAddress);
         }
         return targetAddressIndex;
     }
@@ -2032,76 +2052,20 @@ export class Renderer {
      * @param instructions Assembly instructions in form of a byte array.
      * @returns An array of human readable assembly instructions.
      */
-    public async getInstructionText(instructions: Array<Byte>): Promise<string> {
-        const instruction = DoubleWord.fromBytes(instructions[0], instructions[1], instructions[2], instructions[3]);
-
-        const type: string = InstructionTypes[DoubleWord.getBitRange(instruction, 0, 3)];
-        const operation: string =  InstructionSet[DoubleWord.getBitRange(instruction, 5, 12)];
-
-        if (type === undefined || operation === undefined) {
-            return "UNKNOWN";
-        }
-        let assemblyString = operation;
+    public async getInstructionText(instructions: Array<Byte>): Promise<[string, number][]> {
         
-        const addrModeFirstOp: number =  DoubleWord.getBitRange(instruction, 14, 16);
-        const firstOpType: number =  DoubleWord.getBitRange(instruction, 16, 23);
+        const data: DoubleWord[] = [];
 
-        if (addrModeFirstOp === undefined || firstOpType === undefined) {
-            return "UNKNOWN";
-        } else if (firstOpType === OperandTypes.NO) {
-            return assemblyString;
-        }
-
-        const firstOperand = DoubleWord.fromBytes(instructions[4], instructions[5], instructions[6], instructions[7]);
-        
-        if (operation === "INT") {
-            assemblyString += " " + InterruptNumbers[firstOperand];
-        } else if (operation === "DEV") {
-            assemblyString += " " + DevOperations[firstOperand];
-        } else if (firstOpType === OperandTypes.IMMEDIATE ) {
-            assemblyString += " $0x" + firstOperand.toString(16);
-        } else if (firstOpType === OperandTypes.MEMORY_ADDRESS) {
-            assemblyString += " @0x" + firstOperand.toString(16);
-        } else {
-            const registerName: string = RegisterNumbers[firstOperand];
-            if (registerName === undefined) {
-                return "UNKNOWN"
-            }
-            if (addrModeFirstOp === AddressingModes.INDIRECT) {
-                assemblyString += " *%" + registerName;
-            } else {
-                assemblyString += " %" + registerName;
-            }
+        for (let i = 0; i < instructions.length; i += 4) {
+            data.push(DoubleWord.fromBytes(
+                instructions[i],
+                instructions[i+1],
+                instructions[i+2],
+                instructions[i+3],
+            ));
         }
         
-        const addrModeSecondOp: number =  DoubleWord.getBitRange(instruction, 23, 25);
-        const secondOpType: number =  DoubleWord.getBitRange(instruction, 25);
-
-        if (addrModeSecondOp === undefined || secondOpType === undefined) {
-            return "UNKNOWN";
-        } else if (secondOpType === OperandTypes.NO) {
-            return assemblyString;
-        }
-
-        const secondOperand = DoubleWord.fromBytes(instructions[8], instructions[9], instructions[10], instructions[11]);
-        
-        if (secondOpType === OperandTypes.IMMEDIATE ) {
-            assemblyString += ", $0x" + secondOperand.toString(16);
-        } else if (secondOpType === OperandTypes.MEMORY_ADDRESS) {
-            assemblyString += ", @0x" + secondOperand.toString(16);
-        } else {
-            const registerName: string = RegisterNumbers[secondOperand];
-            if (registerName === undefined) {
-                return "UNKNOWN"
-            }
-            if (addrModeSecondOp === AddressingModes.INDIRECT) {
-                assemblyString += ", *%" + registerName;
-            } else {
-                assemblyString += ", %" + registerName;
-            }
-        }
-        
-        return assemblyString;
+        return disassembleIfPossble(data);
     }
 
     /**
@@ -2118,5 +2082,4 @@ export class Renderer {
         }
         return virtualAddresses;
     }
-
 }

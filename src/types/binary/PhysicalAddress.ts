@@ -24,8 +24,9 @@ export namespace PhysicalAddress {
 	}
 
     /**
-	 * This method creates a PhysicalAddress from a number.
-	 * @param number
+	 * This method creates a PhysicalAddress from a page table entry and a virtual address.
+	 * @param pageTableEntry
+     * @param virtuallAddress
 	 * @returns
 	 */
 	export function fromPageTableEntryAndVirtualAddress(pageTableEntry: PageTableEntry, virtuallAddress: VirtualAddress): PhysicalAddress {

@@ -1,6 +1,6 @@
 .LOOP_START:
 
-MOV $10, %eax      ; Kopiere den Wert 100 in das Register eax.
+MOV $100, %eax      ; Kopiere den Wert 100 in das Register eax.
 
 .loop: 
     SUB $1, %eax     ; Subtrahiere den Wert 1 vom Wert im Register eax.
@@ -9,7 +9,6 @@ MOV $10, %eax      ; Kopiere den Wert 100 in das Register eax.
 
 ; Ende des Programms. Das Ergebnis steht in Register eax.
 
-MOV $0x12345678, %edx ; notify the simulator (for the Siulator.test.ts test)
 MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
 INT $0x80 ; Exit Syscall
 

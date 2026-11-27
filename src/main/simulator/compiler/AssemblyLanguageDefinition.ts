@@ -1,7 +1,6 @@
 export interface AssemblyLanguageDefinition {
     variable_formats: {
-        dataSegmentStart: string;
-        dataSegmentEnd: string;
+        declarationUninitialized: string;
         declarationDecimal: string;
         declarationHexadecimal: string;
         declarationBinary: string;
@@ -32,41 +31,35 @@ export interface AssemblyLanguageDefinition {
         binary: string;
     };
 
-    addressable_registers: {
+    addressable_registers: AssemblyAddressableRegisters[];
+
+    operand_types: AssemblyOperandType[];
+
+    instructions: AssemblyInstruction[];
+}
+
+export type AssemblyAddressableRegisters = {
         name: string;
         aliases: string[] | undefined;
         code: string;
-    }[];
+    };
 
-    operand_types: {
+export type AssemblyOperandType = {
         name: string;
         code: string;
         regex: string;
-    }[];
+    };
 
-    addressModes: {
-        name: string;
-        code: string;
-    }[];
-
-    instruction_types: {
-        name: string;
-        code: string;
-    }[];
-
-    instructions: {
+export type AssemblyInstruction = {
         mnemonic: string;
         opcode: string;
-        type: string;
         regex: string;
         operands: {
             name: string;
             allowed_types: string[];
         }[] | undefined;
-        address_modes: string[];
         illegal_combinations_of_operand_types: {
             __SOURCE__: string;
             __TARGET__: string;
         }[] | undefined;
-    }[];
-}
+    };

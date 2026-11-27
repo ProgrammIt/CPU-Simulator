@@ -35,6 +35,7 @@ PUSH %eax ; offset
 PUSH %ecx ; fd
 MOV %esp, %ebx ; put struct in ebx for seek
 CALL SYSCALLS_FILE_SEEK
+CMP $0, %eax
 JGE _UTIL_LOAD_SEGMENT_SEEK_SEGMENT_START_NO_ERROR
     ; remove seek params
     ADD $12, %esp

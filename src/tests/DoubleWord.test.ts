@@ -40,7 +40,7 @@ describe("Create doubleword from decimal integer values", () => {
     });
 
     test("Measure toNumber() performance", () => {
-        const debugLogger: DebugLogger = new DebugLogger(100,10);
+        const debugLogger: DebugLogger = new DebugLogger(500, 500);
         const guiLogger: GUILogger = new GUILogger(1000, 100, true);
         const mainMemory = new RAM(DoubleWord.SIZE);
         const cpu = new CPUCore(mainMemory, DataSizes.DOUBLEWORD, "./os_filesystem", debugLogger, guiLogger);
@@ -52,5 +52,7 @@ describe("Create doubleword from decimal integer values", () => {
             dword = alu.add(dword, DoubleWord.fromNumber(1))
         }
         expect(dword).toBe(repetitions);
+        debugLogger.dispose();
+        guiLogger.dispose();
     });
 });

@@ -9,3 +9,8 @@ JMP INCLUDE_END
     JMP LOOP_START
 
 .INCLUDE_END:
+
+MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
+INT $0x80 ; Exit Syscall
+
+.INCLUDE "os/include/syscalls"

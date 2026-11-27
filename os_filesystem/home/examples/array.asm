@@ -9,4 +9,9 @@ MOV $0x64, %ebx      ; Kopiere den Wert 100 in das Register EBX.
     ADD $4, %ebx    ; Inkrementiere den Wert im Register EBX um 4 (Byte <=> 32 Bit <=> eine Zahl).
     CMP $9, %eax    ; Vergleiche den aktuellen Wert im Register EAX mit dem Wert 9.
     JL loop         ; Springe zurueck.
+
+MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
+INT $0x80 ; Exit Syscall
+
+.INCLUDE "os/include/syscalls"
     

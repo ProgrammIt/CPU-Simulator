@@ -45,3 +45,8 @@ MOV $0x1, @0x20C     ; store i
 
 ; load res into eax
 MOV @0x208, %eax
+
+MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
+INT $0x80 ; Exit Syscall
+
+.INCLUDE "os/include/syscalls"

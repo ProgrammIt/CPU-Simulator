@@ -57,7 +57,7 @@
 
         ; prepare stack for further calls
         
-        .BUF 32 ICE_HEADER ; prepare buffer to store ice header
+        .BUF 16 ICE_HEADER ; prepare buffer to store ice header
 
         ; SYSCALLS_FILE_READ
         ; Parameters (ebx is a pointer to the following struct):
@@ -66,7 +66,7 @@
         ;   *(ebx+8)   buffer size, limits the amount of bytes that will be read
         ; Return value (immediate value):
         ;   eax     success status (>=0 = number of bytes read, -1 = invalid file descriptor, -2 = seek position out of file bounds, -3 = no console input ready)
-        PUSH $32 ; buffer size
+        PUSH $16 ; buffer size
         PUSH $ICE_HEADER ; pointer to buffer
         PUSH %eax ; file descriptor
         MOV %esp, %ebx ; prepare bx for read
@@ -95,6 +95,21 @@
             RET
 
         ._UTIL_LOAD_PROGRAM_MAGIC_MATCH:
+        ; get ISA version
+        MOV $ICE_HEADER, %ebx
+        ADD $8, %ebx
+        MOV *%ebx, %ebx
+        SHR $16, %ebx
+        CMP $CONST_ISA_VERION, %ebx ; check ISA version
+        JE _UTIL_LOAD_PROGRAM_ISA_VERSION_MATCH
+            MOV %edx, %esp ; reset stack
+            POP %ecx
+            POP %ebx
+            MOV $-4, %eax
+            RET
+
+        ._UTIL_LOAD_PROGRAM_ISA_VERSION_MATCH:
+
         MOV $ICE_HEADER, %ebx
         ADD $4, %ebx ; offset to read program header offset
         MOV *%ebx, %eax ; program header offset
@@ -132,8 +147,8 @@
         ;   *(ebx+8)   buffer size, limits the amount of bytes that will be read
         ; Return value (immediate value):
         ;   eax     success status (>=0 = number of bytes read, -1 = invalid file descriptor, -2 = seek position out of file bounds, -3 = no console input ready)
-        .BUF 64 PROGRAM_HEADER ; prepare buffer for program header
-        PUSH $64 ; buffer size
+        .BUF 48 PROGRAM_HEADER ; prepare buffer for program header
+        PUSH $48 ; buffer size
         PUSH $PROGRAM_HEADER ; pointer to buffer
         PUSH %ecx ; fd
         MOV %esp, %ebx ; set ebx for read
@@ -180,7 +195,7 @@
     
     ._UTIL_LOAD_PROGRAM_ALLOCATE_PAGE_TABLES:
         CMP %eax, %ebx ; all L2 page tab mapped?
-        JGE _UTIL_LOAD_PROGRAM_ALLOCATE_PAGE_TABLES_DONE
+        JAE _UTIL_LOAD_PROGRAM_ALLOCATE_PAGE_TABLES_DONE
         ; save counters and free registers for use
         PUSH %eax
         PUSH %ebx
@@ -424,6 +439,58 @@
 
     ._UTIL_LOAD_PROGRAM_DATA_SEGMENT_SKIP:
 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; prepare stack to load uninitialized data segment ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; get uninitialized data segment size
+    MOV $PROGRAM_HEADER, %eax
+    ADD $44, %eax ; PH offset
+    MOV *%eax, %eax 
+    CMP $0, %eax
+    JE _UTIL_LOAD_PROGRAM_LOAD_UNINITIALIZED_DATA_SEGMENT_SUCCESS
+
+    ; prepare stack for uninitialized data segment
+    MOV %esp, %ebx
+    ADD $8, %ebx ; uninitialized data segment size
+    MOV %eax, *%ebx ; set new segment size
+
+    ; get virtual address start of uninitialized data segment
+    MOV $PROGRAM_HEADER, %ebx
+    ADD $40, %ebx ; PH offset
+    MOV *%ebx, %eax ; get v-address    
+    MOV %esp, %ebx
+    ADD $12, %ebx ; offset for stack v-address
+    MOV %eax, *%ebx ; set new v-address
+
+    ; set new flags
+    MOV %esp, %eax
+    ADD $16, %eax ; stack offset for flags
+    MOV $0xC00, *%eax ; set new flags C00 = present + Writable
+
+    MOV %esp, %ebx ; set ebx to start of struct for call
+    ADD $4, %ebx
+
+    ; UTIL_LOAD_UNINITIALIZED_SEGMENT
+    ; Parameters
+    ;   ebx holds the start of the following struct
+    ;   ebx + 16 = process id
+    ;   ebx + 12 = page table flags
+    ;   ebx +  8 = segment virtual memory start address
+    ;   ebx +  4 = segment size in bytes
+    ;   ebx +    = page directory base address
+    ; Return value (immediate value):
+    ;   eax success status (0 = success, -1 = error)
+    PUSH %edx ; save stack return
+    CALL UTIL_LOAD_UNINITIALIZED_SEGMENT
+    POP %edx
+    CMP $0, %eax
+    JGE _UTIL_LOAD_PROGRAM_LOAD_UNINITIALIZED_DATA_SEGMENT_SUCCESS
+        ; error
+        MOV %edx, %esp ; reset stack
+        POP %ecx
+        POP %ebx
+        MOV $-4, %eax
+        RET
+
+    ._UTIL_LOAD_PROGRAM_LOAD_UNINITIALIZED_DATA_SEGMENT_SUCCESS:
 
         MOV %edx, %esp ; reset stack
         POP %ecx

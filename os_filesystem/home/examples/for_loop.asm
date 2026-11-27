@@ -19,3 +19,8 @@ MOV $0x0, %eax ; 0 - 11 th address
     MOV $0xFF, %ebx      ; debug marker
 
 ; 12 Byte -> 3 x 4 Byte -> 3 x 4 Adressen
+
+MOV $CONST_SYSCALL_PROCESS_EXIT, %eax
+INT $0x80 ; Exit Syscall
+
+.INCLUDE "os/include/syscalls"
